@@ -2,7 +2,7 @@
 
 All notable changes to Okno are documented here. The project follows [Semantic Versioning](https://semver.org/). The plugin and the bridge package share one version number.
 
-## [Unreleased]
+## [1.0.0-beta.11] — 2026-11-04
 
 ### Added
 
@@ -19,6 +19,8 @@ All notable changes to Okno are documented here. The project follows [Semantic V
 
 ### Changed
 
+- The « changes to publish » dot on the **Publish** button is dark instead of orange, so it no longer clashes with the lime button.
+- Repeater rows (lists in lists) no longer stack a grey background per level: rows are outlined, nested rows get a left rule, and fields keep the same contrast at every depth.
 - `Okno_Activity::lookup()` and `Okno_Rest::post_item()` / `can_create_type()` are public; `Okno_Field_Adapter::describe_type()` describes a content type's fields without an entry.
 
 ## [1.0.0-beta.10] — 2026-11-04
@@ -198,6 +200,7 @@ First public release.
 - Managed regions (`data-okno-managed`) explain where to edit content Okno doesn't own.
 - Explicit sections (`data-okno-section`, `data-okno-layout`) take precedence over auto-detected ones.
 
+[1.0.0-beta.11]: https://github.com/pixelersagency/okno/releases/tag/v1.0.0-beta.11
 [1.0.0-beta.10]: https://github.com/pixelersagency/okno/releases/tag/v1.0.0-beta.10
 [1.0.0-beta.9]: https://github.com/pixelersagency/okno/releases/tag/v1.0.0-beta.9
 [1.0.0-beta.8]: https://github.com/pixelersagency/okno/releases/tag/v1.0.0-beta.8
