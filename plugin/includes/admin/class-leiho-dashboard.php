@@ -314,16 +314,840 @@ class Leiho_Dashboard {
 	 * Démarrer
 	 * =================================================================== */
 
-	private static function render_start() {
-		$settings    = Leiho_Plugin::settings();
-		$wp_origin   = Leiho_Admin::wp_origin();
-		$has_url     = '' !== $settings['front_url'];
-		$connection  = self::connection();
-		$bridge_file = LEIHO_URL . 'assets/bridge/leiho-bridge.js';
+	/** Étapes du parcours pas à pas, dans l'ordre (progression). */
+	const START_STEPS = array( 'url', 'frame', 'bridge', 'content', 'annotate', 'test' );
 
-		$loader = "<script>\n  if (window.self !== window.top) {\n    var s = document.createElement('script');\n    s.src = '/leiho-bridge.js';\n    s.setAttribute('data-wp-origin', '" . $wp_origin . "');\n    document.head.appendChild(s);\n  }\n</script>";
-		$react  = "npm install leiho\n\n// In the root layout (Next.js: app/layout.tsx, Remix: root.tsx, Vite: App.tsx)\nimport { LeihoBridge } from 'leiho/react';\n\n<LeihoBridge wpOrigin=\"" . $wp_origin . '" />';
-		$csp    = "Content-Security-Policy: frame-ancestors 'self' " . $wp_origin;
+	/**
+	 * Adresses utilisées dans les extraits de code de « Démarrer ».
+	 *
+	 * @return array{wp:string,front:string,export:string,content:string}
+	 */
+	public static function start_context() {
+		$settings = Leiho_Plugin::settings();
+		return array(
+			'wp'      => Leiho_Admin::wp_origin(),
+			'front'   => (string) $settings['front_url'],
+			'export'  => rest_url( Leiho_Rest::NS . '/export' ),
+			'content' => rest_url( Leiho_Rest::NS . '/content' ),
+		);
+	}
+
+	/**
+	 * Frameworks proposés par « Démarrer », avec leurs extraits de code.
+	 *
+	 * Une entrée par framework : libellé, précision, et pour chaque étape
+	 * (frame, bridge, content, annotate) un groupe d'extraits :
+	 *   text   phrase d'introduction ;
+	 *   blocks liste de array( file, code ) ;
+	 *   tabs   variantes (hébergeur…) : id => array( label, blocks, note ) ;
+	 *   note   précision sous les extraits ;
+	 *   download true : lien de téléchargement de leiho-bridge.js.
+	 * Pour ajouter un framework, ajouter une entrée ici : l'écran, les onglets
+	 * et la consigne pour l'agent IA en sont tirés.
+	 *
+	 * @param array $ctx Adresses (start_context()).
+	 * @return array<string,array>
+	 */
+	public static function frameworks( $ctx ) {
+		$vars = array(
+			'{{WP}}'      => $ctx['wp'],
+			'{{EXPORT}}'  => $ctx['export'],
+			'{{CONTENT}}' => $ctx['content'],
+		);
+		$code = static function ( $key ) use ( $vars ) {
+			return strtr( self::snippet( $key ), $vars );
+		};
+		$csp     = "frame-ancestors 'self' " . $ctx['wp'];
+		$install = array(
+			'file' => __( 'Terminal', 'leiho' ),
+			'code' => 'npm install leiho',
+		);
+		$hosts   = array(
+			'netlify' => array(
+				'label'  => 'Netlify · Cloudflare Pages',
+				'blocks' => array(
+					array(
+						'file' => 'public/_headers',
+						'code' => "/*\n  Content-Security-Policy: " . $csp,
+					),
+				),
+			),
+			'vercel'  => array(
+				'label'  => 'Vercel',
+				'blocks' => array(
+					array(
+						'file' => 'vercel.json',
+						'code' => $code( 'vercel' ),
+					),
+				),
+			),
+		);
+		$serverless = __( 'Serverless host with a read-only disk? Pass snapshot: false to loadLeihoContent.', 'leiho' );
+
+		return array(
+			'next'      => array(
+				'label'    => 'Next.js',
+				'hint'     => __( 'App Router', 'leiho' ),
+				'frame'    => array(
+					'text'   => __( 'Copy this into next.config.ts.', 'leiho' ),
+					'blocks' => array(
+						array(
+							'file' => 'next.config.ts',
+							'code' => $code( 'next-config' ),
+						),
+					),
+				),
+				'bridge'   => array(
+					'text'   => __( 'Install the package, then add the component to app/layout.tsx. It’s already a client component.', 'leiho' ),
+					'blocks' => array(
+						$install,
+						array(
+							'file' => 'app/layout.tsx',
+							'code' => $code( 'next-layout' ),
+						),
+					),
+				),
+				'content'  => array(
+					'text'   => __( 'Load the content in lib/leiho.ts, then read each page by its path.', 'leiho' ),
+					'blocks' => array(
+						array(
+							'file' => 'lib/leiho.ts',
+							'code' => $code( 'next-lib' ),
+						),
+						array(
+							'file' => 'app/[[...slug]]/page.tsx',
+							'code' => $code( 'next-page' ),
+						),
+					),
+					'note'   => $serverless,
+					'types'  => true,
+				),
+				'annotate' => array(
+					'blocks' => array(
+						array(
+							'file' => 'JSX',
+							'code' => $code( 'annotate-jsx' ),
+						),
+					),
+				),
+			),
+			'astro'     => array(
+				'label'    => 'Astro',
+				'hint'     => __( 'Static or server output', 'leiho' ),
+				'frame'    => array(
+					'text' => __( 'Set the header where the site is hosted.', 'leiho' ),
+					'tabs' => $hosts + array(
+						'node' => array(
+							'label'  => __( 'Node server', 'leiho' ),
+							'blocks' => array(
+								array(
+									'file' => 'src/middleware.ts',
+									'code' => $code( 'astro-middleware' ),
+								),
+							),
+							'note'   => __( 'Applies to pages rendered on request. Prerendered pages take their headers from the host.', 'leiho' ),
+						),
+					),
+				),
+				'bridge'   => array(
+					'text'   => __( 'Install the package, then add this script to your base layout. Astro bundles it, and the bridge only downloads inside the editor.', 'leiho' ),
+					'blocks' => array(
+						$install,
+						array(
+							'file' => 'src/layouts/Base.astro',
+							'code' => $code( 'astro-layout' ),
+						),
+					),
+				),
+				'content'  => array(
+					'text'   => __( 'Load the content in getStaticPaths: one request per build.', 'leiho' ),
+					'blocks' => array(
+						array(
+							'file' => 'src/pages/[...path].astro',
+							'code' => $code( 'astro-page' ),
+						),
+					),
+					'types'  => true,
+				),
+				'annotate' => array(
+					'blocks' => array(
+						array(
+							'file' => '.astro',
+							'code' => $code( 'annotate-astro' ),
+						),
+					),
+				),
+			),
+			'nuxt'      => array(
+				'label'    => 'Nuxt',
+				'hint'     => __( 'Nuxt 3 and later', 'leiho' ),
+				'frame'    => array(
+					'text'   => __( 'Copy this into nuxt.config.ts.', 'leiho' ),
+					'blocks' => array(
+						array(
+							'file' => 'nuxt.config.ts',
+							'code' => $code( 'nuxt-config' ),
+						),
+					),
+				),
+				'bridge'   => array(
+					'text'   => __( 'Install the package, then create this client plugin.', 'leiho' ),
+					'blocks' => array(
+						$install,
+						array(
+							'file' => 'plugins/leiho.client.ts',
+							'code' => $code( 'nuxt-plugin' ),
+						),
+					),
+				),
+				'content'  => array(
+					'text'   => __( 'Serve each page from a server route, then fetch it in your page.', 'leiho' ),
+					'blocks' => array(
+						array(
+							'file' => 'server/api/page.get.ts',
+							'code' => $code( 'nuxt-route' ),
+						),
+						array(
+							'file' => 'pages/[...slug].vue',
+							'code' => $code( 'nuxt-page' ),
+						),
+					),
+					'note'   => $serverless,
+					'types'  => true,
+				),
+				'annotate' => array(
+					'blocks' => array(
+						array(
+							'file' => 'Vue',
+							'code' => $code( 'annotate-vue' ),
+						),
+					),
+				),
+			),
+			'sveltekit' => array(
+				'label'    => 'SvelteKit',
+				'hint'     => __( 'Svelte 5', 'leiho' ),
+				'frame'    => array(
+					'text'   => __( 'Copy this into src/hooks.server.ts.', 'leiho' ),
+					'blocks' => array(
+						array(
+							'file' => 'src/hooks.server.ts',
+							'code' => $code( 'svelte-hooks' ),
+						),
+					),
+					'note'   => __( 'Prerendered pages are served as static files: set the same header on your host.', 'leiho' ),
+				),
+				'bridge'   => array(
+					'text'   => __( 'Install the package, then load the bridge from the root layout.', 'leiho' ),
+					'blocks' => array(
+						$install,
+						array(
+							'file' => 'src/routes/+layout.svelte',
+							'code' => $code( 'svelte-layout' ),
+						),
+					),
+				),
+				'content'  => array(
+					'text'   => __( 'Load each page in +page.server.ts.', 'leiho' ),
+					'blocks' => array(
+						array(
+							'file' => 'src/routes/[...path]/+page.server.ts',
+							'code' => $code( 'svelte-load' ),
+						),
+					),
+					'note'   => $serverless,
+					'types'  => true,
+				),
+				'annotate' => array(
+					'blocks' => array(
+						array(
+							'file' => 'Svelte',
+							'code' => $code( 'annotate-svelte' ),
+						),
+					),
+				),
+			),
+			'vite'      => array(
+				'label'    => 'React + Vite',
+				'hint'     => __( 'Also Remix and React Router', 'leiho' ),
+				'frame'    => array(
+					'text' => __( 'Set the header on your host, and in vite.config.ts for vite dev and vite preview.', 'leiho' ),
+					'tabs' => $hosts + array(
+						'dev' => array(
+							'label'  => __( 'Dev server', 'leiho' ),
+							'blocks' => array(
+								array(
+									'file' => 'vite.config.ts',
+									'code' => $code( 'vite-config' ),
+								),
+							),
+						),
+					),
+				),
+				'bridge'   => array(
+					'text'   => __( 'Install the package, then add the component next to your app in src/main.tsx.', 'leiho' ),
+					'blocks' => array(
+						$install,
+						array(
+							'file' => 'src/main.tsx',
+							'code' => $code( 'vite-main' ),
+						),
+					),
+					'note'   => __( 'Remix or React Router: put it in app/root.tsx.', 'leiho' ),
+				),
+				'content'  => array(
+					'text'   => __( 'The app fetches one page at a time, from the browser.', 'leiho' ),
+					'blocks' => array(
+						array(
+							'file' => 'src/usePage.ts',
+							'code' => $code( 'vite-hook' ),
+						),
+					),
+					'note'   => __( 'Remix or React Router loaders: use loadLeihoContent from leiho/content instead.', 'leiho' ),
+					'types'  => true,
+				),
+				'annotate' => array(
+					'blocks' => array(
+						array(
+							'file' => 'JSX',
+							'code' => $code( 'annotate-jsx' ),
+						),
+					),
+				),
+			),
+			'other'     => array(
+				'label'    => __( 'Other', 'leiho' ),
+				'hint'     => __( 'Plain HTML, PHP, Eleventy, Hugo…', 'leiho' ),
+				'frame'    => array(
+					'text' => __( 'Set the header in your server configuration.', 'leiho' ),
+					'tabs' => array(
+						'nginx'  => array(
+							'label'  => 'nginx',
+							'blocks' => array(
+								array(
+									'file' => 'nginx.conf',
+									'code' => 'add_header Content-Security-Policy "' . $csp . '" always;',
+								),
+							),
+						),
+						'apache' => array(
+							'label'  => 'Apache',
+							'blocks' => array(
+								array(
+									'file' => '.htaccess',
+									'code' => "<IfModule mod_headers.c>\n  Header always set Content-Security-Policy \"" . $csp . "\"\n</IfModule>",
+								),
+							),
+						),
+						'header' => array(
+							'label'  => __( 'Any server', 'leiho' ),
+							'blocks' => array(
+								array(
+									'file' => __( 'HTTP header', 'leiho' ),
+									'code' => 'Content-Security-Policy: ' . $csp,
+								),
+							),
+						),
+					),
+				),
+				'bridge'   => array(
+					'text'     => __( 'Put leiho-bridge.js in the site’s public folder, then add this code to the layout’s <head>.', 'leiho' ),
+					'blocks'   => array(
+						array(
+							'file' => '<head>',
+							'code' => $code( 'loader' ),
+						),
+					),
+					'download' => true,
+				),
+				'content'  => array(
+					'text'   => __( 'Read the content from these URLs, at build time or on each request.', 'leiho' ),
+					'blocks' => array(
+						array(
+							'file' => __( 'Content API', 'leiho' ),
+							'code' => $code( 'rest' ),
+						),
+					),
+					'note'   => __( 'Building with Node? npm install leiho gives you loadLeihoContent from leiho/content.', 'leiho' ),
+				),
+				'annotate' => array(
+					'blocks' => array(
+						array(
+							'file' => 'HTML',
+							'code' => $code( 'annotate-html' ),
+						),
+					),
+				),
+			),
+		);
+	}
+
+	/**
+	 * Extraits de code bruts. {{WP}}, {{EXPORT}} et {{CONTENT}} sont remplacés
+	 * par les adresses du site.
+	 *
+	 * @param string $key Extrait.
+	 * @return string
+	 */
+	private static function snippet( $key ) {
+		switch ( $key ) {
+			case 'vercel':
+				return <<<'CODE'
+{
+  "headers": [
+    {
+      "source": "/(.*)",
+      "headers": [
+        { "key": "Content-Security-Policy", "value": "frame-ancestors 'self' {{WP}}" }
+      ]
+    }
+  ]
+}
+CODE;
+			case 'next-config':
+				return <<<'CODE'
+import type { NextConfig } from 'next';
+
+const nextConfig: NextConfig = {
+  async headers() {
+    return [
+      {
+        source: '/:path*',
+        headers: [
+          { key: 'Content-Security-Policy', value: "frame-ancestors 'self' {{WP}}" },
+        ],
+      },
+    ];
+  },
+};
+
+export default nextConfig;
+CODE;
+			case 'next-layout':
+				return <<<'CODE'
+import { LeihoBridge } from 'leiho/react';
+
+export default function RootLayout({ children }: { children: React.ReactNode }) {
+  return (
+    <html lang="en">
+      <body>
+        {children}
+        <LeihoBridge wpOrigin="{{WP}}" />
+      </body>
+    </html>
+  );
+}
+CODE;
+			case 'next-lib':
+				return <<<'CODE'
+import { cache } from 'react';
+import { loadLeihoContent, indexLeihoContent } from 'leiho/content';
+
+// One request per render, shared by every component.
+export const getContent = cache(async () => {
+  const { data } = await loadLeihoContent({ url: '{{EXPORT}}' });
+  return indexLeihoContent(data);
+});
+CODE;
+			case 'next-page':
+				return <<<'CODE'
+import { notFound } from 'next/navigation';
+import { getContent } from '@/lib/leiho';
+
+export default async function Page({ params }: { params: Promise<{ slug?: string[] }> }) {
+  const { slug = [] } = await params;
+  const page = (await getContent()).byPath('/' + slug.join('/'));
+  if (!page) notFound();
+
+  return (
+    <main data-wp-post={page.id}>
+      <h1 data-wp-field="_title">{page.title}</h1>
+    </main>
+  );
+}
+CODE;
+			case 'astro-middleware':
+				return <<<'CODE'
+import { defineMiddleware } from 'astro:middleware';
+
+export const onRequest = defineMiddleware(async (_context, next) => {
+  const response = await next();
+  response.headers.set('Content-Security-Policy', "frame-ancestors 'self' {{WP}}");
+  return response;
+});
+CODE;
+			case 'astro-layout':
+				return <<<'CODE'
+<head>
+  <!-- … -->
+  <script>
+    if (window.self !== window.top) {
+      import('leiho').then(({ initLeihoBridge }) => {
+        initLeihoBridge({ wpOrigin: '{{WP}}' });
+      });
+    }
+  </script>
+</head>
+CODE;
+			case 'astro-page':
+				return <<<'CODE'
+---
+import { loadLeihoContent, indexLeihoContent } from 'leiho/content';
+import Base from '../layouts/Base.astro';
+
+export async function getStaticPaths() {
+  const { data } = await loadLeihoContent({ url: '{{EXPORT}}' });
+  return indexLeihoContent(data).items.map((page) => ({
+    params: { path: page.path.replace(/^\/|\/$/g, '') || undefined },
+    props: { page },
+  }));
+}
+
+const { page } = Astro.props;
+---
+<Base title={page.title}>
+  <main data-wp-post={page.id}>
+    <h1 data-wp-field="_title">{page.title}</h1>
+  </main>
+</Base>
+CODE;
+			case 'nuxt-config':
+				return <<<'CODE'
+export default defineNuxtConfig({
+  routeRules: {
+    '/**': {
+      headers: { 'Content-Security-Policy': "frame-ancestors 'self' {{WP}}" },
+    },
+  },
+});
+CODE;
+			case 'nuxt-plugin':
+				return <<<'CODE'
+export default defineNuxtPlugin(() => {
+  if (window.self === window.top) return;
+  import('leiho').then(({ initLeihoBridge }) => {
+    // Already on screen: don't hide the page.
+    initLeihoBridge({ wpOrigin: '{{WP}}', cloakTimeout: 0 });
+  });
+});
+CODE;
+			case 'nuxt-route':
+				return <<<'CODE'
+import { loadLeihoContent, indexLeihoContent } from 'leiho/content';
+
+export default defineEventHandler(async (event) => {
+  const { path = '/' } = getQuery(event);
+  const { data } = await loadLeihoContent({ url: '{{EXPORT}}' });
+  const page = indexLeihoContent(data).byPath(String(path));
+  if (!page) throw createError({ statusCode: 404 });
+  return page;
+});
+CODE;
+			case 'nuxt-page':
+				return <<<'CODE'
+<script setup lang="ts">
+const route = useRoute();
+const { data: page } = await useFetch('/api/page', { query: { path: route.path } });
+</script>
+
+<template>
+  <main v-if="page" :data-wp-post="page.id">
+    <h1 data-wp-field="_title">{{ page.title }}</h1>
+  </main>
+</template>
+CODE;
+			case 'svelte-hooks':
+				return <<<'CODE'
+import type { Handle } from '@sveltejs/kit';
+
+export const handle: Handle = async ({ event, resolve }) => {
+  const response = await resolve(event);
+  response.headers.set('Content-Security-Policy', "frame-ancestors 'self' {{WP}}");
+  return response;
+};
+CODE;
+			case 'svelte-layout':
+				return <<<'CODE'
+<script>
+  import { onMount } from 'svelte';
+
+  let { children } = $props();
+
+  onMount(() => {
+    if (window.self === window.top) return;
+    import('leiho').then(({ initLeihoBridge }) => {
+      // Already on screen: don't hide the page.
+      initLeihoBridge({ wpOrigin: '{{WP}}', cloakTimeout: 0 });
+    });
+  });
+</script>
+
+{@render children()}
+CODE;
+			case 'svelte-load':
+				return <<<'CODE'
+import { error } from '@sveltejs/kit';
+import { loadLeihoContent, indexLeihoContent } from 'leiho/content';
+
+export async function load({ url }) {
+  const { data } = await loadLeihoContent({ url: '{{EXPORT}}' });
+  const page = indexLeihoContent(data).byPath(url.pathname);
+  if (!page) error(404, 'Not found');
+  return { page };
+}
+CODE;
+			case 'vite-config':
+				return <<<'CODE'
+import { defineConfig } from 'vite';
+import react from '@vitejs/plugin-react';
+
+const csp = "frame-ancestors 'self' {{WP}}";
+
+export default defineConfig({
+  plugins: [react()],
+  server: { headers: { 'Content-Security-Policy': csp } },
+  preview: { headers: { 'Content-Security-Policy': csp } },
+});
+CODE;
+			case 'vite-main':
+				return <<<'CODE'
+import { StrictMode } from 'react';
+import { createRoot } from 'react-dom/client';
+import { LeihoBridge } from 'leiho/react';
+import App from './App';
+
+createRoot(document.getElementById('root')!).render(
+  <StrictMode>
+    <App />
+    <LeihoBridge wpOrigin="{{WP}}" />
+  </StrictMode>
+);
+CODE;
+			case 'vite-hook':
+				return <<<'CODE'
+import { useEffect, useState } from 'react';
+
+export function usePage(path: string) {
+  const [page, setPage] = useState<any>(null);
+
+  useEffect(() => {
+    const url = new URL('{{CONTENT}}');
+    url.searchParams.set('path', path);
+    let cancelled = false;
+    fetch(url)
+      .then((res) => res.json())
+      .then((items) => {
+        if (!cancelled) setPage(items[0] ?? null);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [path]);
+
+  return page;
+}
+CODE;
+			case 'loader':
+				return <<<'CODE'
+<script>
+  if (window.self !== window.top) {
+    var s = document.createElement('script');
+    s.src = '/leiho-bridge.js';
+    s.setAttribute('data-wp-origin', '{{WP}}');
+    document.head.appendChild(s);
+  }
+</script>
+CODE;
+			case 'rest':
+				return <<<'CODE'
+# All published content, in one request
+GET {{EXPORT}}
+
+# One page, by its path
+GET {{CONTENT}}?path=/about
+CODE;
+			case 'annotate-jsx':
+				return <<<'CODE'
+<section data-wp-post={page.id} data-leiho-section="Hero">
+  <h1 data-wp-field="hero_title">{page.fields.hero_title}</h1>
+  <img data-wp-field="hero_image" src={page.fields.hero_image?.url} alt={page.fields.hero_image?.alt} />
+  {page.fields.cards?.map((card, i) => (
+    <article key={i} data-wp-field={`cards.${i}.title`}>{card.title}</article>
+  ))}
+</section>
+CODE;
+			case 'annotate-astro':
+				return <<<'CODE'
+<section data-wp-post={page.id} data-leiho-section="Hero">
+  <h1 data-wp-field="hero_title">{page.fields.hero_title}</h1>
+  <img data-wp-field="hero_image" src={page.fields.hero_image?.url} alt={page.fields.hero_image?.alt} />
+  {page.fields.cards?.map((card, i) => (
+    <article data-wp-field={`cards.${i}.title`}>{card.title}</article>
+  ))}
+</section>
+CODE;
+			case 'annotate-vue':
+				return <<<'CODE'
+<section :data-wp-post="page.id" data-leiho-section="Hero">
+  <h1 data-wp-field="hero_title">{{ page.fields.hero_title }}</h1>
+  <img data-wp-field="hero_image" :src="page.fields.hero_image?.url" :alt="page.fields.hero_image?.alt">
+  <article v-for="(card, i) in page.fields.cards" :key="i" :data-wp-field="`cards.${i}.title`">
+    {{ card.title }}
+  </article>
+</section>
+CODE;
+			case 'annotate-svelte':
+				return <<<'CODE'
+<section data-wp-post={page.id} data-leiho-section="Hero">
+  <h1 data-wp-field="hero_title">{page.fields.hero_title}</h1>
+  <img data-wp-field="hero_image" src={page.fields.hero_image?.url} alt={page.fields.hero_image?.alt} />
+  {#each page.fields.cards ?? [] as card, i}
+    <article data-wp-field="cards.{i}.title">{card.title}</article>
+  {/each}
+</section>
+CODE;
+			case 'annotate-html':
+				return <<<'CODE'
+<section data-wp-post="12" data-leiho-section="Hero">
+  <h1 data-wp-field="hero_title">…</h1>
+  <img data-wp-field="hero_image" src="…" alt="…">
+  <article data-wp-field="cards.0.title">…</article>
+</section>
+CODE;
+		}
+		return '';
+	}
+
+	/**
+	 * Titres des étapes à extraits (écran et consigne pour l'agent).
+	 *
+	 * @return array<string,string>
+	 */
+	private static function start_step_titles() {
+		return array(
+			'frame'    => __( 'Allow the editor to display the site', 'leiho' ),
+			'bridge'   => __( 'Install the bridge', 'leiho' ),
+			'content'  => __( 'Read the content', 'leiho' ),
+			'annotate' => __( 'Annotate your content', 'leiho' ),
+		);
+	}
+
+	/**
+	 * Début de la consigne pour l'agent IA, propre à un framework : contexte,
+	 * adresses et extraits déjà remplis. Le guide complet est ajouté à la copie.
+	 *
+	 * @param array  $fw   Framework (frameworks()).
+	 * @param string $case existing | new.
+	 * @param array  $ctx  Adresses (start_context()).
+	 * @return string
+	 */
+	public static function start_prompt( $fw, $case, $ctx ) {
+		$lines   = array();
+		$lines[] = __( 'We’re going to make this site editable with Leiho, the visual editor for WordPress. Leiho has precise instructions to follow throughout the project; you’ll find them below. Read them in full before writing any code, and follow them for every component.', 'leiho' );
+		$lines[] = 'new' === $case
+			? __( 'We’re starting from scratch. Build the site and its ACF content model, following the instructions from the very first component. Finish with the checklist.', 'leiho' )
+			: __( 'The site already exists. Install the bridge, then annotate every piece of displayed content with its matching WordPress field, following the instructions. Finish with the checklist.', 'leiho' );
+
+		$facts = array(
+			/* translators: %s: framework name (Next.js, Astro…). */
+			sprintf( __( 'Framework: %s', 'leiho' ), $fw['label'] . ( '' !== $fw['hint'] ? ' (' . $fw['hint'] . ')' : '' ) ),
+			/* translators: %s: WordPress address. */
+			sprintf( __( 'WordPress address (wp-admin origin): %s', 'leiho' ), $ctx['wp'] ),
+			'' !== $ctx['front']
+				/* translators: %s: site address. */
+				? sprintf( __( 'Site address: %s', 'leiho' ), $ctx['front'] )
+				: __( 'Site address: not set yet in Leiho.', 'leiho' ),
+		);
+		$lines[] = '- ' . implode( "\n- ", $facts );
+		$lines[] = __( 'Here are the snippets for this framework, already filled in with these addresses. Adapt file names and paths to the project.', 'leiho' );
+
+		foreach ( self::start_step_titles() as $step => $title ) {
+			$group   = $fw[ $step ];
+			$lines[] = '## ' . $title;
+			if ( ! empty( $group['text'] ) ) {
+				$lines[] = $group['text'];
+			}
+			$variants = ! empty( $group['tabs'] ) ? $group['tabs'] : array( array( 'blocks' => $group['blocks'] ) );
+			if ( ! empty( $group['tabs'] ) ) {
+				$lines[] = __( 'Use the variant that matches the host:', 'leiho' );
+			}
+			foreach ( $variants as $variant ) {
+				foreach ( $variant['blocks'] as $block ) {
+					$label   = isset( $variant['label'] ) ? $variant['label'] . ' — ' : '';
+					$lines[] = $label . $block['file'] . ":\n\n```\n" . $block['code'] . "\n```";
+				}
+				if ( ! empty( $variant['note'] ) ) {
+					$lines[] = $variant['note'];
+				}
+			}
+			if ( ! empty( $group['download'] ) ) {
+				$lines[] = __( 'Copy leiho-bridge.js from the leiho npm package (dist folder) to the site’s public folder.', 'leiho' );
+			}
+			if ( ! empty( $group['note'] ) ) {
+				$lines[] = $group['note'];
+			}
+		}
+
+		$lines[] = __( 'When you’re done, tell me: I’ll click “Test the connection” in Leiho → Get started to check that the editor sees the site.', 'leiho' );
+		$lines[] = 'new' === $case ? __( 'Site idea or brief:', 'leiho' ) : __( 'Site repository:', 'leiho' );
+
+		return implode( "\n\n", $lines );
+	}
+
+	/**
+	 * Framework demandé dans l'URL (?fw=), '' si absent ou inconnu.
+	 *
+	 * @param array $frameworks Frameworks connus.
+	 * @return string
+	 */
+	private static function requested_framework( $frameworks ) {
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Simple choix d'affichage.
+		$fw = isset( $_GET['fw'] ) ? sanitize_key( wp_unslash( $_GET['fw'] ) ) : '';
+		return isset( $frameworks[ $fw ] ) ? $fw : '';
+	}
+
+	/**
+	 * Étapes faites, d'après ce que le serveur sait : adresse du site et
+	 * dernier test du bridge (un bridge qui répond prouve aussi l'en-tête).
+	 *
+	 * @param bool       $has_url    Adresse du site renseignée.
+	 * @param array|null $connection Dernier test (connection()).
+	 * @return array<string,bool>
+	 */
+	public static function start_progress( $has_url, $connection ) {
+		$ok     = $connection && ! empty( $connection['ok'] );
+		$fields = $ok && ! empty( $connection['fields'] );
+		return array(
+			'url'      => (bool) $has_url,
+			'frame'    => (bool) $ok,
+			'bridge'   => (bool) $ok,
+			'content'  => (bool) $fields,
+			'annotate' => (bool) $fields,
+			'test'     => (bool) $ok,
+		);
+	}
+
+	private static function render_start() {
+		$settings   = Leiho_Plugin::settings();
+		$ctx        = self::start_context();
+		$has_url    = '' !== $settings['front_url'];
+		$connection = self::connection();
+		$frameworks = self::frameworks( $ctx );
+		$current    = self::requested_framework( $frameworks );
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Simple choix d'affichage.
+		$path       = isset( $_GET['path'] ) ? sanitize_key( wp_unslash( $_GET['path'] ) ) : '';
+		$path       = in_array( $path, array( 'steps', 'ai' ), true ) ? $path : '';
+		$done       = self::start_progress( $has_url, $connection );
+		$count      = count( array_filter( $done ) );
+		$total      = count( self::START_STEPS );
+		$next_step  = '';
+		foreach ( self::START_STEPS as $step ) {
+			if ( empty( $done[ $step ] ) ) {
+				$next_step = $step;
+				break;
+			}
+		}
+		$titles = self::start_step_titles();
 
 		// Version française du guide pour un wp-admin en français, anglaise sinon.
 		$instructions_file = LEIHO_DIR . 'docs/agent-instructions.md';
@@ -332,134 +1156,297 @@ class Leiho_Dashboard {
 		}
 		// phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents -- Fichier local du plugin.
 		$instructions = file_exists( $instructions_file ) ? file_get_contents( $instructions_file ) : '';
-		$instructions = str_replace( 'https://ADRESSE-DU-WORDPRESS', $wp_origin, $instructions );
+		$instructions = str_replace( 'https://ADRESSE-DU-WORDPRESS', $ctx['wp'], $instructions );
 
-		$intro        = __( 'We’re going to make this site editable with Leiho, the visual editor for WordPress. Leiho has precise instructions to follow throughout the project; you’ll find them below. Read them in full before writing any code, and follow them for every component.', 'leiho' );
-		$prompt_exist = $intro . "\n\n" . __( 'The site already exists. Install the bridge, then annotate every piece of displayed content with its matching WordPress field, following the instructions. Finish with the checklist.', 'leiho' ) . "\n\n" . __( 'Site repository:', 'leiho' ) . "\n\n---\n\n" . $instructions;
-		$prompt_new   = $intro . "\n\n" . __( 'We’re starting from scratch. Build the site and its ACF content model, following the instructions from the very first component. Finish with the checklist.', 'leiho' ) . "\n\n" . __( 'Site idea or brief:', 'leiho' ) . "\n\n---\n\n" . $instructions;
+		$step_class = static function ( $step ) use ( $done, $next_step ) {
+			if ( ! empty( $done[ $step ] ) ) {
+				return 'leiho-step leiho-step--done';
+			}
+			return $step === $next_step ? 'leiho-step leiho-step--current' : 'leiho-step';
+		};
 		?>
-		<div class="leiho-page leiho-page--narrow">
+		<div class="leiho-page leiho-page--narrow leiho-onboard" data-leiho-onboarding data-fw="<?php echo esc_attr( $current ); ?>">
 			<span class="leiho-eyebrow"><?php esc_html_e( 'Connect a site', 'leiho' ); ?></span>
 			<h2 style="margin:0 0 8px;font-size:22px;color:var(--leiho-ink)"><?php esc_html_e( 'Make your site editable', 'leiho' ); ?></h2>
-			<p class="leiho-lead"><?php esc_html_e( 'Leiho works with any site that reads its content from WordPress: React, Next.js, Remix, Vite, Astro, Nuxt, SvelteKit or plain HTML. Four steps, each one verifiable.', 'leiho' ); ?></p>
+			<p class="leiho-lead"><?php esc_html_e( 'Leiho works with any site that reads its content from WordPress. Pick your framework: the steps and the code adapt to it.', 'leiho' ); ?></p>
 
-			<ol class="leiho-steps">
-				<li class="leiho-step <?php echo $has_url ? 'leiho-step--done' : 'leiho-step--current'; ?>">
-					<h3>
-						<?php esc_html_e( 'Site URL', 'leiho' ); ?>
-						<?php if ( $has_url ) : ?>
-							<span class="leiho-pill leiho-pill--ok"><?php echo esc_html( $settings['front_url'] ); ?></span>
-						<?php endif; ?>
-					</h3>
-					<p><?php esc_html_e( 'The site’s public URL and, if you have one, the preview URL to show in the editor.', 'leiho' ); ?></p>
-					<a class="leiho-btn <?php echo $has_url ? 'leiho-btn--quiet leiho-btn--small' : ''; ?>" href="<?php echo esc_url( Leiho_App::url( 'settings' ) ); ?>">
-						<?php echo $has_url ? esc_html__( 'Edit', 'leiho' ) : esc_html__( 'Enter the URL', 'leiho' ); ?>
-					</a>
-				</li>
+			<form class="leiho-onboard__section" id="leiho-fw-form" method="get" action="<?php echo esc_url( admin_url( 'admin.php' ) ); ?>" data-leiho-fw-form>
+				<input type="hidden" name="page" value="<?php echo esc_attr( Leiho_App::SLUG ); ?>">
+				<input type="hidden" name="view" value="start">
+				<fieldset>
+					<legend class="leiho-onboard__title"><span class="leiho-onboard__num">1</span><?php esc_html_e( 'Pick your framework.', 'leiho' ); ?></legend>
+					<div class="leiho-choices leiho-choices--fw">
+						<?php foreach ( $frameworks as $id => $fw ) : ?>
+							<label class="leiho-choice">
+								<input type="radio" name="fw" value="<?php echo esc_attr( $id ); ?>" <?php checked( $current, $id ); ?> data-leiho-fw-choice>
+								<strong><?php echo esc_html( $fw['label'] ); ?></strong>
+								<span><?php echo esc_html( $fw['hint'] ); ?></span>
+							</label>
+						<?php endforeach; ?>
+					</div>
+				</fieldset>
+				<noscript><p><button type="submit" class="leiho-btn leiho-btn--small"><?php esc_html_e( 'Show the steps', 'leiho' ); ?></button></p></noscript>
+			</form>
 
-				<li class="leiho-step">
-					<h3><?php esc_html_e( 'Allow the editor to display the site', 'leiho' ); ?></h3>
-					<p><?php esc_html_e( 'The site must allow being displayed in wp-admin. Add this HTTP header to its responses (host settings, middleware or the framework’s headers file).', 'leiho' ); ?></p>
-					<div class="leiho-code">
-						<pre><?php echo esc_html( $csp ); ?></pre>
-						<button type="button" data-leiho-copy="<?php echo esc_attr( $csp ); ?>"><?php esc_html_e( 'Copy', 'leiho' ); ?></button>
+			<div data-leiho-after-fw <?php echo '' === $current ? 'hidden' : ''; ?>>
+				<fieldset class="leiho-onboard__section">
+					<legend class="leiho-onboard__title"><span class="leiho-onboard__num">2</span><?php esc_html_e( 'Choose how.', 'leiho' ); ?></legend>
+					<div class="leiho-choices leiho-choices--paths">
+						<label class="leiho-choice">
+							<input type="radio" name="path" value="steps" form="leiho-fw-form" <?php checked( $path, 'steps' ); ?> data-leiho-path-choice>
+							<strong><?php esc_html_e( 'Set it up step by step', 'leiho' ); ?></strong>
+							<span><?php esc_html_e( 'Six short steps with the code for your framework, each one checked.', 'leiho' ); ?></span>
+						</label>
+						<label class="leiho-choice">
+							<input type="radio" name="path" value="ai" form="leiho-fw-form" <?php checked( $path, 'ai' ); ?> data-leiho-path-choice>
+							<strong><?php esc_html_e( 'Let my AI do it', 'leiho' ); ?></strong>
+							<span><?php esc_html_e( 'Copy one prompt into your coding agent. It gets the same code and the full rules.', 'leiho' ); ?></span>
+						</label>
 					</div>
-					<div class="leiho-actions">
-						<button type="button" class="leiho-btn leiho-btn--quiet leiho-btn--small" data-leiho-check-headers <?php disabled( ! $has_url ); ?>>
-							<?php esc_html_e( 'Check headers', 'leiho' ); ?>
-						</button>
-					</div>
-					<div class="leiho-check" data-leiho-headers-result hidden></div>
-				</li>
+				</fieldset>
 
-				<li class="leiho-step">
-					<h3><?php esc_html_e( 'Install the bridge', 'leiho' ); ?></h3>
-					<p><?php esc_html_e( 'A small script that only loads inside the editor. Your visitors never download it.', 'leiho' ); ?></p>
-					<div class="leiho-segmented" role="tablist" data-leiho-segmented>
-						<button type="button" role="tab" aria-selected="true" data-panel="html"><?php esc_html_e( 'HTML · Astro · Nuxt · SvelteKit', 'leiho' ); ?></button>
-						<button type="button" role="tab" aria-selected="false" data-panel="react"><?php esc_html_e( 'React · Next.js · Remix · Vite', 'leiho' ); ?></button>
-					</div>
-					<div data-panel-id="html">
-						<p class="leiho-help"><?php esc_html_e( 'Put leiho-bridge.js in the site’s public folder, then add this code to the layout’s <head>.', 'leiho' ); ?></p>
-						<div class="leiho-code">
-							<pre><?php echo esc_html( $loader ); ?></pre>
-							<button type="button" data-leiho-copy="<?php echo esc_attr( $loader ); ?>"><?php esc_html_e( 'Copy', 'leiho' ); ?></button>
-						</div>
-						<div class="leiho-actions">
-							<a class="leiho-btn leiho-btn--quiet leiho-btn--small" href="<?php echo esc_url( $bridge_file ); ?>" download="leiho-bridge.js"><?php esc_html_e( 'Download leiho-bridge.js', 'leiho' ); ?></a>
-						</div>
-					</div>
-					<div data-panel-id="react" hidden>
-						<p class="leiho-help"><?php esc_html_e( 'The component loads the bridge only inside the editor, through a dynamic import.', 'leiho' ); ?></p>
-						<div class="leiho-code">
-							<pre><?php echo esc_html( $react ); ?></pre>
-							<button type="button" data-leiho-copy="<?php echo esc_attr( $react ); ?>"><?php esc_html_e( 'Copy', 'leiho' ); ?></button>
-						</div>
-					</div>
-				</li>
+				<noscript><p><button type="submit" form="leiho-fw-form" class="leiho-btn leiho-btn--small"><?php esc_html_e( 'Show this path', 'leiho' ); ?></button></p></noscript>
 
-				<li class="leiho-step <?php echo ( $connection && $connection['ok'] ) ? 'leiho-step--done' : ''; ?>">
-					<h3><?php esc_html_e( 'Test the connection', 'leiho' ); ?></h3>
-					<p><?php esc_html_e( 'Leiho opens your site in the background and waits for the bridge to check in. If it responds, the editor is ready.', 'leiho' ); ?></p>
-					<div class="leiho-actions">
-						<button type="button" class="leiho-btn" data-leiho-test-bridge <?php disabled( ! $has_url ); ?>>
-							<?php esc_html_e( 'Test the connection', 'leiho' ); ?>
-						</button>
-					</div>
-					<div class="leiho-check <?php echo $connection ? ( $connection['ok'] ? 'leiho-check--ok' : 'leiho-check--error' ) : ''; ?>" data-leiho-bridge-result <?php echo $connection ? '' : 'hidden'; ?>>
-						<?php if ( $connection ) : ?>
-							<span class="leiho-dot <?php echo $connection['ok'] ? 'leiho-dot--ok' : 'leiho-dot--error'; ?>"></span>
-							<span>
+				<section class="leiho-onboard__section" data-leiho-path-panel="steps" aria-labelledby="leiho-steps-title" <?php echo 'steps' === $path ? '' : 'hidden'; ?>>
+					<div class="leiho-onboard__head">
+						<h2 class="leiho-onboard__title" id="leiho-steps-title"><?php esc_html_e( 'Step by step', 'leiho' ); ?></h2>
+						<div class="leiho-onboard__progress">
+							<progress class="leiho-progress" max="<?php echo esc_attr( $total ); ?>" value="<?php echo esc_attr( $count ); ?>" data-leiho-progress-bar aria-labelledby="leiho-progress-label"></progress>
+							<span id="leiho-progress-label" aria-live="polite" data-leiho-progress-label>
 								<?php
-								echo esc_html(
-									$connection['ok']
-										/* translators: 1: bridge version, 2: number of fields, 3: relative time (e.g. 5 mins). */
-										? sprintf( __( 'Bridge v%1$s detected, %2$d annotated field(s) on the home page. Checked %3$s ago.', 'leiho' ), $connection['version'], $connection['fields'], human_time_diff( $connection['at'] ) )
-										/* translators: %s: relative time (e.g. 5 mins). */
-										: sprintf( __( 'The bridge didn’t respond to the last test, %s ago.', 'leiho' ), human_time_diff( $connection['at'] ) )
-								);
+								/* translators: 1: steps done, 2: total steps. */
+								echo esc_html( sprintf( __( '%1$d of %2$d steps done', 'leiho' ), $count, $total ) );
 								?>
 							</span>
-						<?php endif; ?>
+						</div>
 					</div>
-				</li>
-			</ol>
 
-			<h2 class="leiho-heading" style="margin-top:48px"><?php esc_html_e( 'Annotate your content', 'leiho' ); ?></h2>
-			<div class="leiho-card">
-				<p><?php esc_html_e( 'Every element that displays a WordPress field carries that field’s name. The bridge uses it to know what to update, and the editor to know which field to open on click.', 'leiho' ); ?></p>
-				<div class="leiho-code">
-					<pre><?php echo esc_html( "<section data-wp-post=\"12\" data-leiho-section=\"Hero\">\n  <h1 data-wp-field=\"hero_title\">…</h1>\n  <img data-wp-field=\"hero_image\" src=\"…\" alt=\"…\">\n  <article data-wp-field=\"cards.0.title\">…</article>\n</section>" ); ?></pre>
-				</div>
-				<p class="leiho-help" style="margin-top:12px"><?php esc_html_e( 'All the annotations, rules and the checklist are in the guide below.', 'leiho' ); ?></p>
+					<ol class="leiho-steps">
+						<li class="<?php echo esc_attr( $step_class( 'url' ) ); ?>" data-leiho-step="url">
+							<h3>
+								<?php esc_html_e( 'Site URL', 'leiho' ); ?>
+								<?php if ( $has_url ) : ?>
+									<span class="leiho-pill leiho-pill--ok"><?php echo esc_html( $settings['front_url'] ); ?></span>
+								<?php endif; ?>
+							</h3>
+							<p><?php esc_html_e( 'The site’s public URL and, if you have one, the preview URL to show in the editor.', 'leiho' ); ?></p>
+							<a class="leiho-btn <?php echo $has_url ? 'leiho-btn--quiet leiho-btn--small' : ''; ?>" href="<?php echo esc_url( Leiho_App::url( 'settings' ) ); ?>">
+								<?php echo $has_url ? esc_html__( 'Edit', 'leiho' ) : esc_html__( 'Enter the URL', 'leiho' ); ?>
+							</a>
+						</li>
+
+						<li class="<?php echo esc_attr( $step_class( 'frame' ) ); ?>" data-leiho-step="frame">
+							<h3><?php echo esc_html( $titles['frame'] ); ?></h3>
+							<p><?php esc_html_e( 'The site must allow being displayed in wp-admin. Already sending a Content-Security-Policy? Add frame-ancestors to it, and don’t send X-Frame-Options.', 'leiho' ); ?></p>
+							<?php self::render_fw_groups( $frameworks, 'frame', $current ); ?>
+							<div class="leiho-actions">
+								<button type="button" class="leiho-btn leiho-btn--quiet leiho-btn--small" data-leiho-check-headers <?php disabled( ! $has_url ); ?>>
+									<?php esc_html_e( 'Check headers', 'leiho' ); ?>
+								</button>
+							</div>
+							<div class="leiho-check" data-leiho-headers-result role="status" aria-live="polite" hidden></div>
+						</li>
+
+						<li class="<?php echo esc_attr( $step_class( 'bridge' ) ); ?>" data-leiho-step="bridge">
+							<h3><?php echo esc_html( $titles['bridge'] ); ?></h3>
+							<p><?php esc_html_e( 'A small script that only loads inside the editor. Your visitors never download it.', 'leiho' ); ?></p>
+							<?php self::render_fw_groups( $frameworks, 'bridge', $current ); ?>
+						</li>
+
+						<li class="<?php echo esc_attr( $step_class( 'content' ) ); ?>" data-leiho-step="content">
+							<h3><?php echo esc_html( $titles['content'] ); ?></h3>
+							<p><?php esc_html_e( 'Read your content from Leiho’s content API: one request, all published content, fields already shaped.', 'leiho' ); ?></p>
+							<?php self::render_fw_groups( $frameworks, 'content', $current, $ctx ); ?>
+							<?php if ( 'token' === $settings['content_access'] ) : ?>
+								<p class="leiho-help"><?php esc_html_e( 'Restricted access is on: set LEIHO_TOKEN in the build environment. The token is in Settings, under Content API.', 'leiho' ); ?></p>
+							<?php endif; ?>
+							<p class="leiho-help"><?php esc_html_e( 'Site built at deploy time? In Settings, choose how Publish rebuilds it. Rendered on each request? Choose Live content.', 'leiho' ); ?></p>
+						</li>
+
+						<li class="<?php echo esc_attr( $step_class( 'annotate' ) ); ?>" data-leiho-step="annotate">
+							<h3><?php echo esc_html( $titles['annotate'] ); ?></h3>
+							<p><?php esc_html_e( 'Every element that displays a WordPress field carries that field’s name. The bridge uses it to know what to update, and the editor to know which field to open on click.', 'leiho' ); ?></p>
+							<?php self::render_fw_groups( $frameworks, 'annotate', $current ); ?>
+							<p class="leiho-help"><?php esc_html_e( 'Always render annotated elements, even when empty. All the annotations, rules and the checklist are in the agent instructions, below.', 'leiho' ); ?></p>
+						</li>
+
+						<li class="<?php echo esc_attr( $step_class( 'test' ) ); ?>" data-leiho-step="test" id="leiho-step-test">
+							<h3><?php esc_html_e( 'Test the connection', 'leiho' ); ?></h3>
+							<p><?php esc_html_e( 'Leiho opens your site in the background and waits for the bridge to check in. If it responds, the editor is ready.', 'leiho' ); ?></p>
+							<div class="leiho-actions">
+								<button type="button" class="leiho-btn" data-leiho-test-bridge <?php disabled( ! $has_url ); ?>>
+									<?php esc_html_e( 'Test the connection', 'leiho' ); ?>
+								</button>
+							</div>
+							<div class="leiho-check <?php echo $connection ? ( $connection['ok'] ? 'leiho-check--ok' : 'leiho-check--error' ) : ''; ?>" data-leiho-bridge-result role="status" aria-live="polite" <?php echo $connection ? '' : 'hidden'; ?>>
+								<?php if ( $connection ) : ?>
+									<span class="leiho-dot <?php echo $connection['ok'] ? 'leiho-dot--ok' : 'leiho-dot--error'; ?>"></span>
+									<span>
+										<?php
+										echo esc_html(
+											$connection['ok']
+												/* translators: 1: bridge version, 2: number of fields, 3: relative time (e.g. 5 mins). */
+												? sprintf( __( 'Bridge v%1$s detected, %2$d annotated field(s) on the home page. Checked %3$s ago.', 'leiho' ), $connection['version'], $connection['fields'], human_time_diff( $connection['at'] ) )
+												/* translators: %s: relative time (e.g. 5 mins). */
+												: sprintf( __( 'The bridge didn’t respond to the last test, %s ago.', 'leiho' ), human_time_diff( $connection['at'] ) )
+										);
+										?>
+									</span>
+								<?php endif; ?>
+							</div>
+						</li>
+					</ol>
+				</section>
+
+				<section class="leiho-onboard__section" data-leiho-path-panel="ai" aria-labelledby="leiho-ai-title" <?php echo 'ai' === $path ? '' : 'hidden'; ?>>
+					<h2 class="leiho-onboard__title" id="leiho-ai-title"><?php esc_html_e( 'With your AI agent', 'leiho' ); ?></h2>
+					<div class="leiho-card">
+						<p><?php esc_html_e( 'One prompt with your framework, your addresses, the code from the steps and Leiho’s full rules. Paste it into your agent, then add your repository or brief.', 'leiho' ); ?></p>
+						<?php foreach ( $frameworks as $id => $fw ) : ?>
+							<div data-leiho-fw="<?php echo esc_attr( $id ); ?>" <?php echo $id === $current ? '' : 'hidden'; ?>>
+								<?php
+								$prompt_id = 'leiho-prompt-' . $id;
+								self::render_tabs(
+									$prompt_id,
+									array(
+										'existing' => array(
+											'label' => __( 'Existing site', 'leiho' ),
+											'html'  => self::prompt_panel( $prompt_id . '-existing', self::start_prompt( $fw, 'existing', $ctx ) ),
+										),
+										'new'      => array(
+											'label' => __( 'New site', 'leiho' ),
+											'html'  => self::prompt_panel( $prompt_id . '-new', self::start_prompt( $fw, 'new', $ctx ) ),
+										),
+									)
+								);
+								?>
+							</div>
+						<?php endforeach; ?>
+						<p class="leiho-help"><?php esc_html_e( 'Works with Claude Code, Cursor, Codex, Copilot and any agent that edits your code.', 'leiho' ); ?></p>
+						<div class="leiho-check leiho-check--ok" data-leiho-after-copy role="status" aria-live="polite" hidden>
+							<span class="leiho-dot leiho-dot--ok"></span>
+							<span>
+								<?php esc_html_e( 'Prompt copied. When your agent is done, test the connection.', 'leiho' ); ?>
+								<button type="button" class="leiho-btn leiho-btn--quiet leiho-btn--small" data-leiho-goto-test><?php esc_html_e( 'Go to the test', 'leiho' ); ?></button>
+							</span>
+						</div>
+					</div>
+				</section>
 			</div>
 
-			<h2 class="leiho-heading" style="margin-top:48px"><?php esc_html_e( 'With an AI agent', 'leiho' ); ?></h2>
-			<div class="leiho-card">
-				<span class="leiho-eyebrow"><?php esc_html_e( 'Claude, Codex, Cursor…', 'leiho' ); ?></span>
-				<h2><?php esc_html_e( 'Let the agent do the integration', 'leiho' ); ?></h2>
-				<p><?php esc_html_e( 'Leiho gives your agent a precise contract: where to load the bridge, how to name and annotate fields, which mistakes to avoid, what to check before shipping. Copy the right prompt, then add your repository or brief.', 'leiho' ); ?></p>
+			<details class="leiho-onboard__guide">
+				<summary><?php esc_html_e( 'Read the full agent instructions', 'leiho' ); ?></summary>
+				<textarea id="leiho-instructions" class="leiho-instructions" readonly spellcheck="false" aria-label="<?php esc_attr_e( 'Agent instructions', 'leiho' ); ?>"><?php echo esc_textarea( $instructions ); ?></textarea>
+			</details>
+		</div>
+		<?php
+	}
 
-				<div class="leiho-prompts">
-					<div class="leiho-prompt">
-						<h3><?php esc_html_e( 'Integrate an existing site', 'leiho' ); ?></h3>
-						<p><?php esc_html_e( 'The site already reads its content from WordPress. The agent installs the bridge and annotates all the content.', 'leiho' ); ?></p>
-						<button type="button" class="leiho-btn leiho-btn--small" data-leiho-copy-from="leiho-prompt-existing"><?php esc_html_e( 'Copy prompt', 'leiho' ); ?></button>
-						<textarea id="leiho-prompt-existing" class="leiho-copy-source" readonly tabindex="-1" aria-hidden="true"><?php echo esc_textarea( $prompt_exist ); ?></textarea>
+	/**
+	 * Panneaux d'une étape, un par framework ; seul le framework choisi est
+	 * visible (le JS bascule les autres).
+	 *
+	 * @param array  $frameworks Frameworks.
+	 * @param string $step       frame | bridge | content | annotate.
+	 * @param string $current    Framework choisi, '' si aucun.
+	 * @param array  $ctx        Adresses (étape content : commande des types).
+	 * @return void
+	 */
+	private static function render_fw_groups( $frameworks, $step, $current, $ctx = array() ) {
+		foreach ( $frameworks as $id => $fw ) {
+			$group = $fw[ $step ];
+			?>
+			<div class="leiho-fw-panel" data-leiho-fw="<?php echo esc_attr( $id ); ?>" <?php echo $id === $current ? '' : 'hidden'; ?>>
+				<?php if ( ! empty( $group['text'] ) ) : ?>
+					<p><?php echo esc_html( $group['text'] ); ?></p>
+				<?php endif; ?>
+				<?php
+				if ( ! empty( $group['tabs'] ) ) {
+					$tabs = array();
+					foreach ( $group['tabs'] as $tab_id => $tab ) {
+						$tabs[ $tab_id ] = array(
+							'label' => $tab['label'],
+							'html'  => self::blocks_html( $tab['blocks'] ) . ( ! empty( $tab['note'] ) ? '<p class="leiho-help">' . esc_html( $tab['note'] ) . '</p>' : '' ),
+						);
+					}
+					self::render_tabs( 'leiho-' . $step . '-' . $id, $tabs );
+				} else {
+					echo self::blocks_html( $group['blocks'] ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Échappé dans blocks_html().
+				}
+				?>
+				<?php if ( ! empty( $group['download'] ) ) : ?>
+					<div class="leiho-actions">
+						<a class="leiho-btn leiho-btn--quiet leiho-btn--small" href="<?php echo esc_url( LEIHO_URL . 'assets/bridge/leiho-bridge.js' ); ?>" download="leiho-bridge.js"><?php esc_html_e( 'Download leiho-bridge.js', 'leiho' ); ?></a>
 					</div>
-					<div class="leiho-prompt">
-						<h3><?php esc_html_e( 'Build a new site', 'leiho' ); ?></h3>
-						<p><?php esc_html_e( 'The agent designs the site and its ACF content model, editable with Leiho from the very first component.', 'leiho' ); ?></p>
-						<button type="button" class="leiho-btn leiho-btn--small" data-leiho-copy-from="leiho-prompt-new"><?php esc_html_e( 'Copy prompt', 'leiho' ); ?></button>
-						<textarea id="leiho-prompt-new" class="leiho-copy-source" readonly tabindex="-1" aria-hidden="true"><?php echo esc_textarea( $prompt_new ); ?></textarea>
-					</div>
-				</div>
-
-				<details style="margin-top:20px">
-					<summary style="cursor:pointer;color:var(--leiho-ink);font-weight:600"><?php esc_html_e( 'Read the full instructions', 'leiho' ); ?></summary>
-					<textarea class="leiho-instructions" readonly spellcheck="false" aria-label="<?php esc_attr_e( 'Agent instructions', 'leiho' ); ?>"><?php echo esc_textarea( $instructions ); ?></textarea>
-				</details>
+				<?php endif; ?>
+				<?php if ( ! empty( $group['note'] ) ) : ?>
+					<p class="leiho-help"><?php echo esc_html( $group['note'] ); ?></p>
+				<?php endif; ?>
+				<?php
+				if ( ! empty( $group['types'] ) && ! empty( $ctx['export'] ) ) {
+					echo '<p class="leiho-help">' . esc_html__( 'Using TypeScript? Generate the types of your fields, and run it again after changing a field group:', 'leiho' ) . '</p>';
+					echo self::blocks_html( array( array( 'file' => __( 'Terminal', 'leiho' ), 'code' => 'npx leiho types --url ' . $ctx['export'] ) ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Échappé dans blocks_html().
+				}
+				?>
 			</div>
+			<?php
+		}
+	}
+
+	/**
+	 * Blocs de code à copier, avec le nom du fichier au-dessus.
+	 *
+	 * @param array $blocks Liste de array( file, code ).
+	 * @return string HTML échappé.
+	 */
+	private static function blocks_html( $blocks ) {
+		$html = '';
+		foreach ( $blocks as $block ) {
+			$html .= '<div class="leiho-code leiho-code--file">'
+				. '<span class="leiho-code__file">' . esc_html( $block['file'] ) . '</span>'
+				. '<pre>' . esc_html( $block['code'] ) . '</pre>'
+				. '<button type="button" data-leiho-copy="' . esc_attr( $block['code'] ) . '">' . esc_html__( 'Copy', 'leiho' ) . '</button>'
+				. '</div>';
+		}
+		return $html;
+	}
+
+	/**
+	 * Bouton de copie d'une consigne et son texte (caché). La copie y ajoute le
+	 * guide complet (#leiho-instructions).
+	 *
+	 * @param string $id     Identifiant du texte.
+	 * @param string $prompt Début de la consigne.
+	 * @return string HTML échappé.
+	 */
+	private static function prompt_panel( $id, $prompt ) {
+		return '<div class="leiho-actions">'
+			. '<button type="button" class="leiho-btn" data-leiho-copy-from="' . esc_attr( $id . ' leiho-instructions' ) . '" data-leiho-prompt-copy>' . esc_html__( 'Copy prompt', 'leiho' ) . '</button>'
+			. '</div>'
+			. '<textarea id="' . esc_attr( $id ) . '" class="leiho-copy-source" readonly tabindex="-1" aria-hidden="true">' . esc_textarea( $prompt ) . '</textarea>';
+	}
+
+	/**
+	 * Onglets (.leiho-segmented) et leurs panneaux, le premier ouvert.
+	 *
+	 * @param string $prefix Préfixe unique des identifiants.
+	 * @param array  $tabs   id => array( label, html ) ; html déjà échappé.
+	 * @return void
+	 */
+	private static function render_tabs( $prefix, $tabs ) {
+		$first = (string) array_key_first( $tabs );
+		?>
+		<div class="leiho-codetabs">
+			<div class="leiho-segmented" role="tablist" data-leiho-segmented>
+				<?php foreach ( $tabs as $tab_id => $tab ) : ?>
+					<button type="button" role="tab" id="<?php echo esc_attr( $prefix . '-tab-' . $tab_id ); ?>" aria-controls="<?php echo esc_attr( $prefix . '-' . $tab_id . '-panel' ); ?>" aria-selected="<?php echo $tab_id === $first ? 'true' : 'false'; ?>" tabindex="<?php echo $tab_id === $first ? '0' : '-1'; ?>" data-panel="<?php echo esc_attr( $tab_id ); ?>"><?php echo esc_html( $tab['label'] ); ?></button>
+				<?php endforeach; ?>
+			</div>
+			<?php foreach ( $tabs as $tab_id => $tab ) : ?>
+				<div role="tabpanel" id="<?php echo esc_attr( $prefix . '-' . $tab_id . '-panel' ); ?>" aria-labelledby="<?php echo esc_attr( $prefix . '-tab-' . $tab_id ); ?>" data-panel-id="<?php echo esc_attr( $tab_id ); ?>" <?php echo $tab_id === $first ? '' : 'hidden'; ?>>
+					<?php echo $tab['html']; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Échappé par l'appelant. ?>
+				</div>
+			<?php endforeach; ?>
 		</div>
 		<?php
 	}

@@ -1144,3 +1144,171 @@ form + .leiho-form-section,
 		flex-direction: column;
 	}
 }
+
+/* ── Démarrer : framework, parcours, progression ───────────────────── */
+
+.leiho-onboard fieldset {
+	min-width: 0;
+	margin: 0;
+	padding: 0;
+	border: 0;
+}
+
+.leiho-onboard .leiho-onboard__section {
+	margin-top: 32px;
+}
+
+.leiho-onboard__title {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	margin: 0 0 12px;
+	padding: 0;
+	color: var(--leiho-ink);
+	font-size: 15px;
+	font-weight: 650;
+}
+
+.leiho-onboard__num {
+	display: inline-grid;
+	flex: none;
+	place-items: center;
+	width: 24px;
+	height: 24px;
+	border-radius: 50%;
+	background: var(--leiho-accent);
+	color: var(--leiho-on-accent);
+	font-size: 12px;
+	font-weight: 700;
+}
+
+.leiho-choices--fw {
+	grid-template-columns: repeat( auto-fill, minmax( 180px, 1fr ) );
+}
+
+.leiho-choices--paths .leiho-choice {
+	padding-top: 18px;
+	padding-bottom: 18px;
+}
+
+.leiho-choices--paths .leiho-choice strong {
+	font-size: 15px;
+}
+
+.leiho-onboard__head {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	flex-wrap: wrap;
+	gap: 8px 16px;
+	margin-bottom: 12px;
+}
+
+.leiho-onboard__head .leiho-onboard__title {
+	margin: 0;
+}
+
+.leiho-onboard__progress {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	color: var(--leiho-muted);
+	font-size: 13px;
+}
+
+.leiho-onboard__progress .leiho-progress {
+	flex: 0 0 120px;
+	width: 120px;
+	height: 6px;
+}
+
+.leiho-fw-panel > p:first-child {
+	margin-top: 0;
+}
+
+.leiho-fw-panel .leiho-help,
+.leiho-step > .leiho-help {
+	display: block;
+	margin: 12px 0 0;
+}
+
+.leiho-codetabs .leiho-segmented {
+	margin-top: 0;
+}
+
+/* Bloc de code avec son fichier : bandeau en tête, bouton Copier dedans. */
+.leiho-code--file {
+	border-radius: 8px;
+	overflow: hidden;
+}
+
+.leiho-code__file {
+	display: block;
+	padding: 8px 88px 8px 16px;
+	background: #0a0a0a;
+	border-bottom: 1px solid rgba( 255, 255, 255, 0.1 );
+	color: #a1a1a1;
+	font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+	font-size: 12px;
+	line-height: 18px;
+	overflow-wrap: anywhere;
+}
+
+.leiho-code--file pre {
+	padding-right: 16px;
+	border-radius: 0;
+}
+
+.leiho-code--file button {
+	top: 3px;
+	right: 6px;
+}
+
+.leiho-onboard__guide {
+	margin-top: 40px;
+}
+
+.leiho-onboard__guide summary {
+	color: var(--leiho-ink);
+	font-weight: 600;
+	cursor: pointer;
+}
+
+.leiho-onboard__guide summary:focus-visible,
+.leiho-onboard .leiho-btn:focus-visible,
+.leiho-code button:focus-visible {
+	outline: 2px solid var(--leiho-accent-ink);
+	outline-offset: 2px;
+}
+
+[data-leiho-after-copy] .leiho-btn {
+	margin-left: 6px;
+	vertical-align: middle;
+}
+
+@media ( max-width: 600px ) {
+	.leiho-choices--fw {
+		grid-template-columns: repeat( 2, minmax( 0, 1fr ) );
+	}
+
+	.leiho-onboard__progress {
+		width: 100%;
+	}
+
+	.leiho-onboard__progress .leiho-progress {
+		flex: 1 1 auto;
+	}
+
+	.leiho-onboard .leiho-step {
+		padding: 18px 14px;
+	}
+
+	.leiho-onboard .leiho-step::before {
+		position: static;
+		margin-bottom: 10px;
+	}
+}
+
+.leiho-codetabs [role="tabpanel"] > .leiho-actions:first-child {
+	margin-top: 12px;
+}

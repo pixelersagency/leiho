@@ -56,33 +56,56 @@
 			copyText( direct.getAttribute( 'data-leiho-copy' ), direct );
 			return;
 		}
+		// Plusieurs sources (identifiants séparés par des espaces) : textes
+		// mis bout à bout, séparés par un filet (consigne + guide complet).
 		var from = event.target.closest( '[data-leiho-copy-from]' );
 		if ( from ) {
-			var source = document.getElementById( from.getAttribute( 'data-leiho-copy-from' ) );
-			if ( source ) {
-				copyText( source.value, from );
+			var parts = from.getAttribute( 'data-leiho-copy-from' ).split( /\s+/ ).map( function ( id ) {
+				var source = document.getElementById( id );
+				return source ? source.value : '';
+			} ).filter( Boolean );
+			if ( parts.length ) {
+				copyText( parts.join( '\n\n---\n\n' ), from );
+				from.dispatchEvent( new CustomEvent( 'leiho:copied', { bubbles: true } ) );
 			}
 		}
 	} );
 
-	/* ── Code tabs (HTML / React) ──────────────────────────────────── */
+	/* ── Code tabs (.leiho-segmented) ──────────────────────────────── */
 
 	document.querySelectorAll( '[data-leiho-segmented]' ).forEach( function ( group ) {
-		var buttons = group.querySelectorAll( 'button[data-panel]' );
+		var buttons = Array.prototype.slice.call( group.querySelectorAll( 'button[data-panel]' ) );
 		var scope = group.parentElement;
 
-		function select( name ) {
+		function select( name, focus ) {
 			buttons.forEach( function ( b ) {
-				b.setAttribute( 'aria-selected', b.getAttribute( 'data-panel' ) === name ? 'true' : 'false' );
+				var on = b.getAttribute( 'data-panel' ) === name;
+				b.setAttribute( 'aria-selected', on ? 'true' : 'false' );
+				b.tabIndex = on ? 0 : -1;
+				if ( on && focus ) {
+					b.focus();
+				}
 			} );
-			scope.querySelectorAll( '[data-panel-id]' ).forEach( function ( panel ) {
-				panel.hidden = panel.getAttribute( 'data-panel-id' ) !== name;
+			// Panneaux de ce groupe seulement : d'autres onglets peuvent être imbriqués.
+			Array.prototype.forEach.call( scope.children, function ( panel ) {
+				if ( panel.hasAttribute( 'data-panel-id' ) ) {
+					panel.hidden = panel.getAttribute( 'data-panel-id' ) !== name;
+				}
 			} );
 		}
 
-		buttons.forEach( function ( b ) {
+		buttons.forEach( function ( b, i ) {
 			b.addEventListener( 'click', function () {
 				select( b.getAttribute( 'data-panel' ) );
+			} );
+			// Flèches gauche / droite entre les onglets (motif ARIA tablist).
+			b.addEventListener( 'keydown', function ( event ) {
+				var step = { ArrowRight: 1, ArrowLeft: -1 }[ event.key ];
+				if ( step ) {
+					event.preventDefault();
+					var next = buttons[ ( i + step + buttons.length ) % buttons.length ];
+					select( next.getAttribute( 'data-panel' ), true );
+				}
 			} );
 		} );
 	} );
@@ -109,6 +132,187 @@
 		syncDriverFields();
 	}
 
+	/* ── Get started: framework, path, progress ─────────────────────── */
+
+	var onboarding = document.querySelector( '[data-leiho-onboarding]' );
+	var STORE_FW = 'leiho.start.fw';
+	var STORE_PATH = 'leiho.start.path';
+
+	// localStorage peut être indisponible (navigation privée, stockage bloqué).
+	function store( key, value ) {
+		try {
+			if ( undefined === value ) {
+				return window.localStorage.getItem( key ) || '';
+			}
+			window.localStorage.setItem( key, value );
+		} catch ( e ) {
+			/* Le choix n'est pas retenu, l'écran marche quand même. */
+		}
+		return '';
+	}
+
+	// Garde ?fw= et ?path= dans l'adresse : lien partageable, rechargement fidèle.
+	function syncUrl( name, value ) {
+		if ( ! window.history || ! window.history.replaceState ) {
+			return;
+		}
+		try {
+			var url = new URL( window.location.href );
+			url.searchParams.set( name, value );
+			window.history.replaceState( null, '', url.toString() );
+		} catch ( e ) {
+			/* Adresse non modifiable : sans conséquence. */
+		}
+	}
+
+	function radioValue( selector ) {
+		var checked = onboarding.querySelector( selector + ':checked' );
+		return checked ? checked.value : '';
+	}
+
+	function checkRadio( selector, value ) {
+		var found = false;
+		onboarding.querySelectorAll( selector ).forEach( function ( r ) {
+			if ( r.value === value ) {
+				r.checked = true;
+				found = true;
+			}
+		} );
+		return found;
+	}
+
+	function applyFramework( fw ) {
+		onboarding.setAttribute( 'data-fw', fw );
+		onboarding.querySelectorAll( '[data-leiho-fw]' ).forEach( function ( panel ) {
+			panel.hidden = panel.getAttribute( 'data-leiho-fw' ) !== fw;
+		} );
+		var after = onboarding.querySelector( '[data-leiho-after-fw]' );
+		if ( after ) {
+			after.hidden = ! fw;
+		}
+	}
+
+	function applyPath( path ) {
+		onboarding.querySelectorAll( '[data-leiho-path-panel]' ).forEach( function ( panel ) {
+			panel.hidden = panel.getAttribute( 'data-leiho-path-panel' ) !== path;
+		} );
+	}
+
+	var STEP_ORDER = [ 'url', 'frame', 'bridge', 'content', 'annotate', 'test' ];
+
+	function refreshProgress() {
+		if ( ! onboarding ) {
+			return;
+		}
+		var steps = onboarding.querySelectorAll( '[data-leiho-step]' );
+		var done = 0;
+		var current = null;
+		steps.forEach( function ( li ) {
+			li.classList.remove( 'leiho-step--current' );
+			if ( li.classList.contains( 'leiho-step--done' ) ) {
+				done++;
+			} else if ( ! current ) {
+				current = li;
+			}
+		} );
+		if ( current ) {
+			current.classList.add( 'leiho-step--current' );
+		}
+		var bar = onboarding.querySelector( '[data-leiho-progress-bar]' );
+		var label = onboarding.querySelector( '[data-leiho-progress-label]' );
+		if ( bar ) {
+			bar.value = done;
+		}
+		if ( label ) {
+			/* translators: 1: steps done, 2: total steps. */
+			label.textContent = window.wp.i18n.sprintf( __( '%1$d of %2$d steps done', 'leiho' ), done, steps.length );
+		}
+	}
+
+	/** Marque des étapes comme faites (vérifiées dans le navigateur). */
+	function markSteps( names ) {
+		if ( ! onboarding ) {
+			return;
+		}
+		names.forEach( function ( name ) {
+			if ( STEP_ORDER.indexOf( name ) === -1 ) {
+				return;
+			}
+			var li = onboarding.querySelector( '[data-leiho-step="' + name + '"]' );
+			if ( li ) {
+				li.classList.add( 'leiho-step--done' );
+			}
+		} );
+		refreshProgress();
+	}
+
+	if ( onboarding ) {
+		// Choix de l'adresse (?fw=, ?path=, déjà rendus par le serveur), sinon le dernier retenu.
+		var fw = radioValue( '[data-leiho-fw-choice]' );
+		if ( ! fw && checkRadio( '[data-leiho-fw-choice]', store( STORE_FW ) ) ) {
+			fw = radioValue( '[data-leiho-fw-choice]' );
+		}
+		applyFramework( fw );
+
+		var path = radioValue( '[data-leiho-path-choice]' );
+		if ( ! path && checkRadio( '[data-leiho-path-choice]', store( STORE_PATH ) ) ) {
+			path = radioValue( '[data-leiho-path-choice]' );
+		}
+		applyPath( path );
+
+		onboarding.addEventListener( 'change', function ( event ) {
+			var input = event.target;
+			if ( input.matches( '[data-leiho-fw-choice]' ) ) {
+				store( STORE_FW, input.value );
+				syncUrl( 'fw', input.value );
+				applyFramework( input.value );
+			} else if ( input.matches( '[data-leiho-path-choice]' ) ) {
+				store( STORE_PATH, input.value );
+				syncUrl( 'path', input.value );
+				applyPath( input.value );
+			}
+		} );
+
+		// Le JS fait le travail du formulaire (sans JS : bouton « Afficher »).
+		var fwForm = onboarding.querySelector( '[data-leiho-fw-form]' );
+		if ( fwForm ) {
+			fwForm.addEventListener( 'submit', function ( event ) {
+				event.preventDefault();
+			} );
+		}
+
+		// Consigne copiée : on montre la suite (tester la connexion).
+		onboarding.addEventListener( 'leiho:copied', function ( event ) {
+			if ( ! event.target.matches( '[data-leiho-prompt-copy]' ) ) {
+				return;
+			}
+			var after = onboarding.querySelector( '[data-leiho-after-copy]' );
+			if ( after ) {
+				after.hidden = false;
+			}
+		} );
+
+		onboarding.addEventListener( 'click', function ( event ) {
+			if ( ! event.target.closest( '[data-leiho-goto-test]' ) ) {
+				return;
+			}
+			checkRadio( '[data-leiho-path-choice]', 'steps' );
+			store( STORE_PATH, 'steps' );
+			syncUrl( 'path', 'steps' );
+			applyPath( 'steps' );
+			var step = document.getElementById( 'leiho-step-test' );
+			if ( step ) {
+				step.scrollIntoView( { behavior: 'smooth', block: 'start' } );
+				var button = step.querySelector( '[data-leiho-test-bridge]' );
+				if ( button && ! button.disabled ) {
+					button.focus( { preventScroll: true } );
+				}
+			}
+		} );
+
+		refreshProgress();
+	}
+
 	/* ── Get started: live checks ───────────────────────────────────── */
 
 	function showResult( el, level, message ) {
@@ -132,6 +336,10 @@
 			apiFetch( { path: '/leiho/v1/connection' } )
 				.then( function ( res ) {
 					showResult( headersResult, res.level, res.message );
+					// « warn » : aucun en-tête ne bloque, l'éditeur fonctionnera.
+					if ( 'ok' === res.level || 'warn' === res.level ) {
+						markSteps( [ 'frame' ] );
+					}
 				} )
 				.catch( function ( err ) {
 					showResult( headersResult, 'error', ( err && err.message ) || t.headersFailed );
@@ -175,8 +383,10 @@
 					showResult( testResult, 'error', t.bridgeTimeout );
 				} else if ( ! payload.fields ) {
 					showResult( testResult, 'warn', t.bridgeNoFields );
+					markSteps( [ 'frame', 'bridge', 'test' ] );
 				} else {
 					showResult( testResult, 'ok', format( t.bridgeOk, payload.version, payload.fields, payload.sections ) );
+					markSteps( [ 'frame', 'bridge', 'content', 'annotate', 'test' ] );
 				}
 
 				if ( apiFetch ) {

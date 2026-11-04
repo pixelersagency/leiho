@@ -5625,3 +5625,98 @@ mark.leiho-ai-flag {
 	padding-left: 18px;
 	list-style: disc;
 }
+
+/* ── Démarrer (application) ────────────────────────────────────────── */
+
+.leiho-app .leiho-admin--app .leiho-onboard__progress .leiho-progress {
+	flex: 0 0 120px;
+	width: 120px;
+	height: 6px;
+}
+
+.leiho-app .leiho-admin--app .leiho-onboard__title {
+	font-size: var(--leiho-text-md, 15px);
+	font-weight: 600;
+}
+
+.leiho-app .leiho-admin--app .leiho-onboard__progress {
+	color: var(--leiho-faint);
+	font-size: var(--leiho-text-sm, 13px);
+}
+
+.leiho-app .leiho-admin--app .leiho-code__file {
+	border-bottom-color: var(--leiho-line);
+	background: var(--leiho-canvas);
+	color: var(--leiho-faint);
+	font-family: var(--leiho-mono);
+	font-size: var(--leiho-text-xs, 12px);
+}
+
+.leiho-app .leiho-admin--app .leiho-code--file {
+	border: 1px solid var(--leiho-line);
+}
+
+.leiho-app .leiho-admin--app .leiho-code--file pre {
+	border: 0;
+}
+
+/* Bouton Copier lisible dans les deux thèmes (fond du code = canvas). */
+.leiho-app .leiho-admin--app .leiho-code button {
+	border-color: var(--leiho-line);
+	background: var(--leiho-input);
+	color: var(--leiho-ink);
+	font-size: var(--leiho-text-xs, 12px);
+}
+
+.leiho-app .leiho-admin--app .leiho-code button:hover {
+	background: var(--leiho-active);
+}
+
+.leiho-app .leiho-admin--app .leiho-step {
+	border-color: var(--leiho-line);
+	background: var(--leiho-surface);
+}
+
+.leiho-app .leiho-admin--app .leiho-step::before {
+	background-color: var(--leiho-input);
+	color: var(--leiho-muted);
+}
+
+.leiho-app .leiho-admin--app .leiho-step--current::before {
+	background-color: var(--leiho-accent);
+	color: var(--leiho-on-accent);
+}
+
+.leiho-app .leiho-admin--app .leiho-step--done::before {
+	background-color: var(--leiho-ok-soft);
+}
+
+@media ( max-width: 600px ) {
+	.leiho-app .leiho-admin--app .leiho-onboard__progress .leiho-progress {
+		flex: 1 1 auto;
+	}
+
+	/* Étroit : le numéro passe au-dessus du titre, le code prend la largeur. */
+	.leiho-app .leiho-admin--app .leiho-onboard .leiho-step {
+		padding: 18px 14px;
+	}
+
+	.leiho-app .leiho-admin--app .leiho-onboard .leiho-step::before {
+		position: static;
+		margin-bottom: 10px;
+	}
+
+	.leiho-app .leiho-admin--app .leiho-onboard .leiho-page,
+	.leiho-app .leiho-admin--app .leiho-page.leiho-onboard {
+		padding-left: 16px;
+		padding-right: 16px;
+	}
+
+	.leiho-onboard .leiho-code__file {
+		padding-right: 72px;
+	}
+
+	.leiho-onboard .leiho-code pre {
+		padding: 12px;
+	}
+}
