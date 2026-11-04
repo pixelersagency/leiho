@@ -39,6 +39,7 @@ require_once OKNO_DIR . 'includes/collections/class-okno-collections-values.php'
 require_once OKNO_DIR . 'includes/collections/class-okno-collections-store.php';
 require_once OKNO_DIR . 'includes/collections/class-okno-collections-rest.php';
 require_once OKNO_DIR . 'includes/collections/class-okno-collections.php';
+require_once OKNO_DIR . 'includes/collections/class-okno-acf-import.php';
 require_once OKNO_DIR . 'includes/deploy/interface-okno-deploy-driver.php';
 require_once OKNO_DIR . 'includes/deploy/class-okno-build-hook-driver.php';
 require_once OKNO_DIR . 'includes/deploy/class-okno-coolify-driver.php';
@@ -114,6 +115,7 @@ final class Okno_Plugin {
 		Okno_Content::init();
 		Okno_Cache::init();
 		Okno_Collections::init();
+		Okno_ACF_Import::init();
 		Okno_Headless::init();
 		Okno_Activity::init();
 		Okno_Updater::init();

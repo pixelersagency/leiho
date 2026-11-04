@@ -66,6 +66,12 @@ class Okno_ACF_Adapter extends Okno_Field_Adapter {
 			return $this->groups_cache[ $post_id ];
 		}
 
+		// Type importé dans Okno Collections : ses champs ne viennent plus d'ACF.
+		if ( self::retired( get_post_type( $post_id ) ) ) {
+			$this->groups_cache[ $post_id ] = array();
+			return array();
+		}
+
 		$out = array();
 		foreach ( acf_get_field_groups( array( 'post_id' => $post_id ) ) as $group ) {
 			$fields = acf_get_fields( $group['key'] );
@@ -149,6 +155,9 @@ class Okno_ACF_Adapter extends Okno_Field_Adapter {
 
 	public function get_definitions( $post_type ) {
 		$out = array();
+		if ( self::retired( $post_type ) ) {
+			return $out;
+		}
 		foreach ( acf_get_field_groups() as $group ) {
 			$target = self::targets( isset( $group['location'] ) ? $group['location'] : array(), $post_type );
 			if ( null === $target ) {
@@ -164,6 +173,17 @@ class Okno_ACF_Adapter extends Okno_Field_Adapter {
 			);
 		}
 		return $out;
+	}
+
+	/**
+	 * Les champs ACF de ce type ont-ils été importés dans Okno Collections ?
+	 * Les groupes ACF restent intacts (retour possible), mais ne servent plus.
+	 *
+	 * @param string|false $post_type Type.
+	 * @return bool
+	 */
+	public static function retired( $post_type ) {
+		return is_string( $post_type ) && '' !== $post_type && class_exists( 'Okno_ACF_Import' ) && 'okno' === Okno_ACF_Import::engine( $post_type );
 	}
 
 	/**

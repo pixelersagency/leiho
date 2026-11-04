@@ -22,6 +22,8 @@ Thanks for helping. Bug reports, framework recipes and pull requests are all wel
 ```bash
 # Plugin tests: they stub WordPress, so no install is needed
 php plugin/tests/test-acf-adapter.php
+php plugin/tests/test-collections.php
+php plugin/tests/test-acf-import.php
 php plugin/tests/test-activity.php
 php plugin/tests/test-frame-verdict.php
 php plugin/tests/test-updater.php

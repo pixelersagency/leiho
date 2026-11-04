@@ -150,8 +150,9 @@ class Okno_Collections {
 					array( 'status' => 400 )
 				);
 			}
-			// Un post type déjà déclaré par un autre plugin ou le thème.
-			if ( function_exists( 'post_type_exists' ) && post_type_exists( $collection['id'] ) && ! in_array( $collection['id'], self::$registered, true ) ) {
+			// Un post type déjà déclaré par un autre plugin ou le thème (sauf
+			// collection « externe » : Okno n'y possède que les champs).
+			if ( empty( $collection['external'] ) && function_exists( 'post_type_exists' ) && post_type_exists( $collection['id'] ) && ! in_array( $collection['id'], self::$registered, true ) ) {
 				return new WP_Error(
 					'okno_post_type_taken',
 					/* translators: %s: collection id. */
@@ -441,6 +442,9 @@ class Okno_Collections {
 	public static function register_post_types() {
 		foreach ( self::schema()['collections'] as $collection ) {
 			$id = $collection['id'];
+			if ( ! empty( $collection['external'] ) ) {
+				continue; // Type déclaré par le thème, une extension ou ACF (voir Okno_ACF_Import).
+			}
 			if ( post_type_exists( $id ) && ! in_array( $id, self::$registered, true ) ) {
 				continue; // Déclaré ailleurs : on ne l'écrase pas.
 			}
@@ -498,6 +502,11 @@ class Okno_Collections {
 	 */
 	public static function settings( $settings ) {
 		foreach ( self::schema()['collections'] as $collection ) {
+			if ( ! empty( $collection['external'] ) ) {
+				// Type déclaré ailleurs : servi (ou non) selon les réglages, comme
+				// avant qu'Okno n'en reprenne les champs.
+				continue;
+			}
 			if ( ! in_array( $collection['id'], (array) $settings['post_types'], true ) ) {
 				$settings['post_types'][] = $collection['id'];
 			}

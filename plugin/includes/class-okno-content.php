@@ -572,6 +572,9 @@ class Okno_Content {
 			$rendered = apply_filters( 'the_content', $html );
 		} elseif ( function_exists( 'has_filter' ) && has_filter( 'acf_the_content' ) ) {
 			$rendered = apply_filters( 'acf_the_content', $html );
+		} elseif ( ! empty( $field['okno_acf'] ) ) {
+			// Champ importé d'ACF, ACF désactivé : même rendu qu'ACF.
+			$rendered = self::acf_render( $html );
 		} else {
 			$rendered = wpautop( $html );
 		}
@@ -584,6 +587,29 @@ class Okno_Content {
 		 * @param array|null $field    Champ ACF (null : contenu principal).
 		 */
 		return (string) apply_filters( 'okno_content_html', $rendered, $html, $field );
+	}
+
+	/**
+	 * Rendu d'un wysiwyg tel qu'ACF le fait (filtre acf_the_content : ceux de
+	 * the_content sans les blocs), pour un champ importé d'ACF quand ACF n'est
+	 * plus actif : le front reçoit le même HTML (paragraphes, guillemets,
+	 * shortcodes, embeds, images responsives).
+	 *
+	 * @param string $html Valeur stockée.
+	 * @return string
+	 */
+	public static function acf_render( $html ) {
+		$embed = isset( $GLOBALS['wp_embed'] ) ? $GLOBALS['wp_embed'] : null;
+		if ( $embed && method_exists( $embed, 'run_shortcode' ) ) {
+			$html = $embed->run_shortcode( $html );
+			$html = $embed->autoembed( $html );
+		}
+		foreach ( array( 'wptexturize', 'wpautop', 'shortcode_unautop', 'wp_filter_content_tags', 'capital_P_dangit', 'do_shortcode', 'convert_smilies' ) as $filter ) {
+			if ( function_exists( $filter ) ) {
+				$html = call_user_func( $filter, $html );
+			}
+		}
+		return $html;
 	}
 
 	/* ---------------------------------------------------------------------

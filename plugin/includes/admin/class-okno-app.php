@@ -561,15 +561,21 @@ class Okno_App {
 	 * @return array[]
 	 */
 	public static function content_types() {
-		$settings = Okno_Plugin::settings();
-		$out      = array();
+		$settings   = Okno_Plugin::settings();
+		$out        = array();
+		$acf_groups = class_exists( 'Okno_ACF_Import' ) && Okno_ACF_Import::acf_available() && Okno_Collections_Rest::can_manage();
 		foreach ( $settings['post_types'] as $name ) {
 			$object = get_post_type_object( $name );
 			if ( ! $object || ! current_user_can( $object->cap->edit_posts ) ) {
 				continue;
 			}
 			$collection = class_exists( 'Okno_Collections' ) ? Okno_Collections::for_post_type( $name ) : null;
-			$out[]      = array(
+			$import     = class_exists( 'Okno_ACF_Import' ) ? Okno_ACF_Import::record( $name ) : null;
+			// Pendant son import, un type reste servi (et présenté) par ACF.
+			if ( $import && 'done' !== $import['status'] ) {
+				$collection = null;
+			}
+			$out[] = array(
 				'name'       => $name,
 				'label'      => $object->labels->name,
 				'singular'   => $object->labels->singular_name,
@@ -579,10 +585,28 @@ class Okno_App {
 				'singleton'  => $collection && 'singleton' === $collection['kind'],
 				// Une collection sans chemin (témoignages, réglages…) n'a pas de page
 				// sur le site : elle s'édite en formulaire.
-				'hasPages'   => $collection ? ! empty( $settings['url_patterns'][ $name ] ) : true,
+				'hasPages'   => $collection && empty( $collection['external'] ) ? ! empty( $settings['url_patterns'][ $name ] ) : true,
+				// Type déclaré hors d'Okno (thème, extension, ACF) dont Okno a repris les champs.
+				'external'   => $collection && ! empty( $collection['external'] ),
+				// Champs ACF importables dans Okno Collections (administrateurs).
+				'acfImport'  => ! $collection && $acf_groups ? self::acf_import_state( $name, $import ) : null,
 			);
 		}
 		return $out;
+	}
+
+	/**
+	 * Le type a-t-il des champs ACF à importer, et où en est l'import ?
+	 *
+	 * @param string     $name   Type.
+	 * @param array|null $import Enregistrement de l'import.
+	 * @return array|null { status } ; null sans groupe ACF.
+	 */
+	private static function acf_import_state( $name, $import ) {
+		if ( ! $import && ! Okno_ACF_Import::groups_for( $name ) ) {
+			return null;
+		}
+		return array( 'status' => $import ? $import['status'] : null );
 	}
 
 	/**

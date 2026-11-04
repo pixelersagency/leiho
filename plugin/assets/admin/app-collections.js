@@ -379,7 +379,10 @@
 			body.appendChild( renderGeneral( d, cur ) );
 			if ( ! cur.isNew ) {
 				body.appendChild( renderArchived( cur.item ) );
-				body.appendChild(
+				var imported = cur.item.acf_import;
+				if ( imported ) {
+					body.appendChild( renderImported( cur.item ) );
+				} else body.appendChild(
 					h( 'div', { class: 'okno-detail__card' }, h( 'div', { class: 'okno-danger-zone' }, [
 						h( 'div', {}, [
 							h( 'h3', { text: __( 'Remove this collection', 'okno' ) } ),
@@ -404,6 +407,34 @@
 				target.focus();
 			}
 		}
+	}
+
+	/**
+	 * Collection importée d'ACF : retour à ACF (à la place de la suppression).
+	 */
+	function renderImported( item ) {
+		var info = item.acf_import;
+		var date = info.finished ? new Date( info.finished ).toLocaleDateString() : '';
+		return h( 'div', { class: 'okno-detail__card' }, h( 'div', { class: 'okno-danger-zone' }, [
+			h( 'div', {}, [
+				h( 'h3', { text: __( 'Go back to ACF', 'okno' ) } ),
+				h( 'p', { class: 'okno-muted', text: date
+					? /* translators: %s: date of the import. */
+					  sprintf( __( 'Imported from ACF on %s. ACF still has the values of that day: going back serves them again and deletes the Okno values of this collection.', 'okno' ), date )
+					: __( 'ACF still has the values of the import day: going back serves them again and deletes the Okno values of this collection.', 'okno' ) } ),
+			] ),
+			h( 'button', {
+				type: 'button',
+				class: 'okno-btn okno-btn--danger',
+				disabled: ! info.can_rollback,
+				title: info.can_rollback ? null : __( 'Activate ACF (or Secure Custom Fields) first.', 'okno' ),
+				onClick: function () {
+					if ( window.OknoAcfImport ) {
+						window.OknoAcfImport.rollback( item.collection.id, item.collection.label );
+					}
+				},
+			}, [ icon( 'restore' ), __( 'Go back to ACF', 'okno' ) ] ),
+		] ) );
 	}
 
 	/** Deux lettres pour la pastille de type (Te, Nu, Li…). */
@@ -488,6 +519,24 @@
 
 		var idErrors = errorsFor( 'id' ).concat( errorsFor( 'label' ) );
 		var pathErrors = errorsFor( 'path' );
+
+		// Type déclaré par le thème, une extension ou ACF : Okno n'en gère que
+		// les champs (libellés, nature, URL et fonctionnalités viennent d'ailleurs).
+		if ( d.external ) {
+			return h( 'div', { class: 'okno-detail__card' }, [
+				h( 'h3', { text: __( 'General', 'okno' ) } ),
+				h( 'p', { class: 'okno-muted', text: 'acf' === d.source
+					? __( 'These fields come from ACF. The content type itself (labels, URL, features) is still declared where it was: in ACF, the theme or a plugin. Okno manages its fields.', 'okno' )
+					: __( 'This content type is declared by the theme or a plugin. Okno manages its fields.', 'okno' ) } ),
+				h( 'div', { class: 'okno-settings-grid' }, [
+					h( 'div', { class: 'okno-setting' }, [
+						h( 'label', { class: 'okno-label', for: idId, text: __( 'Identifier', 'okno' ) } ),
+						idInput,
+					] ),
+					field( __( 'Name (plural)', 'okno' ), label, __( 'Shown in Okno.', 'okno' ), labelId ),
+				] ),
+			] );
+		}
 
 		return h( 'div', { class: 'okno-detail__card' }, [
 			h( 'h3', { text: __( 'General', 'okno' ) } ),

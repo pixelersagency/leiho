@@ -479,6 +479,32 @@ class Okno_Collections_Store {
 	}
 
 	/**
+	 * Supprime la table d'une collection et son état (retour à ACF d'une
+	 * collection importée). La collection doit déjà être retirée du schéma.
+	 *
+	 * @param string $id Collection.
+	 * @return bool
+	 */
+	public static function drop( $id ) {
+		$state = self::state();
+		if ( ! isset( $state['collections'][ $id ] ) ) {
+			return true;
+		}
+		$ok = self::query( 'DROP TABLE IF EXISTS ' . self::ident( self::table( $id ) ) );
+		if ( ! $ok ) {
+			return false;
+		}
+		unset( $state['collections'][ $id ] );
+		self::save_state( $state );
+		foreach ( array_keys( self::$rows ) as $cache ) {
+			if ( 0 === strpos( $cache, $id . ':' ) ) {
+				unset( self::$rows[ $cache ] );
+			}
+		}
+		return true;
+	}
+
+	/**
 	 * @param string $sql Requête DDL (identifiants vérifiés, aucune valeur).
 	 * @return bool
 	 */

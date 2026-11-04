@@ -158,6 +158,19 @@ Okno Collections est un modèle de contenu intégré à Okno, sans ACF : des **c
 - **Même éditeur, même API** que pour ACF : chemins pointés (`sections.2.items.1.title`), `/okno/v1/export`, `/content` et `/types`.
 - **Constructeur de schéma** dans Okno → **Collections** : collections et pages uniques, libellés, modèle d'URL, fonctionnalités, et un éditeur de champs avec les 19 types et leurs options (choix, min / max, cibles des références, sous-champs des listes et groupes, types de blocs), réordonnés par glisser-déposer ou au clavier. La clé d'un champ est générée à partir de son nom et figée une fois appliquée : seuls le nom et le libellé changent ensuite. **Vérifier** lance la migration à blanc et liste ce qui va se passer (nouvelles colonnes, conversions, colonnes archivées) avant de rien appliquer ; les erreurs pointent le champ concerné. Colonnes archivées listées avec un bouton de purge (confirmée en tapant l'identifiant), import et export d'`okno.schema.json` en un clic. Les entrées s'éditent ensuite dans Okno → **Collections** (et dans l'éditeur visuel quand la collection a une URL). **+ Nouvelle collection**, en bas de la liste des types, en crée une.
 
+### Importer depuis ACF
+
+Un site ACF passe à Okno Collections un type de contenu à la fois. Dans Okno → **Collections**, un type ACF propose **Importer dans Okno** (administrateurs) :
+
+1. **Aperçu** : les groupes de champs ACF rattachés au type, ce que devient chaque champ dans Okno (`text` → Texte, `repeater` → Liste, `flexible_content` → Blocs, `relationship` → Référence…) et ce qui n'est pas repris (champs sans équivalent comme `page_link`, `taxonomy` ou `user`, logique conditionnelle, valeurs par défaut, restrictions de médias, règles d'emplacement autres que le type, options de répéteur d'ACF Pro), avec le nombre d'entrées, de champs et de valeurs stockées.
+2. **Import** : Okno crée la collection avec les mêmes noms d'API (camelCase et tirets compris), puis copie les entrées par lots en passant par la validation de l'éditeur, avec une barre de progression. Une valeur refusée n'arrête pas l'import : elle est listée avec un lien vers l'entrée. Chaque entrée est ensuite vérifiée : le JSON servi par Okno est comparé, champ par champ, à celui que servait ACF, et chaque écart est listé.
+3. Le type est alors **servi par Okno** : `/export`, `/content` et `/types` donnent le même JSON qu'avant (objets médias, références, lignes de répéteurs, `_layout` des blocs, texte riche rendu, choix, dates, nombres, booléens), et les chemins pointés de l'éditeur visuel fonctionnent toujours. Les groupes ACF restent en place mais ne s'appliquent plus à ce type.
+4. **Revenir à ACF** (réglages de la collection) sert de nouveau les valeurs ACF et supprime la table Okno de la collection.
+
+Rien n'est jamais supprimé côté ACF : ni métas, ni groupe de champs, ni type de contenu. Les valeurs modifiées dans Okno après l'import ne sont **pas** réécrites dans ACF : revenir à ACF rétablit les valeurs du jour de l'import. Un type déclaré par le thème ou une extension y reste déclaré (Okno ne reprend que ses champs) ; un type déclaré dans l'écran **Post Types** d'ACF est enregistré par Okno avec les mêmes réglages si ACF est désactivé. Les pages et articles ne peuvent pas devenir des collections : leurs champs ACF restent dans ACF.
+
+API REST (administrateurs) : `GET /okno/v1/collections/import-acf` (types et état), `GET …/import-acf/preview?post_type=ville`, `POST …/import-acf/run` (`{ "post_type": "ville" }`, un lot par appel jusqu'à `status: done`, reprise possible), `GET …/import-acf/status?post_type=ville`, `POST …/import-acf/rollback` (`{ "post_type": "ville", "confirm": "ville" }`). WP-CLI : `wp okno acf-import list|preview|run|rollback`.
+
 Format et API : [plugin/docs/collections-spec.md](plugin/docs/collections-spec.md) (en anglais).
 
 ## Licence

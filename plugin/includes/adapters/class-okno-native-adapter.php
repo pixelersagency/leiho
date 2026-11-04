@@ -58,7 +58,22 @@ class Okno_Native_Adapter extends Okno_Field_Adapter {
 	 */
 	private function collection( $post_id ) {
 		$type = get_post_type( $post_id );
-		return $type ? Okno_Collections::for_post_type( $type ) : null;
+		return $type ? $this->served( $type ) : null;
+	}
+
+	/**
+	 * Collection d'un type, si Okno en sert les champs : pendant un import
+	 * ACF, c'est encore ACF qui sert le type (sauf pour l'import lui-même).
+	 *
+	 * @param string $post_type Type.
+	 * @return array|null
+	 */
+	private function served( $post_type ) {
+		$collection = Okno_Collections::for_post_type( $post_type );
+		if ( $collection && class_exists( 'Okno_ACF_Import' ) && ! Okno_ACF_Import::native_serves( $post_type ) ) {
+			return null;
+		}
+		return $collection;
 	}
 
 	/**
@@ -76,14 +91,44 @@ class Okno_Native_Adapter extends Okno_Field_Adapter {
 		if ( ! isset( $this->fields_cache[ $id ] ) ) {
 			$out = array();
 			foreach ( $collection['fields'] as $field ) {
+				$engine = Okno_Collections_Schema::engine_field( $field );
+				if ( isset( $collection['source'] ) && 'acf' === $collection['source'] ) {
+					self::mark_acf( $engine );
+				}
 				$out[ $field['name'] ] = array(
 					'field'  => $field,
-					'engine' => Okno_Collections_Schema::engine_field( $field ),
+					'engine' => $engine,
 				);
 			}
 			$this->fields_cache[ $id ] = $out;
 		}
 		return $this->fields_cache[ $id ];
+	}
+
+	/**
+	 * Champ d'une collection importée d'ACF : ses wysiwyg gardent le rendu
+	 * d'ACF même ACF désactivé (Okno_Content::html()).
+	 *
+	 * @param array $engine Champ moteur (entrée/sortie).
+	 * @return void
+	 */
+	private static function mark_acf( &$engine ) {
+		$engine['okno_acf'] = true;
+		if ( isset( $engine['sub_fields'] ) ) {
+			foreach ( $engine['sub_fields'] as &$sub ) {
+				self::mark_acf( $sub );
+			}
+			unset( $sub );
+		}
+		if ( isset( $engine['layouts'] ) ) {
+			foreach ( $engine['layouts'] as &$layout ) {
+				foreach ( $layout['sub_fields'] as &$sub ) {
+					self::mark_acf( $sub );
+				}
+				unset( $sub );
+			}
+			unset( $layout );
+		}
 	}
 
 	/**
@@ -219,7 +264,15 @@ class Okno_Native_Adapter extends Okno_Field_Adapter {
 		Okno_Collections::entry_changed( $post_id );
 
 		// Révision WordPress des champs (si le type les active).
-		if ( function_exists( 'wp_save_post_revision' ) && post_type_supports( $collection['id'], 'revisions' ) ) {
+		/**
+		 * Révision WordPress après l'écriture des champs d'une entrée.
+		 *
+		 * L'import ACF l'éteint : copier les valeurs ne change pas l'entrée.
+		 *
+		 * @param bool $save    Enregistrer une révision.
+		 * @param int  $post_id Entrée.
+		 */
+		if ( function_exists( 'wp_save_post_revision' ) && post_type_supports( $collection['id'], 'revisions' ) && apply_filters( 'okno_collections_save_revision', true, $post_id ) ) {
 			wp_save_post_revision( $post_id );
 		}
 
@@ -247,7 +300,7 @@ class Okno_Native_Adapter extends Okno_Field_Adapter {
 	}
 
 	public function get_definitions( $post_type ) {
-		$collection = Okno_Collections::for_post_type( $post_type );
+		$collection = $this->served( $post_type );
 		if ( ! $collection || ! $collection['fields'] ) {
 			return array();
 		}

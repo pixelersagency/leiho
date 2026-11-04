@@ -373,17 +373,351 @@
 				h( 'p', { text: acf
 					? __( 'This content type and its fields are defined in Advanced Custom Fields (or by the theme). Okno edits their values; change the fields themselves in ACF.', 'okno' )
 					: __( 'This content type and its fields are defined by WordPress, the theme or a plugin. Okno edits their values.', 'okno' ) } ),
-				acf && cfg.acfUrl
-					? h( 'a', { class: 'okno-btn okno-btn--quiet', href: cfg.acfUrl }, [ icon( 'external' ), __( 'Open the ACF field groups', 'okno' ) ] )
+				canImport( t )
+					? h( 'p', { class: 'okno-muted', text: __( 'You can also move these fields into Okno: Okno then defines and stores them, and ACF is no longer needed for this content type. Nothing is deleted from ACF, and you can go back.', 'okno' ) } )
 					: null,
+				h( 'div', { class: 'okno-actions' }, [
+					canImport( t ) ? importButton( t, true ) : null,
+					acf && cfg.acfUrl
+						? h( 'a', { class: 'okno-btn okno-btn--quiet', href: cfg.acfUrl }, [ icon( 'external' ), __( 'Open the ACF field groups', 'okno' ) ] )
+						: null,
+				] ),
 			] ) ),
 		] );
 	}
 
+	/* ------------------------------------------------------------------ *
+	 * Import ACF → Okno Collections (administrateurs)
+	 * ------------------------------------------------------------------ */
+
+	var IMPORT_API = '/okno/v1/collections/import-acf';
+
+	var OKNO_TYPES = {
+		text: __( 'Text', 'okno' ),
+		richtext: __( 'Rich text', 'okno' ),
+		number: __( 'Number', 'okno' ),
+		boolean: __( 'Yes / no', 'okno' ),
+		date: __( 'Date', 'okno' ),
+		datetime: __( 'Date and time', 'okno' ),
+		select: __( 'Choice', 'okno' ),
+		email: __( 'Email', 'okno' ),
+		url: __( 'URL', 'okno' ),
+		color: __( 'Color', 'okno' ),
+		image: __( 'Image', 'okno' ),
+		file: __( 'File', 'okno' ),
+		gallery: __( 'Gallery', 'okno' ),
+		link: __( 'Link', 'okno' ),
+		reference: __( 'Reference', 'okno' ),
+		list: __( 'List', 'okno' ),
+		blocks: __( 'Blocks', 'okno' ),
+		group: __( 'Group', 'okno' ),
+		block: __( 'Block type', 'okno' ),
+	};
+
+	var IMPORT_NOTES = {
+		layout: __( 'Screen layout only, no value', 'okno' ),
+		name: __( 'Name not usable in the API', 'okno' ),
+		clone: __( 'Clone field', 'okno' ),
+		clone_group: __( 'Clone kept as a group', 'okno' ),
+		unsupported: __( 'No Okno equivalent', 'okno' ),
+		no_choices: __( 'No choices declared', 'okno' ),
+		empty: __( 'Nothing left inside', 'okno' ),
+		conditional: __( 'Conditional logic dropped', 'okno' ),
+		default: __( 'Default value dropped', 'okno' ),
+		media_rules: __( 'Media restrictions dropped', 'okno' ),
+		custom_choices: __( 'Values outside the choices refused', 'okno' ),
+		filters: __( 'Taxonomy filter dropped', 'okno' ),
+		bidirectional: __( 'No longer bidirectional', 'okno' ),
+		pro: __( 'Collapsed rows / pagination dropped', 'okno' ),
+		oembed: __( 'Kept as its URL', 'okno' ),
+		time_picker: __( 'Kept as text (HH:MM:SS)', 'okno' ),
+	};
+
+	var IMPORT_STATUS = {
+		ok: [ 'ok', __( 'Same', 'okno' ) ],
+		changed: [ 'warn', __( 'Adapted', 'okno' ) ],
+		dropped: [ 'error', __( 'Not carried over', 'okno' ) ],
+		ignored: [ '', __( 'Ignored', 'okno' ) ],
+	};
+
+	/** Un type ACF (pas encore une collection) dont l'administrateur peut importer les champs. */
+	function canImport( t ) {
+		return !! ( cfg.canCollections && t && ! t.collection && t.acfImport );
+	}
+
+	function importButton( t, withLabel ) {
+		var running = t.acfImport && 'running' === t.acfImport.status;
+		var label = running ? __( 'Resume the import into Okno', 'okno' ) : __( 'Import into Okno', 'okno' );
+		if ( withLabel ) {
+			return h( 'button', { type: 'button', class: 'okno-btn', onClick: function () {
+				openImport( t );
+			} }, [ icon( 'download' ), label ] );
+		}
+		return h( 'button', { type: 'button', class: 'okno-icon-btn okno-import-btn', title: label, 'aria-label': label, onClick: function () {
+			openImport( t );
+		} }, icon( 'download' ) );
+	}
+
+	function setActions( dialog, actions ) {
+		var footer = dialog.el.querySelector( '.okno-dialog__actions' );
+		App.clear( footer );
+		actions.forEach( function ( action ) {
+			footer.appendChild( h( 'button', {
+				type: 'button',
+				class: 'okno-btn' + ( action.primary ? '' : action.danger ? ' okno-btn--danger' : ' okno-btn--quiet' ),
+				disabled: !! action.disabled,
+				onClick: action.onClick,
+			}, action.label ) );
+		} );
+	}
+
+	function mapRow( node, depth ) {
+		var pill = IMPORT_STATUS[ node.status ] || IMPORT_STATUS.ok;
+		var target = node.okno ? ( OKNO_TYPES[ node.okno ] || node.okno ) : '—';
+		var notes = ( node.notes || [] ).map( function ( n ) {
+			return IMPORT_NOTES[ n ] || n;
+		} ).join( ' · ' );
+		var rows = [ h( 'li', { class: 'okno-acf-map__row okno-acf-map__row--' + node.status, style: depth ? '--depth:' + depth : null }, [
+			h( 'span', { class: 'okno-acf-map__name' }, [
+				h( 'code', { text: node.name || '·' } ),
+				node.label && node.label !== node.name ? h( 'span', { class: 'okno-muted', text: node.label } ) : null,
+			] ),
+			h( 'span', { class: 'okno-acf-map__types' }, [
+				h( 'span', { class: 'okno-mono', text: node.acf } ),
+				h( 'span', { 'aria-hidden': 'true', text: ' → ' } ),
+				h( 'span', { class: 'okno-sr', text: ' ' + __( 'becomes', 'okno' ) + ' ' } ),
+				h( 'strong', { text: target } ),
+			] ),
+			h( 'span', { class: 'okno-acf-map__status' }, [
+				h( 'span', { class: 'okno-pill' + ( pill[ 0 ] ? ' okno-pill--' + pill[ 0 ] : '' ), text: pill[ 1 ] } ),
+				notes ? h( 'span', { class: 'okno-acf-map__notes', text: notes } ) : null,
+			] ),
+		] ) ];
+		( node.fields || [] ).forEach( function ( child ) {
+			rows = rows.concat( mapRow( child, depth + 1 ) );
+		} );
+		return rows;
+	}
+
+	function previewBody( p ) {
+		var counts = p.counts || {};
+		var out = [
+			h( 'p', { text: sprintf(
+				/* translators: 1: content type, 2: number of entries, 3: number of fields, 4: number of stored values. */
+				__( 'Okno creates the collection “%1$s” from its ACF fields, then copies %2$s entries (%3$s fields, %4$s stored values) with the same checks as the editor. The front end keeps receiving the same JSON; each entry is checked after the copy.', 'okno' ),
+				p.label, counts.entries, counts.fields, counts.values
+			) } ),
+		];
+		if ( ! p.importable ) {
+			out.push( h( 'div', { class: 'okno-notice okno-notice--error', role: 'alert' }, [
+				h( 'p', { text: p.reason || __( 'The Okno collection built from these ACF fields is invalid.', 'okno' ) } ),
+			].concat( ( p.errors || [] ).map( function ( e ) {
+				return h( 'p', { text: ( e.path ? e.path + ' : ' : '' ) + e.message } );
+			} ) ) ) );
+		}
+		( p.groups || [] ).forEach( function ( g ) {
+			var rows = [];
+			g.fields.forEach( function ( f ) {
+				rows = rows.concat( mapRow( f, 0 ) );
+			} );
+			out.push( h( 'section', { class: 'okno-acf-group' }, [
+				h( 'h3', { class: 'okno-group-label' }, [
+					/* translators: %s: ACF field group title. */
+					sprintf( __( 'Field group “%s”', 'okno' ), g.title ),
+					g.conditional ? h( 'span', { class: 'okno-pill okno-pill--warn', text: __( 'Extra location rules', 'okno' ) } ) : null,
+				] ),
+				h( 'ul', { class: 'okno-acf-map' }, rows ),
+			] ) );
+		} );
+		if ( p.lost && p.lost.length ) {
+			out.push( h( 'section', { class: 'okno-acf-group' }, [
+				h( 'h3', { class: 'okno-group-label', text: __( 'What doesn’t carry over', 'okno' ) } ),
+				h( 'ul', { class: 'okno-acf-lost' }, p.lost.map( function ( l ) {
+					return h( 'li', {}, [
+						h( 'span', { text: l.message } ),
+						l.items && l.items.length ? h( 'span', { class: 'okno-mono okno-muted', text: ' ' + l.items.join( ', ' ) } ) : null,
+					] );
+				} ) ),
+			] ) );
+		}
+		return out;
+	}
+
+	function progressBody( rec ) {
+		var total = Math.max( 1, rec.total || 0 );
+		return [
+			h( 'p', { text: sprintf(
+				/* translators: 1: entries copied, 2: total entries. */
+				__( 'Copying the entries: %1$s of %2$s. You can close this window: the import resumes where it stopped.', 'okno' ),
+				rec.done || 0, rec.total || 0
+			) } ),
+			h( 'progress', { class: 'okno-progress', max: total, value: Math.min( rec.done || 0, total ), 'aria-label': __( 'Import progress', 'okno' ) } ),
+			rec.failed || rec.different
+				? h( 'p', { class: 'okno-muted', text: sprintf(
+					/* translators: 1: number of failures, 2: number of differences. */
+					__( 'So far: %1$s failures, %2$s differences.', 'okno' ),
+					rec.failed || 0, rec.different || 0
+				) } )
+				: null,
+		];
+	}
+
+	function entryLink( type, item ) {
+		return h( 'a', { href: cfg.urls.collections + '&type=' + encodeURIComponent( type ) + '&id=' + item.post_id, text: item.title || '#' + item.post_id } );
+	}
+
+	function resultBody( type, rec ) {
+		var out = [
+			h( 'div', { class: 'okno-acf-result' }, [
+				h( 'span', { class: 'okno-pill okno-pill--ok', text: sprintf( _n( '%d entry imported', '%d entries imported', rec.imported, 'okno' ), rec.imported ) } ),
+				h( 'span', { class: 'okno-pill' + ( rec.failed ? ' okno-pill--error' : '' ), text: sprintf( _n( '%d failure', '%d failures', rec.failed, 'okno' ), rec.failed ) } ),
+				h( 'span', { class: 'okno-pill' + ( rec.different ? ' okno-pill--warn' : '' ), text: sprintf( _n( '%d difference', '%d differences', rec.different, 'okno' ), rec.different ) } ),
+			] ),
+			h( 'p', { text: rec.failed || rec.different
+				? __( 'The content type is now served by Okno. The values below were refused or changed by Okno’s checks; ACF still holds the originals. Correct them in Okno.', 'okno' )
+				: __( 'The content type is now served by Okno, and every entry gives the front end the same values as before.', 'okno' ) } ),
+		];
+		if ( rec.failures && rec.failures.length ) {
+			out.push( h( 'h3', { class: 'okno-group-label', text: __( 'Failures', 'okno' ) } ) );
+			out.push( h( 'ul', { class: 'okno-acf-issues' }, rec.failures.map( function ( f ) {
+				return h( 'li', {}, [ entryLink( type, f ), ' · ', h( 'code', { text: f.field } ), ' — ', f.message ] );
+			} ) ) );
+		}
+		if ( rec.diffs && rec.diffs.length ) {
+			out.push( h( 'h3', { class: 'okno-group-label', text: __( 'Values served differently', 'okno' ) } ) );
+			out.push( h( 'ul', { class: 'okno-acf-issues' }, rec.diffs.map( function ( d ) {
+				return h( 'li', {}, [
+					entryLink( type, d ), ' · ', h( 'code', { text: d.field } ),
+					h( 'div', { class: 'okno-acf-diff' }, [
+						h( 'span', { class: 'okno-mono', text: __( 'ACF:', 'okno' ) + ' ' + d.before } ),
+						h( 'span', { class: 'okno-mono', text: __( 'Okno:', 'okno' ) + ' ' + d.after } ),
+					] ),
+				] );
+			} ) ) );
+		}
+		return out;
+	}
+
+	/**
+	 * Aperçu → import par lots avec progression → résultat.
+	 *
+	 * @param {Object} t Type (cfg.types).
+	 */
+	function openImport( t ) {
+		var stopped = false;
+		var dialog = App.modal( {
+			title: sprintf( /* translators: %s: content type. */ __( 'Import “%s” into Okno', 'okno' ), t.label ),
+			wide: true,
+			sticky: true,
+			body: h( 'p', { class: 'okno-muted', text: __( 'Reading the ACF fields…', 'okno' ) } ),
+			actions: [ { label: __( 'Cancel', 'okno' ) } ],
+			onClose: function () {
+				stopped = true;
+			},
+		} );
+		dialog.el.classList.add( 'okno-dialog--import' );
+
+		function show( nodes ) {
+			App.append( App.clear( dialog.body ), nodes );
+		}
+
+		function finish( rec ) {
+			show( resultBody( t.name, rec ) );
+			App.announce( __( 'Import finished.', 'okno' ) );
+			setActions( dialog, [ { label: __( 'Open the collection', 'okno' ), primary: true, onClick: function () {
+				window.location.href = cfg.urls.collections + '&type=' + encodeURIComponent( t.name ) + '&panel=fields';
+			} } ] );
+		}
+
+		function run() {
+			return App.api( { path: IMPORT_API + '/run', method: 'POST', data: { post_type: t.name } } ).then( function ( rec ) {
+				if ( 'done' === rec.status ) {
+					finish( rec );
+					return;
+				}
+				show( progressBody( rec ) );
+				if ( ! stopped ) {
+					return run();
+				}
+			} );
+		}
+
+		function start() {
+			show( progressBody( { done: 0, total: 0 } ) );
+			setActions( dialog, [ { label: __( 'Close', 'okno' ), onClick: function () {
+				dialog.close();
+			} } ] );
+			run().catch( function ( err ) {
+				show( h( 'div', { class: 'okno-notice okno-notice--error', role: 'alert' }, h( 'p', { text: App.errorMessage( err, __( 'The import stopped.', 'okno' ) ) } ) ) );
+				setActions( dialog, [
+					{ label: __( 'Close', 'okno' ), onClick: function () {
+						dialog.close();
+					} },
+					{ label: __( 'Try again', 'okno' ), primary: true, onClick: start },
+				] );
+			} );
+		}
+
+		if ( t.acfImport && 'running' === t.acfImport.status ) {
+			start();
+			return;
+		}
+
+		App.api( { path: IMPORT_API + '/preview?post_type=' + encodeURIComponent( t.name ) } )
+			.then( function ( p ) {
+				show( previewBody( p ) );
+				setActions( dialog, [
+					{ label: __( 'Cancel', 'okno' ), onClick: function () {
+						dialog.close();
+					} },
+					{
+						label: sprintf( _n( 'Import %d entry', 'Import %d entries', p.counts.entries, 'okno' ), p.counts.entries ),
+						primary: true,
+						disabled: ! p.importable,
+						onClick: start,
+					},
+				] );
+			} )
+			.catch( function ( err ) {
+				show( h( 'div', { class: 'okno-notice okno-notice--error', role: 'alert' }, h( 'p', { text: App.errorMessage( err, __( 'Couldn’t read the ACF fields.', 'okno' ) ) } ) ) );
+			} );
+	}
+
+	/**
+	 * Retour à ACF d'une collection importée (réglages de la collection).
+	 *
+	 * @param {string} name  Type.
+	 * @param {string} label Libellé.
+	 */
+	function rollbackImport( name, label ) {
+		App.confirm( {
+			/* translators: %s: content type. */
+			title: sprintf( __( 'Go back to ACF for “%s”?', 'okno' ), label || name ),
+			message: __( 'ACF serves the fields of this content type again, with the values they had on the import day. Values edited in Okno since the import are not written back to ACF: they are deleted with the Okno table of this collection.', 'okno' ),
+			confirmLabel: __( 'Go back to ACF', 'okno' ),
+			danger: true,
+			typeToConfirm: name,
+		} ).then( function ( ok ) {
+			if ( ! ok ) {
+				return;
+			}
+			App.api( { path: IMPORT_API + '/rollback', method: 'POST', data: { post_type: name, confirm: name } } )
+				.then( function () {
+					App.toast( __( 'The content type is served by ACF again.', 'okno' ) );
+					window.location.href = cfg.urls.collections + '&type=' + encodeURIComponent( name );
+				} )
+				.catch( function ( err ) {
+					App.toast( App.errorMessage( err, __( 'Couldn’t go back to ACF.', 'okno' ) ), true );
+				} );
+		} );
+	}
+
+	window.OknoAcfImport = { open: openImport, rollback: rollbackImport };
+
 	function renderListHead() {
 		var t = currentType();
 		listTitle.textContent = t ? t.label : __( 'No content type', 'okno' );
-		App.append( App.clear( listTools ), [ tabsControl(), newEntryButton() ] );
+		App.append( App.clear( listTools ), [ canImport( t ) ? importButton( t, false ) : null, tabsControl(), newEntryButton() ] );
 	}
 
 	function newCollection() {
