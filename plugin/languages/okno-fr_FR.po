@@ -732,7 +732,7 @@ msgid "Visual editor"
 msgstr "Éditeur visuel"
 
 #: includes/admin/class-okno-admin.php:85
-#: includes/collections/class-okno-collections.php:544
+#: includes/collections/class-okno-collections.php:565
 msgid "Edit with Okno"
 msgstr "Modifier avec Okno"
 
@@ -1831,19 +1831,19 @@ msgstr "La table de « %s » aurait trop de colonnes de texte court, colonnes ar
 msgid "Another plugin or the theme already registers the content type “%s”."
 msgstr "Une autre extension ou le thème déclare déjà le type de contenu « %s »."
 
-#: includes/collections/class-okno-collections.php:316
+#: includes/collections/class-okno-collections.php:321
 msgid "The file is not valid JSON."
 msgstr "Le fichier n’est pas du JSON valide."
 
-#: includes/collections/class-okno-collections.php:320
+#: includes/collections/class-okno-collections.php:325
 msgid "This is not an Okno Collections schema file."
 msgstr "Ce n’est pas un fichier de schéma Okno Collections."
 
-#: includes/collections/class-okno-collections.php:538
+#: includes/collections/class-okno-collections.php:559
 msgid "Fields"
 msgstr "Champs"
 
-#: includes/collections/class-okno-collections.php:542
+#: includes/collections/class-okno-collections.php:563
 msgid "The fields of this entry are edited in Okno."
 msgstr "Les champs de cette entrée se modifient dans Okno."
 

@@ -216,6 +216,8 @@ class Okno_Native_Adapter extends Okno_Field_Adapter {
 			);
 		}
 
+		Okno_Collections::entry_changed( $post_id );
+
 		// Révision WordPress des champs (si le type les active).
 		if ( function_exists( 'wp_save_post_revision' ) && post_type_supports( $collection['id'], 'revisions' ) ) {
 			wp_save_post_revision( $post_id );

@@ -221,6 +221,11 @@ class Okno_Collections {
 		if ( class_exists( 'Okno_Content' ) ) {
 			Okno_Content::invalidate();
 		}
+		// Le schéma change la forme du contenu servi (export, types) : le
+		// front doit être reconstruit, comme après une modification de contenu.
+		if ( ! empty( $report['operations'] ) && class_exists( 'Okno_Deploy_Manager' ) ) {
+			Okno_Deploy_Manager::queue_auto();
+		}
 
 		/**
 		 * Le schéma Okno Collections a été migré et enregistré.
@@ -396,6 +401,22 @@ class Okno_Collections {
 			Okno_Schema::touch( $post_id );
 		}
 		return $result;
+	}
+
+	/**
+	 * Les champs d'une entrée ont changé. Ils vivent dans la table de la
+	 * collection, pas en postmeta : les crochets de métas ne voient rien, on
+	 * vide donc le cache de contenu et on signale le changement
+	 * (okno_content_changed : publication automatique, purge des caches de page)
+	 * explicitement.
+	 *
+	 * @param int $post_id Entrée.
+	 * @return void
+	 */
+	public static function entry_changed( $post_id ) {
+		if ( class_exists( 'Okno_Content' ) ) {
+			Okno_Content::post_changed( (int) $post_id );
+		}
 	}
 
 	/**
@@ -663,6 +684,7 @@ class Okno_Collections {
 			$values[ $key ] = Okno_Collections_Values::convert( $old['value'], $old, $field, $ok );
 		}
 		Okno_Collections_Store::write( $collection['id'], $post_id, $values );
+		self::entry_changed( $post_id );
 		if ( class_exists( 'Okno_Schema' ) ) {
 			Okno_Schema::touch( $post_id );
 		}

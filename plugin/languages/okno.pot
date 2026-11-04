@@ -782,7 +782,7 @@ msgid "Visual editor"
 msgstr ""
 
 #: includes/admin/class-okno-admin.php:85
-#: includes/collections/class-okno-collections.php:544
+#: includes/collections/class-okno-collections.php:565
 msgid "Edit with Okno"
 msgstr ""
 
@@ -1910,19 +1910,19 @@ msgstr ""
 msgid "Another plugin or the theme already registers the content type “%s”."
 msgstr ""
 
-#: includes/collections/class-okno-collections.php:316
+#: includes/collections/class-okno-collections.php:321
 msgid "The file is not valid JSON."
 msgstr ""
 
-#: includes/collections/class-okno-collections.php:320
+#: includes/collections/class-okno-collections.php:325
 msgid "This is not an Okno Collections schema file."
 msgstr ""
 
-#: includes/collections/class-okno-collections.php:538
+#: includes/collections/class-okno-collections.php:559
 msgid "Fields"
 msgstr ""
 
-#: includes/collections/class-okno-collections.php:542
+#: includes/collections/class-okno-collections.php:563
 msgid "The fields of this entry are edited in Okno."
 msgstr ""
 

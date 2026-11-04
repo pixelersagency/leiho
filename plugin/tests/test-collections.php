@@ -37,8 +37,14 @@ function get_option( $k, $d = false ) { return array_key_exists( $k, $GLOBALS['o
 function update_option( $k, $v, $a = null ) { $GLOBALS['options'][ $k ] = $v; return true; }
 function delete_option( $k ) { unset( $GLOBALS['options'][ $k ] ); return true; }
 function apply_filters( $tag, $value ) { return $value; }
-function do_action( ...$a ) {}
+function do_action( $tag, ...$a ) { $GLOBALS['actions'][] = array( $tag, $a ); }
+function wp_is_post_revision( $p ) { return false; }
+function wp_is_post_autosave( $p ) { return false; }
+function wp_using_ext_object_cache() { return false; }
+function wp_cache_get( $k, $g = '', $f = false, &$found = null ) { $found = isset( $GLOBALS['cache'][ $g ][ $k ] ); return $found ? $GLOBALS['cache'][ $g ][ $k ] : false; }
 function wp_cache_set( $k, $v, $g = '', $t = 0 ) { $GLOBALS['cache'][ $g ][ $k ] = $v; return true; }
+function wp_cache_add( $k, $v, $g = '', $t = 0 ) { return isset( $GLOBALS['cache'][ $g ][ $k ] ) ? false : wp_cache_set( $k, $v, $g ); }
+function wp_cache_delete( $k, $g = '' ) { unset( $GLOBALS['cache'][ $g ][ $k ] ); return true; }
 function add_action( ...$a ) {}
 function add_filter( ...$a ) {}
 function did_action( $h ) { return 0; }
@@ -78,7 +84,9 @@ function wp_parse_args( $a, $d ) { return array_merge( $d, (array) $a ); }
 class Okno_Plugin {
 	public static function title( $p ) { return get_the_title( $p ); }
 	public static function settings() {
-		return array( 'front_url' => '', 'url_patterns' => array( 'service' => '/services/{slug}' ), 'path_meta_key' => '', 'post_types' => array() );
+		$settings = array( 'front_url' => '', 'url_patterns' => array( 'service' => '/services/{slug}' ), 'path_meta_key' => '', 'post_types' => array() );
+		// Le vrai Okno_Plugin::settings() passe par le filtre okno_settings.
+		return class_exists( 'Okno_Collections' ) ? Okno_Collections::settings( $settings ) : $settings;
 	}
 }
 
@@ -347,6 +355,19 @@ $result = $adapter->save_values(
 check( 'écriture des champs racine', array( 'hero_title', 'sections', 'contact' ) === $result['saved'] && ! $result['errors'], $result );
 check( 'chemin inconnu laissé aux autres adapters', ! isset( $result['errors']['ailleurs'] ) );
 check( 'révision demandée', 1 === $GLOBALS['revisions'] );
+// Les champs vivent dans la table de la collection, pas en postmeta : le
+// cache de contenu et la publication automatique doivent l'apprendre quand même.
+$changed = array_values( array_filter( $GLOBALS['actions'], function ( $a ) { return 'okno_content_changed' === $a[0]; } ) );
+check( 'écriture : okno_content_changed', $changed && 1 === $changed[ count( $changed ) - 1 ][1][0], $changed );
+$gen = Okno_Cache::generation();
+$inv = new ReflectionProperty( 'Okno_Content', 'invalidated' );
+$inv->setAccessible( true );
+$inv->setValue( null, false );
+$GLOBALS['options'][ Okno_Content::OPTION_CACHE ] = array( 'stale' => true );
+$adapter->save_values( 1, array( 'hero_title' => 'Bonjour !' ) );
+check( 'écriture : cache de contenu invalidé', $gen !== Okno_Cache::generation() && ! isset( $GLOBALS['options'][ Okno_Content::OPTION_CACHE ] ) );
+$adapter->save_values( 1, array( 'hero_title' => 'Bonjour' ) );
+$GLOBALS['revisions'] = 1;
 
 $row = $GLOBALS['wpdb']->get_row( 'SELECT * FROM wp_okno_home WHERE post_id = 1' );
 $stored = json_decode( $row['f_sections'], true );
