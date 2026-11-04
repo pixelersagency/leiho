@@ -13,8 +13,9 @@ defined( 'ABSPATH' ) || exit;
  *
  * Un build statique fait une seule requête (/export) au lieu d'une par page :
  * la base de données ne sature plus sur un hébergement mutualisé. La réponse
- * est calculée une fois, gardée en option, et invalidée à chaque modification
- * de contenu. Elle porte un ETag : un build sans changement reçoit un 304.
+ * est calculée une fois, gardée en cache (Okno_Cache : cache objet persistant
+ * s'il y en a un, sinon option) et invalidée à chaque modification de contenu.
+ * Toutes les réponses portent un ETag : un client à jour reçoit un 304.
  */
 class Okno_Content {
 
@@ -179,20 +180,16 @@ class Okno_Content {
 	 * @return WP_REST_Response
 	 */
 	public function get_export( WP_REST_Request $request ) {
-		$cache = get_option( self::OPTION_CACHE );
+		$cache = Okno_Cache::get_export();
 		if ( ! is_array( $cache ) || ! isset( $cache['etag'], $cache['body'] ) || self::FORMAT !== ( isset( $cache['format'] ) ? $cache['format'] : 0 ) ) {
 			$cache = $this->build_export();
-			update_option( self::OPTION_CACHE, $cache, false );
+			Okno_Cache::set_export( $cache );
 		}
 
 		$etag    = '"' . $cache['etag'] . '"';
-		$headers = array(
-			'ETag'          => $etag,
-			'Cache-Control' => 'no-cache',
-		);
+		$headers = Okno_Cache::headers( $etag );
 
-		$given = (string) $request->get_header( 'if_none_match' );
-		if ( '' !== $given && in_array( $etag, array_map( 'trim', explode( ',', $given ) ), true ) ) {
+		if ( Okno_Cache::not_modified( $request, $etag ) ) {
 			return new WP_REST_Response( null, 304, $headers );
 		}
 
@@ -269,8 +266,16 @@ class Okno_Content {
 
 		$path = (string) $request->get_param( 'path' );
 		if ( '' !== $path ) {
-			$post = self::find_by_path( $path, $types );
-			return rest_ensure_response( $post ? array( $this->item( $post ) ) : array() );
+			// Résolution gardée en cache (id ou 0) : le repli parcourt tous les contenus.
+			$id   = (int) Okno_Cache::remember(
+				'path:' . md5( implode( ',', $types ) . '|' . $path ),
+				static function () use ( $path, $types ) {
+					$found = self::find_by_path( $path, $types );
+					return $found ? (int) $found->ID : 0;
+				}
+			);
+			$post = $id ? get_post( $id ) : null;
+			return Okno_Cache::response( $request, $post ? array( $this->cached_item( $post ) ) : array() );
 		}
 
 		$per_page = min( 500, max( 1, (int) $request->get_param( 'per_page' ) ) );
@@ -291,10 +296,10 @@ class Okno_Content {
 		$query    = new WP_Query( $args );
 		$items    = array();
 		foreach ( $query->posts as $post ) {
-			$items[] = $this->item( $post );
+			$items[] = $this->cached_item( $post );
 		}
 
-		$response = rest_ensure_response( $items );
+		$response = Okno_Cache::response( $request, $items );
 		$response->header( 'X-WP-Total', (int) $query->found_posts );
 		$response->header( 'X-WP-TotalPages', (int) $query->max_num_pages );
 		return $response;
@@ -315,25 +320,38 @@ class Okno_Content {
 		if ( 'publish' !== $post->post_status && ! current_user_can( 'edit_post', $post->ID ) ) {
 			return new WP_Error( 'okno_not_found', __( 'Content not found.', 'okno' ), array( 'status' => 404 ) );
 		}
-		return rest_ensure_response( $this->item( $post ) );
+		return Okno_Cache::response( $request, $this->cached_item( $post ), 'publish' !== $post->post_status );
 	}
 
 	/**
 	 * GET /types : déclarations TypeScript du contenu.
 	 *
+	 * @param WP_REST_Request $request Requête.
 	 * @return WP_REST_Response
 	 */
-	public function get_types() {
-		$response = new WP_REST_Response( null, 200 );
+	public function get_types( WP_REST_Request $request ) {
+		$body    = (string) Okno_Cache::remember(
+			'types',
+			static function () {
+				return Okno_Types::generate( Okno_Plugin::instance() );
+			}
+		);
+		$etag    = Okno_Cache::etag( $body );
+		$headers = Okno_Cache::headers( $etag );
+		if ( Okno_Cache::not_modified( $request, $etag ) ) {
+			return new WP_REST_Response( null, 304, $headers );
+		}
+
+		$response = new WP_REST_Response( null, 200, $headers );
 		$response->header( 'Content-Type', 'text/plain; charset=utf-8' );
 		// Corps texte brut : WordPress encoderait une chaîne en JSON.
 		add_filter(
 			'rest_pre_serve_request',
-			static function ( $served, $result ) use ( $response ) {
+			static function ( $served, $result ) use ( $response, $body ) {
 				if ( $result !== $response ) {
 					return $served;
 				}
-				echo Okno_Types::generate( Okno_Plugin::instance() ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Code source, pas du HTML.
+				echo $body; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Code source, pas du HTML.
 				return true;
 			},
 			10,
@@ -373,6 +391,25 @@ class Okno_Content {
 		 * @param WP_Post $post Post.
 		 */
 		return apply_filters( 'okno_content_item', $item, $post );
+	}
+
+	/**
+	 * Contenu publié : depuis le cache objet (persistant). Brouillon : jamais
+	 * mis en cache, il n'est servi qu'à qui peut l'éditer.
+	 *
+	 * @param WP_Post $post Post.
+	 * @return array
+	 */
+	private function cached_item( $post ) {
+		if ( 'publish' !== $post->post_status ) {
+			return $this->item( $post );
+		}
+		return Okno_Cache::remember(
+			'item:' . (int) $post->ID,
+			function () use ( $post ) {
+				return $this->item( $post );
+			}
+		);
 	}
 
 	/**
@@ -626,7 +663,8 @@ class Okno_Content {
 	 * ------------------------------------------------------------------- */
 
 	/**
-	 * Vide le cache d'export.
+	 * Vide le cache de contenu (option d'export et génération du cache
+	 * objet) et programme la purge des caches de page en fin de requête.
 	 *
 	 * @return void
 	 */
@@ -634,14 +672,17 @@ class Okno_Content {
 		if ( ! self::$invalidated ) {
 			self::$invalidated = true;
 			delete_option( self::OPTION_CACHE );
+			Okno_Cache::bump();
 			// Encore une fois en fin de requête : un build lancé entre deux
 			// écritures aurait remis en cache un état à moitié enregistré.
 			add_action(
 				'shutdown',
 				static function () {
 					delete_option( Okno_Content::OPTION_CACHE );
+					Okno_Cache::bump();
 				}
 			);
+			Okno_Cache::queue_purge();
 		}
 	}
 

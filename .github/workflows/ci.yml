@@ -28,6 +28,7 @@ jobs:
         run: |
           php plugin/tests/test-acf-adapter.php
           php plugin/tests/test-content.php
+          php plugin/tests/test-cache.php
           php plugin/tests/test-activity.php
           php plugin/tests/test-frame-verdict.php
           php plugin/tests/test-updater.php

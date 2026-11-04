@@ -363,6 +363,7 @@ class Okno_Admin {
 		$settings['auto_deploy']         = ! empty( $input['auto_deploy'] );
 		$settings['auto_deploy_delay']   = max( 15, absint( isset( $input['auto_deploy_delay'] ) ? $input['auto_deploy_delay'] : 60 ) );
 		$settings['content_access']      = isset( $input['content_access'] ) && 'token' === $input['content_access'] ? 'token' : 'public';
+		$settings['content_cache']       = ! empty( $input['content_cache'] );
 		foreach ( Okno_Headless::FLAGS as $flag ) {
 			$settings[ $flag ] = ! empty( $input[ $flag ] );
 		}
