@@ -21,6 +21,9 @@ class Okno_Deploy_Manager {
 	/** Codes d'erreur passagers : la publication reste en attente. */
 	const RETRY_CODES = array( 'okno_save_in_progress', 'okno_deploy_in_progress', 'okno_rate_limited' );
 
+	/** Essais quand le service de build ne répond pas, avant d'abandonner. */
+	const SERVICE_RETRIES = 5;
+
 	/** Publication automatique déjà replanifiée dans cette requête. */
 	private static $auto_queued = false;
 
@@ -378,8 +381,24 @@ class Okno_Deploy_Manager {
 			);
 		}
 
-		// Erreur définitive (réglages, service injoignable) : visible dans
-		// l'historique ; réessayer à chaque heartbeat n'y changerait rien.
+		// Service de build injoignable ou en erreur (HTTP 502 posé par
+		// trigger()) : souvent passager (coupure réseau, GitHub ou Netlify
+		// en difficulté). Les modifications restent en attente et le cron
+		// retente plus tard, quelques fois seulement.
+		$data     = $result->get_error_data();
+		$attempts = (int) get_option( self::AUTO_ATTEMPTS, 0 );
+		if ( is_array( $data ) && isset( $data['status'] ) && 502 === (int) $data['status'] && $attempts < self::SERVICE_RETRIES ) {
+			self::reschedule_auto( $attempts + 1 );
+			return array(
+				'state'    => 'pending',
+				'retry_in' => self::auto_delay(),
+				'error'    => $result,
+			);
+		}
+
+		// Erreur définitive (réglages, ou service toujours en échec après
+		// plusieurs essais) : visible dans l'historique ; réessayer à chaque
+		// heartbeat n'y changerait rien.
 		self::drop_pending();
 		return array(
 			'state' => 'failed',

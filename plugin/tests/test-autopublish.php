@@ -237,12 +237,19 @@ check( 'rate limit : en attente', 'pending' === $out['state'] && 0 === $GLOBALS[
 check( 'rate limit : délai restant', $out['retry_in'] >= 199 && $out['retry_in'] <= 201, $out['retry_in'] );
 check( 'rate limit : cron de secours replanifié', (bool) wp_next_scheduled( $M::AUTO_HOOK ) );
 
-// Erreur définitive : abandon (visible dans l'historique), pas de boucle.
+// Service de build injoignable : passager, la publication reste en attente
+// et le cron retente, un nombre limité de fois.
 reset_state();
 pend();
 $GLOBALS['driver']->result = new WP_Error( 'okno_http', 'Service down' );
 $out = $M::flush_pending( 0 );
-check( 'erreur définitive : failed', 'failed' === $out['state'] && 1 === $GLOBALS['driver']->calls, $out );
+check( 'service injoignable : en attente', 'pending' === $out['state'] && 1 === $GLOBALS['driver']->calls, $out );
+check( 'service injoignable : marqueur gardé, cron replanifié', $M::pending_since() > 0 && (bool) wp_next_scheduled( $M::AUTO_HOOK ) );
+
+// Toujours en échec après les essais : abandon (visible dans l'historique), pas de boucle.
+$GLOBALS['options'][ $M::AUTO_ATTEMPTS ] = $M::SERVICE_RETRIES;
+$out = $M::flush_pending( 0 );
+check( 'erreur définitive : failed', 'failed' === $out['state'], $out );
 check( 'erreur définitive : marqueur abandonné', 0 === $M::pending_since() && false === wp_next_scheduled( $M::AUTO_HOOK ) );
 
 // Réglage décoché depuis le changement.

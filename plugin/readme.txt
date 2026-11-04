@@ -8,11 +8,11 @@ Stable tag: 1.0.0-beta.6
 License: GPL-2.0-or-later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
-Visual editing for headless WordPress. Editors see the real front end inside wp-admin, click, edit ACF fields live, save and publish.
+Visual editing and content API for headless WordPress. Editors see the real front end inside wp-admin, click, edit fields live, save and publish.
 
 == Description ==
 
-Okno loads your headless front end (Next.js, Astro, Remix, Vite, Nuxt, SvelteKit or plain HTML) inside wp-admin. Editors click an element, edit the ACF field behind it, watch the page update as they type, then save and publish.
+Okno loads your headless front end (Next.js, Astro, Remix, Vite, Nuxt, SvelteKit or plain HTML) inside wp-admin. Editors click an element, edit the field behind it (ACF or Okno Collections), watch the page update as they type, then save and publish.
 
 * Works with any front end through a small, dependency-free bridge script. React apps get a one-line component.
 * Uses the ACF fields you already have: text, WYSIWYG, images, galleries, links, relationships, repeaters, groups and flexible content.
@@ -37,7 +37,7 @@ No. The bridge is plain JavaScript and works with any HTML page. React apps can 
 
 = Does Okno store content somewhere else? =
 
-No. Everything is saved to your existing ACF fields and post data.
+No. Content is saved where it lives: your existing ACF fields and post data, or the Okno Collections tables for content types defined in Okno.
 
 = What happens to my data if I delete the plugin? =
 
