@@ -53,6 +53,19 @@ test( 'charge, envoie le jeton et écrit l’instantané', async () => {
 	assert.deepEqual( JSON.parse( await fs.readFile( snapshot, 'utf8' ) ), sample );
 } );
 
+test( 'instantané impossible à écrire (serveur en lecture seule) : contenu servi quand même', async () => {
+	const warnings = [];
+	const result = await loadLeihoContent( {
+		url: 'https://cms.example.com',
+		snapshot: '/dev/null/impossible/content.json',
+		logger: { warn: ( m ) => warnings.push( m ) },
+		fetch: async () => respond( 200, sample ),
+	} );
+	assert.equal( result.source, 'network' );
+	assert.equal( result.data.items.length, 2 );
+	assert.match( warnings.join( ' ' ), /snapshot not written/ );
+} );
+
 test( '304 : réutilise l’instantané sans le retélécharger', async () => {
 	const snapshot = await tmpSnapshot();
 	await fs.writeFile( snapshot, JSON.stringify( sample ) );

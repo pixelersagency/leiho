@@ -7,10 +7,15 @@ All notable changes to Leiho (called Okno until 1.0.0-beta.11) are documented he
 ### Added
 
 - **AI screen** (navigation, administrators): the AI provider's status with its setup link and privacy note, the brand context (moved from Settings, with export and import), the **context of every content type** Leiho edits — ACF types and pages included, not only Leiho collections — the recent AI actions from the change log, and the abilities offered to external agents. It has its own form: saving it changes nothing else.
+- **Get started is now an onboarding.** Pick your framework (Next.js, Astro, Nuxt, SvelteKit, React + Vite, or anything else), then either follow six steps with code written for it — allow the editor to display the site, install the bridge, read the content, annotate, test the connection — or copy one prompt for your coding agent (Claude Code, Cursor, Codex…), with the framework's snippets and the full integration guide, for an existing or a new site. Progress is tracked as checks pass.
+- **AI agents over MCP.** The AI screen explains how to connect Claude Desktop, Claude Code or Cursor through the WordPress MCP Adapter, with this site's endpoint and username filled in, and example prompts.
+- **New abilities for agents**: `leiho/search-entries`, `leiho/create-draft` (always a draft, validated like the editor) and `leiho/suggest-alt-text` (when the provider reads images; saves nothing).
+- **Site administration by an agent** (administrators, filter `leiho_ai_admin_capability`): `leiho/get-diagnostics` (versions, settings, secrets as set / empty / unreadable only, frame headers, GitHub preflight, recent deployments, content API and AI status, and a list of problems with their fix), `leiho/update-settings` (same validation as the Settings screen, partial updates, `dry_run`, logged), `leiho/set-secret` (write-only) and `leiho/test-connection`. No ability publishes or deploys.
 - **Live preview of the site's home page** on Leiho's home, rendered at desktop width and scaled to the card; clicking it opens the home page in the visual editor. Shown once the connection test has succeeded, so the site is known to allow being displayed in wp-admin.
 
 ### Fixed
 
+- Content client: a snapshot that can't be written (read-only server, serverless rendering) no longer makes `loadLeihoContent` fail; the content is served and a warning is logged.
 - Tags field: typing a tag that is already chosen and pressing Enter no longer removes it (removing is done with its ×); the typed text is cleared.
 - Entry list: the sort menu (« Dernière modification ») is no longer cut; filter menus take the width of their label and wrap in a narrow column. In French, the sort is now « Modifiés récemment ».
 - Field builder: a long collection name in the header wraps on two lines (full name on hover) instead of being cut.

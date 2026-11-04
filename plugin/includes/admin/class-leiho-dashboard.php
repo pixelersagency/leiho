@@ -1943,7 +1943,6 @@ CODE;
 					<?php else : ?>
 						<span class="leiho-pill leiho-pill--warn"><?php esc_html_e( 'Not active', 'leiho' ); ?></span>
 						<span class="leiho-help"><?php esc_html_e( 'The official MCP Adapter plugin, by WordPress.org, turns these abilities into MCP tools. Install and activate it first.', 'leiho' ); ?></span>
-						<a class="leiho-btn leiho-btn--quiet" href="<?php echo esc_url( $install ); ?>"><?php esc_html_e( 'Install MCP Adapter', 'leiho' ); ?></a>
 					<?php endif; ?>
 				</div>
 			</div>

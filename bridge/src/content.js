@@ -100,7 +100,13 @@ export async function loadLeihoContent( options = {} ) {
 				throw new Error( 'Leiho: unexpected response from ' + url + ' (is Leiho 1.0.0-beta.6+ active?)' );
 			}
 			if ( snapshotPath ) {
-				await writeSnapshot( snapshotPath, data );
+				// Un serveur en lecture seule (serverless, à la requête) ne peut
+				// pas écrire l'instantané : le contenu reçu reste bon, on le sert.
+				try {
+					await writeSnapshot( snapshotPath, data );
+				} catch ( writeError ) {
+					logger.warn( 'Leiho: snapshot not written (' + writeError.message + '). Pass snapshot: false to skip it.' );
+				}
 			}
 			return { data, source: 'network', stale: false };
 		} catch ( error ) {

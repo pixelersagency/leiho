@@ -1,1 +1,1 @@
-{"domain":"messages","locale_data":{"messages":{"":{"domain":"messages","lang":"fr_FR","plural-forms":"nplurals=2; plural=(n > 1);"},"Copied":["Copié"]}}}
+{"domain":"messages","locale_data":{"messages":{"":{"domain":"messages","lang":"fr_FR","plural-forms":"nplurals=2; plural=(n > 1);"},"%1$d of %2$d steps done":["%1$d étapes faites sur %2$d"],"Copied":["Copié"]}}}

@@ -50,7 +50,7 @@ Parts of the Leiho app's layout and styles (three-pane Collections view, list ro
 == Changelog ==
 
 = 1.0.0-beta.13 =
-* New AI screen (provider, brand context, context of each content type, recent AI actions, abilities for agents) and a live preview of the site's home page on Leiho's home. Fixes in tags, list filters and the "Go back to ACF" dialog.
+* Get started becomes a framework-aware onboarding (step by step, or one prompt for your coding agent). New AI screen with an MCP connection guide, new abilities for agents (search, drafts, alt text, diagnostics and settings for administrators), and a live preview of the site's home page on Leiho's home. Fixes in tags, list filters and the "Go back to ACF" dialog.
 
 = 1.0.0-beta.12 =
 * Okno is now Leiho. Existing Okno sites are migrated automatically; front ends written for Okno keep working until 2.0. See "Coming from Okno" in the README.
