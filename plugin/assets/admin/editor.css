@@ -1970,3 +1970,31 @@ html.okno-fullscreen .mce-floatpanel {
 	padding: 0 14px;
 	font-size: var(--okno-text-base, 14px);
 }
+
+/* Lignes de répéteur : chaque niveau posait son propre fond gris
+   (--okno-input, translucide) par-dessus le précédent, et les champs, du même
+   gris, s'y fondaient. Les lignes n'ont plus de fond : un simple filet les
+   délimite, et un trait à gauche marque chaque niveau d'imbrication. Les
+   champs gardent leur fond, toujours posé sur la même surface, donc le même
+   contraste à toute profondeur. */
+.okno-app .okno-repeater-row,
+.okno-app .okno-group-field .okno-repeater-row {
+	background: transparent;
+	border: 1px solid var(--okno-line);
+}
+
+.okno-app .okno-repeater-row .okno-repeater-row {
+	padding: 8px 0 4px 12px;
+	border: 0;
+	border-left: 2px solid var(--okno-line-strong);
+	border-radius: 0;
+}
+
+.okno-app .okno-repeater-row .okno-repeater-row:focus-within {
+	border-left-color: var(--okno-accent-ink);
+}
+
+.okno-app .okno-repeater-row .okno-repeater-title {
+	color: var(--okno-muted);
+	font-size: var(--okno-text-sm, 13px);
+}

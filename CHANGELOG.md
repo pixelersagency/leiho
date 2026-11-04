@@ -7,6 +7,7 @@ All notable changes to Okno are documented here. The project follows [Semantic V
 ### Changed
 
 - The « changes to publish » dot on the **Publish** button is dark instead of orange, so it no longer clashes with the lime button.
+- Repeater rows (lists in lists) no longer stack a grey background per level: rows are outlined, nested rows get a left rule, and fields keep the same contrast at every depth.
 
 ## [1.0.0-beta.10] — 2026-11-04
 
