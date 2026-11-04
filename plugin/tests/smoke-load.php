@@ -12,7 +12,7 @@ define( 'DAY_IN_SECONDS', 86400 );
 
 class WP_Error { public function __construct( $c = '', $m = '', $d = null ) {} public function add_data( $d ) {} public function get_error_message() { return ''; } }
 class WP_REST_Request { public function get_param( $k ) {} public function get_json_params() { return array(); } }
-class WP_REST_Server { const READABLE = 'GET'; const CREATABLE = 'POST'; const DELETABLE = 'DELETE'; }
+class WP_REST_Server { const READABLE = 'GET'; const CREATABLE = 'POST'; const DELETABLE = 'DELETE'; const EDITABLE = 'POST, PUT, PATCH'; }
 class WP_Query { public $posts = array(); public $found_posts = 0; public $max_num_pages = 1; public function __construct( $a = array() ) {} }
 
 $called = array();
@@ -120,6 +120,9 @@ echo "settings OK — driver='" . Okno_Plugin::settings()['deploy_driver'] . "'\
 new Okno_Rest( $plugin );
 new Okno_Schema( $plugin );
 new Okno_ACF_Adapter();
+new Okno_Native_Adapter();
+new Okno_Collections_Rest();
+echo 'collections : ' . count( Okno_Collections::post_types() ) . "\n";
 new Okno_Github_Actions_Driver();
 new Okno_Github_Commit_Driver();
 new Okno_Build_Hook_Driver();

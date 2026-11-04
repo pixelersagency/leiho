@@ -21,6 +21,7 @@ jobs:
       - uses: shivammathur/setup-php@v2
         with:
           php-version: ${{ matrix.php }}
+          extensions: pdo_sqlite
           coverage: none
       - name: Lint
         run: find plugin -name '*.php' -print0 | xargs -0 -n1 php -l > /dev/null
@@ -28,6 +29,7 @@ jobs:
         run: |
           php plugin/tests/test-acf-adapter.php
           php plugin/tests/test-content.php
+          php plugin/tests/test-collections.php
           php plugin/tests/test-activity.php
           php plugin/tests/test-frame-verdict.php
           php plugin/tests/test-updater.php
@@ -51,6 +53,7 @@ jobs:
         run: |
           npm install -g typescript@5.6.3 > /dev/null
           php plugin/tests/test-content.php
+          php plugin/tests/test-collections.php
       - name: Built files are committed
         run: git diff --exit-code -- bridge/dist plugin/assets/bridge
       - name: Translations are complete and up to date

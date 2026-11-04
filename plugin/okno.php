@@ -2,7 +2,7 @@
 /**
  * Plugin Name:       Okno
  * Plugin URI:        https://github.com/pixelersagency/okno
- * Description:       Visual editor for headless front ends (Astro, Next.js, …), right inside wp-admin. Your existing ACF fields stay the source of truth.
+ * Description:       Visual editor and content API for headless front ends (Astro, Next.js, …), right inside wp-admin. Define your content types in Okno, or keep your existing ACF fields.
  * Version:           1.0.0-beta.5
  * Requires at least: 6.0
  * Requires PHP:      7.4
@@ -33,6 +33,12 @@ define( 'OKNO_URL', plugin_dir_url( __FILE__ ) );
 require_once OKNO_DIR . 'includes/adapters/interface-okno-adapter.php';
 require_once OKNO_DIR . 'includes/adapters/abstract-okno-field-adapter.php';
 require_once OKNO_DIR . 'includes/adapters/class-okno-acf-adapter.php';
+require_once OKNO_DIR . 'includes/adapters/class-okno-native-adapter.php';
+require_once OKNO_DIR . 'includes/collections/class-okno-collections-schema.php';
+require_once OKNO_DIR . 'includes/collections/class-okno-collections-values.php';
+require_once OKNO_DIR . 'includes/collections/class-okno-collections-store.php';
+require_once OKNO_DIR . 'includes/collections/class-okno-collections-rest.php';
+require_once OKNO_DIR . 'includes/collections/class-okno-collections.php';
 require_once OKNO_DIR . 'includes/deploy/interface-okno-deploy-driver.php';
 require_once OKNO_DIR . 'includes/deploy/class-okno-build-hook-driver.php';
 require_once OKNO_DIR . 'includes/deploy/class-okno-coolify-driver.php';
@@ -77,7 +83,9 @@ final class Okno_Plugin {
 	}
 
 	private function boot() {
-		$this->adapters['acf'] = new Okno_ACF_Adapter();
+		// Okno Collections d'abord : les champs natifs priment sur un homonyme ACF.
+		$this->adapters['collections'] = new Okno_Native_Adapter();
+		$this->adapters['acf']         = new Okno_ACF_Adapter();
 
 		/**
 		 * Permet d'enregistrer des adapters supplémentaires (JetEngine, Metabox, …).
@@ -100,6 +108,7 @@ final class Okno_Plugin {
 		add_action( Okno_Deploy_Manager::AUTO_HOOK, array( 'Okno_Deploy_Manager', 'run_auto' ) );
 		add_action( 'okno_content_changed', array( 'Okno_Deploy_Manager', 'queue_auto' ) );
 		Okno_Content::init();
+		Okno_Collections::init();
 		Okno_Headless::init();
 		Okno_Activity::init();
 		Okno_Updater::init();
@@ -149,7 +158,13 @@ final class Okno_Plugin {
 			'headless_lockdown'   => false,
 		);
 		$saved = get_option( self::OPTION_SETTINGS, array() );
-		return wp_parse_args( is_array( $saved ) ? $saved : array(), $defaults );
+
+		/**
+		 * Réglages effectifs (Okno Collections y ajoute ses types et chemins).
+		 *
+		 * @param array $settings Réglages enregistrés, valeurs par défaut comprises.
+		 */
+		return apply_filters( 'okno_settings', wp_parse_args( is_array( $saved ) ? $saved : array(), $defaults ) );
 	}
 
 	/**
