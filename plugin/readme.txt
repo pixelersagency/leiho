@@ -43,6 +43,10 @@ No. Content is saved where it lives: your existing ACF fields and post data, or 
 
 Okno removes its own settings, tokens, history table and internal post meta, and the Okno Collections tables and schema (define OKNO_KEEP_DATA in wp-config.php to keep them). Your posts and ACF fields are left untouched.
 
+== Credits ==
+
+Parts of the Okno app's layout and styles (three-pane Content and Collections views, list rows, field settings, dialogs) are derived from Stacki (https://github.com/flowtricks/stacki), Copyright (c) 2026 Timothy Ricks, MIT License. The full license text ships in licenses/stacki-MIT.txt.
+
 == Changelog ==
 
 = 1.0.0-beta.6 =

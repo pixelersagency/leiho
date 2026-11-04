@@ -33,6 +33,11 @@ rsync -a \
 	--exclude .DS_Store \
 	plugin/ "$STAGE/okno/"
 cp LICENSE "$STAGE/okno/LICENSE"
+# Licences des parties tierces (licenses/, copié avec plugin/) : obligatoire.
+if [ ! -f "$STAGE/okno/licenses/stacki-MIT.txt" ]; then
+	echo "licenses/stacki-MIT.txt is missing from the package." >&2
+	exit 1
+fi
 
 mkdir -p dist
 ZIP="$ROOT/dist/okno-$VERSION.zip"

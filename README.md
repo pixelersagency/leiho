@@ -306,3 +306,7 @@ See [CONTRIBUTING.md](CONTRIBUTING.md).
 ## License
 
 [GPL-2.0-or-later](LICENSE). Made by [Pixelers](https://pixelers.fr).
+
+## Credits / third-party
+
+The layout and styles of the Okno app (three-pane Content and Collections views, list rows, field settings, dialogs) are partly derived from [Stacki](https://github.com/flowtricks/stacki), Copyright (c) 2026 Timothy Ricks, under the MIT License: see [plugin/licenses/stacki-MIT.txt](plugin/licenses/stacki-MIT.txt). Files with derived portions say so in their header.

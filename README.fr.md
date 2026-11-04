@@ -162,3 +162,7 @@ Format et API : [plugin/docs/collections-spec.md](plugin/docs/collections-spec.m
 ## Licence
 
 [GPL-2.0-or-later](LICENSE). Réalisé par [Pixelers](https://pixelers.fr).
+
+## Crédits / tiers
+
+La mise en page et les styles de l'application Okno (vues Contenus et Collections en trois volets, lignes de liste, réglages des champs, boîtes de dialogue) sont en partie dérivés de [Stacki](https://github.com/flowtricks/stacki), Copyright (c) 2026 Timothy Ricks, sous licence MIT : voir [plugin/licenses/stacki-MIT.txt](plugin/licenses/stacki-MIT.txt). Les fichiers concernés le signalent dans leur en-tête.
