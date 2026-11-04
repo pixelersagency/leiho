@@ -1847,7 +1847,7 @@
 					return h( 'li', {}, h( 'button', { type: 'button', class: 'okno-type-card', onClick: function () {
 						picked = t.type;
 						dialog.close();
-					} }, [ h( 'strong', { text: t.label } ), h( 'span', { text: t.help } ) ] ) );
+					} }, [ h( 'span', { class: 'okno-type-card__icon' }, icon( 'type-' + t.type, 18 ) ), h( 'strong', { text: t.label } ), h( 'span', { text: t.help } ) ] ) );
 				} ) ),
 				onClose: function () {
 					resolve( picked );

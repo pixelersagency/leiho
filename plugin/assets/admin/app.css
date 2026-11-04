@@ -2334,6 +2334,23 @@ body.okno-app-body #wpbody-content {
 	background: var(--okno-active);
 }
 
+.okno-type-card .okno-type-card__icon {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 32px;
+	height: 32px;
+	margin-bottom: 6px;
+	border-radius: 8px;
+	background: var(--okno-panel);
+	color: var(--okno-accent-ink);
+}
+
+.okno-type-card:hover .okno-type-card__icon,
+.okno-type-card:focus-visible .okno-type-card__icon {
+	background: var(--okno-accent-soft);
+}
+
 /* ── Pagination ────────────────────────────────────────────────────── */
 
 .okno-pager {
@@ -4586,4 +4603,18 @@ body.okno-app-body .wplink-autocomplete .ui-state-focus {
 	flex: 0 0 200px;
 	width: 200px;
 	padding-left: 12px;
+}
+
+/* Cartes « Mise en ligne » (réglages) : la règle commune des boutons radio
+   les remet dans le flux (position: relative) et le rond chevauchait le
+   titre. On le ramène dans sa marge, à gauche du texte. */
+.okno-app .okno-admin--app .okno-choice {
+	position: relative;
+	padding: 14px 16px 14px 48px;
+}
+
+.okno-app .okno-admin--app .okno-choice input[type="radio"] {
+	position: absolute;
+	top: 15px;
+	left: 16px;
 }

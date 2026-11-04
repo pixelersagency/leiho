@@ -787,7 +787,7 @@ msgstr ""
 
 #: assets/admin/app-collections.js:1796 assets/admin/app-collections.js:1855
 #: assets/admin/app-content.js:613 assets/admin/app-content.js:670
-#: assets/admin/app-content.js:1238 assets/admin/app.js:317
+#: assets/admin/app-content.js:1238 assets/admin/app.js:337
 msgid "Cancel"
 msgstr ""
 
@@ -799,7 +799,7 @@ msgstr ""
 msgid "Schema imported."
 msgstr ""
 
-#: assets/admin/app-content.js:47 assets/admin/app.js:649
+#: assets/admin/app-content.js:47 assets/admin/app.js:669
 #: assets/admin/editor.js:1282
 msgid "Published"
 msgstr ""
@@ -1149,7 +1149,7 @@ msgid "Open the collection"
 msgstr ""
 
 #: assets/admin/app-content.js:647 assets/admin/app-content.js:653
-#: assets/admin/app.js:195
+#: assets/admin/app.js:215
 msgid "Close"
 msgstr ""
 
@@ -1534,21 +1534,21 @@ msgstr[0] ""
 msgstr[1] ""
 
 #. translators: %s: text the user must type to confirm.
-#: assets/admin/app.js:303
+#: assets/admin/app.js:323
 #, javascript-format
 msgid "Type %s to confirm"
 msgstr ""
 
-#: assets/admin/app.js:319
+#: assets/admin/app.js:339
 msgid "Confirm"
 msgstr ""
 
-#: assets/admin/app.js:370 assets/admin/editor.js:3810
+#: assets/admin/app.js:390 assets/admin/editor.js:3810
 msgid "just now"
 msgstr ""
 
 #. translators: %d: number of minutes.
-#: assets/admin/app.js:374 assets/admin/editor.js:3814
+#: assets/admin/app.js:394 assets/admin/editor.js:3814
 #, javascript-format
 msgid "%d minute ago"
 msgid_plural "%d minutes ago"
@@ -1556,92 +1556,92 @@ msgstr[0] ""
 msgstr[1] ""
 
 #. translators: %d: number of hours.
-#: assets/admin/app.js:378 assets/admin/editor.js:3819
+#: assets/admin/app.js:398 assets/admin/editor.js:3819
 #, javascript-format
 msgid "%d hour ago"
 msgid_plural "%d hours ago"
 msgstr[0] ""
 msgstr[1] ""
 
-#: assets/admin/app.js:398
+#: assets/admin/app.js:418
 msgid "Something went wrong."
 msgstr ""
 
-#: assets/admin/app.js:424 assets/admin/editor.js:4206
+#: assets/admin/app.js:444 assets/admin/editor.js:4206
 #: includes/admin/class-okno-admin.php:479
 #: includes/admin/class-okno-app.php:494
 msgid "Switch to dark theme"
 msgstr ""
 
-#: assets/admin/app.js:424 assets/admin/editor.js:4206
+#: assets/admin/app.js:444 assets/admin/editor.js:4206
 msgid "Switch to light theme"
 msgstr ""
 
-#: assets/admin/app.js:459 includes/admin/class-okno-app.php:439
+#: assets/admin/app.js:479 includes/admin/class-okno-app.php:439
 #: includes/admin/class-okno-app.php:441
 msgid "Collapse the menu"
 msgstr ""
 
-#: assets/admin/app.js:459
+#: assets/admin/app.js:479
 msgid "Expand the menu"
 msgstr ""
 
-#: assets/admin/app.js:485
+#: assets/admin/app.js:505
 msgid "Close the menu"
 msgstr ""
 
-#: assets/admin/app.js:485 includes/admin/class-okno-app.php:474
+#: assets/admin/app.js:505 includes/admin/class-okno-app.php:474
 msgid "Open the menu"
 msgstr ""
 
-#: assets/admin/app.js:606
+#: assets/admin/app.js:626
 msgid "Changes are waiting to be published. They will be published automatically."
 msgstr ""
 
-#: assets/admin/app.js:607
+#: assets/admin/app.js:627
 msgid "Some changes aren’t published yet."
 msgstr ""
 
-#: assets/admin/app.js:608
+#: assets/admin/app.js:628
 msgid "Everything is published"
 msgstr ""
 
-#: assets/admin/app.js:611 includes/admin/class-okno-admin.php:482
+#: assets/admin/app.js:631 includes/admin/class-okno-admin.php:482
 #: includes/admin/class-okno-app.php:491
 msgid "Publish"
 msgstr ""
 
-#: assets/admin/app.js:611
+#: assets/admin/app.js:631
 msgid "Publish (unpublished changes)"
 msgstr ""
 
-#: assets/admin/app.js:614 assets/admin/app.js:640 assets/admin/app.js:675
+#: assets/admin/app.js:634 assets/admin/app.js:660 assets/admin/app.js:695
 #: assets/admin/editor.js:3981
 msgid "Publishing…"
 msgstr ""
 
-#: assets/admin/app.js:650
+#: assets/admin/app.js:670
 msgid "Your site is up to date."
 msgstr ""
 
-#: assets/admin/app.js:652
+#: assets/admin/app.js:672
 msgid "Publishing failed"
 msgstr ""
 
-#: assets/admin/app.js:653 assets/admin/app.js:699
+#: assets/admin/app.js:673 assets/admin/app.js:719
 msgid "Publishing failed."
 msgstr ""
 
-#: assets/admin/app.js:679 assets/admin/app.js:691
+#: assets/admin/app.js:699 assets/admin/app.js:711
 msgid "Publishing started."
 msgstr ""
 
-#: assets/admin/app.js:686
+#: assets/admin/app.js:706
 msgid "Publishing started"
 msgstr ""
 
 #. translators: %d: estimated build time in minutes.
-#: assets/admin/app.js:690
+#: assets/admin/app.js:710
 #, javascript-format
 msgid "Publishing started. Your site will be up to date in about %d min."
 msgstr ""

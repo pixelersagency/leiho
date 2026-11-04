@@ -2,6 +2,16 @@
 
 All notable changes to Okno are documented here. The project follows [Semantic Versioning](https://semver.org/). The plugin and the bridge package share one version number.
 
+## [1.0.0-beta.10] — 2026-11-04
+
+### Fixed
+
+- Settings → Publishing: the radio button of each publishing mode card no longer covers the card's title.
+
+### Changed
+
+- **Add a field**: each field type now shows an icon.
+
 ## [1.0.0-beta.9] — 2026-11-04
 
 ### Added
@@ -166,6 +176,7 @@ First public release.
 - Managed regions (`data-okno-managed`) explain where to edit content Okno doesn't own.
 - Explicit sections (`data-okno-section`, `data-okno-layout`) take precedence over auto-detected ones.
 
+[1.0.0-beta.10]: https://github.com/pixelersagency/okno/releases/tag/v1.0.0-beta.10
 [1.0.0-beta.9]: https://github.com/pixelersagency/okno/releases/tag/v1.0.0-beta.9
 [1.0.0-beta.8]: https://github.com/pixelersagency/okno/releases/tag/v1.0.0-beta.8
 [1.0.0-beta.7]: https://github.com/pixelersagency/okno/releases/tag/v1.0.0-beta.7
