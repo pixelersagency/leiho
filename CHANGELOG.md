@@ -6,6 +6,22 @@ All notable changes to Okno are documented here. The project follows [Semantic V
 
 ### Added
 
+- **Okno Collections**: content types and fields defined in Okno, without ACF. Collections (many entries) and singletons (one entry, created by Okno) are registered as post types, so roles, drafts, trash, revisions, media and SEO plugins keep working; field values live in one table per collection (`wp_okno_<id>`) with typed, indexed columns for scalar fields and JSON for lists, blocks, groups and multiple values. 19 field types: text, rich text, number, boolean, date, date-time, select, slug, email, URL, color, image, file, gallery, link, reference, list, blocks, group.
+- **Schema as code**: `okno.schema.json` export and import, validated with precise error paths (`fields.3.key`).
+- **Safe migrations**: a stable `key` per field makes renames free; type changes copy and convert values into a new column; removed and retyped columns are archived, never dropped (purge is explicit); `dry_run` returns the plan. Works on MySQL 5.7+, MariaDB and the SQLite drop-in.
+- **Field values in revisions**: each revision of an entry stores its fields, restoring it restores them, and a field-only change creates a revision.
+- Administrator REST routes `/okno/v1/collections` (list, create, replace, delete, export, import, purge) and a PHP API (`Okno_Collections::import()`, `save_entry()`, `entry()`…).
+- Collections are served by `/okno/v1/export`, `/content` and `/types` and edited in the visual editor with the same dotted paths as ACF fields. ACF keeps working alongside.
+- `okno_settings` filter on the effective settings, `okno_collection_post_type_args`, `okno_collections_capability` filters and `okno_collections_saved` action.
+
+### Changed
+
+- The field engine (describe, read, patch dotted paths, sanitize, shape for the front end) is now shared by the ACF and Collections adapters (`Okno_Field_Adapter`).
+
+### Fixed
+
+- A multiple select is read as a list of choices, and edited with a multi-select in the editor, instead of the string "Array".
+
 - **Content API.** `GET /okno/v1/export` serves every published item of the Okno content types in one cached response with an `ETag` (an unchanged build gets a `304`); `/okno/v1/content` filters by type, path or slug; `/okno/v1/content/{id}` serves one item. Fields are keyed by name and shaped for a front end: images and files as `{ id, url, alt, width, height, sizes }`, relations as `{ id, type, slug, title, path }`, WYSIWYG as rendered HTML, flexible content rows with `_layout`. The cache is cleared on every content, field, term or settings change.
 - **TypeScript types.** `GET /okno/v1/types` generates declarations of that JSON from the ACF field groups (flexible content as a discriminated union on `_layout`, fields of conditional groups optional, select choices as literal unions).
 - **Content client** in the npm package: `@pixelersagency/okno-bridge/content` loads the export with retries, keeps a snapshot in `.okno/content.json` and falls back to it when WordPress doesn't answer. CLI: `npx okno types`, `npx okno pull`.

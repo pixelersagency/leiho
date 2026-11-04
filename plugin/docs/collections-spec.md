@@ -71,7 +71,7 @@ The schema lives in the `okno_collections` option and can be exported to / impor
 
 | Property | | |
 |---|---|---|
-| `id` | required | Post type name and table suffix. `^[a-z][a-z0-9_]{0,19}$`, not a WordPress reserved post type (`post`, `page`, `attachment`…), not `export`/`import`. Never changes. |
+| `id` | required | Post type name and table suffix. `^[a-z][a-z0-9_]{0,19}$`, not a WordPress reserved post type (`post`, `page`, `attachment`…), not `export`/`import`/`activity` (Okno's own table). Never changes. |
 | `kind` | `collection` (default) \| `singleton` | |
 | `label`, `singular_label` | | Admin labels. `singular_label` defaults to `label`. |
 | `path` | | Front-end URL pattern (`/services/{slug}`, `{id}` also works). Used unless the Okno settings set one. |
@@ -153,7 +153,7 @@ Conversions: any scalar to text; numeric text to number; text to boolean (`"", "
 
 Archived columns are listed in `GET /okno/v1/collections/{id}` and dropped only by an explicit `POST /okno/v1/collections/{id}/purge` with `confirm` set to the collection id.
 
-The plan is idempotent: the state is updated after each successful operation, so a migration interrupted by a database error is resumed by saving again. SQL uses `CREATE TABLE`, `ALTER TABLE … ADD COLUMN`, `CREATE INDEX`, `ALTER TABLE … DROP COLUMN` (purge only): all supported by MySQL 5.7+, MariaDB 10.3+ and the SQLite drop-in. No `ALTER … MODIFY` / `RENAME COLUMN`.
+The plan is idempotent: the state is updated after each successful operation, so a migration interrupted by a database error is resumed by saving again. SQL uses `CREATE TABLE`, `ALTER TABLE … ADD COLUMN`, `CREATE INDEX`, `DROP INDEX` + `ALTER TABLE … DROP COLUMN` (purge only): all supported by MySQL 5.7+, MariaDB 10.3+ and the SQLite drop-in. No `ALTER … MODIFY` / `RENAME COLUMN`.
 
 ## 5. Revisions
 
@@ -182,7 +182,7 @@ Okno_Collections::save_entry( $post_id, array( 'price' => 120, 'sections.0.image
 
 A migration report: `{ dry_run, operations: [{ op, collection, key?, column?, … }], converted: { "<collection>.<key>": { converted, failed } }, warnings: [] }`.
 
-### REST (`okno/v1`, `manage_options`)
+### REST (`okno/v1`, `manage_options`, filter `okno_collections_capability`)
 
 | Route | |
 |---|---|
@@ -195,7 +195,7 @@ A migration report: `{ dry_run, operations: [{ op, collection, key?, column?, �
 | `GET /collections/export` | `okno.schema.json` (attachment). |
 | `POST /collections/import` | Replace the whole schema with a file's content. `?dry_run=1`. |
 
-Invalid schemas answer `400` with `data.errors`: a list of `{ path, message }` (`collections.1.fields.3.key`).
+Invalid schemas answer `400` with `data.errors`: a list of `{ path, message }` (`collections.1.fields.3.key`; relative to the collection, `fields.3.key`, on the single-collection routes).
 
 ### Content and editor
 
