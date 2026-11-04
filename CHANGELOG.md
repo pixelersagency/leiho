@@ -2,7 +2,7 @@
 
 All notable changes to Leiho (called Okno until 1.0.0-beta.11) are documented here. The project follows [Semantic Versioning](https://semver.org/). The plugin and the bridge package share one version number.
 
-## [1.0.0-beta.13] — 2026-11-05
+## [1.0.0-beta.13] — 2026-11-04
 
 ### Added
 
