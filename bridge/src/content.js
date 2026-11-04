@@ -18,6 +18,7 @@
  */
 
 const DEFAULT_SNAPSHOT = '.leiho/content.json';
+const LEGACY_SNAPSHOT = '.okno/content.json';
 
 /**
  * URL de l'export depuis l'adresse du CMS (ou l'URL complète de l'endpoint).
@@ -52,8 +53,9 @@ export function exportUrl( url ) {
  */
 export async function loadLeihoContent( options = {} ) {
 	const env = typeof process !== 'undefined' ? process.env : {};
-	const url = exportUrl( options.url || env.LEIHO_URL );
-	const token = options.token ?? env.LEIHO_TOKEN ?? '';
+	// OKNO_URL / OKNO_TOKEN : noms d'avant le renommage en Leiho, encore lus.
+	const url = exportUrl( options.url || env.LEIHO_URL || env.OKNO_URL );
+	const token = options.token ?? env.LEIHO_TOKEN ?? env.OKNO_TOKEN ?? '';
 	const snapshotPath = options.snapshot === false ? null : options.snapshot || DEFAULT_SNAPSHOT;
 	const fallback = options.fallback || 'snapshot';
 	const retries = Math.max( 1, options.retries ?? 3 );
@@ -61,7 +63,10 @@ export async function loadLeihoContent( options = {} ) {
 	const doFetch = options.fetch || globalThis.fetch;
 	const logger = options.logger || console;
 
-	const snapshot = snapshotPath ? await readSnapshot( snapshotPath ) : null;
+	// Instantané d'avant le renommage (.okno/) : repris tant qu'aucun .leiho/ n'existe.
+	const snapshot = snapshotPath
+		? ( await readSnapshot( snapshotPath ) ) ?? ( snapshotPath === DEFAULT_SNAPSHOT ? await readSnapshot( LEGACY_SNAPSHOT ) : null )
+		: null;
 
 	const headers = { Accept: 'application/json' };
 	if ( token ) {
@@ -168,3 +173,11 @@ async function writeSnapshot( file, data ) {
 function sleep( ms ) {
 	return new Promise( ( resolve ) => setTimeout( resolve, ms ) );
 }
+
+/**
+ * Noms d'avant le renommage d'Okno en Leiho : gardés jusqu'à la 2.0.
+ * @deprecated Utiliser loadLeihoContent / indexLeihoContent.
+ */
+export const loadOknoContent = loadLeihoContent;
+/** @deprecated Utiliser indexLeihoContent. */
+export const indexOknoContent = indexLeihoContent;

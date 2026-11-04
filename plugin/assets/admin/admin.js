@@ -198,7 +198,7 @@
 					return;
 				}
 				var data = event.data;
-				if ( ! data || 'leiho' !== data.ns || 'ready' !== data.type ) {
+				if ( ! data || ( 'leiho' !== data.ns && 'okno' !== data.ns ) || 'ready' !== data.type ) { // okno : bridge d'avant Leiho.
 					return;
 				}
 				var fields = 0;

@@ -379,7 +379,7 @@ $GLOBALS['acf_values'][21] = array( 'field_h1' => str_repeat( 'x', 80 ) ); // Pl
 // Valeurs stockées par ACF : une méta de référence par valeur (compteur de l'aperçu).
 $GLOBALS['wpdb']->exec( "INSERT INTO wp_postmeta (post_id, meta_key, meta_value) VALUES (10, '_h1', 'field_h1'), (10, '_prix', 'field_prix'), (10, '_sections_0_label', 'field_s_label'), (11, '_h1', 'field_h1'), (30, '_sous_titre', 'field_sous')" );
 
-/** Contenu servi, tel que l'export le construit (adapters dans l'ordre d'Leiho). */
+/** Contenu servi, tel que l'export le construit (adapters dans l'ordre de Leiho). */
 function served( $id ) {
 	$fields = array();
 	foreach ( array( new Leiho_Native_Adapter(), new Leiho_ACF_Adapter() ) as $adapter ) {

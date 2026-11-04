@@ -60,8 +60,12 @@ class Leiho_Secrets {
 		return null === self::decrypt( $secrets[ $name ] ) ? 'unreadable' : 'ok';
 	}
 
-	private static function key() {
-		return hash( 'sha256', wp_salt( 'auth' ) . '|leiho-secrets', true );
+	/**
+	 * @param bool $legacy Clé des secrets écrits par Okno (avant le renommage
+	 *                     en Leiho) : seule la chaîne de dérivation change.
+	 */
+	private static function key( $legacy = false ) {
+		return hash( 'sha256', wp_salt( 'auth' ) . ( $legacy ? '|okno-secrets' : '|leiho-secrets' ), true );
 	}
 
 	private static function encrypt( $plain ) {
@@ -73,11 +77,15 @@ class Leiho_Secrets {
 	}
 
 	private static function decrypt( $blob ) {
+		$plain = self::decrypt_with( $blob, self::key() );
+		return null !== $plain ? $plain : self::decrypt_with( $blob, self::key( true ) );
+	}
+
+	private static function decrypt_with( $blob, $key ) {
 		$raw = base64_decode( $blob, true );
 		if ( false === $raw || strlen( $raw ) < 49 ) {
 			return null;
 		}
-		$key    = self::key();
 		$iv     = substr( $raw, 0, 16 );
 		$mac    = substr( $raw, 16, 32 );
 		$cipher = substr( $raw, 48 );
@@ -88,5 +96,34 @@ class Leiho_Secrets {
 
 		$plain = openssl_decrypt( $cipher, 'aes-256-cbc', $key, OPENSSL_RAW_DATA, $iv );
 		return false === $plain ? null : $plain;
+	}
+
+	/**
+	 * Rechiffre avec la clé Leiho les secrets hérités d'Okno (migration). Un
+	 * secret illisible avec les deux clés (salts changés) est laissé tel quel :
+	 * l'écran des réglages le signale déjà comme « illisible ».
+	 *
+	 * @return int Nombre de secrets rechiffrés.
+	 */
+	public static function upgrade_legacy() {
+		$secrets = get_option( Leiho_Plugin::OPTION_SECRETS, array() );
+		if ( ! is_array( $secrets ) ) {
+			return 0;
+		}
+		$count = 0;
+		foreach ( $secrets as $name => $blob ) {
+			if ( ! is_string( $blob ) || '' === $blob || null !== self::decrypt_with( $blob, self::key() ) ) {
+				continue;
+			}
+			$plain = self::decrypt_with( $blob, self::key( true ) );
+			if ( null !== $plain ) {
+				$secrets[ $name ] = self::encrypt( $plain );
+				$count++;
+			}
+		}
+		if ( $count ) {
+			update_option( Leiho_Plugin::OPTION_SECRETS, $secrets, false );
+		}
+		return $count;
 	}
 }

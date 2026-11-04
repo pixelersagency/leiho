@@ -150,7 +150,7 @@ class Leiho_Cache {
 	}
 
 	/**
-	 * Invalide tout le cache objet d'Leiho d'un coup : les anciennes clés ne
+	 * Invalide tout le cache objet de Leiho d'un coup : les anciennes clés ne
 	 * sont plus jamais lues et expirent d'elles-mêmes.
 	 *
 	 * @return void
@@ -294,7 +294,7 @@ class Leiho_Cache {
 			'Cache-Control' => $control,
 		);
 		if ( $private ) {
-			$headers['Vary'] = 'Origin, Authorization, X-Leiho-Token, Cookie';
+			$headers['Vary'] = 'Origin, Authorization, X-Leiho-Token, X-Okno-Token, Cookie';
 		}
 		return $headers;
 	}

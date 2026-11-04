@@ -1,6 +1,6 @@
 <?php
 /**
- * Tests de l'IA d'Leiho, sans WordPress ni réseau : php plugin/tests/test-ai.php
+ * Tests de l'IA de Leiho, sans WordPress ni réseau : php plugin/tests/test-ai.php
  *
  * Assemblage des prompts (contexte de marque + entrée), contrôle des
  * formulations interdites et de la longueur, réponse JSON → valeurs de
@@ -590,7 +590,7 @@ check( 'journal : action d’IA (qui, champ, action), sans le texte', 'ai' === $
 // Nouvelle entrée : génération puis brouillon.
 $GLOBALS['caps']['edit_posts'] = true;
 check( 'REST : nouvelle entrée autorisée pour un type géré', true === Leiho_AI_Rest::can_create_entry( new WP_REST_Request( array( 'post_type' => 'service' ) ) ) );
-check( 'REST : type hors d’Leiho refusé', false === Leiho_AI_Rest::can_create_entry( new WP_REST_Request( array( 'post_type' => 'product' ) ) ) );
+check( 'REST : type hors de Leiho refusé', false === Leiho_AI_Rest::can_create_entry( new WP_REST_Request( array( 'post_type' => 'product' ) ) ) );
 Fake_Builder::$answers = array( json_encode( array( '_title' => 'Audit radon', '_excerpt' => 'Mesure du radon.' ) ) );
 $entry = Leiho_AI_Rest::entry( new WP_REST_Request( array( 'post_type' => 'service', 'brief' => 'Le radon' ) ) );
 $log   = array_pop( Fake_Builder::$log );
@@ -641,7 +641,7 @@ $GLOBALS['posts'][42]->post_status = 'future';
 check( 'écriture : contenu programmé refusé', is_wp_error( Leiho_AI_Abilities::update_entry_fields( array( 'id' => 42, 'values' => array( 'x' => 1 ) ) ) ) );
 $GLOBALS['posts'][43] = (object) array( 'ID' => 43, 'post_type' => 'product', 'post_status' => 'draft' );
 $GLOBALS['post_caps']['edit_post:43'] = true;
-check( 'permission : type hors d’Leiho refusé', false === Leiho_AI_Abilities::can_edit_entry( array( 'id' => 43 ) ) );
+check( 'permission : type hors de Leiho refusé', false === Leiho_AI_Abilities::can_edit_entry( array( 'id' => 43 ) ) );
 $GLOBALS['posts'][42]->post_status = 'draft';
 
 $upd = Leiho_AI_Abilities::update_entry_fields( array( 'id' => 42, 'values' => array( 'hero_title' => 'Nouveau', '_status' => 'publish' ), 'revision' => 'rev1' ) );

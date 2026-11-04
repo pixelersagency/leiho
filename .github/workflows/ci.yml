@@ -39,6 +39,7 @@ jobs:
           php plugin/tests/test-autopublish.php
           php plugin/tests/test-app.php
           php plugin/tests/test-ai.php
+          php plugin/tests/test-legacy.php
           php plugin/tests/smoke-load.php
 
   bridge:

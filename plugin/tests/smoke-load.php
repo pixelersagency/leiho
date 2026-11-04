@@ -25,6 +25,16 @@ function register_rest_route( ...$a ) {}
 function plugin_dir_path( $f ) { return dirname( $f ) . '/'; }
 function plugin_dir_url( $f ) { return 'https://wp.test/plugins/leiho/'; }
 function get_option( $k, $d = false ) { return $d; }
+function add_option( ...$a ) { return true; }
+// Base vide : aucune donnée Okno à migrer.
+$GLOBALS['wpdb'] = new class() {
+	public $prefix  = 'wp_';
+	public $options = 'wp_options';
+	public function esc_like( $s ) { return addcslashes( $s, '_%\\' ); }
+	public function prepare( $sql, ...$args ) { return $sql; }
+	public function get_var( $sql ) { return null; }
+	public function get_col( $sql ) { return array(); }
+};
 function update_option( ...$a ) { return true; }
 function get_post_meta( ...$a ) { return ''; }
 function update_post_meta( ...$a ) { return true; }

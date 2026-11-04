@@ -50,6 +50,7 @@
 	 * ------------------------------------------------------------------ */
 
 	var state = {
+		bridgeNs: '', // « leiho », ou « okno » pour un bridge d'avant le renommage.
 		posts: [], // liste /posts (contenus éditables).
 		postsPage: 1,
 		postsTotalPages: 1,
@@ -433,7 +434,9 @@
 		if ( FORM || ! els.frame.contentWindow || ! cfg.frontOrigin ) {
 			return;
 		}
-		message.ns = 'leiho';
+		// Un site encore équipé du bridge d'Okno parle « okno » : on lui répond
+		// dans sa langue (voir la réception ci-dessous).
+		message.ns = state.bridgeNs || 'leiho';
 		els.frame.contentWindow.postMessage( message, cfg.frontOrigin );
 	}
 
@@ -445,9 +448,10 @@
 			return;
 		}
 		var data = event.data;
-		if ( ! data || data.ns !== 'leiho' ) {
+		if ( ! data || ( data.ns !== 'leiho' && data.ns !== 'okno' ) ) {
 			return;
 		}
+		state.bridgeNs = data.ns;
 
 		if ( 'ready' === data.type ) {
 			onBridgeReady( data );
@@ -489,7 +493,7 @@
 			return;
 		}
 
-		// Page inconnue d'Leiho (hors post types configurés, ou URL non mappée) :
+		// Page inconnue de Leiho (hors post types configurés, ou URL non mappée) :
 		// on recharge quand même l'aperçu dessus pour ne pas bloquer la visite.
 		toast( __( 'This page can’t be edited with Leiho — preview only.', 'leiho' ) );
 		loadFrame( data.href );
@@ -2960,7 +2964,7 @@
 	 * Contrôles spécialisés
 	 * ------------------------------------------------------------------ */
 
-	/** Styles de la zone éditable de TinyMCE (iframe) : jetons d'Leiho. */
+	/** Styles de la zone éditable de TinyMCE (iframe) : jetons de Leiho. */
 	function editorContentStyle() {
 		var host = els.panel || document.body;
 		var css = window.getComputedStyle( host );
@@ -3022,7 +3026,7 @@
 						menubar: false,
 						statusbar: false,
 						wpautop: full ? true : undefined,
-						// Le texte édité prend les couleurs d'Leiho (thème clair ou sombre).
+						// Le texte édité prend les couleurs de Leiho (thème clair ou sombre).
 						content_style: editorContentStyle(),
 						height: full ? 360 : 180,
 						setup: function ( ed ) {
@@ -4377,7 +4381,8 @@
 	var storedTheme = themeApi ? themeApi.current() : null;
 	if ( ! themeApi ) {
 		try {
-			storedTheme = window.localStorage.getItem( 'leiho-theme' );
+			// okno-theme : nom de la clé avant le renommage en Leiho.
+			storedTheme = window.localStorage.getItem( 'leiho-theme' ) || window.localStorage.getItem( 'okno-theme' );
 		} catch ( e ) { /* stockage indisponible : thème sombre. */ }
 	}
 

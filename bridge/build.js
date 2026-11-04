@@ -37,6 +37,7 @@ ${ body
 	.join( '\n' ) }
 
 	window.initLeihoBridge = initLeihoBridge;
+	window.initOknoBridge = initLeihoBridge; // Nom d'avant le renommage en Leiho.
 
 	// Auto-init depuis l'attribut du tag <script>.
 	var script = document.currentScript;
@@ -44,7 +45,7 @@ ${ body
 	if ( origin ) {
 		initLeihoBridge( {
 			wpOrigin: origin,
-			cloakTimeout: Number( script.getAttribute( 'data-leiho-cloak-timeout' ) ) || undefined,
+			cloakTimeout: Number( script.getAttribute( 'data-leiho-cloak-timeout' ) || script.getAttribute( 'data-okno-cloak-timeout' ) ) || undefined,
 		} );
 	}
 } )();

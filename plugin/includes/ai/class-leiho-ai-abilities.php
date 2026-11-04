@@ -2,7 +2,7 @@
 defined( 'ABSPATH' ) || exit;
 
 /**
- * Capacités d'Leiho pour l'Abilities API de WordPress (6.9+) : les agents
+ * Capacités de Leiho pour l'Abilities API de WordPress (6.9+) : les agents
  * d'IA externes (adaptateur MCP, agents WordPress) lisent le contexte de
  * marque, les types de contenu et les entrées, et modifient les champs d'un
  * brouillon par le même chemin d'écriture que l'éditeur (validation,
@@ -211,7 +211,7 @@ class Leiho_AI_Abilities {
 	 */
 	public static function is_draft( $status ) {
 		/**
-		 * Statuts qu'une capacité d'Leiho peut modifier.
+		 * Statuts qu'une capacité de Leiho peut modifier.
 		 *
 		 * @param string[] $statuses Par défaut draft, pending, auto-draft.
 		 */

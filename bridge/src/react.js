@@ -35,4 +35,7 @@ export function LeihoBridge( { wpOrigin, cloakTimeout = 0 } ) {
 	return null;
 }
 
+/** @deprecated Nom d'avant le renommage d'Okno en Leiho, gardé jusqu'à la 2.0. */
+export const OknoBridge = LeihoBridge;
+
 export default LeihoBridge;

@@ -300,7 +300,7 @@ class Leiho_Collections {
 	}
 
 	/**
-	 * Contenu d'leiho.schema.json.
+	 * Contenu de leiho.schema.json.
 	 *
 	 * @return array
 	 */
@@ -504,7 +504,7 @@ class Leiho_Collections {
 		foreach ( self::schema()['collections'] as $collection ) {
 			if ( ! empty( $collection['external'] ) ) {
 				// Type déclaré ailleurs : servi (ou non) selon les réglages, comme
-				// avant qu'Leiho n'en reprenne les champs.
+				// avant que Leiho n'en reprenne les champs.
 				continue;
 			}
 			if ( ! in_array( $collection['id'], (array) $settings['post_types'], true ) ) {

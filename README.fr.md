@@ -21,7 +21,7 @@ Le headless donne aux développeurs un front moderne, mais retire aux rédacteur
 
 ## Leiho, c'est le back-office
 
-Un clic sur **Leiho** dans wp-admin et il s'ouvre en plein écran : menu WordPress, barre d'administration, pied de page et notices des autres extensions disparaissent (sur cette page seulement), remplacés par la navigation d'Leiho. WordPress + Leiho suffisent, les rédacteurs n'ont jamais besoin d'en sortir.
+Un clic sur **Leiho** dans wp-admin et il s'ouvre en plein écran : menu WordPress, barre d'administration, pied de page et notices des autres extensions disparaissent (sur cette page seulement), remplacés par la navigation de Leiho. WordPress + Leiho suffisent, les rédacteurs n'ont jamais besoin d'en sortir.
 
 | | |
 |---|---|

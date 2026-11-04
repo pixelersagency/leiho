@@ -91,7 +91,7 @@ class Leiho_Plugin {
 }
 
 /**
- * $wpdb minimal sur SQLite en mémoire (PDO). Le SQL d'Leiho est du MySQL
+ * $wpdb minimal sur SQLite en mémoire (PDO). Le SQL de Leiho est du MySQL
  * portable : SQLite l'accepte tel quel (backticks, types, CREATE INDEX).
  */
 class Fake_WPDB {

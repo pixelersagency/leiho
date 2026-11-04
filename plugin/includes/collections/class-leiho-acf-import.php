@@ -1435,7 +1435,7 @@ class Leiho_ACF_Import {
 	}
 
 	/**
-	 * Copie une entrée, puis compare ce qu'Leiho sert à ce que servait ACF.
+	 * Copie une entrée, puis compare ce que Leiho sert à ce que servait ACF.
 	 *
 	 * @param int                 $post_id    Entrée.
 	 * @param array               $collection Collection.

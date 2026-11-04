@@ -9,7 +9,7 @@
  * Interface d'application de bureau, dense et neutre : sombre par défaut,
  * clair dérivé (mêmes densités). Collections est en trois volets (types de
  * contenu, entrées ou champs, entrée éditée ou réglages du champ).
- * L'accent reste celui d'Leiho (#C5FF3E), le violet marque les collections.
+ * L'accent reste celui de Leiho (#C5FF3E), le violet marque les collections.
  *
  * Portions derived from Stacki (https://github.com/flowtricks/stacki),
  * Copyright (c) 2026 Timothy Ricks, MIT License — see licenses/stacki-MIT.txt.
@@ -4389,7 +4389,7 @@ body.leiho-app-body #wpbody-content {
 /*
  * La fenêtre de la médiathèque (wp.media), celle des liens (wpLink) et les
  * fenêtres de TinyMCE sont ajoutées au <body>, hors de la coque : elles
- * reçoivent ici les couleurs d'Leiho (clair et sombre, d'après le thème posé
+ * reçoivent ici les couleurs de Leiho (clair et sombre, d'après le thème posé
  * sur <html>), le bouton principal lime et l'anneau de sélection d'accent.
  */
 html[data-leiho-theme] body.leiho-app-body {
@@ -4991,7 +4991,7 @@ body.leiho-app-body .wplink-autocomplete .ui-state-focus {
 
 /*
  * Bouton « IA » d'un champ texte, aligné à droite de son libellé ; menu
- * d'actions (liste flottante d'Leiho) ; aperçu de la proposition avec
+ * d'actions (liste flottante de Leiho) ; aperçu de la proposition avec
  * différences, passages interdits surlignés ; nouvelle entrée ; contexte
  * de marque dans les réglages. Couleurs : jetons de l'application, clair
  * et sombre.

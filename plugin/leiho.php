@@ -58,6 +58,7 @@ require_once LEIHO_DIR . 'includes/class-leiho-cache.php';
 require_once LEIHO_DIR . 'includes/class-leiho-types.php';
 require_once LEIHO_DIR . 'includes/class-leiho-headless.php';
 require_once LEIHO_DIR . 'includes/class-leiho-updater.php';
+require_once LEIHO_DIR . 'includes/class-leiho-legacy.php';
 require_once LEIHO_DIR . 'includes/ai/class-leiho-ai-prompt.php';
 require_once LEIHO_DIR . 'includes/ai/class-leiho-ai-brand.php';
 require_once LEIHO_DIR . 'includes/ai/class-leiho-ai.php';
@@ -92,6 +93,14 @@ final class Leiho_Plugin {
 	}
 
 	private function boot() {
+		// Leiho s'appelait Okno : tant qu'Okno est actif, Leiho attend (un
+		// avis demande de le désactiver) ; ensuite il reprend ses données.
+		if ( Leiho_Legacy::okno_active() ) {
+			Leiho_Legacy::wait_for_okno();
+			return;
+		}
+		Leiho_Legacy::maybe_migrate();
+
 		// Leiho Collections d'abord : les champs natifs priment sur un homonyme ACF.
 		$this->adapters['collections'] = new Leiho_Native_Adapter();
 		$this->adapters['acf']         = new Leiho_ACF_Adapter();
@@ -126,6 +135,7 @@ final class Leiho_Plugin {
 		Leiho_Updater::init();
 		Leiho_AI::init();
 		Leiho_App::init();
+		Leiho_Legacy::init();
 
 		if ( is_admin() ) {
 			new Leiho_Admin( $this );
@@ -184,6 +194,21 @@ final class Leiho_Plugin {
 	}
 
 	/**
+	 * Activation. La migration depuis Okno passe en premier : sans elle, un
+	 * site Okno serait pris pour une installation neuve (réglages par défaut,
+	 * durcissement headless activé d'office, historique vide).
+	 */
+	public static function activate() {
+		if ( Leiho_Legacy::okno_active() ) {
+			return; // Leiho attend : la migration se fera quand Okno sera désactivé.
+		}
+		Leiho_Legacy::maybe_migrate();
+		Leiho_Headless::seed_defaults();
+		Leiho_Deploy_Manager::schedule_cleanup();
+		Leiho_Activity::install();
+	}
+
+	/**
 	 * Titre lisible d'un contenu.
 	 *
 	 * get_the_title() passe par wptexturize() et rend des entités (&rsquo;,
@@ -228,7 +253,5 @@ final class Leiho_Plugin {
 
 add_action( 'plugins_loaded', array( 'Leiho_Plugin', 'instance' ) );
 
-register_activation_hook( __FILE__, array( 'Leiho_Headless', 'seed_defaults' ) );
-register_activation_hook( __FILE__, array( 'Leiho_Deploy_Manager', 'schedule_cleanup' ) );
-register_activation_hook( __FILE__, array( 'Leiho_Activity', 'install' ) );
+register_activation_hook( __FILE__, array( 'Leiho_Plugin', 'activate' ) );
 register_deactivation_hook( __FILE__, array( 'Leiho_Deploy_Manager', 'unschedule_cleanup' ) );

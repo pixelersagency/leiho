@@ -170,7 +170,7 @@ un champ. Rends-les normalement et entoure le plus petit bloc utile d'une régio
 
 ## Charger le contenu
 
-Lis le contenu dans l'API de contenu d'Leiho, pas dans l'API REST de WordPress ni dans des
+Lis le contenu dans l'API de contenu de Leiho, pas dans l'API REST de WordPress ni dans des
 fichiers JSON du dépôt : WordPress est la seule source de vérité.
 
 ```js
@@ -193,7 +193,7 @@ const page = contenu.byPath( Astro.url.pathname );
 ## Publication
 
 - Site qui lit WordPress **à chaque visite** (rendu serveur à la demande, SPA qui interroge
-  l'API) : choisir le mode « Contenu en direct » dans les réglages d'Leiho. Enregistrer suffit.
+  l'API) : choisir le mode « Contenu en direct » dans les réglages de Leiho. Enregistrer suffit.
 - Site **généré au build** (Astro statique, export Next) : configurer le déploiement dans les
   réglages (build hook, GitHub Actions, Coolify, commit). Le client clique « Publier ».
 

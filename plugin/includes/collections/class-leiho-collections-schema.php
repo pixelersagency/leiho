@@ -71,7 +71,7 @@ class Leiho_Collections_Schema {
 		'export',
 		'import',
 		'fields',
-		// Table d'Leiho lui-même (wp_leiho_activity).
+		// Table de Leiho lui-même (wp_leiho_activity).
 		'activity',
 	);
 
@@ -106,7 +106,7 @@ class Leiho_Collections_Schema {
 	/**
 	 * Valide et normalise un schéma complet.
 	 *
-	 * @param mixed $input  Schéma (tableau décodé d'leiho.schema.json).
+	 * @param mixed $input  Schéma (tableau décodé de leiho.schema.json).
 	 * @param array $errors Erreurs (sortie) : [{ path, message }].
 	 * @return array{version:int,collections:array}
 	 */

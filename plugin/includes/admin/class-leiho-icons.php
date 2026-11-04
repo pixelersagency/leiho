@@ -2,7 +2,7 @@
 defined( 'ABSPATH' ) || exit;
 
 /**
- * Icônes SVG inline, partagées par toutes les pages d'Leiho.
+ * Icônes SVG inline, partagées par toutes les pages de Leiho.
  *
  * Aucune police d'icônes : Dashicons peut être déchargée par un plugin ou un
  * thème d'admin, et ses glyphes manquants débordaient sur les libellés.

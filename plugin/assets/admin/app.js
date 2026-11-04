@@ -453,7 +453,7 @@
 	// posé par PHP au premier rendu (méta utilisateur) ; le choix est gardé
 	// côté serveur, en cookie et dans le navigateur (LeihoUI.theme).
 	var themeApi = window.LeihoUI && window.LeihoUI.theme;
-	applyTheme( themeApi ? themeApi.current() : 'light' === storage( 'leiho-theme' ) ? 'light' : 'dark' );
+	applyTheme( themeApi ? themeApi.current() : 'light' === ( storage( 'leiho-theme' ) || storage( 'okno-theme' ) ) ? 'light' : 'dark' ); // okno-theme : nom d'avant Leiho.
 
 	if ( themeBtn ) {
 		themeBtn.addEventListener( 'click', function () {

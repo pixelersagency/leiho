@@ -277,7 +277,7 @@ $M::run_auto();
 check( 'cron seul : publié', 1 === $GLOBALS['driver']->calls && 0 === $M::pending_since() );
 
 // Sans publication automatique : le marqueur alimente l'indicateur de la
-// barre d'Leiho (« changements non publiés »), sans rien planifier.
+// barre de Leiho (« changements non publiés »), sans rien planifier.
 function queue_and_shutdown() {
 	$GLOBALS['shutdown'] = array();
 	$flag = new ReflectionProperty( 'Leiho_Deploy_Manager', 'auto_queued' );

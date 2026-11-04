@@ -1,9 +1,9 @@
 <?php
 /**
  * Désinstallation (suppression du plugin depuis wp-admin, pas la simple
- * désactivation) : retire toutes les données d'Leiho. Les champs ACF et les
+ * désactivation) : retire toutes les données de Leiho. Les champs ACF et les
  * contenus modifiés avec Leiho ne sont pas touchés : ils appartiennent au site.
- * Les valeurs des champs Leiho Collections vivent dans les tables d'Leiho et
+ * Les valeurs des champs Leiho Collections vivent dans les tables de Leiho et
  * partent avec lui, sauf si LEIHO_KEEP_DATA est défini ; les entrées restent
  * dans wp_posts.
  *
@@ -18,7 +18,7 @@ defined( 'WP_UNINSTALL_PLUGIN' ) || exit;
 function leiho_uninstall_site() {
 	global $wpdb;
 
-	foreach ( array( 'leiho_settings', 'leiho_secrets', 'leiho_deploy_history', 'leiho_usage', 'leiho_connection', 'leiho_activity_db_version', 'leiho_update_last_release', 'leiho_export_cache', 'leiho_auto_deploy_attempts', 'leiho_auto_deploy_pending', 'leiho_deploy_lock', 'leiho_ai_brand' ) as $option ) {
+	foreach ( array( 'leiho_settings', 'leiho_secrets', 'leiho_deploy_history', 'leiho_usage', 'leiho_connection', 'leiho_activity_db_version', 'leiho_update_last_release', 'leiho_export_cache', 'leiho_auto_deploy_attempts', 'leiho_auto_deploy_pending', 'leiho_deploy_lock', 'leiho_ai_brand', 'leiho_migrated_from_okno', 'leiho_migration_lock' ) as $option ) {
 		delete_option( $option );
 	}
 
@@ -42,7 +42,9 @@ function leiho_uninstall_site() {
 
 	// Leiho Collections : tables des collections, schéma, instantanés des
 	// révisions. LEIHO_KEEP_DATA (wp-config.php) les garde pour une réinstallation.
-	if ( ! defined( 'LEIHO_KEEP_DATA' ) || ! LEIHO_KEEP_DATA ) {
+	// OKNO_KEEP_DATA : nom d'avant le renommage en Leiho, encore respecté.
+	$keep = ( defined( 'LEIHO_KEEP_DATA' ) && LEIHO_KEEP_DATA ) || ( defined( 'OKNO_KEEP_DATA' ) && OKNO_KEEP_DATA );
+	if ( ! $keep ) {
 		$state = get_option( 'leiho_collections_state', array() );
 		foreach ( array_keys( isset( $state['collections'] ) && is_array( $state['collections'] ) ? $state['collections'] : array() ) as $id ) {
 			// Même garde que Leiho_Collections_Schema::ID_PATTERN : jamais d'identifiant arbitraire en SQL.

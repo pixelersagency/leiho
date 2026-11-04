@@ -61,6 +61,19 @@
 	const MANAGED_CLASS = 'leiho-managed-hover';
 	const CLOAK_CLASS = 'leiho-cloak';
 
+	/**
+	 * Attributs d'annotation : data-leiho-*, ou data-okno-* sur les sites annotés
+	 * avant le renommage d'Okno en Leiho (lus tant que la 2.0 n'est pas sortie).
+	 */
+	function attr( el, name ) {
+		const value = el.getAttribute( 'data-leiho-' + name );
+		return null !== value ? value : el.getAttribute( 'data-okno-' + name );
+	}
+
+	function sel( name ) {
+		return '[data-leiho-' + name + '], [data-okno-' + name + ']';
+	}
+
 	/** Attente de stabilisation du DOM avant re-collecte (rendus successifs de React). */
 	const SETTLE_MS = 120;
 
@@ -159,7 +172,7 @@
 		// Libellé vide = libellé par défaut, composé et traduit côté éditeur
 		// (le bridge ne connaît pas la langue de wp-admin) ; voir sectionAuto().
 		function sectionLabel( el ) {
-			const explicit = el.getAttribute( 'data-leiho-section' ) || el.getAttribute( 'aria-label' );
+			const explicit = attr( el, 'section' ) || el.getAttribute( 'aria-label' );
 			if ( explicit ) {
 				return explicit;
 			}
@@ -182,7 +195,7 @@
 		}
 
 		function sectionLayout( el ) {
-			const raw = el.getAttribute( 'data-leiho-layout' );
+			const raw = attr( el, 'layout' );
 			if ( ! raw ) {
 				return null;
 			}
@@ -202,7 +215,7 @@
 
 			// 1. Sections annotées explicitement : elles priment, même à l'intérieur
 			//    d'une balise <section> générique (sauf imbriquées dans une autre annotée).
-			const EXPLICIT = '[data-leiho-section], [data-leiho-layout]';
+			const EXPLICIT = sel( 'section' ) + ', ' + sel( 'layout' );
 			const explicit = [ ...document.querySelectorAll( EXPLICIT ) ].filter(
 				( el ) => ! ( el.parentElement && el.parentElement.closest( EXPLICIT ) )
 			);
@@ -249,7 +262,7 @@
 					entry = {
 						postId,
 						path,
-						refresh: 'save' === el.getAttribute( 'data-leiho-refresh' ),
+						refresh: 'save' === attr( el, 'refresh' ),
 						els: [],
 					};
 					nextFields.set( key, entry );
@@ -325,7 +338,7 @@
 					el.style.backgroundImage = value ? 'url("' + value + '")' : '';
 				}
 			} else if ( 'color_picker' === fieldType ) {
-				el.style.setProperty( el.getAttribute( 'data-leiho-style' ) || 'color', value || '' );
+				el.style.setProperty( attr( el, 'style' ) || 'color', value || '' );
 			} else if ( 'link' === fieldType ) {
 				const link = 'A' === el.tagName ? el : el.querySelector( 'a' );
 				const data = value && 'object' === typeof value ? value : { url: value };
@@ -340,7 +353,7 @@
 						setText( link, data.title );
 					}
 				}
-			} else if ( 'wysiwyg' === fieldType || 'html' === el.getAttribute( 'data-leiho-apply' ) ) {
+			} else if ( 'wysiwyg' === fieldType || 'html' === attr( el, 'apply' ) ) {
 				const html = sanitizeHtml( value );
 				if ( el.innerHTML !== html ) {
 					el.innerHTML = html;
@@ -446,7 +459,7 @@
 
 		document.addEventListener( 'mouseover', ( event ) => {
 			const field = fieldTarget( event.target );
-			const managed = ! field && event.target.closest ? event.target.closest( '[data-leiho-managed]' ) : null;
+			const managed = ! field && event.target.closest ? event.target.closest( sel( 'managed' ) ) : null;
 			document.querySelectorAll( '.' + HOVER_CLASS + ', .' + MANAGED_CLASS ).forEach( ( el ) => {
 				if ( el !== field && el !== managed ) {
 					el.classList.remove( HOVER_CLASS, MANAGED_CLASS );
@@ -497,16 +510,16 @@
 				}
 
 				// 3. Un contenu géré ailleurs.
-				const managed = target.closest( '[data-leiho-managed]' );
+				const managed = target.closest( sel( 'managed' ) );
 				if ( managed ) {
 					event.preventDefault();
 					event.stopPropagation();
-					const provider = managed.getAttribute( 'data-leiho-managed' ) || '';
+					const provider = attr( managed, 'managed' ) || '';
 					send( {
 						type: 'managedFocus',
 						provider,
-						label: managed.getAttribute( 'data-leiho-managed-label' ) || '',
-						editUrl: managed.getAttribute( 'data-leiho-edit-url' ) || '',
+						label: attr( managed, 'managed-label' ) || '',
+						editUrl: attr( managed, 'edit-url' ) || '',
 					} );
 					return;
 				}
@@ -576,6 +589,7 @@
 	}
 
 	window.initLeihoBridge = initLeihoBridge;
+	window.initOknoBridge = initLeihoBridge; // Nom d'avant le renommage en Leiho.
 
 	// Auto-init depuis l'attribut du tag <script>.
 	var script = document.currentScript;
@@ -583,7 +597,7 @@
 	if ( origin ) {
 		initLeihoBridge( {
 			wpOrigin: origin,
-			cloakTimeout: Number( script.getAttribute( 'data-leiho-cloak-timeout' ) ) || undefined,
+			cloakTimeout: Number( script.getAttribute( 'data-leiho-cloak-timeout' ) || script.getAttribute( 'data-okno-cloak-timeout' ) ) || undefined,
 		} );
 	}
 } )();

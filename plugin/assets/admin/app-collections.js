@@ -11,7 +11,7 @@
  * d'une collection (libellés, type, chemin, fonctionnalités), éditeur de
  * champs (glisser-déposer, 19 types et leurs options, sous-champs, blocs),
  * aperçu du plan de migration (dry_run) avant application, colonnes
- * archivées et purge, suppression, import / export d'leiho.schema.json.
+ * archivées et purge, suppression, import / export de leiho.schema.json.
  *
  * La clé d'un champ (key) est son identité stable : générée à partir du nom
  * à la création, elle ne change plus une fois enregistrée. Seuls le nom (API)
@@ -1750,7 +1750,7 @@
 	}
 
 	/* ------------------------------------------------------------------ *
-	 * Import / export d'leiho.schema.json
+	 * Import / export de leiho.schema.json
 	 * ------------------------------------------------------------------ */
 
 	function exportSchema() {

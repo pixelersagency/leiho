@@ -2,7 +2,7 @@
 defined( 'ABSPATH' ) || exit;
 
 /**
- * IA d'Leiho, posée sur le client d'IA de WordPress (7.0+) : wp_ai_client_prompt()
+ * IA de Leiho, posée sur le client d'IA de WordPress (7.0+) : wp_ai_client_prompt()
  * et le fournisseur que le site a configuré dans Réglages → Connecteurs.
  * Leiho ne stocke aucune clé et ne choisit aucun fournisseur.
  *
@@ -117,7 +117,7 @@ class Leiho_AI {
 	 */
 	public static function capability() {
 		/**
-		 * Capability nécessaire pour utiliser les outils d'IA d'Leiho.
+		 * Capability nécessaire pour utiliser les outils d'IA de Leiho.
 		 *
 		 * @param string $capability Par défaut edit_posts.
 		 */

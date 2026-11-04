@@ -98,9 +98,16 @@ class Leiho_Collections_Store {
 
 	/**
 	 * Nom d'index unique dans la base : SQLite partage les noms d'index entre tables.
+	 *
+	 * L'empreinte est calculée sur l'ancien nom de table (okno_…) : les index
+	 * créés avant le renommage d'Okno en Leiho gardent leur nom après le
+	 * renommage des tables, et restent donc retrouvables (DROP INDEX).
 	 */
 	public static function index_name( $table, $column ) {
-		return 'k' . substr( md5( $table . '.' . $column ), 0, 10 ) . '_' . substr( $column, 0, 50 );
+		global $wpdb;
+		$prefix = isset( $wpdb->prefix ) ? $wpdb->prefix : '';
+		$stable = 0 === strpos( $table, $prefix . 'leiho_' ) ? $prefix . 'okno_' . substr( $table, strlen( $prefix . 'leiho_' ) ) : $table;
+		return 'k' . substr( md5( $stable . '.' . $column ), 0, 10 ) . '_' . substr( $column, 0, 50 );
 	}
 
 	/* ---------------------------------------------------------------------

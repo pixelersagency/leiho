@@ -165,6 +165,9 @@ class Leiho_Content {
 	public static function request_token( $request ) {
 		$token = (string) $request->get_header( 'x_leiho_token' );
 		if ( '' === $token ) {
+			$token = (string) $request->get_header( 'x_okno_token' ); // Fronts écrits pour Okno.
+		}
+		if ( '' === $token ) {
 			$auth = (string) $request->get_header( 'authorization' );
 			if ( 0 === stripos( $auth, 'Bearer ' ) ) {
 				$token = substr( $auth, 7 );

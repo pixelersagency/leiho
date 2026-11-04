@@ -237,7 +237,7 @@ class Leiho_Deploy_Manager {
 			return;
 		}
 		// Sans publication automatique, le marqueur sert quand même : la barre
-		// d'Leiho signale les changements pas encore publiés (« Publier » l'efface).
+		// de Leiho signale les changements pas encore publiés (« Publier » l'efface).
 		$auto = self::auto_enabled();
 		if ( ! $auto && null === self::driver() ) {
 			return;

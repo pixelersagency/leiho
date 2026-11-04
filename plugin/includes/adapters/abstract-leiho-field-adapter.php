@@ -626,7 +626,7 @@ abstract class Leiho_Field_Adapter implements Leiho_Adapter_Interface, Leiho_Con
 
 			default:
 				// Types simples (text, textarea, url, email…) et types inconnus
-				// d'Leiho : la valeur brute, sans la tronquer en chaîne.
+				// de Leiho : la valeur brute, sans la tronquer en chaîne.
 				if ( null === $raw || false === $raw ) {
 					return in_array( $type, array( 'text', 'textarea', 'url', 'email', 'oembed', 'password', 'color_picker', 'radio', 'button_group', 'date_time_picker', 'time_picker' ), true ) ? '' : null;
 				}
@@ -1169,7 +1169,7 @@ abstract class Leiho_Field_Adapter implements Leiho_Adapter_Interface, Leiho_Con
 
 	/**
 	 * Sanitize les sous-champs d'une ligne. Les sous-champs absents du payload
-	 * ne sont pas touchés ; ceux qu'Leiho ne sait pas éditer repassent tels quels
+	 * ne sont pas touchés ; ceux que Leiho ne sait pas éditer repassent tels quels
 	 * pour ne pas être effacés par le remplacement de la ligne.
 	 */
 	protected function sanitize_row( $subs, $row, &$error, $post_id ) {

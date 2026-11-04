@@ -20,8 +20,9 @@ for ( let i = 0; i < rest.length; i++ ) {
 	}
 }
 
-const url = args.url || process.env.LEIHO_URL;
-const token = args.token || process.env.LEIHO_TOKEN || '';
+// OKNO_URL / OKNO_TOKEN : noms d'avant le renommage en Leiho, encore lus.
+const url = args.url || process.env.LEIHO_URL || process.env.OKNO_URL;
+const token = args.token || process.env.LEIHO_TOKEN || process.env.OKNO_TOKEN || '';
 
 async function types() {
 	const endpoint = exportUrl( url ).replace( /\/export$/, '/types' );

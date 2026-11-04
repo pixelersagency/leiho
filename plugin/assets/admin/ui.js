@@ -1981,7 +1981,7 @@
 		// fois côté serveur, pour que PHP l'imprime dès le premier rendu.
 		var stored = null;
 		try {
-			stored = window.localStorage.getItem( 'leiho-theme' );
+			stored = window.localStorage.getItem( 'leiho-theme' ) || window.localStorage.getItem( 'okno-theme' ); // okno-theme : avant Leiho.
 		} catch ( e ) {
 			stored = null;
 		}

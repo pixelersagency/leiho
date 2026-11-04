@@ -30,7 +30,7 @@
 	var TEXT_TYPES = [ 'text', 'textarea', 'wysiwyg' ];
 
 	/* ------------------------------------------------------------------ *
-	 * Icônes (même trait que le reste d'Leiho)
+	 * Icônes (même trait que le reste de Leiho)
 	 * ------------------------------------------------------------------ */
 
 	var ICONS = {
