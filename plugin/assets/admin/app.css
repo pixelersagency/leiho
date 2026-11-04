@@ -5596,3 +5596,32 @@ mark.leiho-ai-flag {
 	line-height: 1.5;
 	resize: vertical;
 }
+
+/* Écran IA : guide de connexion d'un agent (MCP). */
+.leiho-ai-agents__title {
+	margin: 24px 0 8px;
+	color: var(--leiho-ink);
+	font-size: var(--leiho-text-base, 14px);
+	font-weight: 650;
+}
+
+.leiho-ai-connect {
+	margin-top: 8px;
+}
+
+.leiho-ai-connect .leiho-help + .leiho-help {
+	margin-top: 6px;
+}
+
+.leiho-ai-tabs .leiho-code pre {
+	max-height: 320px;
+	overflow: auto;
+}
+
+.leiho-ai-prompts {
+	display: grid;
+	gap: 6px;
+	margin: 8px 0 0;
+	padding-left: 18px;
+	list-style: disc;
+}

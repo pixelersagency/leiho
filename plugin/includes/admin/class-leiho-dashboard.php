@@ -214,7 +214,7 @@ class Leiho_Dashboard {
 								/* translators: 1: author, 2: content title, 3: relative time (e.g. 5 mins). */
 								__( '%1$s · %2$s · %3$s ago', 'leiho' ),
 								$activity->user_name ? $activity->user_name : __( 'Unknown user', 'leiho' ),
-								$title ? $title : __( 'deleted content', 'leiho' ),
+								$title ? $title : ( $post_id ? __( 'deleted content', 'leiho' ) : __( 'site settings', 'leiho' ) ),
 								$when ? human_time_diff( $when ) : '?'
 							)
 						);
@@ -859,7 +859,9 @@ class Leiho_Dashboard {
 					<ul class="leiho-log">
 						<?php
 						foreach ( $actions as $activity ) {
-							if ( current_user_can( 'edit_post', (int) $activity->post_id ) ) {
+							// Sans contenu (post_id 0) : réglages changés par un agent.
+							$allowed = (int) $activity->post_id ? current_user_can( 'edit_post', (int) $activity->post_id ) : current_user_can( 'manage_options' );
+							if ( $allowed ) {
 								self::render_activity( $activity );
 							}
 						}
@@ -868,20 +870,186 @@ class Leiho_Dashboard {
 				<?php endif; ?>
 			</section>
 
-			<section class="leiho-form-section" id="leiho-ai-agents">
-				<h2><?php esc_html_e( 'AI agents', 'leiho' ); ?></h2>
-				<?php if ( function_exists( 'wp_register_ability' ) ) : ?>
-					<p class="leiho-help"><?php esc_html_e( 'External agents (through the WordPress MCP adapter, for example) can use these abilities, with the rights of the user they connect as. They never publish.', 'leiho' ); ?></p>
-					<ul class="leiho-ai-abilities">
-						<?php foreach ( Leiho_AI_Abilities::definitions() as $name => $ability ) : ?>
-							<li><code><?php echo esc_html( $name ); ?></code> <span><?php echo esc_html( $ability['label'] ); ?></span></li>
+			<?php self::render_ai_agents( $status ); ?>
+		</div>
+		<?php
+	}
+
+	/**
+	 * Écran IA : agents externes (MCP). Guide de connexion pas à pas, avec
+	 * l'adresse réelle du serveur MCP du site et l'identifiant de
+	 * l'utilisateur courant (jamais de mot de passe), puis la liste des
+	 * capacités.
+	 *
+	 * @param array $status État de l'IA (Leiho_AI::status()).
+	 * @return void
+	 */
+	private static function render_ai_agents( array $status ) {
+		?>
+		<section class="leiho-form-section" id="leiho-ai-agents">
+			<h2><?php esc_html_e( 'AI agents', 'leiho' ); ?></h2>
+			<?php if ( ! function_exists( 'wp_register_ability' ) ) : ?>
+				<p class="leiho-muted"><?php esc_html_e( 'Leiho offers abilities to external AI agents from WordPress 6.9 (Abilities API).', 'leiho' ); ?></p>
+			</section>
+				<?php
+				return;
+			endif;
+
+			$adapter  = Leiho_AI_Admin_Abilities::mcp_adapter_active();
+			$install  = current_user_can( 'install_plugins' ) ? admin_url( 'plugin-install.php?s=mcp-adapter&tab=search&type=term' ) : 'https://wordpress.org/plugins/mcp-adapter/';
+			$endpoint = rest_url( 'mcp/mcp-adapter-default-server' );
+			$user     = wp_get_current_user();
+			$login    = $user && $user->exists() ? $user->user_login : 'your-username';
+			$host     = (string) wp_parse_url( home_url(), PHP_URL_HOST );
+			$server   = sanitize_key( str_replace( '.', '-', '' !== $host ? $host : 'wordpress' ) );
+			// Jamais de vrai mot de passe : un modèle au format des mots de passe d'application.
+			$password = 'xxxx xxxx xxxx xxxx xxxx xxxx';
+			$package  = '@automattic/mcp-wordpress-remote@latest';
+
+			$json = wp_json_encode(
+				array(
+					'mcpServers' => array(
+						$server => array(
+							'command' => 'npx',
+							'args'    => array( '-y', $package ),
+							'env'     => array(
+								'WP_API_URL'      => $endpoint,
+								'WP_API_USERNAME' => $login,
+								'WP_API_PASSWORD' => $password,
+							),
+						),
+					),
+				),
+				JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE
+			);
+			$quote = static function ( $value ) {
+				return "'" . str_replace( "'", "'\\''", $value ) . "'";
+			};
+			// --env doit être suivi d'une autre option avant le nom du serveur.
+			$cli = 'claude mcp add --scope user'
+				. ' --env ' . $quote( 'WP_API_URL=' . $endpoint )
+				. ' --env ' . $quote( 'WP_API_USERNAME=' . $login )
+				. ' --env ' . $quote( 'WP_API_PASSWORD=' . $password )
+				. ' --transport stdio ' . $server . ' -- npx -y ' . $package;
+
+			$prompts = array(
+				__( 'Read the brand context of my site, then write a draft service page about indoor air audits.', 'leiho' ),
+				__( 'Find my drafts in Leiho and fill in the empty fields of the most recent one.', 'leiho' ),
+				__( 'List the content types and their fields, then create a draft FAQ entry from these notes: …', 'leiho' ),
+			);
+			if ( current_user_can( 'manage_options' ) ) {
+				$prompts[] = __( 'Run the Leiho diagnostics and tell me what to fix, step by step.', 'leiho' );
+			}
+			?>
+			<p class="leiho-help"><?php esc_html_e( 'Claude, Cursor and other AI agents can work on this site through MCP, with the rights of the user they connect as. Content abilities never publish: they read, and they write drafts only.', 'leiho' ); ?></p>
+
+			<div class="leiho-row">
+				<span class="leiho-row__label"><?php esc_html_e( 'Abilities API', 'leiho' ); ?></span>
+				<div><span class="leiho-pill leiho-pill--ok"><?php esc_html_e( 'Available', 'leiho' ); ?></span></div>
+			</div>
+			<div class="leiho-row">
+				<span class="leiho-row__label"><?php esc_html_e( 'MCP Adapter', 'leiho' ); ?></span>
+				<div>
+					<?php if ( $adapter ) : ?>
+						<span class="leiho-pill leiho-pill--ok"><?php esc_html_e( 'Active', 'leiho' ); ?></span>
+						<code><?php echo esc_html( $endpoint ); ?></code>
+					<?php else : ?>
+						<span class="leiho-pill leiho-pill--warn"><?php esc_html_e( 'Not active', 'leiho' ); ?></span>
+						<span class="leiho-help"><?php esc_html_e( 'The official MCP Adapter plugin, by WordPress.org, turns these abilities into MCP tools. Install and activate it first.', 'leiho' ); ?></span>
+						<a class="leiho-btn leiho-btn--quiet" href="<?php echo esc_url( $install ); ?>"><?php esc_html_e( 'Install MCP Adapter', 'leiho' ); ?></a>
+					<?php endif; ?>
+				</div>
+			</div>
+
+			<h3 class="leiho-ai-agents__title"><?php esc_html_e( 'Connect an AI agent', 'leiho' ); ?></h3>
+			<ol class="leiho-steps leiho-ai-connect">
+				<li class="leiho-step <?php echo $adapter ? 'leiho-step--done' : 'leiho-step--current'; ?>">
+					<h3><?php esc_html_e( 'Install the MCP Adapter plugin', 'leiho' ); ?></h3>
+					<?php if ( $adapter ) : ?>
+						<p><?php esc_html_e( 'Done: the adapter is active and serves this site’s MCP server at the address above.', 'leiho' ); ?></p>
+					<?php else : ?>
+						<p><?php esc_html_e( 'Search for “MCP Adapter” in Plugins → Add New Plugin, install it and activate it. It adds the address AI clients connect to.', 'leiho' ); ?></p>
+						<div class="leiho-actions">
+							<a class="leiho-btn leiho-btn--small" href="<?php echo esc_url( $install ); ?>"><?php esc_html_e( 'Install MCP Adapter', 'leiho' ); ?></a>
+						</div>
+					<?php endif; ?>
+				</li>
+
+				<li class="leiho-step">
+					<h3><?php esc_html_e( 'Create an application password', 'leiho' ); ?></h3>
+					<p><?php esc_html_e( 'In your profile, under Application Passwords, add one named after the client (for example “Claude on my laptop”) and copy it: WordPress shows it only once. The site must use HTTPS.', 'leiho' ); ?></p>
+					<p class="leiho-help"><?php esc_html_e( 'The agent acts with the rights of that user. Prefer a dedicated user with the Editor role or lower: content abilities only write drafts, and you can revoke the password at any time from the profile.', 'leiho' ); ?></p>
+					<p class="leiho-help"><?php esc_html_e( 'Administration abilities (diagnostics, settings, secrets) work only when the agent connects as an administrator. Create an administrator application password just for a setup or debugging session, then revoke it.', 'leiho' ); ?></p>
+					<div class="leiho-actions">
+						<a class="leiho-btn leiho-btn--quiet leiho-btn--small" href="<?php echo esc_url( admin_url( 'profile.php#application-passwords-section' ) ); ?>"><?php esc_html_e( 'Open my application passwords', 'leiho' ); ?></a>
+					</div>
+				</li>
+
+				<li class="leiho-step">
+					<h3><?php esc_html_e( 'Add the site to your AI client', 'leiho' ); ?></h3>
+					<p><?php esc_html_e( 'The configuration below is filled in with this site’s address and your username. Replace xxxx xxxx xxxx xxxx xxxx xxxx with the application password. Node.js must be installed on your computer: the client starts a small bridge with npx.', 'leiho' ); ?></p>
+					<div class="leiho-ai-tabs">
+						<div class="leiho-segmented" role="tablist" data-leiho-segmented>
+							<button type="button" role="tab" aria-selected="true" data-panel="claude-desktop"><?php esc_html_e( 'Claude Desktop', 'leiho' ); ?></button>
+							<button type="button" role="tab" aria-selected="false" data-panel="claude-code"><?php esc_html_e( 'Claude Code', 'leiho' ); ?></button>
+							<button type="button" role="tab" aria-selected="false" data-panel="cursor"><?php esc_html_e( 'Cursor', 'leiho' ); ?></button>
+						</div>
+						<div data-panel-id="claude-desktop">
+							<p class="leiho-help"><?php esc_html_e( 'In Claude Desktop, open Settings → Developer → Edit Config. Add this server to claude_desktop_config.json (inside mcpServers if the file already has some), save, then restart Claude.', 'leiho' ); ?></p>
+							<div class="leiho-code">
+								<pre><?php echo esc_html( $json ); ?></pre>
+								<button type="button" data-leiho-copy="<?php echo esc_attr( $json ); ?>"><?php esc_html_e( 'Copy', 'leiho' ); ?></button>
+							</div>
+						</div>
+						<div data-panel-id="claude-code" hidden>
+							<p class="leiho-help"><?php esc_html_e( 'Run this command in a terminal. --scope user makes the server available in all your projects; remove it to add it to the current project only.', 'leiho' ); ?></p>
+							<div class="leiho-code">
+								<pre><?php echo esc_html( $cli ); ?></pre>
+								<button type="button" data-leiho-copy="<?php echo esc_attr( $cli ); ?>"><?php esc_html_e( 'Copy', 'leiho' ); ?></button>
+							</div>
+						</div>
+						<div data-panel-id="cursor" hidden>
+							<p class="leiho-help"><?php esc_html_e( 'Add this server to .cursor/mcp.json in your project, or to ~/.cursor/mcp.json for all your projects, then reload Cursor.', 'leiho' ); ?></p>
+							<div class="leiho-code">
+								<pre><?php echo esc_html( $json ); ?></pre>
+								<button type="button" data-leiho-copy="<?php echo esc_attr( $json ); ?>"><?php esc_html_e( 'Copy', 'leiho' ); ?></button>
+							</div>
+						</div>
+					</div>
+				</li>
+
+				<li class="leiho-step">
+					<h3><?php esc_html_e( 'Ask the agent', 'leiho' ); ?></h3>
+					<p><?php esc_html_e( 'Start a new conversation and check the connection with “List the WordPress abilities you can use on my site.” Then, for example:', 'leiho' ); ?></p>
+					<ul class="leiho-ai-prompts">
+						<?php foreach ( $prompts as $prompt ) : ?>
+							<li><?php echo esc_html( $prompt ); ?></li>
 						<?php endforeach; ?>
 					</ul>
-				<?php else : ?>
-					<p class="leiho-muted"><?php esc_html_e( 'Leiho offers abilities to external AI agents from WordPress 6.9 (Abilities API).', 'leiho' ); ?></p>
-				<?php endif; ?>
-			</section>
-		</div>
+				</li>
+			</ol>
+
+			<h3 class="leiho-ai-agents__title"><?php esc_html_e( 'Content', 'leiho' ); ?></h3>
+			<ul class="leiho-ai-abilities">
+				<?php foreach ( Leiho_AI_Abilities::definitions() as $name => $ability ) : ?>
+					<li>
+						<code><?php echo esc_html( $name ); ?></code>
+						<span><?php echo esc_html( $ability['label'] ); ?></span>
+						<?php if ( Leiho_AI_Abilities::ABILITY_ALT === $name && empty( $status['image'] ) ) : ?>
+							<span class="leiho-muted"><?php esc_html_e( 'Needs an AI provider that reads images.', 'leiho' ); ?></span>
+						<?php endif; ?>
+					</li>
+				<?php endforeach; ?>
+			</ul>
+
+			<h3 class="leiho-ai-agents__title"><?php esc_html_e( 'Site administration (administrators)', 'leiho' ); ?></h3>
+			<ul class="leiho-ai-abilities">
+				<?php foreach ( Leiho_AI_Admin_Abilities::definitions() as $name => $ability ) : ?>
+					<li><code><?php echo esc_html( $name ); ?></code> <span><?php echo esc_html( $ability['label'] ); ?></span></li>
+				<?php endforeach; ?>
+			</ul>
+			<p class="leiho-help"><?php esc_html_e( 'They never return a secret and never publish. Every change made by an agent is logged in Recent AI actions.', 'leiho' ); ?></p>
+		</section>
 		<?php
 	}
 

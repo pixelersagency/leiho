@@ -413,11 +413,27 @@ class Leiho_AI_Rest {
 	 * @return WP_REST_Response|WP_Error
 	 */
 	public static function alt( $request ) {
+		$result = self::suggest_alt( (int) $request['attachment_id'], (string) $request['context'], (int) $request['post_id'] );
+		return is_wp_error( $result ) ? $result : rest_ensure_response( $result );
+	}
+
+	/**
+	 * Propose un texte alternatif pour une image, sans rien enregistrer.
+	 * Partagé par la route REST (éditeur) et la capacité
+	 * leiho/suggest-alt-text (agents) ; les droits sont vérifiés par
+	 * l'appelant.
+	 *
+	 * @param int    $id      Pièce jointe (image).
+	 * @param string $context Contexte d'usage de l'image (facultatif).
+	 * @param int    $post_id Entrée où l'image est utilisée (0 : aucune).
+	 * @return array|WP_Error Proposition { text, format, max, check }.
+	 */
+	public static function suggest_alt( $id, $context = '', $post_id = 0 ) {
 		$status = Leiho_AI::status();
 		if ( ! $status['image'] ) {
 			return new WP_Error( 'leiho_ai_no_image', __( 'The configured AI provider can’t read images.', 'leiho' ), array( 'status' => 501 ) );
 		}
-		$id    = (int) $request['attachment_id'];
+		$id    = (int) $id;
 		$image = Leiho_AI::attachment_image( $id );
 		if ( is_wp_error( $image ) ) {
 			return $image;
@@ -432,14 +448,14 @@ class Leiho_AI_Rest {
 			array(
 				'title'   => $post ? $post->post_title : '',
 				'caption' => $post ? $post->post_excerpt : '',
-				'context' => sanitize_text_field( (string) $request['context'] ),
+				'context' => sanitize_text_field( (string) $context ),
 			)
 		);
 		$raw = Leiho_AI::generate( Leiho_AI_Prompt::system_instruction( $brand ), $prompt, array( 'image' => $image ) );
 		if ( is_wp_error( $raw ) ) {
 			return $raw;
 		}
-		$post_id = (int) $request['post_id'];
+		$post_id = (int) $post_id;
 		// Rattachée à l'entrée éditée, sinon à l'image elle-même.
 		Leiho_Activity::record_ai( $post_id && current_user_can( 'edit_post', $post_id ) ? $post_id : $id, 'alt:' . $id, $post ? $post->post_title : (string) $id, 'alt' );
 
@@ -448,7 +464,7 @@ class Leiho_AI_Rest {
 			'label'      => 'alt',
 			'max_length' => 0,
 		);
-		return rest_ensure_response( self::proposal( $raw, $field, $brand ) );
+		return self::proposal( $raw, $field, $brand );
 	}
 
 	/**

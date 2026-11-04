@@ -38,6 +38,7 @@ class Leiho_AI {
 		add_action( 'rest_api_init', array( 'Leiho_AI_Rest', 'register_routes' ) );
 		add_action( 'wp_abilities_api_categories_init', array( 'Leiho_AI_Abilities', 'register_category' ) );
 		add_action( 'wp_abilities_api_init', array( 'Leiho_AI_Abilities', 'register' ) );
+		add_action( 'wp_abilities_api_init', array( 'Leiho_AI_Admin_Abilities', 'register' ) );
 	}
 
 	/* ---------------------------------------------------------------------

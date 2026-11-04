@@ -64,6 +64,7 @@ require_once LEIHO_DIR . 'includes/ai/class-leiho-ai-brand.php';
 require_once LEIHO_DIR . 'includes/ai/class-leiho-ai.php';
 require_once LEIHO_DIR . 'includes/ai/class-leiho-ai-rest.php';
 require_once LEIHO_DIR . 'includes/ai/class-leiho-ai-abilities.php';
+require_once LEIHO_DIR . 'includes/ai/class-leiho-ai-admin-abilities.php';
 require_once LEIHO_DIR . 'includes/admin/class-leiho-icons.php';
 require_once LEIHO_DIR . 'includes/admin/class-leiho-dashboard.php';
 require_once LEIHO_DIR . 'includes/admin/class-leiho-app.php';

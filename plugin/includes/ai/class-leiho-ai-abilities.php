@@ -4,12 +4,13 @@ defined( 'ABSPATH' ) || exit;
 /**
  * Capacités de Leiho pour l'Abilities API de WordPress (6.9+) : les agents
  * d'IA externes (adaptateur MCP, agents WordPress) lisent le contexte de
- * marque, les types de contenu et les entrées, et modifient les champs d'un
- * brouillon par le même chemin d'écriture que l'éditeur (validation,
- * journal). Aucune ne publie ; aucune ne touche un contenu en ligne.
+ * marque, les types de contenu et les entrées, cherchent des entrées,
+ * créent des brouillons et modifient les champs d'un brouillon par le même
+ * chemin d'écriture que l'éditeur (validation, journal). Aucune ne publie ;
+ * aucune ne touche un contenu en ligne.
  *
- * Elles n'appellent aucun modèle : elles restent disponibles sans
- * fournisseur d'IA configuré.
+ * Seule leiho/suggest-alt-text appelle un modèle (celui du site, s'il lit
+ * les images) ; les autres restent disponibles sans fournisseur d'IA.
  */
 class Leiho_AI_Abilities {
 
@@ -17,6 +18,15 @@ class Leiho_AI_Abilities {
 
 	/** Statuts qu'une capacité peut modifier (brouillons). */
 	const DRAFT_STATUSES = array( 'draft', 'pending', 'auto-draft' );
+
+	/** Statuts qu'une recherche peut viser (jamais la corbeille). */
+	const SEARCH_STATUSES = array( 'publish', 'future', 'draft', 'pending', 'private' );
+
+	/** Résultats par page d'une recherche (maximum). */
+	const MAX_PER_PAGE = 50;
+
+	/** Capacité qui demande un fournisseur capable de lire les images. */
+	const ABILITY_ALT = 'leiho/suggest-alt-text';
 
 	/**
 	 * Catégorie « leiho ».
@@ -31,7 +41,7 @@ class Leiho_AI_Abilities {
 			self::CATEGORY,
 			array(
 				'label'       => __( 'Leiho', 'leiho' ),
-				'description' => __( 'Read and edit the content managed with Leiho: brand context, content types, entries and their fields.', 'leiho' ),
+				'description' => __( 'Read, find and draft the content managed with Leiho: brand context, content types, entries and their fields.', 'leiho' ),
 			)
 		);
 	}
@@ -154,6 +164,115 @@ class Leiho_AI_Abilities {
 					)
 				),
 			),
+			'leiho/search-entries'      => array(
+				'label'               => __( 'Search entries', 'leiho' ),
+				'description'         => __( 'Finds entries of the content types edited in Leiho, by type, title text and status (all statuses except trash by default), most recently modified first. Returns for each entry its ID, type, title, status, last modified date, path on the front end, whether you can edit it and whether an agent can write to it (drafts and pending entries only). Only entries the connected user can edit are listed.', 'leiho' ),
+				'category'            => self::CATEGORY,
+				'input_schema'        => array(
+					'type'                 => 'object',
+					'properties'           => array(
+						'post_type' => array(
+							'type'        => 'string',
+							'description' => __( 'Optional content type (see leiho/list-collections).', 'leiho' ),
+						),
+						'search'    => array(
+							'type'        => 'string',
+							'description' => __( 'Optional text to look for in the titles.', 'leiho' ),
+							'maxLength'   => 200,
+						),
+						'status'    => array(
+							'type'        => 'string',
+							'description' => __( 'Optional status: publish, future, draft, pending or private. All of them by default.', 'leiho' ),
+							'enum'        => array_merge( array( 'any' ), self::SEARCH_STATUSES ),
+						),
+						'per_page'  => array(
+							'type'        => 'integer',
+							'description' => __( 'Results per page (default 20, at most 50).', 'leiho' ),
+							'minimum'     => 1,
+							'maximum'     => self::MAX_PER_PAGE,
+						),
+						'page'      => array(
+							'type'        => 'integer',
+							'description' => __( 'Page of results (default 1).', 'leiho' ),
+							'minimum'     => 1,
+						),
+					),
+					'additionalProperties' => false,
+					'default'              => array(),
+				),
+				'output_schema'       => array( 'type' => 'object' ),
+				'execute_callback'    => array( __CLASS__, 'search_entries' ),
+				'permission_callback' => array( __CLASS__, 'can_read' ),
+				'meta'                => $meta( $readonly ),
+			),
+			'leiho/create-draft'        => array(
+				'label'               => __( 'Create a draft', 'leiho' ),
+				'description'         => __( 'Creates a new draft of a content type edited in Leiho, with a title and optional field values by path (see leiho/list-collections). Values are validated like in the Leiho editor; refused fields are returned in errors. The entry is always a draft: this never publishes. Read leiho/get-brand-context first.', 'leiho' ),
+				'category'            => self::CATEGORY,
+				'input_schema'        => array(
+					'type'                 => 'object',
+					'properties'           => array(
+						'post_type' => array(
+							'type'        => 'string',
+							'description' => __( 'Content type of the new entry (for example page or service).', 'leiho' ),
+						),
+						'title'     => array(
+							'type'        => 'string',
+							'description' => __( 'Title of the new entry.', 'leiho' ),
+							'minLength'   => 1,
+						),
+						'fields'    => array(
+							'type'                 => 'object',
+							'description'          => __( 'Optional field values by path.', 'leiho' ),
+							'additionalProperties' => true,
+						),
+					),
+					'required'             => array( 'post_type', 'title' ),
+					'additionalProperties' => false,
+				),
+				'output_schema'       => array( 'type' => 'object' ),
+				'execute_callback'    => array( __CLASS__, 'create_draft' ),
+				'permission_callback' => array( __CLASS__, 'can_create_draft' ),
+				'meta'                => $meta(
+					array(
+						'readonly'    => false,
+						'destructive' => false,
+						'idempotent'  => false,
+					)
+				),
+			),
+			self::ABILITY_ALT           => array(
+				'label'               => __( 'Suggest an alternative text', 'leiho' ),
+				'description'         => __( 'Describes an image of the media library with the AI provider set up in WordPress and returns a suggested alternative text, checked against the brand context. Saves nothing: to keep it, update the alt_text of the media item through the WordPress media endpoints. Available only when the provider can read images.', 'leiho' ),
+				'category'            => self::CATEGORY,
+				'input_schema'        => array(
+					'type'                 => 'object',
+					'properties'           => array(
+						'id'      => array(
+							'type'        => 'integer',
+							'description' => __( 'Attachment ID of the image.', 'leiho' ),
+							'minimum'     => 1,
+						),
+						'context' => array(
+							'type'        => 'string',
+							'description' => __( 'Optional: where and why the image is used (for example “hero of the radon audit page”).', 'leiho' ),
+							'maxLength'   => 500,
+						),
+					),
+					'required'             => array( 'id' ),
+					'additionalProperties' => false,
+				),
+				'output_schema'       => array( 'type' => 'object' ),
+				'execute_callback'    => array( __CLASS__, 'suggest_alt_text' ),
+				'permission_callback' => array( __CLASS__, 'can_describe_image' ),
+				'meta'                => $meta(
+					array(
+						'readonly'    => true,
+						'destructive' => false,
+						'idempotent'  => false,
+					)
+				),
+			),
 		);
 	}
 
@@ -167,6 +286,11 @@ class Leiho_AI_Abilities {
 			return;
 		}
 		foreach ( self::definitions() as $name => $args ) {
+			// Inutile d'annoncer aux agents une capacité que le fournisseur
+			// ne peut pas servir.
+			if ( self::ABILITY_ALT === $name && ! self::can_read_images() ) {
+				continue;
+			}
 			wp_register_ability( $name, $args );
 		}
 	}
@@ -201,6 +325,43 @@ class Leiho_AI_Abilities {
 	 */
 	public static function can_update_entry( $input = null ) {
 		return self::can_edit_entry( $input );
+	}
+
+	/**
+	 * Créer un brouillon : type édité dans Leiho et droit de créer ce type
+	 * (même contrôle que la création dans l'éditeur).
+	 *
+	 * @param mixed $input Entrée.
+	 * @return bool
+	 */
+	public static function can_create_draft( $input = null ) {
+		$type = is_array( $input ) && isset( $input['post_type'] ) ? sanitize_key( (string) $input['post_type'] ) : '';
+		return '' !== $type
+			&& Leiho_AI::user_can()
+			&& in_array( $type, Leiho_Content::post_types(), true )
+			&& ( new Leiho_Rest( Leiho_Plugin::instance() ) )->can_create_type( $type );
+	}
+
+	/**
+	 * Décrire une image : droit de modifier la pièce jointe (comme la route
+	 * REST du texte alternatif).
+	 *
+	 * @param mixed $input Entrée.
+	 * @return bool
+	 */
+	public static function can_describe_image( $input = null ) {
+		$id = is_array( $input ) && isset( $input['id'] ) ? (int) $input['id'] : 0;
+		return $id > 0 && Leiho_AI::user_can() && 'attachment' === get_post_type( $id ) && current_user_can( 'edit_post', $id );
+	}
+
+	/**
+	 * Le fournisseur d'IA du site lit-il les images ?
+	 *
+	 * @return bool
+	 */
+	public static function can_read_images() {
+		$status = Leiho_AI::status();
+		return ! empty( $status['image'] );
 	}
 
 	/**
@@ -363,6 +524,150 @@ class Leiho_AI_Abilities {
 			'saved'    => array_values( $result['saved'] ),
 			'errors'   => (object) $result['errors'],
 			'revision' => Leiho_Schema::revision( $id ),
+		);
+	}
+
+	/**
+	 * @param mixed $input { post_type, search, status, per_page, page }.
+	 * @return array|WP_Error
+	 */
+	public static function search_entries( $input = null ) {
+		$input = is_array( $input ) ? $input : array();
+		$types = Leiho_Content::post_types();
+		$type  = isset( $input['post_type'] ) ? sanitize_key( (string) $input['post_type'] ) : '';
+		if ( '' !== $type ) {
+			if ( ! in_array( $type, $types, true ) ) {
+				return new WP_Error( 'leiho_bad_request', __( 'This content type isn’t editable in Leiho.', 'leiho' ), array( 'status' => 400 ) );
+			}
+			$types = array( $type );
+		}
+		if ( ! $types ) {
+			return array(
+				'items'       => array(),
+				'total'       => 0,
+				'total_pages' => 0,
+				'page'        => 1,
+			);
+		}
+
+		$status   = isset( $input['status'] ) ? sanitize_key( (string) $input['status'] ) : '';
+		$statuses = in_array( $status, self::SEARCH_STATUSES, true ) ? array( $status ) : self::SEARCH_STATUSES;
+		$per_page = isset( $input['per_page'] ) ? min( self::MAX_PER_PAGE, max( 1, (int) $input['per_page'] ) ) : 20;
+		$page     = isset( $input['page'] ) ? max( 1, (int) $input['page'] ) : 1;
+		$search   = isset( $input['search'] ) ? sanitize_text_field( (string) $input['search'] ) : '';
+
+		$args = array(
+			'post_type'      => $types,
+			'post_status'    => $statuses,
+			'posts_per_page' => $per_page,
+			'paged'          => $page,
+			'orderby'        => 'modified',
+			'order'          => 'DESC',
+		);
+		if ( '' !== $search ) {
+			$args['s']              = $search;
+			$args['search_columns'] = array( 'post_title' );
+		}
+		$query = new WP_Query( $args );
+
+		$mapper = new Leiho_Url_Mapper();
+		$items  = array();
+		foreach ( $query->posts as $post ) {
+			// Ce que l'utilisateur connecté ne peut pas modifier n'est pas listé.
+			if ( ! current_user_can( 'edit_post', $post->ID ) ) {
+				continue;
+			}
+			$items[] = array(
+				'id'           => (int) $post->ID,
+				'type'         => $post->post_type,
+				'title'        => Leiho_Plugin::title( $post ),
+				'status'       => $post->post_status,
+				'modified'     => mysql2date( 'c', $post->post_modified_gmt . ' +0000', false ),
+				'path'         => $mapper->path( $post ),
+				'url'          => $mapper->front_url( $post ),
+				'can_edit'     => true,
+				'agent_writes' => self::is_draft( $post->post_status ) && self::is_leiho_type( $post->ID ),
+			);
+		}
+
+		return array(
+			'items'       => $items,
+			'total'       => (int) $query->found_posts,
+			'total_pages' => (int) $query->max_num_pages,
+			'page'        => $page,
+		);
+	}
+
+	/**
+	 * @param mixed $input { post_type, title, fields }.
+	 * @return array|WP_Error
+	 */
+	public static function create_draft( $input = null ) {
+		$type   = sanitize_key( (string) $input['post_type'] );
+		$title  = isset( $input['title'] ) ? sanitize_text_field( (string) $input['title'] ) : '';
+		$values = isset( $input['fields'] ) && is_array( $input['fields'] ) ? $input['fields'] : array();
+		if ( '' === trim( $title ) ) {
+			return new WP_Error( 'leiho_bad_request', __( 'A title is required.', 'leiho' ), array( 'status' => 400 ) );
+		}
+		// Le statut ne change jamais par ici ; le titre vient de « title ».
+		unset( $values['_status'], $values[ Leiho_Schema::PATH_TITLE ] );
+
+		$post_id = wp_insert_post(
+			array(
+				'post_type'   => $type,
+				'post_title'  => $title,
+				'post_status' => 'draft',
+			),
+			true
+		);
+		if ( is_wp_error( $post_id ) ) {
+			$post_id->add_data( array( 'status' => 500 ) );
+			return $post_id;
+		}
+		$post_id = (int) $post_id;
+
+		$result = array(
+			'saved'  => array(),
+			'errors' => array(),
+		);
+		if ( $values ) {
+			set_transient( Leiho_Deploy_Manager::TRANSIENT_SAVE, 1, 30 );
+			$result = ( new Leiho_Schema( Leiho_Plugin::instance() ) )->save( $post_id, $values );
+			delete_transient( Leiho_Deploy_Manager::TRANSIENT_SAVE );
+		}
+		Leiho_Activity::record_ai( $post_id, Leiho_Schema::PATH_TITLE, $title, 'draft' );
+		Leiho_Plugin::bump_usage( 'save' );
+
+		$post = get_post( $post_id );
+		return array(
+			'id'       => $post_id,
+			'type'     => $type,
+			'status'   => $post ? $post->post_status : 'draft',
+			'saved'    => array_values( array_merge( array( Leiho_Schema::PATH_TITLE ), $result['saved'] ) ),
+			'errors'   => (object) $result['errors'],
+			'revision' => Leiho_Schema::revision( $post_id ),
+		);
+	}
+
+	/**
+	 * @param mixed $input { id, context }.
+	 * @return array|WP_Error
+	 */
+	public static function suggest_alt_text( $input = null ) {
+		if ( ! self::can_read_images() ) {
+			return new WP_Error( 'leiho_ai_no_image', __( 'The configured AI provider can’t read images.', 'leiho' ), array( 'status' => 501 ) );
+		}
+		$id      = (int) $input['id'];
+		$context = isset( $input['context'] ) ? (string) $input['context'] : '';
+		$result  = Leiho_AI_Rest::suggest_alt( $id, $context );
+		if ( is_wp_error( $result ) ) {
+			return $result;
+		}
+		return array(
+			'id'       => $id,
+			'alt_text' => $result['text'],
+			'check'    => $result['check'],
+			'saved'    => false,
 		);
 	}
 
