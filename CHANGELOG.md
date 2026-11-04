@@ -12,6 +12,9 @@ All notable changes to Okno are documented here. The project follows [Semantic V
 - **Restricted access** to the content API with a token (`X-Okno-Token` or `Authorization: Bearer`).
 - **Automatic publishing** after each change, once edits stop for a configurable delay (changes made in wp-admin included).
 - **WordPress as a back office**: noindex for the CMS (header, `robots.txt`, no sitemap), redirection of public WordPress pages to the front end, XML-RPC off, `/wp/v2/users` closed to visitors. On by default for new installs; sites updating keep their behavior until the options are ticked.
+- **Content cache** that uses what the site already has: with a persistent object cache (Redis, Memcached, LiteSpeed, W3 Total Cache…), the export, items, path lookups and types are cached in the object cache and invalidated in O(1) by switching generation; without one, the export keeps its non-autoloaded option. On by default, with a toggle, a status line and a *Clear the content cache* button in the settings.
+- **HTTP caching** on every content endpoint: `ETag`, `Cache-Control: public, max-age=0, must-revalidate` (`private` in restricted mode, for logged-in users and for drafts), `304` on `If-None-Match`.
+- **Page cache purge** when served content changes, once per request: LiteSpeed (by tag), WP Rocket, W3 Total Cache, WP Super Cache, SiteGround, WP Fastest Cache, Cloudflare, Breeze, Nginx Helper, plus the `okno_purge_caches` action and `okno_purge_urls` filter for anything else.
 - `Okno_Content_Adapter_Interface` for adapters that feed the content API, and the `okno_content_item`, `okno_content_post_types`, `okno_content_html` filters and `okno_content_changed` action.
 
 ## [1.0.0-beta.5] — 2026-09-25
