@@ -122,7 +122,7 @@ msgstr "Rechercher une page"
 msgid "Search pages…"
 msgstr "Rechercher une page…"
 
-#: assets/admin/editor.js:927 includes/admin/class-okno-dashboard.php:543
+#: assets/admin/editor.js:927 includes/admin/class-okno-dashboard.php:551
 msgid "Editable content"
 msgstr "Contenus éditables"
 
@@ -594,7 +594,7 @@ msgid "Saving failed."
 msgstr "Échec de l’enregistrement."
 
 #: assets/admin/editor.js:3258 includes/admin/class-okno-admin.php:301
-#: includes/admin/class-okno-dashboard.php:674
+#: includes/admin/class-okno-dashboard.php:682
 msgid "Save"
 msgstr "Enregistrer"
 
@@ -915,7 +915,8 @@ msgstr "Tester la connexion"
 msgid "Selection fields"
 msgstr "Champs de la sélection"
 
-#: includes/admin/class-okno-admin.php:358 includes/class-okno-rest.php:372
+#: includes/admin/class-okno-admin.php:358 includes/class-okno-cache.php:520
+#: includes/class-okno-rest.php:372
 msgid "Access denied."
 msgstr "Accès refusé."
 
@@ -928,7 +929,7 @@ msgid "Settings"
 msgstr "Réglages"
 
 #: includes/admin/class-okno-dashboard.php:34
-#: includes/admin/class-okno-dashboard.php:824
+#: includes/admin/class-okno-dashboard.php:852
 msgid "Deployments"
 msgstr "Publications"
 
@@ -990,7 +991,7 @@ msgid "The last test failed."
 msgstr "Le dernier test a échoué."
 
 #: includes/admin/class-okno-dashboard.php:163
-#: includes/admin/class-okno-dashboard.php:583
+#: includes/admin/class-okno-dashboard.php:591
 msgid "Publishing"
 msgstr "Mise en ligne"
 
@@ -1069,7 +1070,7 @@ msgid "Okno works with any site that reads its content from WordPress: React, Ne
 msgstr "Okno fonctionne avec n’importe quel site qui lit son contenu dans WordPress : React, Next.js, Remix, Vite, Astro, Nuxt, SvelteKit ou HTML. Quatre étapes, chacune vérifiable."
 
 #: includes/admin/class-okno-dashboard.php:361
-#: includes/admin/class-okno-dashboard.php:528
+#: includes/admin/class-okno-dashboard.php:536
 msgid "Site URL"
 msgstr "Adresse du site"
 
@@ -1200,354 +1201,383 @@ msgstr "Instructions pour l’agent"
 msgid "Settings saved."
 msgstr "Réglages enregistrés."
 
-#: includes/admin/class-okno-dashboard.php:508
+#: includes/admin/class-okno-dashboard.php:504
+msgid "Content cache cleared. Page caches were asked to purge the content API."
+msgstr "Cache de contenu vidé. Les caches de page ont été priés de purger l’API de contenu."
+
+#: includes/admin/class-okno-dashboard.php:516
 msgid "GitHub configuration check"
 msgstr "Contrôle de la configuration GitHub"
 
-#: includes/admin/class-okno-dashboard.php:512
+#: includes/admin/class-okno-dashboard.php:520
 msgid "Error"
 msgstr "Erreur"
 
-#: includes/admin/class-okno-dashboard.php:512
+#: includes/admin/class-okno-dashboard.php:520
 msgid "OK"
 msgstr "OK"
 
-#: includes/admin/class-okno-dashboard.php:512
+#: includes/admin/class-okno-dashboard.php:520
 msgid "Warning"
 msgstr "Attention"
 
-#: includes/admin/class-okno-dashboard.php:524
+#: includes/admin/class-okno-dashboard.php:532
 msgid "Your site"
 msgstr "Votre site"
 
-#: includes/admin/class-okno-dashboard.php:525
+#: includes/admin/class-okno-dashboard.php:533
 msgid "The site your clients edit, as visitors see it."
 msgstr "Le site que vos clients modifient, tel que les visiteurs le voient."
 
-#: includes/admin/class-okno-dashboard.php:534
+#: includes/admin/class-okno-dashboard.php:542
 msgid "Preview URL"
 msgstr "Adresse de prévisualisation"
 
-#: includes/admin/class-okno-dashboard.php:537
+#: includes/admin/class-okno-dashboard.php:545
 msgid "Optional. Shown in the editor instead of the public site: useful when the public site is generated at build time and an up-to-date version is served elsewhere."
 msgstr "Facultatif. Affichée dans l’éditeur à la place du site public : utile quand le site public est généré au build et qu’une version à jour est servie ailleurs."
 
-#: includes/admin/class-okno-dashboard.php:544
+#: includes/admin/class-okno-dashboard.php:552
 msgid "The content types offered in the editor, and the URL of each one on the site."
 msgstr "Les types de contenus proposés dans l’éditeur, et l’adresse de chacun sur le site."
 
-#: includes/admin/class-okno-dashboard.php:547
+#: includes/admin/class-okno-dashboard.php:555
 msgid "Content types"
 msgstr "Types de contenus"
 
-#: includes/admin/class-okno-dashboard.php:559
+#: includes/admin/class-okno-dashboard.php:567
 msgid "URLs on the site"
 msgstr "Adresses sur le site"
 
 #. translators: %s: post type name.
-#: includes/admin/class-okno-dashboard.php:565
+#: includes/admin/class-okno-dashboard.php:573
 msgid "URL pattern for %s"
 msgstr "Modèle d’adresse pour %s"
 
-#: includes/admin/class-okno-dashboard.php:569
+#: includes/admin/class-okno-dashboard.php:577
 msgid "Available variables: {slug}, {id}. Empty = /{slug}. The home page always points to /."
 msgstr "Variables disponibles : {slug}, {id}. Vide = /{slug}. La page d’accueil pointe toujours vers /."
 
-#: includes/admin/class-okno-dashboard.php:574
+#: includes/admin/class-okno-dashboard.php:582
 msgid "Field holding the URL"
 msgstr "Champ contenant l’adresse"
 
-#: includes/admin/class-okno-dashboard.php:577
+#: includes/admin/class-okno-dashboard.php:585
 msgid "Optional. Name of an ACF field or meta key that holds each item’s actual URL (for example /services/audit). Takes priority over the patterns above."
 msgstr "Facultatif. Nom d’un champ ACF ou d’une meta qui contient l’adresse réelle de chaque contenu (par exemple /services/audit). Prioritaire sur les modèles ci-dessus."
 
-#: includes/admin/class-okno-dashboard.php:584
+#: includes/admin/class-okno-dashboard.php:592
 msgid "What happens when a client clicks “Publish”."
 msgstr "Ce qui se passe quand un client clique sur « Publier »."
 
-#: includes/admin/class-okno-dashboard.php:586
+#: includes/admin/class-okno-dashboard.php:594
 msgid "Publishing mode"
 msgstr "Mode de mise en ligne"
 
-#: includes/admin/class-okno-dashboard.php:598
+#: includes/admin/class-okno-dashboard.php:606
 msgid "Build hook URL"
 msgstr "URL du build hook"
 
-#: includes/admin/class-okno-dashboard.php:607
+#: includes/admin/class-okno-dashboard.php:615
 msgid "Coolify webhook URL"
 msgstr "URL du webhook Coolify"
 
-#: includes/admin/class-okno-dashboard.php:610
+#: includes/admin/class-okno-dashboard.php:618
 msgid "Coolify token"
 msgstr "Token Coolify"
 
-#: includes/admin/class-okno-dashboard.php:615
+#: includes/admin/class-okno-dashboard.php:623
 msgid "Build time"
 msgstr "Durée du build"
 
-#: includes/admin/class-okno-dashboard.php:617
+#: includes/admin/class-okno-dashboard.php:625
 msgid "minutes"
 msgstr "minutes"
 
-#: includes/admin/class-okno-dashboard.php:618
+#: includes/admin/class-okno-dashboard.php:626
 msgid "Shown to the client after “Publish”, since the build can’t be tracked live."
 msgstr "Affichée au client après « Publier », faute de pouvoir suivre le build en direct."
 
-#: includes/admin/class-okno-dashboard.php:625
+#: includes/admin/class-okno-dashboard.php:633
 msgid "GitHub repository"
 msgstr "Dépôt GitHub"
 
-#: includes/admin/class-okno-dashboard.php:630
+#: includes/admin/class-okno-dashboard.php:638
 msgid "Workflow file"
 msgstr "Fichier du workflow"
 
-#: includes/admin/class-okno-dashboard.php:635
+#: includes/admin/class-okno-dashboard.php:643
 msgid "Branch"
 msgstr "Branche"
 
-#: includes/admin/class-okno-dashboard.php:638
+#: includes/admin/class-okno-dashboard.php:646
 msgid "Fine-grained token limited to this repository only: “Actions: Read and write” for GitHub Actions, “Contents: Read and write” for the deployment commit. Don’t use a classic token: it grants access to all your repositories."
 msgstr "Token fine-grained limité à ce seul dépôt : « Actions : lecture et écriture » pour GitHub Actions, « Contents : lecture et écriture » pour le commit de publication. N’utilisez pas de token classique, il donne accès à tous vos dépôts."
 
-#: includes/admin/class-okno-dashboard.php:638
+#: includes/admin/class-okno-dashboard.php:646
 msgid "GitHub token"
 msgstr "Token GitHub"
 
-#: includes/admin/class-okno-dashboard.php:643
+#: includes/admin/class-okno-dashboard.php:651
 #: includes/deploy/class-okno-deploy-manager.php:140
 msgid "Automatic publishing"
 msgstr "Publication automatique"
 
-#: includes/admin/class-okno-dashboard.php:645
+#: includes/admin/class-okno-dashboard.php:653
 msgid "Publish on its own after each change"
 msgstr "Publier tout seul après chaque modification"
 
 #. translators: %s: number input for the delay in seconds.
-#: includes/admin/class-okno-dashboard.php:650
+#: includes/admin/class-okno-dashboard.php:658
 msgid "Publishes %s seconds after the last change, so a series of edits gives a single deployment. Changes made in wp-admin count too."
 msgstr "Publie %s secondes après la dernière modification : une série de retouches donne un seul déploiement. Les modifications faites dans wp-admin comptent aussi."
 
-#: includes/admin/class-okno-dashboard.php:651
+#: includes/admin/class-okno-dashboard.php:659
 msgid "Delay before automatic publishing, in seconds"
 msgstr "Délai avant la publication automatique, en secondes"
 
-#: includes/admin/class-okno-dashboard.php:658
+#: includes/admin/class-okno-dashboard.php:666
 msgid "Delay between deployments"
 msgstr "Délai entre deux publications"
 
-#: includes/admin/class-okno-dashboard.php:660
+#: includes/admin/class-okno-dashboard.php:668
 msgid "seconds"
 msgstr "secondes"
 
-#: includes/admin/class-okno-dashboard.php:669
+#: includes/admin/class-okno-dashboard.php:677
 msgid "Secrets are encrypted in the database with a key derived from the WordPress salts."
 msgstr "Les secrets sont chiffrés en base avec une clé dérivée des salts WordPress."
 
-#: includes/admin/class-okno-dashboard.php:672
+#: includes/admin/class-okno-dashboard.php:680
 msgid "Save and test GitHub"
 msgstr "Enregistrer et tester GitHub"
 
-#: includes/admin/class-okno-dashboard.php:692
+#: includes/admin/class-okno-dashboard.php:700
 msgid "Content API"
 msgstr "API de contenu"
 
-#: includes/admin/class-okno-dashboard.php:693
+#: includes/admin/class-okno-dashboard.php:701
 msgid "Your front end reads its content here, in a single request at build time. WordPress stays the only source of truth."
 msgstr "Votre front lit son contenu ici, en une seule requête au moment du build. WordPress reste la seule source de vérité."
 
-#: includes/admin/class-okno-dashboard.php:696
+#: includes/admin/class-okno-dashboard.php:704
 msgid "Endpoints"
 msgstr "Adresses"
 
-#: includes/admin/class-okno-dashboard.php:699
+#: includes/admin/class-okno-dashboard.php:707
 msgid "All published content, cached and refreshed on every change. An unchanged build gets a 304."
 msgstr "Tout le contenu publié, mis en cache et rafraîchi à chaque modification. Un build sans changement reçoit un 304."
 
-#: includes/admin/class-okno-dashboard.php:701
+#: includes/admin/class-okno-dashboard.php:709
 msgid "TypeScript types of that content, generated from your fields. In the front-end project: npx okno types."
 msgstr "Les types TypeScript de ce contenu, générés depuis vos champs. Dans le projet du front : npx okno types."
 
-#: includes/admin/class-okno-dashboard.php:706
+#: includes/admin/class-okno-dashboard.php:714
 msgid "Access"
 msgstr "Accès"
 
-#: includes/admin/class-okno-dashboard.php:708
+#: includes/admin/class-okno-dashboard.php:716
 msgid "Public: published content only, as on the site"
 msgstr "Public : contenu publié seulement, comme sur le site"
 
-#: includes/admin/class-okno-dashboard.php:709
+#: includes/admin/class-okno-dashboard.php:717
 msgid "Restricted: the front end sends a token"
 msgstr "Restreint : le front envoie un jeton"
 
-#: includes/admin/class-okno-dashboard.php:715
+#: includes/admin/class-okno-dashboard.php:722
+msgid "Cache"
+msgstr "Cache"
+
+#: includes/admin/class-okno-dashboard.php:724
+msgid "Keep API responses in cache until the content changes"
+msgstr "Garder les réponses de l’API en cache jusqu’au prochain changement de contenu"
+
+#. translators: %s: object cache name (Redis, Memcached…).
+#: includes/admin/class-okno-dashboard.php:730
+msgid "Persistent object cache detected: %s. Okno stores the export, items and types there."
+msgstr "Cache objet persistant détecté : %s. Okno y range l’export, les contenus et les types."
+
+#: includes/admin/class-okno-dashboard.php:732
+msgid "No persistent object cache: Okno keeps its own copy of the export."
+msgstr "Pas de cache objet persistant : Okno garde sa propre copie de l’export."
+
+#: includes/admin/class-okno-dashboard.php:736
+msgid "Responses carry an ETag, and page caches (LiteSpeed, WP Rocket, W3 Total Cache…) are purged for the API whenever content changes."
+msgstr "Les réponses portent un ETag, et les caches de page (LiteSpeed, WP Rocket, W3 Total Cache…) sont purgés pour l’API à chaque changement de contenu."
+
+#: includes/admin/class-okno-dashboard.php:737
+msgid "Clear the content cache"
+msgstr "Vider le cache de contenu"
+
+#: includes/admin/class-okno-dashboard.php:743
 msgid "Content token"
 msgstr "Jeton de contenu"
 
-#: includes/admin/class-okno-dashboard.php:718
+#: includes/admin/class-okno-dashboard.php:746
 msgid "Generate a new token (the current one stops working)"
 msgstr "Générer un nouveau jeton (l’actuel cesse de fonctionner)"
 
-#: includes/admin/class-okno-dashboard.php:719
+#: includes/admin/class-okno-dashboard.php:747
 msgid "Set it as OKNO_TOKEN in the front end’s build environment. Sent in the X-Okno-Token header."
 msgstr "À renseigner comme OKNO_TOKEN dans l’environnement de build du front. Envoyé dans l’en-tête X-Okno-Token."
 
-#: includes/admin/class-okno-dashboard.php:726
+#: includes/admin/class-okno-dashboard.php:754
 msgid "WordPress as a back office"
 msgstr "WordPress en back-office"
 
-#: includes/admin/class-okno-dashboard.php:727
+#: includes/admin/class-okno-dashboard.php:755
 msgid "Your visitors use the front end. These options keep WordPress out of their way and out of search engines. wp-admin, login, the content API and draft previews are not affected."
 msgstr "Vos visiteurs passent par le front. Ces options tiennent WordPress à l’écart, y compris des moteurs de recherche. wp-admin, la connexion, l’API de contenu et l’aperçu des brouillons ne sont pas touchés."
 
-#: includes/admin/class-okno-dashboard.php:730
+#: includes/admin/class-okno-dashboard.php:758
 msgid "Protection"
 msgstr "Protection"
 
-#: includes/admin/class-okno-dashboard.php:732
+#: includes/admin/class-okno-dashboard.php:760
 msgid "Keep WordPress out of search engines (noindex, robots.txt, no sitemap)"
 msgstr "Tenir WordPress hors des moteurs de recherche (noindex, robots.txt, pas de sitemap)"
 
-#: includes/admin/class-okno-dashboard.php:733
+#: includes/admin/class-okno-dashboard.php:761
 msgid "Redirect WordPress pages to the same page on the site"
 msgstr "Rediriger les pages WordPress vers la même page du site"
 
-#: includes/admin/class-okno-dashboard.php:734
+#: includes/admin/class-okno-dashboard.php:762
 msgid "Lock down WordPress (XML-RPC off, user list hidden from visitors, version hidden)"
 msgstr "Verrouiller WordPress (XML-RPC coupé, liste des utilisateurs cachée aux visiteurs, version masquée)"
 
-#: includes/admin/class-okno-dashboard.php:750
+#: includes/admin/class-okno-dashboard.php:778
 msgid "Not set"
 msgstr "Non renseigné"
 
-#: includes/admin/class-okno-dashboard.php:750
+#: includes/admin/class-okno-dashboard.php:778
 msgid "Saved — leave empty to keep it"
 msgstr "Enregistré — laisser vide pour le conserver"
 
-#: includes/admin/class-okno-dashboard.php:752
+#: includes/admin/class-okno-dashboard.php:780
 msgid "This secret can’t be read anymore: the WordPress salts have changed (host or security plugin). Enter it again."
 msgstr "Ce secret n’est plus lisible : les salts WordPress ont changé (hébergeur ou plugin de sécurité). Saisissez-le à nouveau."
 
-#: includes/admin/class-okno-dashboard.php:754
+#: includes/admin/class-okno-dashboard.php:782
 msgid "Delete this secret"
 msgstr "Supprimer ce secret"
 
-#: includes/admin/class-okno-dashboard.php:776
+#: includes/admin/class-okno-dashboard.php:804
 msgid "Deployment history"
 msgstr "Historique des publications"
 
-#: includes/admin/class-okno-dashboard.php:781
+#: includes/admin/class-okno-dashboard.php:809
 msgid "No deployments yet"
 msgstr "Aucune publication"
 
-#: includes/admin/class-okno-dashboard.php:782
+#: includes/admin/class-okno-dashboard.php:810
 msgid "Every click on “Publish” in the editor shows up here with its result."
 msgstr "Chaque clic sur « Publier » dans l’éditeur apparaîtra ici avec son résultat."
 
-#: includes/admin/class-okno-dashboard.php:788
+#: includes/admin/class-okno-dashboard.php:816
 msgid "Date"
 msgstr "Date"
 
-#: includes/admin/class-okno-dashboard.php:789
+#: includes/admin/class-okno-dashboard.php:817
 msgid "By"
 msgstr "Par"
 
-#: includes/admin/class-okno-dashboard.php:790
+#: includes/admin/class-okno-dashboard.php:818
 msgid "Method"
 msgstr "Méthode"
 
-#: includes/admin/class-okno-dashboard.php:791
+#: includes/admin/class-okno-dashboard.php:819
 msgid "Result"
 msgstr "Résultat"
 
-#: includes/admin/class-okno-dashboard.php:806
+#: includes/admin/class-okno-dashboard.php:834
 msgid "View build"
 msgstr "Voir le build"
 
-#: includes/admin/class-okno-dashboard.php:817
+#: includes/admin/class-okno-dashboard.php:845
 msgid "Weekly activity"
 msgstr "Activité par semaine"
 
-#: includes/admin/class-okno-dashboard.php:822
+#: includes/admin/class-okno-dashboard.php:850
 msgid "Week"
 msgstr "Semaine"
 
-#: includes/admin/class-okno-dashboard.php:823
+#: includes/admin/class-okno-dashboard.php:851
 msgid "Saves"
 msgstr "Enregistrements"
 
-#: includes/admin/class-okno-dashboard.php:855
+#: includes/admin/class-okno-dashboard.php:883
 msgid "Live content"
 msgstr "Contenu en direct"
 
-#: includes/admin/class-okno-dashboard.php:856
+#: includes/admin/class-okno-dashboard.php:884
 msgid "The site reads WordPress on every visit. Saving is enough, nothing to publish."
 msgstr "Le site lit WordPress à chaque visite. Enregistrer suffit, rien à publier."
 
-#: includes/admin/class-okno-dashboard.php:859
+#: includes/admin/class-okno-dashboard.php:887
 msgid "Build hook"
 msgstr "Build hook"
 
-#: includes/admin/class-okno-dashboard.php:860
+#: includes/admin/class-okno-dashboard.php:888
 msgid "Vercel, Netlify, Cloudflare Pages… Okno calls the rebuild URL."
 msgstr "Vercel, Netlify, Cloudflare Pages… Okno appelle l’URL de rebuild."
 
-#: includes/admin/class-okno-dashboard.php:863
+#: includes/admin/class-okno-dashboard.php:891
 msgid "GitHub Actions"
 msgstr "GitHub Actions"
 
-#: includes/admin/class-okno-dashboard.php:864
+#: includes/admin/class-okno-dashboard.php:892
 msgid "Triggers a workflow and tracks the build live."
 msgstr "Déclenche un workflow et suit le build en direct."
 
-#: includes/admin/class-okno-dashboard.php:867
+#: includes/admin/class-okno-dashboard.php:895
 msgid "GitHub commit"
 msgstr "Commit GitHub"
 
-#: includes/admin/class-okno-dashboard.php:868
+#: includes/admin/class-okno-dashboard.php:896
 msgid "For hosts that deploy on every push."
 msgstr "Pour les hébergeurs qui déploient à chaque push."
 
-#: includes/admin/class-okno-dashboard.php:871
+#: includes/admin/class-okno-dashboard.php:899
 msgid "Coolify"
 msgstr "Coolify"
 
-#: includes/admin/class-okno-dashboard.php:872
+#: includes/admin/class-okno-dashboard.php:900
 msgid "Coolify deployment webhook."
 msgstr "Webhook de déploiement Coolify."
 
-#: includes/admin/class-okno-dashboard.php:882
+#: includes/admin/class-okno-dashboard.php:910
 msgid "Not set up"
 msgstr "Non configurée"
 
-#: includes/admin/class-okno-dashboard.php:887
+#: includes/admin/class-okno-dashboard.php:915
 msgid "Pending"
 msgstr "En attente"
 
-#: includes/admin/class-okno-dashboard.php:888
+#: includes/admin/class-okno-dashboard.php:916
 msgid "Building"
 msgstr "Build en cours"
 
-#: includes/admin/class-okno-dashboard.php:889
+#: includes/admin/class-okno-dashboard.php:917
 msgid "Triggered"
 msgstr "Déclenchée"
 
-#: includes/admin/class-okno-dashboard.php:890
+#: includes/admin/class-okno-dashboard.php:918
 msgid "Live"
 msgstr "En ligne"
 
-#: includes/admin/class-okno-dashboard.php:891
+#: includes/admin/class-okno-dashboard.php:919
 msgid "Failed"
 msgstr "Échec"
 
-#: includes/class-okno-content.php:154
+#: includes/class-okno-content.php:155
 msgid "A valid Okno content token is required."
 msgstr "Un jeton de contenu Okno valide est requis."
 
-#: includes/class-okno-content.php:265
+#: includes/class-okno-content.php:262
 msgid "This content type is not served by Okno."
 msgstr "Ce type de contenu n’est pas servi par Okno."
 
-#: includes/class-okno-content.php:312 includes/class-okno-content.php:316
+#: includes/class-okno-content.php:317 includes/class-okno-content.php:321
 #: includes/class-okno-rest.php:242 includes/class-okno-rest.php:437
 #: includes/class-okno-rest.php:460 includes/class-okno-schema.php:29
 msgid "Content not found."

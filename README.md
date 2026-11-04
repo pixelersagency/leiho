@@ -183,6 +183,11 @@ Each item carries `id`, `type`, `slug`, `path` (the front-end path from your URL
 - **Snapshot fallback**: every successful load is written to `.okno/content.json`. If WordPress doesn't answer, the build carries on with the last known content and says so (`fallback: 'error'` to fail instead).
 - **Types**: `npx okno types --url https://cms.example.com` writes `src/okno.d.ts`. Regenerate it when you change fields.
 - **Access**: public by default (published content only, which is public anyway). Switch to *Restricted* in the settings and set `OKNO_TOKEN` in the build environment.
+- **Caching**: Okno plugs into the caches the site already has (Settings → *Content API* → *Cache*, on by default).
+  - With a persistent object cache (Redis Object Cache, Memcached, LiteSpeed, W3 Total Cache…), the export, single items, path lookups and the types live in the WordPress object cache (group `okno`). Invalidation is O(1): every change switches to a new cache generation instead of deleting keys. Without one, Okno keeps its own copy of the export in a non-autoloaded option and writes nothing else to the database.
+  - Every endpoint sends an `ETag` and `Cache-Control: public, max-age=0, must-revalidate`, and answers `304` to a matching `If-None-Match`. In restricted mode, for logged-in users and for drafts, responses are `private` (and LiteSpeed is told not to cache them).
+  - When served content changes, Okno purges the content API from the page caches it finds, once per request: LiteSpeed (by tag and URL, Hostinger included), WP Rocket and W3 Total Cache and WP Super Cache (by URL when they can), SiteGround, WP Fastest Cache, Cloudflare, Breeze, Nginx Helper. Hook `okno_purge_caches` to purge anything else (a CDN, a reverse proxy); `okno_purge_urls` changes the URLs.
+  - *Clear the content cache* in the settings does all of this on demand.
 
 ### WordPress as a back office
 
@@ -202,7 +207,7 @@ Found a vulnerability? See [SECURITY.md](SECURITY.md).
 - **Other field plugins**: implement `Okno_Adapter_Interface` and register it with the `okno_adapters` filter (Meta Box, JetEngine, Pods…).
 - **Other deployment targets**: implement `Okno_Deploy_Driver_Interface` and plug it in with `okno_deploy_driver`.
 - **WYSIWYG preview**: `okno_wysiwyg_render` replaces `wpautop()` with your front end's actual rendering.
-- **Content API**: `okno_content_item` adds or removes data on each item (SEO, author…), `okno_content_post_types` changes the served types, `okno_content_html` the rendered HTML. An adapter implementing `Okno_Content_Adapter_Interface` feeds the content API and the types.
+- **Content API**: `okno_content_item` adds or removes data on each item (SEO, author…), `okno_content_post_types` changes the served types, `okno_content_html` the rendered HTML. `okno_content_cache` turns the cache on or off, `okno_content_cache_control` changes the `Cache-Control` header, `okno_purge_third_party_caches` (false) skips the built-in purges. An adapter implementing `Okno_Content_Adapter_Interface` feeds the content API and the types.
 - **Automatic publishing**: the `okno_content_changed` action fires when served content changes.
 
 ## Repository layout
@@ -220,6 +225,7 @@ scripts/    Release packaging
 # Plugin tests (no WordPress needed)
 php plugin/tests/test-acf-adapter.php
 php plugin/tests/test-content.php
+php plugin/tests/test-cache.php
 php plugin/tests/test-activity.php
 php plugin/tests/test-frame-verdict.php
 php plugin/tests/test-updater.php

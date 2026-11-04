@@ -497,6 +497,14 @@ class Okno_Dashboard {
 				</div>
 			<?php endif; ?>
 
+			<?php // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Simple drapeau d'affichage. ?>
+			<?php if ( isset( $_GET['okno_cache_cleared'] ) ) : ?>
+				<div class="okno-notice okno-notice--ok" role="status">
+					<span class="okno-dot okno-dot--ok"></span>
+					<strong><?php esc_html_e( 'Content cache cleared. Page caches were asked to purge the content API.', 'okno' ); ?></strong>
+				</div>
+			<?php endif; ?>
+
 			<?php if ( $preflight ) : ?>
 				<?php
 				$levels = wp_list_pluck( $preflight, 'level' );
@@ -707,6 +715,26 @@ class Okno_Dashboard {
 				<div class="okno-checks">
 					<label><input type="radio" name="okno_settings[content_access]" value="public" <?php checked( $settings['content_access'], 'public' ); ?>> <?php esc_html_e( 'Public: published content only, as on the site', 'okno' ); ?></label>
 					<label><input type="radio" name="okno_settings[content_access]" value="token" <?php checked( $settings['content_access'], 'token' ); ?>> <?php esc_html_e( 'Restricted: the front end sends a token', 'okno' ); ?></label>
+				</div>
+			</div>
+
+			<div class="okno-row">
+				<span class="okno-row__label"><?php esc_html_e( 'Cache', 'okno' ); ?></span>
+				<div>
+					<label class="okno-inline-check"><input type="checkbox" name="okno_settings[content_cache]" value="1" <?php checked( ! empty( $settings['content_cache'] ) ); ?>> <?php esc_html_e( 'Keep API responses in cache until the content changes', 'okno' ); ?></label>
+					<?php $backend = Okno_Cache::backend(); ?>
+					<span class="okno-help">
+						<?php
+						if ( '' !== $backend ) {
+							/* translators: %s: object cache name (Redis, Memcached…). */
+							echo esc_html( sprintf( __( 'Persistent object cache detected: %s. Okno stores the export, items and types there.', 'okno' ), $backend ) );
+						} else {
+							esc_html_e( 'No persistent object cache: Okno keeps its own copy of the export.', 'okno' );
+						}
+						?>
+					</span>
+					<span class="okno-help"><?php esc_html_e( 'Responses carry an ETag, and page caches (LiteSpeed, WP Rocket, W3 Total Cache…) are purged for the API whenever content changes.', 'okno' ); ?></span>
+					<a class="okno-btn okno-btn--quiet" href="<?php echo esc_url( Okno_Cache::clear_url() ); ?>"><?php esc_html_e( 'Clear the content cache', 'okno' ); ?></a>
 				</div>
 			</div>
 

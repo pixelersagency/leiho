@@ -33,6 +33,10 @@ function okno_uninstall_site() {
 	// Journal des modifications.
 	$wpdb->query( "DROP TABLE IF EXISTS {$wpdb->prefix}okno_activity" );
 
+	// Cache objet : changer de génération rend toutes les entrées illisibles,
+	// elles expirent d'elles-mêmes.
+	wp_cache_delete( 'generation', 'okno' );
+
 	wp_clear_scheduled_hook( 'okno_cleanup_deploys' );
 	wp_clear_scheduled_hook( 'okno_auto_deploy' );
 }
