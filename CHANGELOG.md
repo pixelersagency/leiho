@@ -2,6 +2,12 @@
 
 All notable changes to Okno are documented here. The project follows [Semantic Versioning](https://semver.org/). The plugin and the bridge package share one version number.
 
+## [Unreleased]
+
+### Changed
+
+- The « changes to publish » dot on the **Publish** button is dark instead of orange, so it no longer clashes with the lime button.
+
 ## [1.0.0-beta.10] — 2026-11-04
 
 ### Fixed

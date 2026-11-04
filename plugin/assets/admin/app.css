@@ -485,12 +485,13 @@ body.okno-app-body #wpbody-content {
 	margin-right: 5px;
 }
 
+/* Point « modifications à publier » posé sur le bouton lime : l'orange
+   jurait avec le vert ; il prend la couleur du texte du bouton. */
 .okno-pending-dot {
 	width: 7px;
 	height: 7px;
 	border-radius: 50%;
-	background: var(--okno-pending);
-	box-shadow: 0 0 0 2px rgba( 0, 0, 0, 0.35 );
+	background: var(--okno-on-accent, #111);
 }
 
 .okno-user {
