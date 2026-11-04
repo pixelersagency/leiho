@@ -4,7 +4,7 @@ Tags: headless, acf, visual editor, nextjs, astro
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.0.0-beta.8
+Stable tag: 1.0.0-beta.9
 License: GPL-2.0-or-later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -48,6 +48,9 @@ Okno removes its own settings, tokens, history table and internal post meta, and
 Parts of the Okno app's layout and styles (three-pane Collections view, list rows, field settings, dialogs) are derived from Stacki (https://github.com/flowtricks/stacki), Copyright (c) 2026 Timothy Ricks, MIT License. The full license text ships in licenses/stacki-MIT.txt.
 
 == Changelog ==
+
+= 1.0.0-beta.9 =
+* Import from ACF into Okno Collections, one content type at a time, with a preview, a resumable import checked entry by entry, and a way back to ACF. Entries show WordPress's own fields (content, excerpt, slug, taxonomies, author, date, parent and order); the app is larger and uses Okno menus, chips, checkboxes and switches; no theme flash between views.
 
 = 1.0.0-beta.8 =
 * "Check again" shows a newly published Okno version right away. The home screen is centred.

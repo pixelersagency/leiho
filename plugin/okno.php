@@ -3,7 +3,7 @@
  * Plugin Name:       Okno
  * Plugin URI:        https://github.com/pixelersagency/okno
  * Description:       Visual editor and content API for headless front ends (Astro, Next.js, …), right inside wp-admin. Define your content types in Okno, or keep your existing ACF fields.
- * Version:           1.0.0-beta.8
+ * Version:           1.0.0-beta.9
  * Requires at least: 6.0
  * Requires PHP:      7.4
  * Author:            Pixelers
@@ -25,7 +25,7 @@ if ( defined( 'OKNO_VERSION' ) ) {
 	return;
 }
 
-define( 'OKNO_VERSION', '1.0.0-beta.8' );
+define( 'OKNO_VERSION', '1.0.0-beta.9' );
 define( 'OKNO_FILE', __FILE__ );
 define( 'OKNO_DIR', plugin_dir_path( __FILE__ ) );
 define( 'OKNO_URL', plugin_dir_url( __FILE__ ) );
