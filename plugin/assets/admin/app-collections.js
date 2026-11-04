@@ -9,7 +9,7 @@
  * Interface posée sur l'API REST leiho/v1/collections (voir
  * docs/collections-spec.md) : liste des collections et singletons, édition
  * d'une collection (libellés, type, chemin, fonctionnalités), éditeur de
- * champs (glisser-déposer, 19 types et leurs options, sous-champs, blocs),
+ * champs (glisser-déposer, 20 types et leurs options, sous-champs, blocs),
  * aperçu du plan de migration (dry_run) avant application, colonnes
  * archivées et purge, suppression, import / export de leiho.schema.json.
  *
@@ -37,6 +37,7 @@
 	var TYPES = [
 		{ type: 'text', label: __( 'Text', 'leiho' ), help: __( 'A line or a paragraph of plain text.', 'leiho' ) },
 		{ type: 'richtext', label: __( 'Rich text', 'leiho' ), help: __( 'Formatted text: bold, links, lists.', 'leiho' ) },
+		{ type: 'code', label: __( 'Code', 'leiho' ), help: __( 'Code or any text kept exactly as typed, in a fixed-width font.', 'leiho' ) },
 		{ type: 'number', label: __( 'Number', 'leiho' ), help: __( 'A price, a quantity, a rating.', 'leiho' ) },
 		{ type: 'boolean', label: __( 'Yes / no', 'leiho' ), help: __( 'A switch.', 'leiho' ) },
 		{ type: 'date', label: __( 'Date', 'leiho' ), help: __( 'A day.', 'leiho' ) },
@@ -67,7 +68,7 @@
 		{ value: 'page-attributes', label: __( 'Order and parent', 'leiho' ) },
 	];
 
-	var LENGTH_TYPES = [ 'text', 'slug', 'email', 'url' ];
+	var LENGTH_TYPES = [ 'text', 'code', 'slug', 'email', 'url' ];
 	var CONTAINERS = [ 'list', 'group' ];
 	var MAX_DEPTH = 8;
 

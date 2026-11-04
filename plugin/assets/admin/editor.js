@@ -2356,6 +2356,22 @@
 			case 'textarea':
 				input = document.createElement( 'textarea' );
 				input.rows = def.rows || 4;
+				if ( def.code ) {
+					// Champ Code : chasse fixe, pas de correcteur, tabulation insérée.
+					input.className = 'leiho-mono';
+					input.rows = Math.max( 6, Math.min( 18, String( value || '' ).split( '\n' ).length + 1 ) );
+					input.spellcheck = false;
+					input.setAttribute( 'wrap', 'off' );
+					input.addEventListener( 'keydown', function ( e ) {
+						if ( 'Tab' === e.key && ! e.shiftKey && ! e.altKey && ! e.metaKey && ! e.ctrlKey ) {
+							e.preventDefault();
+							var start = input.selectionStart, end = input.selectionEnd;
+							input.value = input.value.slice( 0, start ) + '  ' + input.value.slice( end );
+							input.selectionStart = input.selectionEnd = start + 2;
+							commit( input.value );
+						}
+					} );
+				}
 				input.value = value || '';
 				input.addEventListener( 'input', function () {
 					commit( input.value );

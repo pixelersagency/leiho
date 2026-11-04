@@ -97,6 +97,7 @@ The schema lives in the `leiho_collections` option and can be exported to / impo
 |---|---|---|---|
 | `text` | `multiline`, `max_length` | `string` | `VARCHAR(191)` indexed when `0 < max_length <= 191`, else `TEXT` |
 | `richtext` | | rendered HTML `string` | `LONGTEXT` |
+| `code` | `max_length` | `string`, exactly as typed (tags included): render it as text, never as HTML | `TEXT` |
 | `number` | `integer`, `min`, `max`, `step` | `number \| null` (a whole number is served as `5`, never `5.0`) | `BIGINT` if `integer`, else `DECIMAL(20,6)`; indexed |
 | `boolean` | | `boolean` | `TINYINT(1)` indexed |
 | `date` | | `"YYYY-MM-DD"` | `DATE` indexed |

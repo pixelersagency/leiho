@@ -18,6 +18,7 @@ class Leiho_Collections_Schema {
 	const TYPES = array(
 		'text',
 		'richtext',
+		'code',
 		'number',
 		'boolean',
 		'date',
@@ -41,7 +42,7 @@ class Leiho_Collections_Schema {
 	const CONTAINERS = array( 'list', 'blocks', 'group' );
 
 	/** Types acceptant max_length. */
-	const LENGTH_TYPES = array( 'text', 'slug', 'email', 'url' );
+	const LENGTH_TYPES = array( 'text', 'code', 'slug', 'email', 'url' );
 
 	/** Fonctionnalités de post activables en plus de title et revisions. */
 	const SUPPORTS = array( 'editor', 'excerpt', 'thumbnail', 'page-attributes' );
@@ -558,6 +559,7 @@ class Leiho_Collections_Schema {
 			case 'select':
 				return empty( $field['multiple'] ) ? 'VARCHAR(191)' : 'LONGTEXT';
 			case 'url':
+			case 'code':
 				return 'TEXT';
 			case 'color':
 				return 'VARCHAR(32)';
@@ -642,6 +644,11 @@ class Leiho_Collections_Schema {
 				break;
 			case 'richtext':
 				$out['type'] = 'wysiwyg';
+				break;
+			case 'code':
+				// Code : texte sur plusieurs lignes gardé tel quel (balises comprises), en chasse fixe.
+				$out['type'] = 'textarea';
+				$out['code'] = 1;
 				break;
 			case 'boolean':
 				$out['type'] = 'true_false';

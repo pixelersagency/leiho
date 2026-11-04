@@ -184,6 +184,9 @@ class Leiho_Native_Adapter extends Leiho_Field_Adapter {
 	 */
 	protected function describe( $field ) {
 		$entry = parent::describe( $field );
+		if ( ! empty( $field['code'] ) ) {
+			$entry['code'] = true;
+		}
 		if ( ! empty( $field['instructions'] ) ) {
 			$entry['help'] = $field['instructions'];
 		}
@@ -350,6 +353,16 @@ class Leiho_Native_Adapter extends Leiho_Field_Adapter {
 				return null;
 			}
 			return $this->within_length( $field, sanitize_title( (string) $value ), $error );
+		}
+
+		if ( 'code' === $type ) {
+			// Gardé tel quel : un front affiche ce texte comme du texte, jamais comme du HTML.
+			if ( ! empty( $field['required'] ) && $this->is_empty( $value, 'textarea' ) ) {
+				$error = 'required';
+				return null;
+			}
+			$code = is_scalar( $value ) ? str_replace( array( "\r\n", "\r", "\0" ), array( "\n", "\n", '' ), (string) $value ) : '';
+			return $this->within_length( $field, wp_check_invalid_utf8( $code ), $error );
 		}
 
 		if ( 'select' === $type && ! empty( $field['multiple'] ) ) {
