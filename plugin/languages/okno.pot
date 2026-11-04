@@ -27,7 +27,7 @@ msgstr ""
 msgid "A line or a paragraph of plain text."
 msgstr ""
 
-#: assets/admin/app-collections.js:38
+#: assets/admin/app-collections.js:38 assets/admin/app-content.js:393
 msgid "Text"
 msgstr ""
 
@@ -35,7 +35,7 @@ msgstr ""
 msgid "Formatted text: bold, links, lists."
 msgstr ""
 
-#: assets/admin/app-collections.js:39
+#: assets/admin/app-collections.js:39 assets/admin/app-content.js:394
 msgid "Rich text"
 msgstr ""
 
@@ -43,7 +43,7 @@ msgstr ""
 msgid "A price, a quantity, a rating."
 msgstr ""
 
-#: assets/admin/app-collections.js:40
+#: assets/admin/app-collections.js:40 assets/admin/app-content.js:395
 msgid "Number"
 msgstr ""
 
@@ -51,7 +51,7 @@ msgstr ""
 msgid "A switch."
 msgstr ""
 
-#: assets/admin/app-collections.js:41
+#: assets/admin/app-collections.js:41 assets/admin/app-content.js:396
 msgid "Yes / no"
 msgstr ""
 
@@ -59,7 +59,7 @@ msgstr ""
 msgid "A day."
 msgstr ""
 
-#: assets/admin/app-collections.js:42
+#: assets/admin/app-collections.js:42 assets/admin/app-content.js:397
 #: includes/admin/class-okno-dashboard.php:789
 msgid "Date"
 msgstr ""
@@ -68,11 +68,11 @@ msgstr ""
 msgid "A day and an hour."
 msgstr ""
 
-#: assets/admin/app-collections.js:43
+#: assets/admin/app-collections.js:43 assets/admin/app-content.js:398
 msgid "Date and time"
 msgstr ""
 
-#: assets/admin/app-collections.js:44
+#: assets/admin/app-collections.js:44 assets/admin/app-content.js:399
 msgid "Choice"
 msgstr ""
 
@@ -92,7 +92,7 @@ msgstr ""
 msgid "An email address."
 msgstr ""
 
-#: assets/admin/app-collections.js:46
+#: assets/admin/app-collections.js:46 assets/admin/app-content.js:400
 msgid "Email"
 msgstr ""
 
@@ -100,7 +100,7 @@ msgstr ""
 msgid "A web address."
 msgstr ""
 
-#: assets/admin/app-collections.js:47
+#: assets/admin/app-collections.js:47 assets/admin/app-content.js:401
 msgid "URL"
 msgstr ""
 
@@ -108,11 +108,11 @@ msgstr ""
 msgid "A color code."
 msgstr ""
 
-#: assets/admin/app-collections.js:48
+#: assets/admin/app-collections.js:48 assets/admin/app-content.js:402
 msgid "Color"
 msgstr ""
 
-#: assets/admin/app-collections.js:49
+#: assets/admin/app-collections.js:49 assets/admin/app-content.js:403
 msgid "Image"
 msgstr ""
 
@@ -124,11 +124,11 @@ msgstr ""
 msgid "A PDF or any document."
 msgstr ""
 
-#: assets/admin/app-collections.js:50
+#: assets/admin/app-collections.js:50 assets/admin/app-content.js:404
 msgid "File"
 msgstr ""
 
-#: assets/admin/app-collections.js:51
+#: assets/admin/app-collections.js:51 assets/admin/app-content.js:405
 msgid "Gallery"
 msgstr ""
 
@@ -140,7 +140,7 @@ msgstr ""
 msgid "A URL with its text and target."
 msgstr ""
 
-#: assets/admin/app-collections.js:52
+#: assets/admin/app-collections.js:52 assets/admin/app-content.js:406
 msgid "Link"
 msgstr ""
 
@@ -148,11 +148,11 @@ msgstr ""
 msgid "Points to entries of other collections."
 msgstr ""
 
-#: assets/admin/app-collections.js:53
+#: assets/admin/app-collections.js:53 assets/admin/app-content.js:407
 msgid "Reference"
 msgstr ""
 
-#: assets/admin/app-collections.js:54
+#: assets/admin/app-collections.js:54 assets/admin/app-content.js:408
 msgid "List"
 msgstr ""
 
@@ -160,7 +160,7 @@ msgstr ""
 msgid "Repeated rows of sub-fields."
 msgstr ""
 
-#: assets/admin/app-collections.js:55
+#: assets/admin/app-collections.js:55 assets/admin/app-content.js:409
 msgid "Blocks"
 msgstr ""
 
@@ -168,7 +168,7 @@ msgstr ""
 msgid "Sections of different kinds, in any order."
 msgstr ""
 
-#: assets/admin/app-collections.js:56
+#: assets/admin/app-collections.js:56 assets/admin/app-content.js:410
 msgid "Group"
 msgstr ""
 
@@ -209,7 +209,7 @@ msgid "It may have been removed or renamed. Reload the page to see the current c
 msgstr ""
 
 #: assets/admin/app-collections.js:317 assets/admin/app-content.js:207
-#: assets/admin/app-content.js:450 assets/admin/app-content.js:455
+#: assets/admin/app-content.js:784 assets/admin/app-content.js:789
 msgid "New collection"
 msgstr ""
 
@@ -226,13 +226,13 @@ msgid "Changes not applied yet"
 msgstr ""
 
 #: assets/admin/app-collections.js:333 assets/admin/app-collections.js:360
-#: assets/admin/app-collections.js:493
+#: assets/admin/app-collections.js:527 assets/admin/app-collections.js:542
 msgid "General"
 msgstr ""
 
 #: assets/admin/app-collections.js:335 assets/admin/app-collections.js:340
 #: assets/admin/app-content.js:265 assets/admin/app-content.js:307
-#: includes/collections/class-okno-collections.php:559
+#: includes/collections/class-okno-collections.php:568
 msgid "Fields"
 msgstr ""
 
@@ -240,391 +240,422 @@ msgstr ""
 msgid "Drag the handle or use the arrows to reorder. The title (and the features ticked above) come with every entry."
 msgstr ""
 
-#: assets/admin/app-collections.js:345 assets/admin/app-collections.js:543
-#: assets/admin/app-collections.js:1795
+#: assets/admin/app-collections.js:345 assets/admin/app-collections.js:592
+#: assets/admin/app-collections.js:1844
 msgid "Add a field"
 msgstr ""
 
-#: assets/admin/app-collections.js:364 assets/admin/app-collections.js:460
+#: assets/admin/app-collections.js:364 assets/admin/app-collections.js:491
 #: assets/admin/app-content.js:301
 msgid "Collection"
 msgstr ""
 
-#: assets/admin/app-collections.js:364 assets/admin/app-collections.js:461
+#: assets/admin/app-collections.js:364 assets/admin/app-collections.js:492
 msgid "Single page"
 msgstr ""
 
-#: assets/admin/app-collections.js:385
+#: assets/admin/app-collections.js:388
 msgid "Remove this collection"
 msgstr ""
 
-#: assets/admin/app-collections.js:386
+#: assets/admin/app-collections.js:389
 msgid "It disappears from Okno and the content API. Its entries and their values are kept: create it again with the same id to get everything back."
 msgstr ""
 
-#: assets/admin/app-collections.js:388 assets/admin/app-collections.js:608
-#: assets/admin/app-collections.js:892 assets/admin/app-collections.js:1284
-#: assets/admin/app-collections.js:1292 assets/admin/app-collections.js:1678
+#: assets/admin/app-collections.js:391 assets/admin/app-collections.js:657
+#: assets/admin/app-collections.js:941 assets/admin/app-collections.js:1333
+#: assets/admin/app-collections.js:1341 assets/admin/app-collections.js:1727
 #: assets/admin/editor.js:2904
 msgid "Remove"
 msgstr ""
 
+#: assets/admin/app-collections.js:420 assets/admin/app-collections.js:436
+#: assets/admin/app-content.js:694
+msgid "Go back to ACF"
+msgstr ""
+
+#. translators: %s: date of the import.
+#: assets/admin/app-collections.js:423
+#, javascript-format
+msgid "Imported from ACF on %s. ACF still has the values of that day: going back serves them again and deletes the Okno values of this collection."
+msgstr ""
+
+#: assets/admin/app-collections.js:424
+msgid "ACF still has the values of the import day: going back serves them again and deletes the Okno values of this collection."
+msgstr ""
+
 #: assets/admin/app-collections.js:430
-msgid "Services"
-msgstr ""
-
-#: assets/admin/app-collections.js:431
-msgid "Service"
-msgstr ""
-
-#: assets/admin/app-collections.js:458
-msgid "Kind"
-msgstr ""
-
-#: assets/admin/app-collections.js:460
-msgid "Many entries (services, articles, testimonials)."
+msgid "Activate ACF (or Secure Custom Fields) first."
 msgstr ""
 
 #: assets/admin/app-collections.js:461
+msgid "Services"
+msgstr ""
+
+#: assets/admin/app-collections.js:462
+msgid "Service"
+msgstr ""
+
+#: assets/admin/app-collections.js:489
+msgid "Kind"
+msgstr ""
+
+#: assets/admin/app-collections.js:491
+msgid "Many entries (services, articles, testimonials)."
+msgstr ""
+
+#: assets/admin/app-collections.js:492
 msgid "Exactly one entry (home, contact, site settings)."
 msgstr ""
 
-#: assets/admin/app-collections.js:473
+#: assets/admin/app-collections.js:504
 msgid "Built-in features"
 msgstr ""
 
-#: assets/admin/app-collections.js:495
-msgid "Name (plural)"
+#: assets/admin/app-collections.js:529
+msgid "These fields come from ACF. The content type itself (labels, URL, features) is still declared where it was: in ACF, the theme or a plugin. Okno manages its fields."
 msgstr ""
 
-#: assets/admin/app-collections.js:496
-msgid "Name of one entry"
+#: assets/admin/app-collections.js:530
+msgid "This content type is declared by the theme or a plugin. Okno manages its fields."
 msgstr ""
 
-#: assets/admin/app-collections.js:496
-msgid "Optional. Used in “New service”."
-msgstr ""
-
-#: assets/admin/app-collections.js:498
+#: assets/admin/app-collections.js:533 assets/admin/app-collections.js:547
 msgid "Identifier"
 msgstr ""
 
-#: assets/admin/app-collections.js:500
+#: assets/admin/app-collections.js:536 assets/admin/app-collections.js:544
+msgid "Name (plural)"
+msgstr ""
+
+#: assets/admin/app-collections.js:536
+msgid "Shown in Okno."
+msgstr ""
+
+#: assets/admin/app-collections.js:545
+msgid "Name of one entry"
+msgstr ""
+
+#: assets/admin/app-collections.js:545
+msgid "Optional. Used in “New service”."
+msgstr ""
+
+#: assets/admin/app-collections.js:549
 msgid "Content type and table name. Lowercase letters, digits and underscores; it can’t change later."
 msgstr ""
 
-#: assets/admin/app-collections.js:500
+#: assets/admin/app-collections.js:549
 msgid "The identifier never changes."
 msgstr ""
 
-#: assets/admin/app-collections.js:504
+#: assets/admin/app-collections.js:553
 msgid "URL on the site"
 msgstr ""
 
-#: assets/admin/app-collections.js:506
+#: assets/admin/app-collections.js:555
 msgid "Where an entry is shown on the site, with {slug} or {id}. Leave empty for content without a page (testimonials, settings): its entries are then edited in Collections only, without the visual editor."
 msgstr ""
 
-#: assets/admin/app-collections.js:535
+#: assets/admin/app-collections.js:584
 msgid "No fields yet. Each entry still has a title."
 msgstr ""
 
-#: assets/admin/app-collections.js:552 assets/admin/app-collections.js:797
+#: assets/admin/app-collections.js:601 assets/admin/app-collections.js:846
 msgid "Drag to reorder"
 msgstr ""
 
 #. translators: %s: field label.
 #. translators: %s: block type label.
-#: assets/admin/app-collections.js:584 assets/admin/app-collections.js:1272
+#: assets/admin/app-collections.js:633 assets/admin/app-collections.js:1321
 #, javascript-format
 msgid "Move “%s” up"
 msgstr ""
 
-#: assets/admin/app-collections.js:585 assets/admin/app-collections.js:1270
+#: assets/admin/app-collections.js:634 assets/admin/app-collections.js:1319
 #: assets/admin/editor.js:2709
 msgid "Move up"
 msgstr ""
 
 #. translators: %s: field label.
 #. translators: %s: block type label.
-#: assets/admin/app-collections.js:596 assets/admin/app-collections.js:1279
+#: assets/admin/app-collections.js:645 assets/admin/app-collections.js:1328
 #, javascript-format
 msgid "Move “%s” down"
 msgstr ""
 
-#: assets/admin/app-collections.js:597 assets/admin/app-collections.js:1277
+#: assets/admin/app-collections.js:646 assets/admin/app-collections.js:1326
 #: assets/admin/editor.js:2717
 msgid "Move down"
 msgstr ""
 
 #. translators: %s: field label.
 #. translators: %s: block type label.
-#: assets/admin/app-collections.js:607 assets/admin/app-collections.js:1286
+#: assets/admin/app-collections.js:656 assets/admin/app-collections.js:1335
 #, javascript-format
 msgid "Remove “%s”"
 msgstr ""
 
-#: assets/admin/app-collections.js:627
+#: assets/admin/app-collections.js:676
 msgid "No sub-fields yet."
 msgstr ""
 
-#: assets/admin/app-collections.js:637
+#: assets/admin/app-collections.js:686
 msgid "Add a sub-field"
 msgstr ""
 
-#: assets/admin/app-collections.js:870
+#: assets/admin/app-collections.js:919
 msgid "Field moved."
 msgstr ""
 
-#: assets/admin/app-collections.js:884
+#: assets/admin/app-collections.js:933
 msgid "This field isn’t saved yet: it is simply removed."
 msgstr ""
 
-#: assets/admin/app-collections.js:886
+#: assets/admin/app-collections.js:935
 msgid "Its values disappear from each entry the next time the entry is saved. Revisions keep the previous values."
 msgstr ""
 
-#: assets/admin/app-collections.js:887
+#: assets/admin/app-collections.js:936
 msgid "Its column is archived, not deleted: add a field with the same key and type again to get the values back, or purge archived columns to delete them."
 msgstr ""
 
 #. translators: %s: field label.
 #. translators: %s: collection label.
-#: assets/admin/app-collections.js:890 assets/admin/app-collections.js:1676
+#: assets/admin/app-collections.js:939 assets/admin/app-collections.js:1725
 #, javascript-format
 msgid "Remove “%s”?"
 msgstr ""
 
 #. translators: %s: field key.
-#: assets/admin/app-collections.js:946
+#: assets/admin/app-collections.js:995
 #, javascript-format
 msgid "Key: %s (fixed: it names the stored data, renaming is free)."
 msgstr ""
 
 #. translators: %s: field key.
-#: assets/admin/app-collections.js:948
+#: assets/admin/app-collections.js:997
 #, javascript-format
 msgid "Key: %s (set when you apply, then fixed)."
 msgstr ""
 
-#: assets/admin/app-collections.js:1011
+#: assets/admin/app-collections.js:1060
 msgid "Shown to editors under the field"
 msgstr ""
 
-#: assets/admin/app-collections.js:1019
+#: assets/admin/app-collections.js:1068
 msgid "Changing the type of a saved field moves its values to a new column; values that can’t be converted stay in the archived column."
 msgstr ""
 
-#: assets/admin/app-collections.js:1024 assets/admin/app-collections.js:1308
+#: assets/admin/app-collections.js:1073 assets/admin/app-collections.js:1357
 #: assets/admin/editor.js:3156
 msgid "Label"
 msgstr ""
 
-#: assets/admin/app-collections.js:1026 assets/admin/app-collections.js:1309
-#: assets/admin/app-collections.js:1340
+#: assets/admin/app-collections.js:1075 assets/admin/app-collections.js:1358
+#: assets/admin/app-collections.js:1389
 msgid "Name in the API"
 msgstr ""
 
-#: assets/admin/app-collections.js:1030 assets/admin/app-collections.js:1341
-#: assets/admin/app-content.js:886 assets/admin/app-media.js:58
+#: assets/admin/app-collections.js:1079 assets/admin/app-collections.js:1390
+#: assets/admin/app-content.js:1220 assets/admin/app-media.js:58
 #: assets/admin/editor.js:1198
 msgid "Type"
 msgstr ""
 
-#: assets/admin/app-collections.js:1031
+#: assets/admin/app-collections.js:1080
 msgid "Instructions"
 msgstr ""
 
-#: assets/admin/app-collections.js:1042
+#: assets/admin/app-collections.js:1091
 msgid "Several lines"
 msgstr ""
 
-#: assets/admin/app-collections.js:1049
+#: assets/admin/app-collections.js:1098
 msgid "Maximum length"
 msgstr ""
 
-#: assets/admin/app-collections.js:1051 assets/admin/app-collections.js:1090
-#: assets/admin/app-collections.js:1100 assets/admin/app-collections.js:1109
-#: assets/admin/app-collections.js:1315
+#: assets/admin/app-collections.js:1100 assets/admin/app-collections.js:1139
+#: assets/admin/app-collections.js:1149 assets/admin/app-collections.js:1158
+#: assets/admin/app-collections.js:1364
 msgid "No limit"
 msgstr ""
 
-#: assets/admin/app-collections.js:1051
+#: assets/admin/app-collections.js:1100
 msgid "Up to 191 characters, the text is indexed (fast to sort and filter)."
 msgstr ""
 
-#: assets/admin/app-collections.js:1055
+#: assets/admin/app-collections.js:1104
 msgid "Whole numbers only"
 msgstr ""
 
-#: assets/admin/app-collections.js:1058 assets/admin/app-collections.js:1313
-#: assets/admin/app-collections.js:1347
+#: assets/admin/app-collections.js:1107 assets/admin/app-collections.js:1362
+#: assets/admin/app-collections.js:1396
 msgid "Maximum"
 msgstr ""
 
-#: assets/admin/app-collections.js:1058 assets/admin/app-collections.js:1310
-#: assets/admin/app-collections.js:1346
+#: assets/admin/app-collections.js:1107 assets/admin/app-collections.js:1359
+#: assets/admin/app-collections.js:1395
 msgid "Minimum"
 msgstr ""
 
-#: assets/admin/app-collections.js:1058
+#: assets/admin/app-collections.js:1107
 msgid "Step"
 msgstr ""
 
-#: assets/admin/app-collections.js:1067
+#: assets/admin/app-collections.js:1116
 msgid "Several choices"
 msgstr ""
 
-#: assets/admin/app-collections.js:1080 assets/admin/app-collections.js:1344
+#: assets/admin/app-collections.js:1129 assets/admin/app-collections.js:1393
 msgid "Choices"
 msgstr ""
 
-#: assets/admin/app-collections.js:1082
+#: assets/admin/app-collections.js:1131
 msgid "One choice per line. Write “value : Label” to show a label different from the stored value."
 msgstr ""
 
-#: assets/admin/app-collections.js:1088
+#: assets/admin/app-collections.js:1137
 msgid "Maximum images"
 msgstr ""
 
-#: assets/admin/app-collections.js:1094
+#: assets/admin/app-collections.js:1143
 msgid "Several entries"
 msgstr ""
 
-#: assets/admin/app-collections.js:1098
+#: assets/admin/app-collections.js:1147
 msgid "Maximum entries"
 msgstr ""
 
-#: assets/admin/app-collections.js:1100
+#: assets/admin/app-collections.js:1149
 msgid "With “Several entries”."
 msgstr ""
 
-#: assets/admin/app-collections.js:1105
+#: assets/admin/app-collections.js:1154
 msgid "Maximum rows"
 msgstr ""
 
-#: assets/admin/app-collections.js:1105
+#: assets/admin/app-collections.js:1154
 msgid "Minimum rows"
 msgstr ""
 
-#: assets/admin/app-collections.js:1121
+#: assets/admin/app-collections.js:1170
 msgid "Advanced options"
 msgstr ""
 
-#: assets/admin/app-collections.js:1139
+#: assets/admin/app-collections.js:1188
 msgid "Required"
 msgstr ""
 
-#: assets/admin/app-collections.js:1147
+#: assets/admin/app-collections.js:1196
 msgid "Fields of each row"
 msgstr ""
 
-#: assets/admin/app-collections.js:1147
+#: assets/admin/app-collections.js:1196
 msgid "Fields of the group"
 msgstr ""
 
-#: assets/admin/app-collections.js:1197 assets/admin/app-collections.js:1345
+#: assets/admin/app-collections.js:1246 assets/admin/app-collections.js:1394
 msgid "Points to"
 msgstr ""
 
-#: assets/admin/app-collections.js:1219 assets/admin/app-collections.js:1343
+#: assets/admin/app-collections.js:1268 assets/admin/app-collections.js:1392
 msgid "Block types"
 msgstr ""
 
-#: assets/admin/app-collections.js:1221
+#: assets/admin/app-collections.js:1270
 msgid "Add at least one block type: editors pick one each time they add a block."
 msgstr ""
 
-#: assets/admin/app-collections.js:1228
+#: assets/admin/app-collections.js:1277
 msgid "New block"
 msgstr ""
 
-#: assets/admin/app-collections.js:1233
+#: assets/admin/app-collections.js:1282
 msgid "Add a block type"
 msgstr ""
 
 #. translators: %s: block type label.
-#: assets/admin/app-collections.js:1290
+#: assets/admin/app-collections.js:1339
 #, javascript-format
 msgid "Remove the block type “%s”?"
 msgstr ""
 
-#: assets/admin/app-collections.js:1291
+#: assets/admin/app-collections.js:1340
 msgid "Blocks of this type disappear from each entry the next time the entry is saved. Revisions keep them."
 msgstr ""
 
 #. translators: %s: block key.
-#: assets/admin/app-collections.js:1309
+#: assets/admin/app-collections.js:1358
 #, javascript-format
 msgid "Key: %s"
 msgstr ""
 
-#: assets/admin/app-collections.js:1318
+#: assets/admin/app-collections.js:1367
 msgid "Fields of this block"
 msgstr ""
 
-#: assets/admin/app-collections.js:1339
+#: assets/admin/app-collections.js:1388
 msgid "Key"
 msgstr ""
 
-#: assets/admin/app-collections.js:1342
+#: assets/admin/app-collections.js:1391
 msgid "Sub-fields"
 msgstr ""
 
-#: assets/admin/app-collections.js:1381
+#: assets/admin/app-collections.js:1430
 msgid "Archived columns"
 msgstr ""
 
-#: assets/admin/app-collections.js:1382
+#: assets/admin/app-collections.js:1431
 msgid "Values of removed or retyped fields. They are kept until you purge them."
 msgstr ""
 
-#: assets/admin/app-collections.js:1385
+#: assets/admin/app-collections.js:1434
 msgid "No archived columns."
 msgstr ""
 
-#: assets/admin/app-collections.js:1391
+#: assets/admin/app-collections.js:1440
 msgid "Field"
 msgstr ""
 
-#: assets/admin/app-collections.js:1392
+#: assets/admin/app-collections.js:1441
 msgid "Column"
 msgstr ""
 
-#: assets/admin/app-collections.js:1393
+#: assets/admin/app-collections.js:1442
 msgid "Why"
 msgstr ""
 
-#: assets/admin/app-collections.js:1394
+#: assets/admin/app-collections.js:1443
 msgid "Archived"
 msgstr ""
 
-#: assets/admin/app-collections.js:1400
+#: assets/admin/app-collections.js:1449
 msgid "Field removed"
 msgstr ""
 
-#: assets/admin/app-collections.js:1400
+#: assets/admin/app-collections.js:1449
 msgid "Type changed"
 msgstr ""
 
-#: assets/admin/app-collections.js:1409
+#: assets/admin/app-collections.js:1458
 msgid "Purge archived columns"
 msgstr ""
 
-#: assets/admin/app-collections.js:1417
+#: assets/admin/app-collections.js:1466
 msgid "Purge archived columns?"
 msgstr ""
 
-#: assets/admin/app-collections.js:1418
+#: assets/admin/app-collections.js:1467
 msgid "Their values are deleted from the database for good. Revisions of entries keep a copy, but the columns can’t be restored."
 msgstr ""
 
-#: assets/admin/app-collections.js:1419
+#: assets/admin/app-collections.js:1468
 msgid "Purge"
 msgstr ""
 
 #. translators: %d: number of columns.
-#: assets/admin/app-collections.js:1430
+#: assets/admin/app-collections.js:1479
 #, javascript-format
 msgid "%d column purged."
 msgid_plural "%d columns purged."
@@ -632,138 +663,139 @@ msgstr[0] ""
 msgstr[1] ""
 
 #. translators: %s: collection id.
-#: assets/admin/app-collections.js:1498
+#: assets/admin/app-collections.js:1547
 #, javascript-format
 msgid "Create the table of “%s”."
 msgstr ""
 
 #. translators: 1: field label, 2: SQL column type.
-#: assets/admin/app-collections.js:1501
+#: assets/admin/app-collections.js:1550
 #, javascript-format
 msgid "Add a column for “%1$s” (%2$s)."
 msgstr ""
 
 #. translators: %s: field label.
-#: assets/admin/app-collections.js:1504
+#: assets/admin/app-collections.js:1553
 #, javascript-format
 msgid "Bring back the archived values of “%s”."
 msgstr ""
 
 #. translators: 1: field label, 2: previous type, 3: new type.
-#: assets/admin/app-collections.js:1507
+#: assets/admin/app-collections.js:1556
 #, javascript-format
 msgid "Convert “%1$s” from %2$s to %3$s: values move to a new column, the old one is archived."
 msgstr ""
 
 #. translators: %s: field label.
-#: assets/admin/app-collections.js:1510
+#: assets/admin/app-collections.js:1559
 #, javascript-format
 msgid "Archive the column of “%s” (values kept)."
 msgstr ""
 
 #. translators: %s: collection id.
-#: assets/admin/app-collections.js:1513
+#: assets/admin/app-collections.js:1562
 #, javascript-format
 msgid "Remove the collection “%s” from Okno (entries and values kept)."
 msgstr ""
 
 #. translators: %s: collection id.
-#: assets/admin/app-collections.js:1516
+#: assets/admin/app-collections.js:1565
 #, javascript-format
 msgid "Create the entry of “%s”."
 msgstr ""
 
 #. translators: %d: number of problems.
-#: assets/admin/app-collections.js:1559
+#: assets/admin/app-collections.js:1608
 #, javascript-format
 msgid "%d problem to fix before applying."
 msgid_plural "%d problems to fix before applying."
 msgstr[0] ""
 msgstr[1] ""
 
-#: assets/admin/app-collections.js:1590
+#: assets/admin/app-collections.js:1639
 msgid "Okno will make these changes to the database:"
 msgstr ""
 
-#: assets/admin/app-collections.js:1596
+#: assets/admin/app-collections.js:1645
 msgid "No database change needed: only the field definitions are updated (labels, options, sub-fields, order)."
 msgstr ""
 
-#: assets/admin/app-collections.js:1616
+#: assets/admin/app-collections.js:1665
 msgid "Removed sub-fields lose their values the next time each entry is saved (revisions keep them):"
 msgstr ""
 
-#: assets/admin/app-collections.js:1624
+#: assets/admin/app-collections.js:1673
 msgid "Apply these changes?"
 msgstr ""
 
-#: assets/admin/app-collections.js:1624
+#: assets/admin/app-collections.js:1673
 msgid "Create this collection?"
 msgstr ""
 
-#: assets/admin/app-collections.js:1628 assets/admin/app-content.js:172
+#: assets/admin/app-collections.js:1677 assets/admin/app-content.js:172
 msgid "Keep editing"
 msgstr ""
 
-#: assets/admin/app-collections.js:1630
+#: assets/admin/app-collections.js:1679
 msgid "Apply"
 msgstr ""
 
-#: assets/admin/app-collections.js:1630
+#: assets/admin/app-collections.js:1679
 msgid "Create"
 msgstr ""
 
 #. translators: %d: number of values.
-#: assets/admin/app-collections.js:1657
+#: assets/admin/app-collections.js:1706
 #, javascript-format
 msgid "%d value couldn’t be converted: it stays in the archived column."
 msgid_plural "%d values couldn’t be converted: they stay in the archived column."
 msgstr[0] ""
 msgstr[1] ""
 
-#: assets/admin/app-collections.js:1662
+#: assets/admin/app-collections.js:1711
 msgid "Changes applied."
 msgstr ""
 
-#: assets/admin/app-collections.js:1662
+#: assets/admin/app-collections.js:1711
 msgid "Collection created."
 msgstr ""
 
-#: assets/admin/app-collections.js:1677
+#: assets/admin/app-collections.js:1726
 msgid "The collection disappears from Okno, the editor and the content API. Its entries and their values are kept in the database: creating it again with the same identifier brings everything back."
 msgstr ""
 
-#: assets/admin/app-collections.js:1687
+#: assets/admin/app-collections.js:1736
 msgid "Collection removed. Its data is kept."
 msgstr ""
 
-#: assets/admin/app-collections.js:1727
-#: includes/collections/class-okno-collections.php:321
+#: assets/admin/app-collections.js:1776
+#: includes/collections/class-okno-collections.php:322
 msgid "The file is not valid JSON."
 msgstr ""
 
 #. translators: %s: file name.
-#: assets/admin/app-collections.js:1737
+#: assets/admin/app-collections.js:1786
 #, javascript-format
 msgid "Import %s?"
 msgstr ""
 
 #. translators: %s: list of collection ids.
-#: assets/admin/app-collections.js:1742
+#: assets/admin/app-collections.js:1791
 #, javascript-format
 msgid "The file replaces the whole schema with: %s."
 msgstr ""
 
-#: assets/admin/app-collections.js:1747 assets/admin/app-collections.js:1806
-#: assets/admin/app-content.js:901 assets/admin/app.js:317
+#: assets/admin/app-collections.js:1796 assets/admin/app-collections.js:1855
+#: assets/admin/app-content.js:610 assets/admin/app-content.js:667
+#: assets/admin/app-content.js:1235 assets/admin/app.js:317
 msgid "Cancel"
 msgstr ""
 
-#: assets/admin/app-collections.js:1749
+#: assets/admin/app-collections.js:1798
 msgid "Import"
 msgstr ""
 
-#: assets/admin/app-collections.js:1756
+#: assets/admin/app-collections.js:1805
 msgid "Schema imported."
 msgstr ""
 
@@ -909,88 +941,334 @@ msgid "This content type and its fields are defined by WordPress, the theme or a
 msgstr ""
 
 #: assets/admin/app-content.js:374
+msgid "You can also move these fields into Okno: Okno then defines and stores them, and ACF is no longer needed for this content type. Nothing is deleted from ACF, and you can go back."
+msgstr ""
+
+#: assets/admin/app-content.js:379
 msgid "Open the ACF field groups"
 msgstr ""
 
-#: assets/admin/app-content.js:382
+#: assets/admin/app-content.js:411
+msgid "Block type"
+msgstr ""
+
+#: assets/admin/app-content.js:415
+msgid "Screen layout only, no value"
+msgstr ""
+
+#: assets/admin/app-content.js:416
+msgid "Name not usable in the API"
+msgstr ""
+
+#: assets/admin/app-content.js:417
+msgid "Clone field"
+msgstr ""
+
+#: assets/admin/app-content.js:418
+msgid "Clone kept as a group"
+msgstr ""
+
+#: assets/admin/app-content.js:419
+msgid "No Okno equivalent"
+msgstr ""
+
+#: assets/admin/app-content.js:420
+msgid "No choices declared"
+msgstr ""
+
+#: assets/admin/app-content.js:421
+msgid "Nothing left inside"
+msgstr ""
+
+#: assets/admin/app-content.js:422
+msgid "Conditional logic dropped"
+msgstr ""
+
+#: assets/admin/app-content.js:423
+msgid "Default value dropped"
+msgstr ""
+
+#: assets/admin/app-content.js:424
+msgid "Media restrictions dropped"
+msgstr ""
+
+#: assets/admin/app-content.js:425
+msgid "Values outside the choices refused"
+msgstr ""
+
+#: assets/admin/app-content.js:426
+msgid "Taxonomy filter dropped"
+msgstr ""
+
+#: assets/admin/app-content.js:427
+msgid "No longer bidirectional"
+msgstr ""
+
+#: assets/admin/app-content.js:428
+msgid "Collapsed rows / pagination dropped"
+msgstr ""
+
+#: assets/admin/app-content.js:429
+msgid "Kept as its URL"
+msgstr ""
+
+#: assets/admin/app-content.js:430
+msgid "Kept as text (HH:MM:SS)"
+msgstr ""
+
+#: assets/admin/app-content.js:434
+msgid "Same"
+msgstr ""
+
+#: assets/admin/app-content.js:435
+msgid "Adapted"
+msgstr ""
+
+#: assets/admin/app-content.js:436
+msgid "Not carried over"
+msgstr ""
+
+#: assets/admin/app-content.js:437
+msgid "Ignored"
+msgstr ""
+
+#: assets/admin/app-content.js:447
+msgid "Import into Okno"
+msgstr ""
+
+#: assets/admin/app-content.js:447
+msgid "Resume the import into Okno"
+msgstr ""
+
+#: assets/admin/app-content.js:485
+msgid "becomes"
+msgstr ""
+
+#. translators: 1: content type, 2: number of entries, 3: number of fields, 4: number of stored values.
+#: assets/admin/app-content.js:504
+#, javascript-format
+msgid "Okno creates the collection “%1$s” from its ACF fields, then copies %2$s entries (%3$s fields, %4$s stored values) with the same checks as the editor. The front end keeps receiving the same JSON; each entry is checked after the copy."
+msgstr ""
+
+#: assets/admin/app-content.js:510
+#: includes/collections/class-okno-acf-import.php:1286
+msgid "The Okno collection built from these ACF fields is invalid."
+msgstr ""
+
+#. translators: %s: ACF field group title.
+#: assets/admin/app-content.js:523
+#, javascript-format
+msgid "Field group “%s”"
+msgstr ""
+
+#: assets/admin/app-content.js:524
+msgid "Extra location rules"
+msgstr ""
+
+#: assets/admin/app-content.js:531
+msgid "What doesn’t carry over"
+msgstr ""
+
+#. translators: 1: entries copied, 2: total entries.
+#: assets/admin/app-content.js:548
+#, javascript-format
+msgid "Copying the entries: %1$s of %2$s. You can close this window: the import resumes where it stopped."
+msgstr ""
+
+#: assets/admin/app-content.js:551
+msgid "Import progress"
+msgstr ""
+
+#. translators: 1: number of failures, 2: number of differences.
+#: assets/admin/app-content.js:555
+#, javascript-format
+msgid "So far: %1$s failures, %2$s differences."
+msgstr ""
+
+#: assets/admin/app-content.js:569
+#, javascript-format
+msgid "%d entry imported"
+msgid_plural "%d entries imported"
+msgstr[0] ""
+msgstr[1] ""
+
+#: assets/admin/app-content.js:570
+#, javascript-format
+msgid "%d failure"
+msgid_plural "%d failures"
+msgstr[0] ""
+msgstr[1] ""
+
+#: assets/admin/app-content.js:571
+#, javascript-format
+msgid "%d difference"
+msgid_plural "%d differences"
+msgstr[0] ""
+msgstr[1] ""
+
+#: assets/admin/app-content.js:574
+msgid "The content type is now served by Okno. The values below were refused or changed by Okno’s checks; ACF still holds the originals. Correct them in Okno."
+msgstr ""
+
+#: assets/admin/app-content.js:575
+msgid "The content type is now served by Okno, and every entry gives the front end the same values as before."
+msgstr ""
+
+#: assets/admin/app-content.js:578
+msgid "Failures"
+msgstr ""
+
+#: assets/admin/app-content.js:584
+msgid "Values served differently"
+msgstr ""
+
+#: assets/admin/app-content.js:589
+msgid "ACF:"
+msgstr ""
+
+#: assets/admin/app-content.js:590
+msgid "Okno:"
+msgstr ""
+
+#. translators: %s: content type.
+#: assets/admin/app-content.js:606
+#, javascript-format
+msgid "Import “%s” into Okno"
+msgstr ""
+
+#: assets/admin/app-content.js:609
+msgid "Reading the ACF fields…"
+msgstr ""
+
+#: assets/admin/app-content.js:623
+msgid "Import finished."
+msgstr ""
+
+#: assets/admin/app-content.js:624
+msgid "Open the collection"
+msgstr ""
+
+#: assets/admin/app-content.js:644 assets/admin/app-content.js:650
+#: assets/admin/app.js:195
+msgid "Close"
+msgstr ""
+
+#: assets/admin/app-content.js:648
+msgid "The import stopped."
+msgstr ""
+
+#: assets/admin/app-content.js:653
+msgid "Try again"
+msgstr ""
+
+#: assets/admin/app-content.js:671
+#, javascript-format
+msgid "Import %d entry"
+msgid_plural "Import %d entries"
+msgstr[0] ""
+msgstr[1] ""
+
+#: assets/admin/app-content.js:679
+msgid "Couldn’t read the ACF fields."
+msgstr ""
+
+#. translators: %s: content type.
+#: assets/admin/app-content.js:692
+#, javascript-format
+msgid "Go back to ACF for “%s”?"
+msgstr ""
+
+#: assets/admin/app-content.js:693
+msgid "ACF serves the fields of this content type again, with the values they had on the import day. Values edited in Okno since the import are not written back to ACF: they are deleted with the Okno table of this collection."
+msgstr ""
+
+#: assets/admin/app-content.js:703
+msgid "The content type is served by ACF again."
+msgstr ""
+
+#: assets/admin/app-content.js:707
+msgid "Couldn’t go back to ACF."
+msgstr ""
+
+#: assets/admin/app-content.js:716
 msgid "No content type"
 msgstr ""
 
 #. translators: 1: content type, 2: number of entries.
-#: assets/admin/app-content.js:427
+#: assets/admin/app-content.js:761
 #, javascript-format
 msgid "%1$s, %2$s"
 msgstr ""
 
 #. translators: %d: number of entries.
-#: assets/admin/app-content.js:427 assets/admin/app-content.js:584
+#: assets/admin/app-content.js:761 assets/admin/app-content.js:918
 #, javascript-format
 msgid "%d entry"
 msgid_plural "%d entries"
 msgstr[0] ""
 msgstr[1] ""
 
-#: assets/admin/app-content.js:465
+#: assets/admin/app-content.js:799
 msgid "No content type is editable in Okno yet. Choose them in the settings."
 msgstr ""
 
-#: assets/admin/app-content.js:518
+#: assets/admin/app-content.js:852
 msgid "Nothing to show."
 msgstr ""
 
-#: assets/admin/app-content.js:565 assets/admin/editor.js:907
+#: assets/admin/app-content.js:899 assets/admin/editor.js:907
 msgid "Couldn’t load the content list."
 msgstr ""
 
-#: assets/admin/app-content.js:592
+#: assets/admin/app-content.js:926
 msgid "No entries yet"
 msgstr ""
 
-#: assets/admin/app-content.js:592
+#: assets/admin/app-content.js:926
 msgid "Nothing matches these filters"
 msgstr ""
 
-#: assets/admin/app-content.js:596
+#: assets/admin/app-content.js:930
 msgid "Create an entry"
 msgstr ""
 
-#: assets/admin/app-content.js:617 assets/admin/app-media.js:135
+#: assets/admin/app-content.js:951 assets/admin/app-media.js:135
 #: assets/admin/editor.js:1060
 msgid "(no title)"
 msgstr ""
 
-#: assets/admin/app-content.js:623
+#: assets/admin/app-content.js:957
 msgid "Restore"
 msgstr ""
 
-#: assets/admin/app-content.js:629 includes/admin/class-okno-admin.php:461
+#: assets/admin/app-content.js:963 includes/admin/class-okno-admin.php:461
 #: includes/admin/class-okno-app.php:58
 #: includes/admin/class-okno-dashboard.php:155
 msgid "Visual editor"
 msgstr ""
 
-#: assets/admin/app-content.js:633
+#: assets/admin/app-content.js:967
 msgid "Back to draft"
 msgstr ""
 
-#: assets/admin/app-content.js:639
+#: assets/admin/app-content.js:973
 msgid "Mark as published"
 msgstr ""
 
-#: assets/admin/app-content.js:639
+#: assets/admin/app-content.js:973
 msgid "Submit for review"
 msgstr ""
 
-#: assets/admin/app-content.js:644 assets/admin/editor.js:2725
+#: assets/admin/app-content.js:978 assets/admin/editor.js:2725
 msgid "Duplicate"
 msgstr ""
 
-#: assets/admin/app-content.js:649 assets/admin/app-content.js:823
+#: assets/admin/app-content.js:983 assets/admin/app-content.js:1157
 msgid "Move to trash"
 msgstr ""
 
 #. translators: 1: content title, 2: status (e.g. Draft), 3: content type.
-#: assets/admin/app-content.js:657
+#: assets/admin/app-content.js:991
 #, javascript-format
 msgid "%1$s — %2$s, %3$s"
 msgstr ""
@@ -1001,7 +1279,7 @@ msgstr ""
 #. translators: 1: location of the sub-field (e.g. “#2 › title”), 2: error message.
 #. translators: 1: action (e.g. Duplicate), 2: content title.
 #. translators: 1: file name, 2: error message.
-#: assets/admin/app-content.js:705 assets/admin/app-content.js:711
+#: assets/admin/app-content.js:1039 assets/admin/app-content.js:1045
 #: assets/admin/app-media.js:313 assets/admin/editor.js:1779
 #: assets/admin/editor.js:2752 assets/admin/editor.js:3075
 #: assets/admin/editor.js:3279
@@ -1009,103 +1287,103 @@ msgstr ""
 msgid "%1$s: %2$s"
 msgstr ""
 
-#: assets/admin/app-content.js:721
+#: assets/admin/app-content.js:1055
 msgid "Previous"
 msgstr ""
 
 #. translators: 1: current page, 2: number of pages.
-#: assets/admin/app-content.js:727
+#: assets/admin/app-content.js:1061
 #, javascript-format
 msgid "Page %1$d of %2$d"
 msgstr ""
 
-#: assets/admin/app-content.js:731
+#: assets/admin/app-content.js:1065
 msgid "Next"
 msgstr ""
 
-#: assets/admin/app-content.js:758
+#: assets/admin/app-content.js:1092
 msgid "Couldn’t open this entry."
 msgstr ""
 
 #. translators: 1: content title, 2: status (e.g. Published).
-#: assets/admin/app-content.js:796
+#: assets/admin/app-content.js:1130
 #, javascript-format
 msgid "“%1$s”: %2$s."
 msgstr ""
 
-#: assets/admin/app-content.js:801 assets/admin/editor.js:1335
+#: assets/admin/app-content.js:1135 assets/admin/editor.js:1335
 msgid "Couldn’t change the status."
 msgstr ""
 
 #. translators: %s: content title.
-#: assets/admin/app-content.js:809 assets/admin/editor.js:1109
+#: assets/admin/app-content.js:1143 assets/admin/editor.js:1109
 #: assets/admin/editor.js:1241
 #, javascript-format
 msgid "“%s” created as a draft."
 msgstr ""
 
-#: assets/admin/app-content.js:814 assets/admin/editor.js:1113
+#: assets/admin/app-content.js:1148 assets/admin/editor.js:1113
 msgid "Couldn’t duplicate this content."
 msgstr ""
 
-#: assets/admin/app-content.js:820
+#: assets/admin/app-content.js:1154
 msgid "Move to trash?"
 msgstr ""
 
 #. translators: %s: content title.
-#: assets/admin/app-content.js:822
+#: assets/admin/app-content.js:1156
 #, javascript-format
 msgid "“%s” will be moved to the trash. You can restore it from the Trash filter."
 msgstr ""
 
 #. translators: %s: content title.
-#: assets/admin/app-content.js:832
+#: assets/admin/app-content.js:1166
 #, javascript-format
 msgid "“%s” moved to the trash."
 msgstr ""
 
-#: assets/admin/app-content.js:844 includes/class-okno-rest.php:523
+#: assets/admin/app-content.js:1178 includes/class-okno-rest.php:523
 msgid "Couldn’t delete this content."
 msgstr ""
 
 #. translators: %s: content title.
-#: assets/admin/app-content.js:853
+#: assets/admin/app-content.js:1187
 #, javascript-format
 msgid "“%s” restored as a draft."
 msgstr ""
 
-#: assets/admin/app-content.js:858 includes/class-okno-rest.php:597
+#: assets/admin/app-content.js:1192 includes/class-okno-rest.php:597
 msgid "Couldn’t restore this content."
 msgstr ""
 
-#: assets/admin/app-content.js:888 assets/admin/app-media.js:243
+#: assets/admin/app-content.js:1222 assets/admin/app-media.js:243
 #: assets/admin/editor.js:1187 includes/class-okno-schema.php:193
 msgid "Title"
 msgstr ""
 
-#: assets/admin/app-content.js:890
+#: assets/admin/app-content.js:1224
 msgid "Created as a draft: nothing is visible on the site until you publish it."
 msgstr ""
 
 #. translators: %s: content type (e.g. Services).
-#: assets/admin/app-content.js:897
+#: assets/admin/app-content.js:1231
 #, javascript-format
 msgid "New entry in %s"
 msgstr ""
 
-#: assets/admin/app-content.js:898 includes/admin/class-okno-dashboard.php:153
+#: assets/admin/app-content.js:1232 includes/admin/class-okno-dashboard.php:153
 msgid "New content"
 msgstr ""
 
-#: assets/admin/app-content.js:902
+#: assets/admin/app-content.js:1236
 msgid "Create and edit"
 msgstr ""
 
-#: assets/admin/app-content.js:947 assets/admin/editor.js:1252
+#: assets/admin/app-content.js:1281 assets/admin/editor.js:1252
 msgid "Couldn’t create this content."
 msgstr ""
 
-#: assets/admin/app-content.js:977 assets/admin/editor.js:901
+#: assets/admin/app-content.js:1311 assets/admin/editor.js:901
 msgid "This content no longer exists or you’re not allowed to edit it."
 msgstr ""
 
@@ -1254,10 +1532,6 @@ msgid "%d file uploaded."
 msgid_plural "%d files uploaded."
 msgstr[0] ""
 msgstr[1] ""
-
-#: assets/admin/app.js:195
-msgid "Close"
-msgstr ""
 
 #. translators: %s: text the user must type to confirm.
 #: assets/admin/app.js:303
@@ -2043,7 +2317,7 @@ msgid "Your saved changes go live automatically. Click “Publish” to do it no
 msgstr ""
 
 #: includes/admin/class-okno-admin.php:95
-#: includes/collections/class-okno-collections.php:565
+#: includes/collections/class-okno-collections.php:574
 msgid "Edit with Okno"
 msgstr ""
 
@@ -3047,10 +3321,203 @@ msgstr ""
 msgid "Couldn’t prepare the Okno update folder."
 msgstr ""
 
+#: includes/collections/class-okno-acf-import.php:1061
+msgid "Already imported into Okno."
+msgstr ""
+
+#: includes/collections/class-okno-acf-import.php:1064
+#: includes/collections/class-okno-acf-import.php:1353
+msgid "ACF (or Secure Custom Fields) isn’t active."
+msgstr ""
+
+#: includes/collections/class-okno-acf-import.php:1067
+msgid "Pages and posts can’t become Okno collections: Okno fields belong to a collection’s own content type. Their ACF fields stay in ACF."
+msgstr ""
+
+#: includes/collections/class-okno-acf-import.php:1070
+msgid "This content type isn’t registered."
+msgstr ""
+
+#: includes/collections/class-okno-acf-import.php:1073
+msgid "An Okno collection already uses this identifier."
+msgstr ""
+
+#: includes/collections/class-okno-acf-import.php:1076
+msgid "Its identifier can’t name an Okno collection (1 to 20 lowercase letters, digits or underscores, not reserved by WordPress)."
+msgstr ""
+
+#: includes/collections/class-okno-acf-import.php:1079
+msgid "No ACF field group is attached to this content type."
+msgstr ""
+
+#: includes/collections/class-okno-acf-import.php:1110
+msgid "None of its ACF fields can be carried over."
+msgstr ""
+
+#: includes/collections/class-okno-acf-import.php:1161
+msgid "Fields with no Okno equivalent are not carried over; their values leave the content API (they stay in ACF)."
+msgstr ""
+
+#: includes/collections/class-okno-acf-import.php:1162
+msgid "Clone fields without cloned fields are not carried over (a seamless clone is replaced by its fields, a clone shown as a group becomes a group)."
+msgstr ""
+
+#: includes/collections/class-okno-acf-import.php:1163
+msgid "Fields or layouts whose name can’t be used as an API name are not carried over."
+msgstr ""
+
+#: includes/collections/class-okno-acf-import.php:1164
+msgid "Several groups define a field with the same name: Okno keeps the last definition, as ACF served it."
+msgstr ""
+
+#: includes/collections/class-okno-acf-import.php:1165
+msgid "Conditional logic is dropped: these fields are always shown in the editor."
+msgstr ""
+
+#: includes/collections/class-okno-acf-import.php:1166
+msgid "Default values are not carried over: existing entries keep their value, new entries start empty."
+msgstr ""
+
+#: includes/collections/class-okno-acf-import.php:1167
+msgid "Location rules other than the content type are dropped: the fields of these groups become available on every entry."
+msgstr ""
+
+#: includes/collections/class-okno-acf-import.php:1168
+msgid "Media restrictions (size, dimensions, file types) are not enforced by Okno."
+msgstr ""
+
+#: includes/collections/class-okno-acf-import.php:1169
+msgid "Repeater options of ACF Pro (collapsed rows, pagination) are not carried over."
+msgstr ""
+
+#: includes/collections/class-okno-acf-import.php:1170
+msgid "Bidirectional relationships stop updating the other side."
+msgstr ""
+
+#: includes/collections/class-okno-acf-import.php:1171
+msgid "Taxonomy filters of relation fields are not carried over."
+msgstr ""
+
+#: includes/collections/class-okno-acf-import.php:1172
+msgid "Values typed by editors outside the declared choices (allow custom, other) are refused by Okno: they are reported as failures."
+msgstr ""
+
+#: includes/collections/class-okno-acf-import.php:1188
+msgid "The content type stays registered by the theme or the plugin that declares it; Okno only takes over its fields."
+msgstr ""
+
+#: includes/collections/class-okno-acf-import.php:1194
+msgid "The content type is declared in ACF: Okno keeps it registered with the same settings if ACF is deactivated. Taxonomies declared in ACF are not taken over."
+msgstr ""
+
+#: includes/collections/class-okno-acf-import.php:1200
+msgid "Past revisions keep their ACF values only: restoring one restores the post, not the Okno fields."
+msgstr ""
+
+#: includes/collections/class-okno-acf-import.php:1205
+msgid "ACF data is never deleted. Values edited in Okno after the import are not written back to ACF: going back to ACF restores the values of the import day."
+msgstr ""
+
+#: includes/collections/class-okno-acf-import.php:1347
+msgid "This import hasn’t started."
+msgstr ""
+
+#: includes/collections/class-okno-acf-import.php:1357
 #: includes/collections/class-okno-collections-rest.php:131
 #: includes/collections/class-okno-collections-rest.php:157
 #: includes/collections/class-okno-collections-rest.php:166
 msgid "Unknown collection."
+msgstr ""
+
+#: includes/collections/class-okno-acf-import.php:1527
+msgid "A required value is empty."
+msgstr ""
+
+#: includes/collections/class-okno-acf-import.php:1528
+msgid "The text is longer than the maximum length."
+msgstr ""
+
+#: includes/collections/class-okno-acf-import.php:1529
+msgid "The value isn’t one of the choices."
+msgstr ""
+
+#: includes/collections/class-okno-acf-import.php:1530
+msgid "The media can’t be used."
+msgstr ""
+
+#: includes/collections/class-okno-acf-import.php:1531
+msgid "A linked entry doesn’t exist or isn’t of an allowed type."
+msgstr ""
+
+#: includes/collections/class-okno-acf-import.php:1532
+msgid "A linked entry doesn’t exist."
+msgstr ""
+
+#: includes/collections/class-okno-acf-import.php:1533
+msgid "The number is invalid."
+msgstr ""
+
+#: includes/collections/class-okno-acf-import.php:1534
+msgid "The number is out of range."
+msgstr ""
+
+#: includes/collections/class-okno-acf-import.php:1535
+msgid "The date is invalid."
+msgstr ""
+
+#: includes/collections/class-okno-acf-import.php:1536
+msgid "The email address is invalid."
+msgstr ""
+
+#: includes/collections/class-okno-acf-import.php:1537
+msgid "The color is invalid."
+msgstr ""
+
+#: includes/collections/class-okno-acf-import.php:1538
+msgid "The link is invalid."
+msgstr ""
+
+#: includes/collections/class-okno-acf-import.php:1539
+msgid "There are more rows than allowed."
+msgstr ""
+
+#: includes/collections/class-okno-acf-import.php:1540
+msgid "There are fewer rows than required."
+msgstr ""
+
+#: includes/collections/class-okno-acf-import.php:1541
+msgid "There are more items than allowed."
+msgstr ""
+
+#: includes/collections/class-okno-acf-import.php:1542
+msgid "A layout no longer exists."
+msgstr ""
+
+#: includes/collections/class-okno-acf-import.php:1543
+msgid "The database refused the value."
+msgstr ""
+
+#: includes/collections/class-okno-acf-import.php:1546
+msgid "The value was refused."
+msgstr ""
+
+#. translators: 1: error message, 2: sub-field name.
+#: includes/collections/class-okno-acf-import.php:1549
+#, php-format
+msgid "%1$s (sub-field “%2$s”)"
+msgstr ""
+
+#: includes/collections/class-okno-acf-import.php:1568
+#: includes/collections/class-okno-acf-import.php:1709
+msgid "This content type wasn’t imported from ACF."
+msgstr ""
+
+#: includes/collections/class-okno-acf-import.php:1571
+msgid "Activate ACF (or Secure Custom Fields) first: it serves the fields again after going back."
+msgstr ""
+
+#: includes/collections/class-okno-acf-import.php:1717
+msgid "Set confirm to the content type to go back to ACF. The Okno values of this type are deleted."
 msgstr ""
 
 #: includes/collections/class-okno-collections-rest.php:139
@@ -3066,150 +3533,158 @@ msgstr ""
 msgid "A collection id never changes."
 msgstr ""
 
-#: includes/collections/class-okno-collections-rest.php:174
+#: includes/collections/class-okno-collections-rest.php:169
+msgid "This collection was imported from ACF: go back to ACF instead (collections/import-acf/rollback)."
+msgstr ""
+
+#: includes/collections/class-okno-collections-rest.php:177
 msgid "Set confirm to the collection id to drop its archived columns. This deletes their data."
 msgstr ""
 
-#: includes/collections/class-okno-collections-schema.php:112
+#: includes/collections/class-okno-collections-schema.php:121
 msgid "The schema must be a JSON object."
 msgstr ""
 
 #. translators: %d: schema format version.
-#: includes/collections/class-okno-collections-schema.php:117
+#: includes/collections/class-okno-collections-schema.php:126
 #, php-format
 msgid "Schema version %d is newer than this Okno supports. Update Okno."
 msgstr ""
 
-#: includes/collections/class-okno-collections-schema.php:123
-#: includes/collections/class-okno-collections-schema.php:253
-#: includes/collections/class-okno-collections-schema.php:424
+#: includes/collections/class-okno-collections-schema.php:132
+#: includes/collections/class-okno-collections-schema.php:276
+#: includes/collections/class-okno-collections-schema.php:448
 msgid "Must be a list."
 msgstr ""
 
 #. translators: %s: collection id.
-#: includes/collections/class-okno-collections-schema.php:142
+#: includes/collections/class-okno-collections-schema.php:151
 #, php-format
 msgid "The id “%s” is used twice."
 msgstr ""
 
-#: includes/collections/class-okno-collections-schema.php:163
+#: includes/collections/class-okno-collections-schema.php:172
 msgid "A collection must be an object."
 msgstr ""
 
-#: includes/collections/class-okno-collections-schema.php:169
+#: includes/collections/class-okno-collections-schema.php:178
 msgid "Use 1 to 20 lowercase letters, digits or underscores, starting with a letter."
 msgstr ""
 
 #. translators: %s: collection id.
-#: includes/collections/class-okno-collections-schema.php:174
+#: includes/collections/class-okno-collections-schema.php:183
 #, php-format
 msgid "“%s” is reserved by WordPress."
 msgstr ""
 
-#: includes/collections/class-okno-collections-schema.php:180
+#: includes/collections/class-okno-collections-schema.php:189
 msgid "Must be “collection” or “singleton”."
 msgstr ""
 
+#: includes/collections/class-okno-collections-schema.php:197
+msgid "A content type registered outside Okno can only be a collection."
+msgstr ""
+
 #. translators: %s: post feature name.
-#: includes/collections/class-okno-collections-schema.php:193
+#: includes/collections/class-okno-collections-schema.php:212
 #, php-format
 msgid "Unknown feature “%s”."
 msgstr ""
 
-#: includes/collections/class-okno-collections-schema.php:201
+#: includes/collections/class-okno-collections-schema.php:220
 msgid "A path starts with “/” and may use {slug} and {id}."
 msgstr ""
 
 #. translators: %d: maximum number of fields.
-#: includes/collections/class-okno-collections-schema.php:215
+#: includes/collections/class-okno-collections-schema.php:235
 #, php-format
 msgid "A collection holds at most %d fields."
 msgstr ""
 
 #. translators: %d: maximum number of short text fields.
-#: includes/collections/class-okno-collections-schema.php:226
+#: includes/collections/class-okno-collections-schema.php:246
 #, php-format
 msgid "A collection holds at most %d short indexed text fields (text up to 191 characters, slug, email, select)."
 msgstr ""
 
 #. translators: %d: maximum nesting depth.
-#: includes/collections/class-okno-collections-schema.php:258
+#: includes/collections/class-okno-collections-schema.php:281
 #, php-format
 msgid "Fields can be nested %d levels deep at most."
 msgstr ""
 
 #. translators: %s: field key.
-#: includes/collections/class-okno-collections-schema.php:272
+#: includes/collections/class-okno-collections-schema.php:295
 #, php-format
 msgid "The key “%s” is used twice."
 msgstr ""
 
 #. translators: %s: field name.
-#: includes/collections/class-okno-collections-schema.php:277
+#: includes/collections/class-okno-collections-schema.php:300
 #, php-format
 msgid "The name “%s” is used twice."
 msgstr ""
 
-#: includes/collections/class-okno-collections-schema.php:299
+#: includes/collections/class-okno-collections-schema.php:323
 msgid "A field must be an object."
 msgstr ""
 
-#: includes/collections/class-okno-collections-schema.php:305
-#: includes/collections/class-okno-collections-schema.php:474
+#: includes/collections/class-okno-collections-schema.php:329
+#: includes/collections/class-okno-collections-schema.php:498
 msgid "Use snake_case: lowercase letters, digits and underscores, starting with a letter (64 characters max)."
 msgstr ""
 
-#: includes/collections/class-okno-collections-schema.php:311
-#: includes/collections/class-okno-collections-schema.php:479
+#: includes/collections/class-okno-collections-schema.php:335
+#: includes/collections/class-okno-collections-schema.php:503
 msgid "Use lowercase letters, digits and underscores, starting with a letter (48 characters max)."
 msgstr ""
 
 #. translators: %s: field type.
-#: includes/collections/class-okno-collections-schema.php:318
+#: includes/collections/class-okno-collections-schema.php:342
 #, php-format
 msgid "Unknown field type “%s”."
 msgstr ""
 
-#: includes/collections/class-okno-collections-schema.php:349
+#: includes/collections/class-okno-collections-schema.php:373
 msgid "min is greater than max."
 msgstr ""
 
-#: includes/collections/class-okno-collections-schema.php:367
+#: includes/collections/class-okno-collections-schema.php:391
 msgid "References point to collection ids or post types."
 msgstr ""
 
 #. translators: %s: collection id or post type.
-#: includes/collections/class-okno-collections-schema.php:374
+#: includes/collections/class-okno-collections-schema.php:398
 #, php-format
 msgid "Unknown collection or content type “%s”."
 msgstr ""
 
-#: includes/collections/class-okno-collections-schema.php:380
+#: includes/collections/class-okno-collections-schema.php:404
 msgid "Say which collections this field points to."
 msgstr ""
 
-#: includes/collections/class-okno-collections-schema.php:392
+#: includes/collections/class-okno-collections-schema.php:416
 msgid "A list needs at least one field."
 msgstr ""
 
-#: includes/collections/class-okno-collections-schema.php:399
+#: includes/collections/class-okno-collections-schema.php:423
 msgid "A group needs at least one field."
 msgstr ""
 
-#: includes/collections/class-okno-collections-schema.php:441
+#: includes/collections/class-okno-collections-schema.php:465
 msgid "Each choice needs a value of 1 to 191 characters."
 msgstr ""
 
-#: includes/collections/class-okno-collections-schema.php:454
+#: includes/collections/class-okno-collections-schema.php:478
 msgid "A select needs at least one choice."
 msgstr ""
 
-#: includes/collections/class-okno-collections-schema.php:467
+#: includes/collections/class-okno-collections-schema.php:491
 msgid "A blocks field needs at least one block type."
 msgstr ""
 
 #. translators: %s: block name.
-#: includes/collections/class-okno-collections-schema.php:484
+#: includes/collections/class-okno-collections-schema.php:508
 #, php-format
 msgid "The block type “%s” is declared twice."
 msgstr ""
@@ -3237,16 +3712,16 @@ msgid "The table of “%s” would have too many short text columns, archived on
 msgstr ""
 
 #. translators: %s: collection id.
-#: includes/collections/class-okno-collections.php:158
+#: includes/collections/class-okno-collections.php:159
 #, php-format
 msgid "Another plugin or the theme already registers the content type “%s”."
 msgstr ""
 
-#: includes/collections/class-okno-collections.php:325
+#: includes/collections/class-okno-collections.php:326
 msgid "This is not an Okno Collections schema file."
 msgstr ""
 
-#: includes/collections/class-okno-collections.php:563
+#: includes/collections/class-okno-collections.php:572
 msgid "The fields of this entry are edited in Okno."
 msgstr ""
 
