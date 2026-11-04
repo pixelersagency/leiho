@@ -4,7 +4,7 @@ Tags: headless, acf, visual editor, nextjs, astro
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.0.0-beta.5
+Stable tag: 1.0.0-beta.6
 License: GPL-2.0-or-later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -41,9 +41,15 @@ No. Everything is saved to your existing ACF fields and post data.
 
 = What happens to my data if I delete the plugin? =
 
-Okno removes its own settings, tokens, history table and internal post meta. Your content and ACF fields are left untouched.
+Okno removes its own settings, tokens, history table and internal post meta, and the Okno Collections tables and schema (define OKNO_KEEP_DATA in wp-config.php to keep them). Your posts and ACF fields are left untouched.
 
 == Changelog ==
+
+= 1.0.0-beta.6 =
+* Okno Collections: define content types and fields in Okno, without ACF, with schema export/import and safe migrations.
+* Content API for headless front ends (export, items, TypeScript types), cached in the site's object cache, with ETag/304 and page cache purge.
+* Automatic publishing after each change, without a server cron.
+* WordPress as a back office: noindex, redirection of public pages to the front end, XML-RPC off.
 
 = 1.0.0-beta.5 =
 * Update checks are more robust and no longer send the site address to GitHub.
