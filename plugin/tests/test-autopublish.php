@@ -42,7 +42,7 @@ function get_option( $k, $d = false ) { return array_key_exists( $k, $GLOBALS['o
 function update_option( $k, $v, $a = null ) { $GLOBALS['options'][ $k ] = $v; return true; }
 function delete_option( $k ) { unset( $GLOBALS['options'][ $k ] ); return true; }
 function wp_cache_delete( ...$a ) { return true; }
-function add_action( ...$a ) {}
+function add_action( $hook, $cb = null ) { if ( 'shutdown' === $hook ) { $GLOBALS['shutdown'][] = $cb; } }
 function wp_next_scheduled( $h ) { return isset( $GLOBALS['cron'][ $h ] ) ? $GLOBALS['cron'][ $h ] : false; }
 function wp_schedule_single_event( $t, $h ) { $GLOBALS['cron'][ $h ] = $t; }
 function wp_clear_scheduled_hook( $h ) { unset( $GLOBALS['cron'][ $h ] ); }
@@ -275,6 +275,36 @@ reset_state();
 pend();
 $M::run_auto();
 check( 'cron seul : publié', 1 === $GLOBALS['driver']->calls && 0 === $M::pending_since() );
+
+// Sans publication automatique : le marqueur alimente l'indicateur de la
+// barre d'Okno (« changements non publiés »), sans rien planifier.
+function queue_and_shutdown() {
+	$GLOBALS['shutdown'] = array();
+	$flag = new ReflectionProperty( 'Okno_Deploy_Manager', 'auto_queued' );
+	$flag->setAccessible( true );
+	$flag->setValue( null, false );
+	Okno_Deploy_Manager::queue_auto();
+	foreach ( $GLOBALS['shutdown'] as $cb ) {
+		call_user_func( $cb );
+	}
+}
+reset_state();
+$GLOBALS['settings']['auto_deploy'] = false;
+queue_and_shutdown();
+check( 'sans auto : changement noté', $M::pending_since() > 0 );
+check( 'sans auto : rien de planifié', false === wp_next_scheduled( $M::AUTO_HOOK ) );
+$record = $M::trigger();
+check( 'sans auto : Publier efface le marqueur', ! is_wp_error( $record ) && 0 === $M::pending_since() );
+
+reset_state();
+$GLOBALS['settings']['deploy_driver'] = '';
+queue_and_shutdown();
+check( 'sans mode de publication : rien noté', 0 === $M::pending_since() && ! $GLOBALS['shutdown'] );
+$GLOBALS['settings']['deploy_driver'] = 'fake';
+
+reset_state();
+queue_and_shutdown();
+check( 'avec auto : noté et planifié', $M::pending_since() > 0 && false !== wp_next_scheduled( $M::AUTO_HOOK ) );
 
 echo empty( $GLOBALS['failed'] ) ? "\nTout est vert.\n" : "\nÉCHECS.\n";
 exit( empty( $GLOBALS['failed'] ) ? 0 : 1 );

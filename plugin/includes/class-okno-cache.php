@@ -523,7 +523,7 @@ class Okno_Cache {
 
 		Okno_Content::invalidate();
 
-		wp_safe_redirect( add_query_arg( 'okno_cache_cleared', '1', admin_url( 'admin.php?page=okno-settings' ) ) );
+		wp_safe_redirect( Okno_App::url( 'settings', array( 'okno_cache_cleared' => '1' ) ) );
 		exit;
 	}
 

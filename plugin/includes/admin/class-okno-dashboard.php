@@ -2,95 +2,33 @@
 defined( 'ABSPATH' ) || exit;
 
 /**
- * Pages d'administration d'Okno : Accueil, Démarrer, Réglages, Publications.
- *
- * Chaque onglet est une vraie page WordPress (slug propre) : le menu latéral
- * reste synchronisé et chaque onglet a une URL partageable.
+ * Vues de l'application Okno rendues en PHP : Accueil, Démarrer, Réglages,
+ * Publications. La coque (navigation, barre du haut) est dans Okno_App.
  */
 class Okno_Dashboard {
 
 	const OPTION_CONNECTION = 'okno_connection';
 
 	/**
-	 * Onglets : slug de page => libellé, capability.
+	 * Rend une vue de l'application (Okno_App) : home, start, settings, deploys.
 	 *
-	 * @return array<string,array{label:string,cap:string}>
+	 * @param string $view Vue.
+	 * @return void
 	 */
-	public static function tabs() {
-		return array(
-			'okno'          => array(
-				'label' => __( 'Home', 'okno' ),
-				'cap'   => 'edit_posts',
-			),
-			'okno-start'    => array(
-				'label' => __( 'Get started', 'okno' ),
-				'cap'   => 'manage_options',
-			),
-			'okno-settings' => array(
-				'label' => __( 'Settings', 'okno' ),
-				'cap'   => 'manage_options',
-			),
-			'okno-deploys'  => array(
-				'label' => __( 'Deployments', 'okno' ),
-				'cap'   => 'edit_posts',
-			),
-		);
-	}
-
-	/**
-	 * Point d'entrée : rend l'onglet correspondant à la page courante.
-	 */
-	public static function render() {
-		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Lecture du slug de page.
-		$page = isset( $_GET['page'] ) ? sanitize_key( wp_unslash( $_GET['page'] ) ) : 'okno';
-		$tabs = self::tabs();
-		if ( ! isset( $tabs[ $page ] ) || ! current_user_can( $tabs[ $page ]['cap'] ) ) {
-			$page = 'okno';
+	public static function render_view( $view ) {
+		switch ( $view ) {
+			case 'start':
+				self::render_start();
+				break;
+			case 'settings':
+				self::render_settings();
+				break;
+			case 'deploys':
+				self::render_deploys();
+				break;
+			default:
+				self::render_home();
 		}
-		?>
-		<div class="okno-admin">
-			<?php self::render_bar( $page ); ?>
-			<?php
-			switch ( $page ) {
-				case 'okno-start':
-					self::render_start();
-					break;
-				case 'okno-settings':
-					self::render_settings();
-					break;
-				case 'okno-deploys':
-					self::render_deploys();
-					break;
-				default:
-					self::render_home();
-			}
-			?>
-		</div>
-		<?php
-	}
-
-	private static function render_bar( $current ) {
-		?>
-		<header class="okno-bar">
-			<div class="okno-bar__brand">
-				<img src="<?php echo esc_url( OKNO_URL . 'assets/img/okno-mark.svg' ); ?>" alt="" width="24" height="24">
-				<h1 class="okno-bar__title">Okno</h1>
-				<span class="okno-bar__version">v<?php echo esc_html( OKNO_VERSION ); ?></span>
-			</div>
-			<nav class="okno-tabs" aria-label="<?php esc_attr_e( 'Okno sections', 'okno' ); ?>">
-				<?php foreach ( self::tabs() as $slug => $tab ) : ?>
-					<?php
-					if ( ! current_user_can( $tab['cap'] ) ) {
-						continue;
-					}
-					?>
-					<a href="<?php echo esc_url( admin_url( 'admin.php?page=' . $slug ) ); ?>" <?php echo $slug === $current ? 'aria-current="page"' : ''; ?>>
-						<?php echo esc_html( $tab['label'] ); ?>
-					</a>
-				<?php endforeach; ?>
-			</nav>
-		</header>
-		<?php
 	}
 
 	/* =====================================================================
@@ -115,7 +53,7 @@ class Okno_Dashboard {
 						<h2><?php esc_html_e( 'Connect your site to Okno', 'okno' ); ?></h2>
 						<p><?php esc_html_e( 'Enter your site’s URL, allow the editor to display it, install the bridge: four guided steps, each with a check.', 'okno' ); ?></p>
 					</div>
-					<a class="okno-btn" href="<?php echo esc_url( admin_url( 'admin.php?page=okno-start' ) ); ?>">
+					<a class="okno-btn" href="<?php echo esc_url( Okno_App::url( 'start' ) ); ?>">
 						<?php esc_html_e( 'Get started', 'okno' ); ?>
 						<?php Okno_Icons::render( 'arrow', 16 ); ?>
 					</a>
@@ -127,7 +65,7 @@ class Okno_Dashboard {
 						<p><?php esc_html_e( 'Click any text or image on your site to edit it. You see the result right away, before you save.', 'okno' ); ?></p>
 					</div>
 					<div class="okno-actions" style="margin-top:0">
-						<a class="okno-btn" href="<?php echo esc_url( admin_url( 'admin.php?page=okno-editor' ) ); ?>">
+						<a class="okno-btn" href="<?php echo esc_url( Okno_App::url( 'editor' ) ); ?>">
 							<?php esc_html_e( 'Open the editor', 'okno' ); ?>
 						</a>
 						<?php if ( $configured ) : ?>
@@ -181,6 +119,29 @@ class Okno_Dashboard {
 				</div>
 			</div>
 
+			<h2 class="okno-heading" style="margin-top:40px"><?php esc_html_e( 'Quick links', 'okno' ); ?></h2>
+			<div class="okno-quick">
+				<?php
+				$links = array(
+					array( 'content', array( 'new' => '1' ), 'plus', __( 'New content', 'okno' ), __( 'A page, an article or a collection entry.', 'okno' ), 'edit_posts' ),
+					array( 'content', array(), 'list', __( 'All content', 'okno' ), __( 'Search, filter, duplicate, restore.', 'okno' ), 'edit_posts' ),
+					array( 'editor', array(), 'edit', __( 'Visual editor', 'okno' ), __( 'Edit your pages as visitors see them.', 'okno' ), 'edit_posts' ),
+					array( 'collections', array(), 'database', __( 'Collections', 'okno' ), __( 'Define your content types and their fields.', 'okno' ), Okno_App::views()['collections']['cap'] ),
+					array( 'media', array(), 'image', __( 'Media', 'okno' ), __( 'Images and files of the site.', 'okno' ), 'upload_files' ),
+				);
+				foreach ( $links as $link ) :
+					if ( ! current_user_can( $link[5] ) ) {
+						continue;
+					}
+					?>
+					<a class="okno-quick__item" href="<?php echo esc_url( Okno_App::url( $link[0], $link[1] ) ); ?>">
+						<span class="okno-quick__icon"><?php Okno_Icons::render( $link[2], 18 ); ?></span>
+						<strong><?php echo esc_html( $link[3] ); ?></strong>
+						<span><?php echo esc_html( $link[4] ); ?></span>
+					</a>
+				<?php endforeach; ?>
+			</div>
+
 			<h2 class="okno-heading" style="margin-top:40px"><?php esc_html_e( 'Recent changes', 'okno' ); ?></h2>
 
 			<div class="okno-card okno-card--flush">
@@ -211,14 +172,7 @@ class Okno_Dashboard {
 		$post_id   = (int) $activity->post_id;
 		$title     = $post_id ? Okno_Plugin::title( $post_id ) : '';
 		$when      = strtotime( $activity->created_at . ' UTC' );
-		$open_url  = add_query_arg(
-			array(
-				'page'  => 'okno-editor',
-				'post'  => $post_id,
-				'field' => $activity->field_path,
-			),
-			admin_url( 'admin.php' )
-		);
+		$open_url  = add_query_arg( 'field', rawurlencode( $activity->field_path ), Okno_Admin::edit_url( $post_id ) );
 		$initials  = self::initials( $activity->user_name );
 		?>
 		<li class="okno-log__item">
@@ -364,7 +318,7 @@ class Okno_Dashboard {
 						<?php endif; ?>
 					</h3>
 					<p><?php esc_html_e( 'The site’s public URL and, if you have one, the preview URL to show in the editor.', 'okno' ); ?></p>
-					<a class="okno-btn <?php echo $has_url ? 'okno-btn--quiet okno-btn--small' : ''; ?>" href="<?php echo esc_url( admin_url( 'admin.php?page=okno-settings' ) ); ?>">
+					<a class="okno-btn <?php echo $has_url ? 'okno-btn--quiet okno-btn--small' : ''; ?>" href="<?php echo esc_url( Okno_App::url( 'settings' ) ); ?>">
 						<?php echo $has_url ? esc_html__( 'Edit', 'okno' ) : esc_html__( 'Enter the URL', 'okno' ); ?>
 					</a>
 				</li>
@@ -667,6 +621,19 @@ class Okno_Dashboard {
 							<div>
 								<input type="number" id="okno_min_interval" name="okno_settings[min_deploy_interval]" value="<?php echo esc_attr( $settings['min_deploy_interval'] ); ?>" min="0"> <span class="okno-muted"><?php esc_html_e( 'seconds', 'okno' ); ?></span>
 							</div>
+						</div>
+					</div>
+				</section>
+
+				<section class="okno-form-section">
+					<h2><?php esc_html_e( 'Editors', 'okno' ); ?></h2>
+					<p class="okno-help"><?php esc_html_e( 'Okno is the whole back office for the people who edit the site.', 'okno' ); ?></p>
+					<div class="okno-row">
+						<span class="okno-row__label"><?php esc_html_e( 'After logging in', 'okno' ); ?></span>
+						<div>
+							<input type="hidden" name="okno_settings[editor_landing]" value="0">
+							<label class="okno-inline-check"><input type="checkbox" name="okno_settings[editor_landing]" value="1" <?php checked( ! empty( $settings['editor_landing'] ) ); ?>> <?php esc_html_e( 'Open Okno for users who aren’t administrators', 'okno' ); ?></label>
+							<span class="okno-help"><?php esc_html_e( 'Editors and authors land in Okno instead of the WordPress dashboard. Administrators keep the usual dashboard and reach Okno from the menu.', 'okno' ); ?></span>
 						</div>
 					</div>
 				</section>

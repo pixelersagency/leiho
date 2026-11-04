@@ -39,6 +39,20 @@ class Okno_Rest {
 							'type'    => 'string',
 							'default' => '',
 						),
+						// Filtres de la vue Contenus (facultatifs : l'éditeur ne les envoie pas).
+						'type'     => array(
+							'type'    => 'string',
+							'default' => '',
+						),
+						'status'   => array(
+							'type'    => 'string',
+							'default' => '',
+						),
+						'orderby'  => array(
+							'type'    => 'string',
+							'enum'    => array( 'title', 'modified' ),
+							'default' => 'title',
+						),
 					),
 				),
 				array(
@@ -63,6 +77,33 @@ class Okno_Rest {
 					'callback'            => array( $this, 'delete_post' ),
 					'permission_callback' => array( $this, 'can_delete_post' ),
 				),
+			)
+		);
+
+		register_rest_route(
+			self::NS,
+			'/posts/(?P<id>\d+)/status',
+			array(
+				'methods'             => WP_REST_Server::CREATABLE,
+				'callback'            => array( $this, 'set_status' ),
+				'permission_callback' => array( $this, 'can_edit_post' ),
+				'args'                => array(
+					'status' => array(
+						'type'     => 'string',
+						'enum'     => array( 'publish', 'draft', 'pending', 'private' ),
+						'required' => true,
+					),
+				),
+			)
+		);
+
+		register_rest_route(
+			self::NS,
+			'/posts/(?P<id>\d+)/restore',
+			array(
+				'methods'             => WP_REST_Server::CREATABLE,
+				'callback'            => array( $this, 'restore_post' ),
+				'permission_callback' => array( $this, 'can_delete_post' ),
 			)
 		);
 
@@ -139,7 +180,19 @@ class Okno_Rest {
 			)
 		);
 
-		// Avant la route /deploy/{id} : « flush » y correspondrait aussi.
+		// Avant la route /deploy/{id} : « state » et « flush » y correspondraient aussi.
+		register_rest_route(
+			self::NS,
+			'/deploy/state',
+			array(
+				'methods'             => WP_REST_Server::READABLE,
+				'callback'            => array( $this, 'deploy_state' ),
+				'permission_callback' => static function () {
+					return current_user_can( 'edit_posts' );
+				},
+			)
+		);
+
 		register_rest_route(
 			self::NS,
 			'/deploy/flush',
@@ -206,15 +259,27 @@ class Okno_Rest {
 		$page     = max( 1, (int) $request->get_param( 'page' ) );
 		$search   = sanitize_text_field( (string) $request->get_param( 'search' ) );
 
+		$types = $settings['post_types'];
+		$type  = sanitize_key( (string) $request->get_param( 'type' ) );
+		if ( '' !== $type ) {
+			if ( ! in_array( $type, $types, true ) ) {
+				return new WP_Error( 'okno_bad_request', __( 'This content type isn’t editable in Okno.', 'okno' ), array( 'status' => 400 ) );
+			}
+			$types = array( $type );
+		}
+
+		$statuses = self::query_statuses( (string) $request->get_param( 'status' ) );
+		$by_date  = 'modified' === $request->get_param( 'orderby' );
+
 		$query = new WP_Query(
 			array(
-				'post_type'      => $settings['post_types'],
-				'post_status'    => array( 'publish', 'draft', 'pending', 'private' ),
+				'post_type'      => $types,
+				'post_status'    => $statuses,
 				'posts_per_page' => $per_page,
 				'paged'          => $page,
 				's'              => $search,
-				'orderby'        => 'title',
-				'order'          => 'ASC',
+				'orderby'        => $by_date ? 'modified' : 'title',
+				'order'          => $by_date ? 'DESC' : 'ASC',
 			)
 		);
 
@@ -230,6 +295,21 @@ class Okno_Rest {
 		$response->header( 'X-WP-Total', (int) $query->found_posts );
 		$response->header( 'X-WP-TotalPages', (int) $query->max_num_pages );
 		return $response;
+	}
+
+	/**
+	 * Statuts listés : tous ceux qu'on édite par défaut, un seul sur demande,
+	 * la corbeille seulement quand on la demande. Fonction pure.
+	 *
+	 * @param string $status Statut demandé ('' = tous sauf corbeille).
+	 * @return string[]
+	 */
+	public static function query_statuses( $status ) {
+		$editable = array( 'publish', 'future', 'draft', 'pending', 'private' );
+		if ( 'trash' === $status || in_array( $status, $editable, true ) ) {
+			return array( $status );
+		}
+		return $editable;
 	}
 
 	/**
@@ -451,6 +531,74 @@ class Okno_Rest {
 	}
 
 	/**
+	 * Statut applicable : publier (ou rendre privé) demande le droit de
+	 * publier ce type ; sans lui, « publish » devient « pending » (relecture),
+	 * comme dans l'éditeur de WordPress. Fonction pure.
+	 *
+	 * @param string $requested   Statut demandé.
+	 * @param bool   $can_publish Droit de publier ce type de contenu.
+	 * @return string|null null si le statut n'est pas accepté.
+	 */
+	public static function allowed_status( $requested, $can_publish ) {
+		if ( ! in_array( $requested, array( 'publish', 'draft', 'pending', 'private' ), true ) ) {
+			return null;
+		}
+		if ( 'private' === $requested && ! $can_publish ) {
+			return null;
+		}
+		if ( 'publish' === $requested && ! $can_publish ) {
+			return 'pending';
+		}
+		return $requested;
+	}
+
+	/**
+	 * POST /posts/{id}/status : publie, repasse en brouillon, soumet à relecture.
+	 */
+	public function set_status( WP_REST_Request $request ) {
+		$post_id = (int) $request['id'];
+		$post    = get_post( $post_id );
+		if ( ! $post || 'trash' === $post->post_status ) {
+			return new WP_Error( 'okno_not_found', __( 'Content not found.', 'okno' ), array( 'status' => 404 ) );
+		}
+		$object = get_post_type_object( $post->post_type );
+		$status = self::allowed_status( (string) $request->get_param( 'status' ), $object && current_user_can( $object->cap->publish_posts ) );
+		if ( null === $status ) {
+			return new WP_Error( 'okno_forbidden', __( 'You’re not allowed to give this status.', 'okno' ), array( 'status' => 403 ) );
+		}
+		if ( $status !== $post->post_status ) {
+			$result = wp_update_post(
+				array(
+					'ID'          => $post_id,
+					'post_status' => $status,
+				),
+				true
+			);
+			if ( is_wp_error( $result ) ) {
+				$result->add_data( array( 'status' => 500 ) );
+				return $result;
+			}
+		}
+		return rest_ensure_response( $this->post_item( get_post( $post_id ), new Okno_Url_Mapper() ) );
+	}
+
+	/**
+	 * POST /posts/{id}/restore : sort un contenu de la corbeille (en brouillon,
+	 * comme WordPress depuis la 5.6).
+	 */
+	public function restore_post( WP_REST_Request $request ) {
+		$post_id = (int) $request['id'];
+		$post    = get_post( $post_id );
+		if ( ! $post || 'trash' !== $post->post_status ) {
+			return new WP_Error( 'okno_not_found', __( 'This content isn’t in the trash.', 'okno' ), array( 'status' => 404 ) );
+		}
+		if ( ! wp_untrash_post( $post_id ) ) {
+			return new WP_Error( 'okno_restore_failed', __( 'Couldn’t restore this content.', 'okno' ), array( 'status' => 500 ) );
+		}
+		return rest_ensure_response( $this->post_item( get_post( $post_id ), new Okno_Url_Mapper() ) );
+	}
+
+	/**
 	 * POST /posts/{id}/duplicate : copie le contenu, ses métas et ses champs ACF.
 	 */
 	public function duplicate_post( WP_REST_Request $request ) {
@@ -489,6 +637,11 @@ class Okno_Rest {
 			}
 		}
 
+		// Champs Okno Collections : ils vivent dans la table de la collection.
+		if ( class_exists( 'Okno_Collections' ) && Okno_Collections::for_post_type( $post->post_type ) ) {
+			Okno_Collections_Store::write( $post->post_type, $copy_id, Okno_Collections_Store::values( $post->post_type, $post_id ) );
+		}
+
 		foreach ( get_object_taxonomies( $post->post_type ) as $taxonomy ) {
 			$terms = wp_get_object_terms( $post_id, $taxonomy, array( 'fields' => 'ids' ) );
 			if ( ! is_wp_error( $terms ) && $terms ) {
@@ -505,6 +658,7 @@ class Okno_Rest {
 			'title'       => Okno_Plugin::title( $post ),
 			'type'        => $post->post_type,
 			'status'      => $post->post_status,
+			'modified'    => mysql2date( 'c', $post->post_modified_gmt . ' +0000', false ),
 			'preview_url' => $mapper->preview_url( $post ),
 			'front_url'   => $mapper->front_url( $post ),
 			'can_delete'  => current_user_can( 'delete_post', $post->ID ),
@@ -617,6 +771,38 @@ class Okno_Rest {
 		}
 
 		return rest_ensure_response( $body );
+	}
+
+	/**
+	 * GET /deploy/state : barre du haut de l'application (changements non
+	 * publiés, déploiement en cours, dernier déploiement).
+	 */
+	public function deploy_state() {
+		return rest_ensure_response( self::publish_state() );
+	}
+
+	/**
+	 * État de la publication, sans données sensibles.
+	 *
+	 * @return array
+	 */
+	public static function publish_state() {
+		$since   = Okno_Deploy_Manager::pending_since();
+		$active  = Okno_Deploy_Manager::active_deploy();
+		$history = Okno_Deploy_Manager::history();
+		$last    = reset( $history );
+		$auto    = Okno_Deploy_Manager::auto_enabled();
+		return array(
+			'pending' => (bool) $since,
+			'auto'    => $auto,
+			'due_in'  => $since && $auto ? max( 0, Okno_Deploy_Manager::auto_delay() - ( time() - $since ) ) : 0,
+			'active'  => $active ? $active['id'] : '',
+			'last'    => $last ? array(
+				'status'  => $last['status'],
+				'started' => (int) $last['started'],
+				'user'    => $last['user_name'],
+			) : null,
+		);
 	}
 
 	/**

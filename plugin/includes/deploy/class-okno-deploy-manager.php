@@ -233,7 +233,13 @@ class Okno_Deploy_Manager {
 	 * @return void
 	 */
 	public static function queue_auto() {
-		if ( self::$auto_queued || ! self::auto_enabled() ) {
+		if ( self::$auto_queued ) {
+			return;
+		}
+		// Sans publication automatique, le marqueur sert quand même : la barre
+		// d'Okno signale les changements pas encore publiés (« Publier » l'efface).
+		$auto = self::auto_enabled();
+		if ( ! $auto && null === self::driver() ) {
 			return;
 		}
 		self::$auto_queued = true;
@@ -242,9 +248,11 @@ class Okno_Deploy_Manager {
 		// ACF écrit des dizaines de métas, chacune signalerait un changement.
 		add_action(
 			'shutdown',
-			static function () {
+			static function () use ( $auto ) {
 				Okno_Deploy_Manager::mark_pending();
-				Okno_Deploy_Manager::reschedule_auto( 0 );
+				if ( $auto ) {
+					Okno_Deploy_Manager::reschedule_auto( 0 );
+				}
 			}
 		);
 	}

@@ -2,22 +2,17 @@
 defined( 'ABSPATH' ) || exit;
 
 /**
- * Administration : menu, assets, éditeur visuel, enregistrement des réglages.
- * Le rendu des onglets (Accueil, Démarrer, Réglages, Publications) est dans
- * Okno_Dashboard.
+ * Administration : menu, assets, éditeur visuel (et formulaire),
+ * enregistrement des réglages. La coque plein écran est dans Okno_App, les
+ * vues Accueil, Démarrer, Réglages et Publications dans Okno_Dashboard.
  */
 class Okno_Admin {
-
-	const EDITOR_SLUG = 'okno-editor';
 
 	/** @var Okno_Plugin */
 	private $plugin;
 
-	/** @var string[] Hooks des pages du tableau de bord. */
-	private $dashboard_hooks = array();
-
-	/** @var string Hook de la page éditeur. */
-	private $editor_hook = '';
+	/** @var string Hook de la page de l'application. */
+	private $app_hook = '';
 
 	public function __construct( Okno_Plugin $plugin ) {
 		$this->plugin = $plugin;
@@ -30,36 +25,51 @@ class Okno_Admin {
 	}
 
 	public function register_menu() {
-		$tabs = Okno_Dashboard::tabs();
-
-		$this->dashboard_hooks[] = add_menu_page(
+		// Une seule entrée dans le menu WordPress : Okno s'ouvre en plein écran
+		// et a sa propre navigation.
+		$this->app_hook = add_menu_page(
 			'Okno',
 			'Okno',
 			'edit_posts',
-			'okno',
-			array( 'Okno_Dashboard', 'render' ),
+			Okno_App::SLUG,
+			array( $this, 'render_app' ),
 			Okno_Icons::menu_icon(),
 			26
 		);
+		add_action( 'load-' . $this->app_hook, array( 'Okno_App', 'on_load' ) );
 
-		add_submenu_page( 'okno', $tabs['okno']['label'], $tabs['okno']['label'], 'edit_posts', 'okno', array( 'Okno_Dashboard', 'render' ) );
-
-		$this->editor_hook = add_submenu_page( 'okno', __( 'Visual editor', 'okno' ), __( 'Visual editor', 'okno' ), 'edit_posts', self::EDITOR_SLUG, array( $this, 'render_editor_page' ) );
-
-		foreach ( array( 'okno-start', 'okno-settings', 'okno-deploys' ) as $slug ) {
-			$this->dashboard_hooks[] = add_submenu_page( 'okno', $tabs[ $slug ]['label'], $tabs[ $slug ]['label'], $tabs[ $slug ]['cap'], $slug, array( 'Okno_Dashboard', 'render' ) );
+		// Anciennes pages (favoris, liens des versions précédentes, liens
+		// d'autres extensions) : pages cachées (parent options.php, hors de
+		// tout menu), redirigées vers leur vue.
+		foreach ( array_keys( Okno_App::LEGACY ) as $slug ) {
+			$hook = add_submenu_page( 'options.php', 'Okno', 'Okno', 'edit_posts', $slug, '__return_null' );
+			add_action( 'load-' . $hook, array( $this, 'redirect_legacy_page' ) );
 		}
-
-		// Anciens liens (admin.php?page=okno&post=12) : ils ouvraient l'éditeur.
-		add_action( 'load-toplevel_page_okno', array( $this, 'redirect_legacy_editor_links' ) );
 	}
 
-	public function redirect_legacy_editor_links() {
+	/**
+	 * Ancienne page (okno-settings, okno-editor…) : redirection vers sa vue.
+	 *
+	 * @return void
+	 */
+	public function redirect_legacy_page() {
 		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Redirection de navigation, aucune écriture.
-		if ( isset( $_GET['post'] ) ) {
-			wp_safe_redirect( add_query_arg( 'post', absint( $_GET['post'] ), admin_url( 'admin.php?page=' . self::EDITOR_SLUG ) ) );
+		$query = wp_unslash( $_GET );
+		$page  = isset( $query['page'] ) ? sanitize_key( $query['page'] ) : '';
+		$url   = Okno_App::legacy_url( $page, $query );
+		if ( $url ) {
+			wp_safe_redirect( $url );
 			exit;
 		}
+	}
+
+	/**
+	 * Page de l'application.
+	 *
+	 * @return void
+	 */
+	public function render_app() {
+		Okno_App::render( $this );
 	}
 
 	/**
@@ -83,7 +93,7 @@ class Okno_Admin {
 			array(
 				'id'    => 'okno-edit',
 				'title' => __( 'Edit with Okno', 'okno' ),
-				'href'  => add_query_arg( 'post', $post_id, admin_url( 'admin.php?page=' . self::EDITOR_SLUG ) ),
+				'href'  => self::edit_url( $post_id ),
 			)
 		);
 	}
@@ -91,7 +101,7 @@ class Okno_Admin {
 	public function action_links( $links ) {
 		array_unshift(
 			$links,
-			sprintf( '<a href="%s">%s</a>', esc_url( admin_url( 'admin.php?page=okno-start' ) ), esc_html__( 'Get started', 'okno' ) )
+			sprintf( '<a href="%s">%s</a>', esc_url( Okno_App::url( 'start' ) ), esc_html__( 'Get started', 'okno' ) )
 		);
 		return $links;
 	}
@@ -105,16 +115,57 @@ class Okno_Admin {
 		return file_exists( $path ) ? OKNO_VERSION . '.' . filemtime( $path ) : OKNO_VERSION;
 	}
 
+	/**
+	 * Où éditer un contenu dans Okno : l'éditeur visuel s'il a une page sur
+	 * le site, sinon le formulaire.
+	 *
+	 * @param int $post_id Contenu.
+	 * @return string
+	 */
+	public static function edit_url( $post_id ) {
+		$type = get_post_type( $post_id );
+		$view = $type && in_array( $type, self::form_types(), true ) ? 'form' : 'editor';
+		return Okno_App::url( $view, array( 'post' => (int) $post_id ) );
+	}
+
 	public function enqueue( $hook ) {
-		if ( $hook === $this->editor_hook ) {
-			// L'éditeur gère lui-même la publication automatique.
-			$this->enqueue_editor();
+		if ( $hook !== $this->app_hook ) {
+			$this->enqueue_autopublish();
 			return;
 		}
-		if ( in_array( $hook, $this->dashboard_hooks, true ) ) {
+
+		$view = Okno_App::current_view();
+		wp_enqueue_style( 'okno-app', OKNO_URL . 'assets/admin/app.css', array(), self::asset_version( 'assets/admin/app.css' ) );
+
+		if ( 'editor' === $view || 'form' === $view ) {
+			// L'éditeur gère lui-même la publication automatique.
+			$this->enqueue_editor( 'form' === $view ? 'form' : 'visual' );
+			$this->enqueue_shell( $view );
+			return;
+		}
+
+		if ( in_array( $view, array( 'home', 'start', 'settings', 'deploys' ), true ) ) {
 			$this->enqueue_dashboard();
+			$this->enqueue_shell( $view );
+		} else {
+			wp_enqueue_script( 'okno-app-' . $view, OKNO_URL . 'assets/admin/app-' . $view . '.js', array( 'okno-app', 'wp-api-fetch', 'wp-i18n' ), self::asset_version( 'assets/admin/app-' . $view . '.js' ), true );
+			wp_set_script_translations( 'okno-app-' . $view, 'okno', OKNO_DIR . 'languages' );
+			$this->enqueue_shell( $view );
 		}
 		$this->enqueue_autopublish();
+	}
+
+	/**
+	 * Coque de l'application (navigation, barre du haut, publication) et
+	 * utilitaires partagés par les vues JavaScript (window.OknoApp).
+	 *
+	 * @param string $view Vue courante.
+	 * @return void
+	 */
+	private function enqueue_shell( $view ) {
+		wp_enqueue_script( 'okno-app', OKNO_URL . 'assets/admin/app.js', array( 'wp-api-fetch', 'wp-i18n' ), self::asset_version( 'assets/admin/app.js' ), true );
+		wp_set_script_translations( 'okno-app', 'okno', OKNO_DIR . 'languages' );
+		wp_add_inline_script( 'okno-app', 'window.OknoAppConfig = ' . wp_json_encode( Okno_App::config( $view ) ) . ';', 'before' );
 	}
 
 	/**
@@ -183,7 +234,7 @@ class Okno_Admin {
 		);
 	}
 
-	private function enqueue_editor() {
+	private function enqueue_editor( $mode = 'visual' ) {
 		wp_enqueue_media();
 		if ( function_exists( 'wp_enqueue_editor' ) ) {
 			wp_enqueue_editor();
@@ -205,9 +256,10 @@ class Okno_Admin {
 				continue;
 			}
 			$post_types[] = array(
-				'name'      => $type_name,
-				'label'     => $object->labels->singular_name,
-				'canCreate' => current_user_can( $object->cap->create_posts ),
+				'name'       => $type_name,
+				'label'      => $object->labels->singular_name,
+				'canCreate'  => current_user_can( $object->cap->create_posts ),
+				'canPublish' => current_user_can( $object->cap->publish_posts ),
 			);
 		}
 
@@ -218,9 +270,13 @@ class Okno_Admin {
 			'wpOrigin'             => self::wp_origin(),
 			'initialPost'          => isset( $_GET['post'] ) ? absint( $_GET['post'] ) : 0,
 			'initialField'         => isset( $_GET['field'] ) ? sanitize_text_field( wp_unslash( $_GET['field'] ) ) : '',
-			'homeUrl'              => admin_url( 'admin.php?page=okno' ),
-			'startUrl'             => admin_url( 'admin.php?page=okno-start' ),
-			'settingsUrl'          => admin_url( 'admin.php?page=okno-settings' ),
+			'mode'                 => $mode,
+			'homeUrl'              => Okno_App::url(),
+			'contentUrl'           => Okno_App::url( 'content' ),
+			'formUrl'              => Okno_App::url( 'form' ),
+			'editorUrl'            => Okno_App::url( 'editor' ),
+			'startUrl'             => Okno_App::url( 'start' ),
+			'settingsUrl'          => Okno_App::url( 'settings' ),
 			'liveMode'             => 'live' === $settings['deploy_driver'],
 			'driverConfigured'     => (bool) $driver,
 			'driverSupportsStatus' => $driver ? $driver->supports_status() : false,
@@ -228,10 +284,27 @@ class Okno_Admin {
 			'handshakeTimeout'     => 8000,
 			'canDeploy'            => Okno_Deploy_Manager::user_can_deploy(),
 			'autoDeploy'           => Okno_Deploy_Manager::auto_enabled() ? self::autopublish_config() : null,
+			'formTypes'            => self::form_types(),
 		);
 		// phpcs:enable
 
 		wp_add_inline_script( 'okno-editor', 'window.OknoConfig = ' . wp_json_encode( $config ) . ';', 'before' );
+	}
+
+	/**
+	 * Types édités en formulaire : collections sans page sur le site.
+	 *
+	 * @return string[]
+	 */
+	public static function form_types() {
+		$settings = Okno_Plugin::settings();
+		$out      = array();
+		foreach ( Okno_Collections::post_types() as $type ) {
+			if ( empty( $settings['url_patterns'][ $type ] ) ) {
+				$out[] = $type;
+			}
+		}
+		return $out;
 	}
 
 	/**
@@ -250,18 +323,26 @@ class Okno_Admin {
 	 * Page éditeur
 	 * ------------------------------------------------------------------- */
 
-	public function render_editor_page() {
+	/**
+	 * Éditeur : « visual » (aperçu du site + panneau) ou « form » (tous les
+	 * champs d'un contenu, sans aperçu : contenus sans page sur le site).
+	 *
+	 * @param string $mode visual | form.
+	 * @return void
+	 */
+	public function render_editor_page( $mode = 'visual' ) {
 		$settings   = Okno_Plugin::settings();
 		$configured = '' !== $settings['front_url'];
+		$form       = 'form' === $mode;
 
-		if ( ! $configured ) {
+		if ( ! $configured && ! $form ) {
 			?>
 			<div class="okno-editor-setup">
 				<img src="<?php echo esc_url( OKNO_URL . 'assets/img/okno-mark.svg' ); ?>" alt="" width="40" height="40">
 				<h1><?php esc_html_e( 'Okno isn’t connected to your site yet', 'okno' ); ?></h1>
 				<p><?php esc_html_e( 'Enter your site’s URL and install the bridge. The editor will then open right on your pages.', 'okno' ); ?></p>
 				<?php if ( current_user_can( 'manage_options' ) ) : ?>
-					<a class="okno-setup-btn" href="<?php echo esc_url( admin_url( 'admin.php?page=okno-start' ) ); ?>"><?php esc_html_e( 'Connect the site', 'okno' ); ?></a>
+					<a class="okno-setup-btn" href="<?php echo esc_url( Okno_App::url( 'start' ) ); ?>"><?php esc_html_e( 'Connect the site', 'okno' ); ?></a>
 				<?php else : ?>
 					<p><?php esc_html_e( 'Ask the site administrator to finish the setup.', 'okno' ); ?></p>
 				<?php endif; ?>
@@ -270,15 +351,25 @@ class Okno_Admin {
 			return;
 		}
 		?>
-		<div id="okno-editor" class="okno-editor">
+		<div id="okno-editor" class="okno-editor" data-mode="<?php echo esc_attr( $form ? 'form' : 'visual' ); ?>">
 			<header class="okno-toolbar" role="toolbar" aria-label="<?php esc_attr_e( 'Editor actions', 'okno' ); ?>">
 				<div class="okno-toolbar-start">
-					<a class="okno-exit" href="<?php echo esc_url( admin_url( 'admin.php?page=okno' ) ); ?>" title="<?php esc_attr_e( 'Back to Okno home', 'okno' ); ?>" aria-label="<?php esc_attr_e( 'Back to Okno home', 'okno' ); ?>">
+					<?php if ( $form ) : ?>
+						<a class="okno-exit" href="<?php echo esc_url( Okno_App::url( 'content' ) ); ?>" title="<?php esc_attr_e( 'Back to content', 'okno' ); ?>" aria-label="<?php esc_attr_e( 'Back to content', 'okno' ); ?>">
+							<?php Okno_Icons::render( 'back', 16 ); ?>
+						</a>
+					<?php else : ?>
+					<a class="okno-exit" href="<?php echo esc_url( Okno_App::url() ); ?>" title="<?php esc_attr_e( 'Back to Okno home', 'okno' ); ?>" aria-label="<?php esc_attr_e( 'Back to Okno home', 'okno' ); ?>">
 						<?php Okno_Icons::render( 'back', 16 ); ?>
 					</a>
+					<?php endif; ?>
 					<img class="okno-mark" src="<?php echo esc_url( OKNO_URL . 'assets/img/okno-mark.svg' ); ?>" alt="Okno" width="22" height="22">
 					<div class="okno-doc">
-						<span id="okno-current-title" class="okno-current-title"><?php esc_html_e( 'No page open', 'okno' ); ?></span>
+						<span class="okno-doc-row">
+							<span id="okno-current-title" class="okno-current-title"><?php echo esc_html( $form ? __( 'Loading…', 'okno' ) : __( 'No page open', 'okno' ) ); ?></span>
+							<label class="screen-reader-text" for="okno-status"><?php esc_html_e( 'Status', 'okno' ); ?></label>
+							<select id="okno-status" class="okno-status-select" hidden></select>
+						</span>
 						<span id="okno-save-state" class="okno-save-state" aria-live="polite"></span>
 					</div>
 				</div>
@@ -337,7 +428,7 @@ class Okno_Admin {
 								<li><strong><?php esc_html_e( 'The bridge isn’t loaded on this page.', 'okno' ); ?></strong> <?php esc_html_e( 'Check the installation.', 'okno' ); ?></li>
 							</ol>
 							<?php if ( current_user_can( 'manage_options' ) ) : ?>
-								<a class="okno-btn" href="<?php echo esc_url( admin_url( 'admin.php?page=okno-start' ) ); ?>"><?php esc_html_e( 'Test the connection', 'okno' ); ?></a>
+								<a class="okno-btn" href="<?php echo esc_url( Okno_App::url( 'start' ) ); ?>"><?php esc_html_e( 'Test the connection', 'okno' ); ?></a>
 							<?php endif; ?>
 						</div>
 					</div>
@@ -400,6 +491,7 @@ class Okno_Admin {
 		$settings['auto_deploy_delay']   = max( 15, absint( isset( $input['auto_deploy_delay'] ) ? $input['auto_deploy_delay'] : 60 ) );
 		$settings['content_access']      = isset( $input['content_access'] ) && 'token' === $input['content_access'] ? 'token' : 'public';
 		$settings['content_cache']       = ! empty( $input['content_cache'] );
+		$settings['editor_landing']      = ! empty( $input['editor_landing'] );
 		foreach ( Okno_Headless::FLAGS as $flag ) {
 			$settings[ $flag ] = ! empty( $input[ $flag ] );
 		}
@@ -432,7 +524,7 @@ class Okno_Admin {
 			Okno_Github_Preflight::run_and_store( $settings['gh_repo'], $settings['gh_branch'] );
 		}
 
-		wp_safe_redirect( add_query_arg( 'okno_saved', '1', admin_url( 'admin.php?page=okno-settings' ) ) );
+		wp_safe_redirect( Okno_App::url( 'settings', array( 'okno_saved' => '1' ) ) );
 		exit;
 	}
 }

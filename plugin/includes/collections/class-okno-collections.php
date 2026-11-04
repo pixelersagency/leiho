@@ -561,7 +561,7 @@ class Okno_Collections {
 				printf(
 					'<p>%s</p><p><a class="button" href="%s">%s</a></p>',
 					esc_html__( 'The fields of this entry are edited in Okno.', 'okno' ),
-					esc_url( add_query_arg( 'post', (int) $post->ID, admin_url( 'admin.php?page=okno-editor' ) ) ),
+					esc_url( Okno_Admin::edit_url( (int) $post->ID ) ),
 					esc_html__( 'Edit with Okno', 'okno' )
 				);
 			},

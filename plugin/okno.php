@@ -58,6 +58,7 @@ require_once OKNO_DIR . 'includes/class-okno-headless.php';
 require_once OKNO_DIR . 'includes/class-okno-updater.php';
 require_once OKNO_DIR . 'includes/admin/class-okno-icons.php';
 require_once OKNO_DIR . 'includes/admin/class-okno-dashboard.php';
+require_once OKNO_DIR . 'includes/admin/class-okno-app.php';
 require_once OKNO_DIR . 'includes/admin/class-okno-admin.php';
 
 /**
@@ -115,6 +116,7 @@ final class Okno_Plugin {
 		Okno_Headless::init();
 		Okno_Activity::init();
 		Okno_Updater::init();
+		Okno_App::init();
 
 		if ( is_admin() ) {
 			new Okno_Admin( $this );
@@ -155,6 +157,7 @@ final class Okno_Plugin {
 			'auto_deploy_delay'   => 60, // secondes de calme avant de publier.
 			'content_access'      => 'public', // 'public' ou 'token'.
 			'content_cache'       => true, // Cache objet de l'API de contenu (Okno_Cache).
+			'editor_landing'      => true, // Les éditeurs (sans manage_options) arrivent dans Okno après connexion.
 			// Durcissement headless : activé d'office à la première installation
 			// (Okno_Headless::seed_defaults), éteint sur les sites déjà équipés.
 			'headless_noindex'    => false,

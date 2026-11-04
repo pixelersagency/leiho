@@ -68,7 +68,7 @@
 	gap: 24px;
 	flex-wrap: wrap;
 	padding: 14px 28px;
-	background: #fff;
+	background: var(--okno-bg);
 	border-bottom: 1px solid var(--okno-line);
 }
 
@@ -176,7 +176,7 @@
 
 .okno-card {
 	padding: 28px 32px;
-	background: #fff;
+	background: var(--okno-bg);
 	border: 1px solid var(--okno-line);
 	border-radius: var(--okno-radius);
 }
@@ -210,7 +210,7 @@
 }
 
 .okno-card--accent {
-	background: linear-gradient( 180deg, var(--okno-accent-soft) 0%, #fff 100% );
+	background: linear-gradient( 180deg, var(--okno-accent-soft) 0%, var(--okno-bg) 100% );
 	border-color: var(--okno-accent-line);
 }
 
@@ -252,7 +252,7 @@
 }
 
 .okno-admin .okno-btn--quiet {
-	background: #fff;
+	background: var(--okno-bg);
 	border-color: var(--okno-line);
 	color: var(--okno-ink);
 }
@@ -308,7 +308,7 @@
 
 .okno-stat {
 	padding: 16px 18px;
-	background: #fff;
+	background: var(--okno-bg);
 	border: 1px solid var(--okno-line);
 	border-radius: var(--okno-radius);
 }
@@ -550,7 +550,7 @@
 .okno-step {
 	position: relative;
 	padding: 24px 32px 24px 80px;
-	background: #fff;
+	background: var(--okno-bg);
 	border: 1px solid var(--okno-line);
 	border-radius: var(--okno-radius);
 	counter-increment: okno-step;
@@ -699,7 +699,7 @@
 }
 
 .okno-segmented button[aria-selected="true"] {
-	background: #fff;
+	background: var(--okno-bg);
 	color: var(--okno-ink);
 	box-shadow: 0 1px 2px rgba( 10, 10, 10, 0.08 );
 }
@@ -725,7 +725,7 @@
 	padding: 20px 22px;
 	border: 1px solid var(--okno-line);
 	border-radius: var(--okno-radius);
-	background: #fff;
+	background: var(--okno-bg);
 }
 
 .okno-prompt p {
@@ -776,7 +776,7 @@
 
 .okno-form-section {
 	padding: 28px 32px;
-	background: #fff;
+	background: var(--okno-bg);
 	border: 1px solid var(--okno-line);
 	border-radius: var(--okno-radius);
 }
@@ -836,7 +836,7 @@
 	padding: 0 12px;
 	border: 1px solid var(--okno-line-strong);
 	border-radius: 8px;
-	background: #fff;
+	background: var(--okno-bg);
 	color: var(--okno-ink);
 	font-size: 14px;
 	box-shadow: none;
@@ -868,7 +868,7 @@
 	padding: 7px 12px;
 	border: 1px solid var(--okno-line);
 	border-radius: 8px;
-	background: #fff;
+	background: var(--okno-bg);
 	font-size: 13px;
 	cursor: pointer;
 }
@@ -909,7 +909,7 @@
 	padding: 14px 16px 14px 44px;
 	border: 1px solid var(--okno-line);
 	border-radius: 10px;
-	background: #fff;
+	background: var(--okno-bg);
 	cursor: pointer;
 	transition: border-color 0.15s ease, background 0.15s ease;
 }
@@ -1006,7 +1006,7 @@
 	padding: 14px 18px;
 	border: 1px solid var(--okno-line);
 	border-radius: var(--okno-radius);
-	background: #fff;
+	background: var(--okno-bg);
 }
 
 .okno-notice .okno-dot {
