@@ -3082,8 +3082,9 @@ body.okno-app-body #wpbody-content {
 	color: var(--okno-error);
 }
 
+/* Assez large pour « Importer dans Okno » et « Ouvrir les groupes de champs ACF » côte à côte. */
 .okno-fields-note .okno-empty-state {
-	max-width: 440px;
+	max-width: 520px;
 	margin: 12vh auto 0;
 }
 
