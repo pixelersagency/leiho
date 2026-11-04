@@ -49,6 +49,7 @@ require_once OKNO_DIR . 'includes/deploy/class-okno-deploy-manager.php';
 require_once OKNO_DIR . 'includes/class-okno-secrets.php';
 require_once OKNO_DIR . 'includes/class-okno-url-mapper.php';
 require_once OKNO_DIR . 'includes/class-okno-activity.php';
+require_once OKNO_DIR . 'includes/class-okno-native-fields.php';
 require_once OKNO_DIR . 'includes/class-okno-schema.php';
 require_once OKNO_DIR . 'includes/class-okno-rest.php';
 require_once OKNO_DIR . 'includes/class-okno-content.php';

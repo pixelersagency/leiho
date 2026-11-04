@@ -29,7 +29,7 @@ class Okno_Schema {
 			return new WP_Error( 'okno_not_found', __( 'Content not found.', 'okno' ), array( 'status' => 404 ) );
 		}
 
-		$groups = array( $this->native_group( $post ) );
+		$groups = array_merge( array( $this->native_group( $post ) ), Okno_Native_Fields::groups( $post ) );
 
 		foreach ( $this->plugin->adapters() as $adapter ) {
 			$groups = array_merge( $groups, $adapter->get_schema( $post_id ) );
@@ -63,27 +63,50 @@ class Okno_Schema {
 		// Instantané avant écriture, pour le journal (valeur avant / après).
 		$before = $this->get( $post_id );
 
-		// Champs natifs.
+		// Champs natifs : titre et colonnes du post (contenu, extrait,
+		// adresse, date, auteur, parent, ordre) en un seul wp_update_post(),
+		// taxonomies juste avant (wp_update_post relit les termes à jour).
+		$post    = get_post( $post_id );
+		$native  = $post ? Okno_Native_Fields::prepare( $post, $values ) : array(
+			'postarr' => array(),
+			'saved'   => array(),
+			'errors'  => array(),
+		);
+		$postarr = $native['postarr'];
+		$errors  = array_merge( $errors, $native['errors'] );
+
 		if ( array_key_exists( self::PATH_TITLE, $values ) ) {
 			$title = sanitize_text_field( (string) $values[ self::PATH_TITLE ] );
 			if ( '' === trim( $title ) ) {
 				// Le titre est déclaré required dans le schéma — on le fait respecter.
 				$errors[ self::PATH_TITLE ] = 'required';
 			} else {
-				$result = wp_update_post(
-					array(
-						'ID'         => $post_id,
-						'post_title' => $title,
-					),
-					true
-				);
-				if ( is_wp_error( $result ) ) {
-					$errors[ self::PATH_TITLE ] = 'save_failed';
-				} else {
-					$saved[] = self::PATH_TITLE;
-				}
+				$postarr['post_title'] = $title;
+				$native['saved'][]     = self::PATH_TITLE;
 			}
 			unset( $values[ self::PATH_TITLE ] );
+		}
+
+		if ( $native['saved'] ) {
+			// wp_update_post() attend des données échappées (wp_slash).
+			$columns = array_diff( array_keys( $postarr ), array( 'edit_date' ) );
+			$data    = wp_slash( array_intersect_key( $postarr, array_flip( $columns ) ) );
+			if ( isset( $postarr['edit_date'] ) ) {
+				$data['edit_date'] = true;
+			}
+			$data['ID'] = $post_id;
+			$result     = wp_update_post( $data, true );
+			if ( is_wp_error( $result ) ) {
+				foreach ( $native['saved'] as $path ) {
+					if ( 0 !== strpos( $path, Okno_Native_Fields::TAX_PREFIX ) ) {
+						$errors[ $path ] = 'save_failed';
+					} else {
+						$saved[] = $path; // Termes déjà écrits.
+					}
+				}
+			} else {
+				$saved = array_merge( $saved, $native['saved'] );
+			}
 		}
 
 		if ( array_key_exists( self::PATH_THUMBNAIL, $values ) ) {
@@ -177,7 +200,7 @@ class Okno_Schema {
 	}
 
 	/**
-	 * Groupe "natif" : titre + image mise en avant.
+	 * Groupe "natif" : titre, contenu et extrait (formulaire), image mise en avant.
 	 *
 	 * @param WP_Post $post Post.
 	 * @return array
@@ -197,6 +220,9 @@ class Okno_Schema {
 				'value'     => $post->post_title,
 			),
 		);
+
+		// Contenu et extrait : formulaire de Collections seulement (form_only).
+		$fields = array_merge( $fields, Okno_Native_Fields::content_fields( $post ) );
 
 		// Image mise en avant : seulement si le type la prend en charge (une
 		// collection sans la fonctionnalité « Image mise en avant » n'en a pas),
