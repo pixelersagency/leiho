@@ -165,6 +165,9 @@ class Okno_Collections_Rest {
 		if ( ! Okno_Collections::get( $id ) ) {
 			return new WP_Error( 'okno_not_found', __( 'Unknown collection.', 'okno' ), array( 'status' => 404 ) );
 		}
+		if ( class_exists( 'Okno_ACF_Import' ) && Okno_ACF_Import::record( $id ) ) {
+			return new WP_Error( 'okno_imported', __( 'This collection was imported from ACF: go back to ACF instead (collections/import-acf/rollback).', 'okno' ), array( 'status' => 409 ) );
+		}
 		return $this->respond( Okno_Collections::delete_collection( $id ) );
 	}
 
@@ -225,6 +228,8 @@ class Okno_Collections_Rest {
 			'columns'    => (object) $columns,
 			'archived'   => $archived,
 			'entry'      => 'singleton' === $collection['kind'] ? Okno_Collections::entry( $collection['id'] ) : null,
+			// Collection importée d'ACF : état de l'import, retour possible.
+			'acf_import' => class_exists( 'Okno_ACF_Import' ) ? Okno_ACF_Import::summary( $collection['id'] ) : null,
 		);
 	}
 

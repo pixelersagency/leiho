@@ -52,6 +52,7 @@ function okno_uninstall_site() {
 		}
 		delete_option( 'okno_collections' );
 		delete_option( 'okno_collections_state' );
+		delete_option( 'okno_acf_import' );
 		delete_post_meta_by_key( '_okno_fields' );
 	}
 
