@@ -4,7 +4,7 @@ Tags: headless, acf, visual editor, nextjs, astro
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.0.0-beta.6
+Stable tag: 1.0.0-beta.7
 License: GPL-2.0-or-later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -48,6 +48,9 @@ Okno removes its own settings, tokens, history table and internal post meta, and
 Parts of the Okno app's layout and styles (three-pane Content and Collections views, list rows, field settings, dialogs) are derived from Stacki (https://github.com/flowtricks/stacki), Copyright (c) 2026 Timothy Ricks, MIT License. The full license text ships in licenses/stacki-MIT.txt.
 
 == Changelog ==
+
+= 1.0.0-beta.7 =
+* Okno opens full screen and becomes the back office: its own navigation, Content, Media, Collections builder and entry form, in a dense desktop-style interface (dark by default).
 
 = 1.0.0-beta.6 =
 * Okno Collections: define content types and fields in Okno, without ACF, with schema export/import and safe migrations.
