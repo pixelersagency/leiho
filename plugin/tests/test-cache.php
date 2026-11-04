@@ -78,6 +78,7 @@ final class Leiho_Plugin {
 }
 class Leiho_Rest { const NS = 'leiho/v1'; }
 
+require __DIR__ . '/../includes/class-leiho-i18n.php';
 require __DIR__ . '/../includes/class-leiho-content.php';
 require __DIR__ . '/../includes/class-leiho-cache.php';
 

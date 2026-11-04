@@ -138,8 +138,19 @@ class Leiho_Native_Adapter extends Leiho_Field_Adapter {
 	 * @param int   $post_id    Entrée.
 	 * @return array<string,mixed> nom => valeur brute.
 	 */
-	private function raw_values( $collection, $post_id ) {
+	private function raw_values( $collection, $post_id, $locale = null ) {
 		$stored = Leiho_Collections_Store::values( $collection['id'], $post_id );
+		// Autre langue que celle par défaut : les champs traduisibles viennent de
+		// la traduction (vides si pas encore traduits), les autres sont partagés.
+		$locale = null === $locale ? Leiho_I18n::current() : $locale;
+		if ( $locale !== Leiho_I18n::default_locale() ) {
+			$row = Leiho_I18n::row( $post_id, $locale );
+			foreach ( $collection['fields'] as $field ) {
+				if ( Leiho_I18n::is_localized( $field ) ) {
+					$stored[ $field['key'] ] = $row && isset( $row['data'][ $field['key'] ] ) ? $row['data'][ $field['key'] ] : null;
+				}
+			}
+		}
 		$out    = array();
 		foreach ( $this->fields( $collection ) as $name => $def ) {
 			$key          = $def['field']['key'];
@@ -161,8 +172,9 @@ class Leiho_Native_Adapter extends Leiho_Field_Adapter {
 		$raw    = $this->raw_values( $collection, $post_id );
 		$fields = array();
 		foreach ( $this->fields( $collection ) as $name => $def ) {
-			$entry           = array_merge( $this->describe( $def['engine'] ), $this->read_value( $def['engine'], $raw[ $name ] ) );
-			$entry['source'] = 'collections';
+			$entry              = array_merge( $this->describe( $def['engine'] ), $this->read_value( $def['engine'], $raw[ $name ] ) );
+			$entry['source']    = 'collections';
+			$entry['localized'] = Leiho_I18n::is_localized( $def['field'] );
 			$fields[]        = $entry;
 		}
 
@@ -220,7 +232,18 @@ class Leiho_Native_Adapter extends Leiho_Field_Adapter {
 			);
 		}
 
-		$raw     = $this->raw_values( $collection, $post_id );
+		$raw = $this->raw_values( $collection, $post_id );
+		// Traduction partielle (un élément de liste, un champ de groupe) : on part
+		// de la valeur d'origine tant que le champ n'est pas encore traduit.
+		if ( Leiho_I18n::is_translation() ) {
+			$source = null;
+			foreach ( array_keys( $batches ) as $root ) {
+				if ( Leiho_I18n::is_localized( $defs[ $root ]['field'] ) && $this->is_blank( $raw[ $root ] ) ) {
+					$source       = null === $source ? $this->raw_values( $collection, $post_id, Leiho_I18n::default_locale() ) : $source;
+					$raw[ $root ] = $source[ $root ];
+				}
+			}
+		}
 		$columns = array();
 		$touched = array();
 		foreach ( $batches as $root => $paths ) {
@@ -253,8 +276,24 @@ class Leiho_Native_Adapter extends Leiho_Field_Adapter {
 			);
 		}
 
+		// Autre langue : les champs traduisibles vont dans la traduction, les
+		// champs partagés restent dans la table de la collection.
+		$ok = true;
+		if ( Leiho_I18n::is_translation() ) {
+			$localized = array();
+			foreach ( $collection['fields'] as $field ) {
+				if ( array_key_exists( $field['key'], $columns ) && Leiho_I18n::is_localized( $field ) ) {
+					$localized[ $field['key'] ] = $columns[ $field['key'] ];
+					unset( $columns[ $field['key'] ] );
+				}
+			}
+			if ( $localized ) {
+				$ok = Leiho_I18n::write( $post_id, Leiho_I18n::current(), $localized );
+			}
+		}
+
 		// Une seule écriture pour tous les champs du lot.
-		if ( ! Leiho_Collections_Store::write( $collection['id'], $post_id, $columns ) ) {
+		if ( ! $ok || ( $columns && ! Leiho_Collections_Store::write( $collection['id'], $post_id, $columns ) ) ) {
 			foreach ( $touched as $path ) {
 				$errors[ $path ] = 'save_failed';
 			}
@@ -295,11 +334,27 @@ class Leiho_Native_Adapter extends Leiho_Field_Adapter {
 			return array();
 		}
 		$raw = $this->raw_values( $collection, $post_id );
-		$out = array();
+		// Servi au front : un champ pas encore traduit retombe sur la langue par défaut.
+		$fallback = Leiho_I18n::is_translation() ? $this->raw_values( $collection, $post_id, Leiho_I18n::default_locale() ) : null;
+		$out      = array();
 		foreach ( $this->fields( $collection ) as $name => $def ) {
-			$out[ $name ] = $this->public_value( $def['engine'], $raw[ $name ] );
+			$value = $raw[ $name ];
+			if ( $fallback && Leiho_I18n::is_localized( $def['field'] ) && $this->is_blank( $value ) ) {
+				$value = $fallback[ $name ];
+			}
+			$out[ $name ] = $this->public_value( $def['engine'], $value );
 		}
 		return $out;
+	}
+
+	/**
+	 * Valeur brute vide (pas encore traduite).
+	 *
+	 * @param mixed $value Valeur brute.
+	 * @return bool
+	 */
+	private function is_blank( $value ) {
+		return null === $value || '' === $value || array() === $value || false === $value;
 	}
 
 	public function get_definitions( $post_type ) {

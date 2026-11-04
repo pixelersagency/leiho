@@ -22,6 +22,21 @@ class Leiho_Url_Mapper {
 	 * @return string Chemin commençant par '/'.
 	 */
 	public function path( $post ) {
+		$path = $this->default_path( $post );
+		// Entrée de Collections lue dans une autre langue : chemin préfixé (/fr/…).
+		if ( class_exists( 'Leiho_I18n' ) && Leiho_I18n::is_translation() && Leiho_Collections::for_post_type( $post->post_type ) ) {
+			return Leiho_I18n::path( $path, Leiho_I18n::current() );
+		}
+		return $path;
+	}
+
+	/**
+	 * Chemin dans la langue par défaut.
+	 *
+	 * @param WP_Post $post Post.
+	 * @return string
+	 */
+	public function default_path( $post ) {
 		$override = get_post_meta( $post->ID, self::META_PATH, true );
 		if ( is_string( $override ) && '' !== trim( $override ) ) {
 			return '/' . ltrim( trim( $override ), '/' );

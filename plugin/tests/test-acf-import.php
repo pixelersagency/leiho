@@ -205,6 +205,7 @@ require __DIR__ . '/../includes/adapters/abstract-leiho-field-adapter.php';
 require __DIR__ . '/../includes/adapters/class-leiho-acf-adapter.php';
 require __DIR__ . '/../includes/adapters/class-leiho-native-adapter.php';
 require __DIR__ . '/../includes/collections/class-leiho-collections-schema.php';
+require __DIR__ . '/../includes/class-leiho-i18n.php';
 require __DIR__ . '/../includes/collections/class-leiho-collections-values.php';
 require __DIR__ . '/../includes/collections/class-leiho-collections-store.php';
 require __DIR__ . '/../includes/collections/class-leiho-collections.php';

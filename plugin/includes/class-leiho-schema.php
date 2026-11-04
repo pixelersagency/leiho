@@ -37,7 +37,19 @@ class Leiho_Schema {
 
 		$mapper = new Leiho_Url_Mapper();
 
+		// Langues de l'entrée (Collections, plusieurs langues déclarées).
+		$i18n = null;
+		if ( Leiho_I18n::enabled() && Leiho_Collections::for_post_type( $post->post_type ) ) {
+			$i18n = array(
+				'locale'   => Leiho_I18n::current(),
+				'default'  => Leiho_I18n::default_locale(),
+				'locales'  => Leiho_I18n::config()['locales'],
+				'statuses' => Leiho_I18n::statuses( $post_id ),
+			);
+		}
+
 		return array(
+			'i18n'        => $i18n,
 			'post_id'     => (int) $post_id,
 			'revision'    => self::revision( $post_id ),
 			'title'       => Leiho_Plugin::title( $post ),
@@ -74,6 +86,18 @@ class Leiho_Schema {
 		);
 		$postarr = $native['postarr'];
 		$errors  = array_merge( $errors, $native['errors'] );
+
+		// Traduction d'une entrée de Collections : le titre va dans la traduction
+		// (vide : la page retombe sur le titre d'origine), pas dans le post.
+		if ( array_key_exists( self::PATH_TITLE, $values ) && $post && Leiho_I18n::is_translation() && Leiho_Collections::for_post_type( $post->post_type ) ) {
+			$title = sanitize_text_field( (string) $values[ self::PATH_TITLE ] );
+			if ( Leiho_I18n::write( $post_id, Leiho_I18n::current(), array(), $title ) ) {
+				$saved[] = self::PATH_TITLE;
+			} else {
+				$errors[ self::PATH_TITLE ] = 'save_failed';
+			}
+			unset( $values[ self::PATH_TITLE ] );
+		}
 
 		if ( array_key_exists( self::PATH_TITLE, $values ) ) {
 			$title = sanitize_text_field( (string) $values[ self::PATH_TITLE ] );
@@ -208,16 +232,21 @@ class Leiho_Schema {
 	private function native_group( $post ) {
 		$thumbnail_id = (int) get_post_thumbnail_id( $post );
 
+		// Traduction d'une entrée de Collections : titre traduit (vide si pas encore).
+		$translated = Leiho_I18n::is_translation() && Leiho_Collections::for_post_type( $post->post_type );
+		$l10n       = $translated ? Leiho_I18n::row( $post->ID, Leiho_I18n::current() ) : null;
+
 		$fields = array(
 			array(
 				'path'      => self::PATH_TITLE,
 				'key'       => self::PATH_TITLE,
 				'type'      => 'text',
 				'label'     => __( 'Title', 'leiho' ),
-				'required'  => true,
+				'required'  => ! $translated,
 				'supported' => true,
 				'source'    => 'native',
-				'value'     => $post->post_title,
+				'value'     => $translated ? ( $l10n ? (string) $l10n['title'] : '' ) : $post->post_title,
+				'localized' => true,
 			),
 		);
 

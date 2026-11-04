@@ -76,6 +76,12 @@ class Leiho_Content {
 				'methods'             => WP_REST_Server::READABLE,
 				'callback'            => array( $this, 'get_export' ),
 				'permission_callback' => array( __CLASS__, 'can_read' ),
+				'args'                => array(
+					'locale' => array(
+						'type'    => 'string',
+						'default' => '',
+					),
+				),
 			)
 		);
 
@@ -106,6 +112,10 @@ class Leiho_Content {
 					'per_page' => array(
 						'type'    => 'integer',
 						'default' => 100,
+					),
+					'locale'   => array(
+						'type'    => 'string',
+						'default' => '',
 					),
 				),
 			)
@@ -177,12 +187,45 @@ class Leiho_Content {
 	}
 
 	/**
+	 * Langue demandée (?locale=fr), si elle est déclarée et n'est pas la langue par défaut.
+	 *
+	 * @param WP_REST_Request $request Requête.
+	 * @return string|null
+	 */
+	public static function request_locale( $request ) {
+		$code = method_exists( $request, 'get_param' ) ? Leiho_I18n::valid( (string) $request->get_param( 'locale' ) ) : null;
+		return $code && $code !== Leiho_I18n::default_locale() ? $code : null;
+	}
+
+	/**
 	 * GET /export : tout le contenu publié des types configurés.
 	 *
 	 * @param WP_REST_Request $request Requête.
 	 * @return WP_REST_Response
 	 */
 	public function get_export( WP_REST_Request $request ) {
+		$locale = self::request_locale( $request );
+		if ( $locale ) {
+			// Export dans une autre langue : même forme, caché à part.
+			return Leiho_I18n::in_locale(
+				$locale,
+				function () use ( $request, $locale ) {
+					$cache   = Leiho_Cache::remember(
+						'export:' . $locale,
+						function () {
+							return $this->build_export();
+						}
+					);
+					$etag    = '"' . $cache['etag'] . '"';
+					$headers = Leiho_Cache::headers( $etag );
+					if ( Leiho_Cache::not_modified( $request, $etag ) ) {
+						return new WP_REST_Response( null, 304, $headers );
+					}
+					return new WP_REST_Response( json_decode( $cache['body'] ), 200, $headers );
+				}
+			);
+		}
+
 		$cache = Leiho_Cache::get_export();
 		if ( ! is_array( $cache ) || ! isset( $cache['etag'], $cache['body'] ) || self::FORMAT !== ( isset( $cache['format'] ) ? $cache['format'] : 0 ) ) {
 			$cache = $this->build_export();
@@ -258,6 +301,15 @@ class Leiho_Content {
 	 * @return WP_REST_Response|WP_Error
 	 */
 	public function get_items( WP_REST_Request $request ) {
+		$locale = self::request_locale( $request );
+		if ( $locale && ! Leiho_I18n::is_translation() ) {
+			return Leiho_I18n::in_locale(
+				$locale,
+				function () use ( $request ) {
+					return $this->get_items( $request );
+				}
+			);
+		}
 		$types = self::post_types();
 		$type  = sanitize_key( (string) $request->get_param( 'type' ) );
 		if ( '' !== $type ) {
@@ -268,10 +320,22 @@ class Leiho_Content {
 		}
 
 		$path = (string) $request->get_param( 'path' );
+		// Chemin d'une autre langue (/fr/…) : servi dans cette langue.
+		if ( '' !== $path && ! Leiho_I18n::is_translation() && Leiho_I18n::enabled() ) {
+			$found = Leiho_I18n::split_path( $path )[0];
+			if ( $found !== Leiho_I18n::default_locale() ) {
+				return Leiho_I18n::in_locale(
+					$found,
+					function () use ( $request ) {
+						return $this->get_items( $request );
+					}
+				);
+			}
+		}
 		if ( '' !== $path ) {
 			// Résolution gardée en cache (id ou 0) : le repli parcourt tous les contenus.
 			$id   = (int) Leiho_Cache::remember(
-				'path:' . md5( implode( ',', $types ) . '|' . $path ),
+				'path:' . md5( implode( ',', $types ) . '|' . $path . '|' . Leiho_I18n::current() ),
 				static function () use ( $path, $types ) {
 					$found = self::find_by_path( $path, $types );
 					return $found ? (int) $found->ID : 0;
@@ -315,6 +379,15 @@ class Leiho_Content {
 	 * @return WP_REST_Response|WP_Error
 	 */
 	public function get_item( WP_REST_Request $request ) {
+		$locale = self::request_locale( $request );
+		if ( $locale && ! Leiho_I18n::is_translation() ) {
+			return Leiho_I18n::in_locale(
+				$locale,
+				function () use ( $request ) {
+					return $this->get_item( $request );
+				}
+			);
+		}
 		$post = get_post( (int) $request['id'] );
 		if ( ! $post || ! in_array( $post->post_type, self::post_types(), true ) ) {
 			return new WP_Error( 'leiho_not_found', __( 'Content not found.', 'leiho' ), array( 'status' => 404 ) );
@@ -408,7 +481,7 @@ class Leiho_Content {
 			return $this->item( $post );
 		}
 		return Leiho_Cache::remember(
-			'item:' . (int) $post->ID,
+			'item:' . (int) $post->ID . ( Leiho_I18n::is_translation() ? ':' . Leiho_I18n::current() : '' ),
 			function () use ( $post ) {
 				return $this->item( $post );
 			}
@@ -450,7 +523,7 @@ class Leiho_Content {
 			'status'         => $post->post_status,
 			'path'           => $mapper->path( $post ),
 			'url'            => $mapper->front_url( $post ),
-			'title'          => Leiho_Plugin::title( $post ),
+			'title'          => self::localized_title( $post ),
 			'date'           => mysql_to_rfc3339( $post->post_date_gmt && '0000-00-00 00:00:00' !== $post->post_date_gmt ? $post->post_date_gmt : $post->post_date ),
 			'modified'       => mysql_to_rfc3339( $post->post_modified_gmt && '0000-00-00 00:00:00' !== $post->post_modified_gmt ? $post->post_modified_gmt : $post->post_modified ),
 			'parent'         => $post->post_parent ? (int) $post->post_parent : null,
@@ -464,6 +537,12 @@ class Leiho_Content {
 			'fields'         => (object) $fields,
 		);
 
+		// Plusieurs langues : la langue de l'item et son chemin dans chacune.
+		if ( Leiho_I18n::enabled() && Leiho_Collections::for_post_type( $post->post_type ) ) {
+			$item['locale']       = Leiho_I18n::current();
+			$item['translations'] = (object) Leiho_I18n::paths( $mapper->default_path( $post ) );
+		}
+
 		return $item;
 	}
 
@@ -473,6 +552,22 @@ class Leiho_Content {
 	 * @param int $id Pièce jointe.
 	 * @return array|null
 	 */
+	/**
+	 * Titre dans la langue de la requête (repli sur l'original s'il n'est pas traduit).
+	 *
+	 * @param WP_Post $post Post.
+	 * @return string
+	 */
+	public static function localized_title( $post ) {
+		if ( Leiho_I18n::is_translation() && Leiho_Collections::for_post_type( $post->post_type ) ) {
+			$row = Leiho_I18n::row( $post->ID, Leiho_I18n::current() );
+			if ( $row && '' !== trim( (string) $row['title'] ) ) {
+				return html_entity_decode( (string) $row['title'], ENT_QUOTES, 'UTF-8' );
+			}
+		}
+		return Leiho_Plugin::title( $post );
+	}
+
 	public static function media( $id ) {
 		$id = (int) $id;
 		if ( ! $id || 'attachment' !== get_post_type( $id ) ) {
@@ -529,7 +624,7 @@ class Leiho_Content {
 			'id'    => (int) $post->ID,
 			'type'  => $post->post_type,
 			'slug'  => $post->post_name,
-			'title' => Leiho_Plugin::title( $post ),
+			'title' => self::localized_title( $post ),
 			'path'  => $mapper->path( $post ),
 		);
 	}

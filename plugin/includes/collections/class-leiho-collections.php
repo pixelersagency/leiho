@@ -551,6 +551,7 @@ class Leiho_Collections {
 	public static function deleted_post( $post_id, $post = null ) {
 		if ( $post && self::for_post_type( $post->post_type ) ) {
 			Leiho_Collections_Store::delete( $post->post_type, $post_id );
+			Leiho_I18n::delete( $post_id );
 		}
 	}
 

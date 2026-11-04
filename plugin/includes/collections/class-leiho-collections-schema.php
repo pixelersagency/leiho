@@ -141,6 +141,14 @@ class Leiho_Collections_Schema {
 			}
 		}
 
+		// Langues (localisation des champs) : voyagent avec le modèle de contenu.
+		if ( isset( $input['i18n'] ) && class_exists( 'Leiho_I18n' ) ) {
+			$i18n = Leiho_I18n::normalize( $input['i18n'], $errors );
+			if ( $i18n ) {
+				$out['i18n'] = $i18n;
+			}
+		}
+
 		$seen = array();
 		foreach ( array_values( $list ) as $i => $collection ) {
 			$normalized = self::normalize_collection( $collection, 'collections.' . $i, $errors, $ids );
@@ -352,6 +360,11 @@ class Leiho_Collections_Schema {
 			'required' => ! empty( $input['required'] ),
 			'help'     => self::text( isset( $input['help'] ) ? $input['help'] : '', '' ),
 		);
+
+		// Traduisible (champ racine, profondeur 1) : par défaut les textes et ce qui en contient.
+		if ( 1 === $depth ) {
+			$field['localized'] = array_key_exists( 'localized', $input ) ? (bool) $input['localized'] : Leiho_I18n::localized_by_default( $type );
+		}
 
 		if ( in_array( $type, self::LENGTH_TYPES, true ) ) {
 			$field['max_length'] = isset( $input['max_length'] ) ? max( 0, (int) $input['max_length'] ) : 0;
@@ -761,17 +774,27 @@ class Leiho_Collections_Schema {
 			if ( ! empty( $collection['source'] ) ) {
 				$item['source'] = $collection['source'];
 			}
-			$item['fields']         = self::compact_fields( $collection['fields'] );
+			$item['fields']         = self::compact_fields( $collection['fields'], true );
 			$out['collections'][] = $item;
+		}
+		if ( ! empty( $schema['i18n'] ) ) {
+			$out['i18n'] = $schema['i18n'];
 		}
 		return $out;
 	}
 
-	private static function compact_fields( $fields ) {
+	private static function compact_fields( $fields, $root = false ) {
 		$out = array();
 		foreach ( $fields as $field ) {
 			$item = array();
 			foreach ( $field as $prop => $value ) {
+				// « localized » n'est écrit que s'il diffère du réglage par défaut du type.
+				if ( 'localized' === $prop ) {
+					if ( $root && (bool) $value !== Leiho_I18n::localized_by_default( $field['type'] ) ) {
+						$item['localized'] = (bool) $value;
+					}
+					continue;
+				}
 				if ( 'fields' === $prop ) {
 					$item['fields'] = self::compact_fields( $value );
 					continue;

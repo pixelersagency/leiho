@@ -39,6 +39,7 @@ require_once LEIHO_DIR . 'includes/collections/class-leiho-collections-values.ph
 require_once LEIHO_DIR . 'includes/collections/class-leiho-collections-store.php';
 require_once LEIHO_DIR . 'includes/collections/class-leiho-collections-rest.php';
 require_once LEIHO_DIR . 'includes/collections/class-leiho-collections.php';
+require_once LEIHO_DIR . 'includes/class-leiho-i18n.php';
 require_once LEIHO_DIR . 'includes/collections/class-leiho-acf-import.php';
 require_once LEIHO_DIR . 'includes/deploy/interface-leiho-deploy-driver.php';
 require_once LEIHO_DIR . 'includes/deploy/class-leiho-build-hook-driver.php';

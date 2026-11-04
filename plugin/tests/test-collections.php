@@ -48,6 +48,8 @@ function wp_cache_delete( $k, $g = '' ) { unset( $GLOBALS['cache'][ $g ][ $k ] )
 function add_action( ...$a ) {}
 function add_filter( ...$a ) {}
 function did_action( $h ) { return 0; }
+function wp_json_encode( $v ) { return json_encode( $v ); }
+function current_time( $t, $gmt = 0 ) { return gmdate( "Y-m-d H:i:s" ); }
 function wp_strip_all_tags( $v ) { return strip_tags( (string) $v ); }
 function sanitize_text_field( $v ) { return trim( strip_tags( (string) $v ) ); }
 function sanitize_textarea_field( $v ) { return trim( strip_tags( (string) $v ) ); }
@@ -63,7 +65,7 @@ function get_post_type( $id ) { return isset( $GLOBALS['post_types'][ (int) $id 
 function get_post( $id ) {
 	$id = (int) $id;
 	if ( ! isset( $GLOBALS['post_types'][ $id ] ) ) { return null; }
-	return (object) array( 'ID' => $id, 'post_type' => $GLOBALS['post_types'][ $id ], 'post_status' => isset( $GLOBALS['statuses'][ $id ] ) ? $GLOBALS['statuses'][ $id ] : 'publish', 'post_name' => 'slug-' . $id, 'post_parent' => 0 );
+	return (object) array( 'ID' => $id, 'post_type' => $GLOBALS['post_types'][ $id ], 'post_status' => isset( $GLOBALS['statuses'][ $id ] ) ? $GLOBALS['statuses'][ $id ] : 'publish', 'post_name' => 'slug-' . $id, 'post_title' => 'Titre ' . $id, 'post_parent' => 0 );
 }
 function get_the_title( $p ) { return 'Titre ' . ( is_object( $p ) ? $p->ID : $p ); }
 function get_post_meta( $id, $key = '', $single = false ) { return ''; }
@@ -175,6 +177,7 @@ require __DIR__ . '/../includes/adapters/abstract-leiho-field-adapter.php';
 require __DIR__ . '/../includes/adapters/class-leiho-acf-adapter.php';
 require __DIR__ . '/../includes/adapters/class-leiho-native-adapter.php';
 require __DIR__ . '/../includes/collections/class-leiho-collections-schema.php';
+require __DIR__ . '/../includes/class-leiho-i18n.php';
 require __DIR__ . '/../includes/collections/class-leiho-collections-values.php';
 require __DIR__ . '/../includes/collections/class-leiho-collections-store.php';
 require __DIR__ . '/../includes/collections/class-leiho-collections.php';
@@ -530,6 +533,69 @@ check( 'trop long pour la colonne : échec, pas de troncature', false === $ok );
 
 $snap = Leiho_Collections::snapshot( Leiho_Collections::get( 'home' ), 1 );
 check( 'instantané indexé par clé', isset( $snap['fields']['hero_title'], $snap['fields']['sections'] ) && 'text' === $snap['fields']['hero_title']['type'], $snap );
+
+/* =====================================================================
+ * Langues : champs traduits, champs partagés, repli, chemins, état
+ * =================================================================== */
+
+$i18n_home = $home;
+foreach ( $i18n_home['fields'] as $i => $field ) {
+	if ( 'contact' === $field['name'] ) {
+		$i18n_home['fields'][ $i ]['localized'] = false; // Groupe partagé entre les langues.
+	}
+}
+$langs  = array( 'default' => 'en', 'locales' => array( array( 'code' => 'en' ), array( 'code' => 'fr', 'label' => 'Français' ) ) );
+$report = Leiho_Collections::save_schema( array( 'i18n' => $langs, 'collections' => array( $i18n_home, $v3 ) ) );
+check( 'langues enregistrées', ! is_wp_error( $report ) && Leiho_I18n::enabled(), $report );
+check( 'langue inconnue refusée', null === Leiho_I18n::valid( 'de' ) && 'fr' === Leiho_I18n::valid( 'FR' ) );
+$compact = Leiho_Collections::export();
+check( 'i18n exporté', isset( $compact['i18n'] ) && 'en' === $compact['i18n']['default'], $compact );
+$compact_contact = array_values( array_filter( $compact['collections'][0]['fields'], function ( $f ) { return 'contact' === $f['name']; } ) );
+check( 'localized écrit seulement s\'il change', isset( $compact_contact[0]['localized'] ) && false === $compact_contact[0]['localized'] && ! isset( $compact['collections'][0]['fields'][0]['localized'] ), $compact_contact );
+$errors = array();
+$norm   = Leiho_I18n::normalize( array( 'default' => 'xx', 'locales' => array( 'fr', 'en', 'pt BR' ) ), $errors );
+check( 'défaut hors liste : première langue', 'fr' === $norm['default'] && 2 === count( $norm['locales'] ), $norm );
+check( 'code invalide signalé', 'i18n.locales.2' === $errors[0]['path'], $errors );
+
+$adapter = new Leiho_Native_Adapter();
+$adapter->save_values( 1, array( 'contact.email' => 'hello@example.com' ) );
+Leiho_I18n::set_current( 'fr' );
+check( 'traduction vide au départ', null === $adapter->get_schema( 1 )[0]['fields'][0]['value'] || '' === $adapter->get_schema( 1 )[0]['fields'][0]['value'] );
+check( 'statut manquant', 'missing' === Leiho_I18n::status( 1, 'fr' ) );
+$r = $adapter->save_values( 1, array( 'hero_title' => 'Salut', 'contact.email' => 'bonjour@example.com' ) );
+check( 'traduction enregistrée', array() === $r['errors'], $r );
+check( 'original intact', 'Bonjour' === $GLOBALS['wpdb']->get_var( 'SELECT f_hero_title FROM wp_leiho_home WHERE post_id = 1' ) );
+check( 'champ partagé écrit dans la table', false !== strpos( (string) $GLOBALS['wpdb']->get_var( 'SELECT f_contact FROM wp_leiho_home WHERE post_id = 1' ), 'bonjour@example.com' ) );
+$fr = $adapter->get_content( 1 );
+check( 'contenu traduit', 'Salut' === $fr['hero_title'], $fr );
+check( 'champ partagé identique', 'bonjour@example.com' === $fr['contact']['email'], $fr['contact'] );
+Leiho_I18n::set_current( 'en' );
+$en = $adapter->get_content( 1 );
+check( 'langue par défaut inchangée', 'Bonjour' === $en['hero_title'] && 'bonjour@example.com' === $en['contact']['email'], $en );
+
+/* Repli : un champ traduisible vide dans la traduction reprend l'original. */
+$adapter->save_values( 1, array( 'sections' => array( array( '_layout' => 'hero', 'body' => '<p>Hello</p>' ) ) ) );
+Leiho_I18n::set_current( 'fr' );
+check( 'repli sur l\'original', false !== strpos( $adapter->get_content( 1 )['sections'][0]['body'], 'Hello' ), $adapter->get_content( 1 )['sections'] );
+check( 'statut partiel', 'partial' === Leiho_I18n::status( 1, 'fr' ) );
+$r = $adapter->save_values( 1, array( 'sections.0.body' => '<p>Bonjour</p>' ) );
+check( 'traduction partielle d\'une liste : part de l\'original', array() === $r['errors'] && false !== strpos( $adapter->get_content( 1 )['sections'][0]['body'], 'Bonjour' ), $r );
+Leiho_I18n::set_current( 'en' );
+check( 'original de la liste intact', false !== strpos( $adapter->get_content( 1 )['sections'][0]['body'], 'Hello' ) );
+
+/* Chemins. */
+check( 'chemin préfixé', '/fr/services/a' === Leiho_I18n::path( '/services/a', 'fr' ) && '/fr' === Leiho_I18n::path( '/', 'fr' ) );
+check( 'langue par défaut sans préfixe', '/services/a' === Leiho_I18n::path( '/services/a', 'en' ) );
+check( 'chemin découpé', array( 'fr', '/services/a' ) === Leiho_I18n::split_path( '/fr/services/a' ) && array( 'fr', '/' ) === Leiho_I18n::split_path( '/fr' ) );
+check( 'pas une langue', array( 'en', '/faq' ) === Leiho_I18n::split_path( '/faq' ) && array( 'en', '/de/x' ) === Leiho_I18n::split_path( '/de/x' ) );
+check( 'in_locale rétablit la langue', 'fr' === Leiho_I18n::in_locale( 'fr', function () { return Leiho_I18n::current(); } ) && 'en' === Leiho_I18n::current() );
+
+/* Suppression de l'entrée : traductions effacées. */
+Leiho_I18n::delete( 1 );
+Leiho_I18n::flush();
+check( 'traductions supprimées', null === Leiho_I18n::row( 1, 'fr' ) );
+Leiho_Collections::save_schema( array( 'collections' => array( $home, $v3 ) ) );
+check( 'langues retirées', ! Leiho_I18n::enabled() );
 
 /* =====================================================================
  * Types TypeScript
