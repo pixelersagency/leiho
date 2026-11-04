@@ -185,33 +185,41 @@ class Okno_Schema {
 	private function native_group( $post ) {
 		$thumbnail_id = (int) get_post_thumbnail_id( $post );
 
+		$fields = array(
+			array(
+				'path'      => self::PATH_TITLE,
+				'key'       => self::PATH_TITLE,
+				'type'      => 'text',
+				'label'     => __( 'Title', 'okno' ),
+				'required'  => true,
+				'supported' => true,
+				'source'    => 'native',
+				'value'     => $post->post_title,
+			),
+		);
+
+		// Image mise en avant : seulement si le type la prend en charge (une
+		// collection sans la fonctionnalité « Image mise en avant » n'en a pas),
+		// ou si le contenu en a déjà une.
+		if ( $thumbnail_id || ! function_exists( 'post_type_supports' ) || post_type_supports( $post->post_type, 'thumbnail' ) ) {
+			$fields[] = array(
+				'path'      => self::PATH_THUMBNAIL,
+				'key'       => self::PATH_THUMBNAIL,
+				'type'      => 'image',
+				'label'     => __( 'Featured image', 'okno' ),
+				'required'  => false,
+				'supported' => true,
+				'source'    => 'native',
+				'value'     => $thumbnail_id ? $thumbnail_id : null,
+				'meta'      => array( 'url' => $thumbnail_id ? (string) wp_get_attachment_url( $thumbnail_id ) : '' ),
+			);
+		}
+
 		return array(
 			'key'    => 'okno_native',
 			'title'  => __( 'Main content', 'okno' ),
 			'source' => 'native',
-			'fields' => array(
-				array(
-					'path'      => self::PATH_TITLE,
-					'key'       => self::PATH_TITLE,
-					'type'      => 'text',
-					'label'     => __( 'Title', 'okno' ),
-					'required'  => true,
-					'supported' => true,
-					'source'    => 'native',
-					'value'     => $post->post_title,
-				),
-				array(
-					'path'      => self::PATH_THUMBNAIL,
-					'key'       => self::PATH_THUMBNAIL,
-					'type'      => 'image',
-					'label'     => __( 'Featured image', 'okno' ),
-					'required'  => false,
-					'supported' => true,
-					'source'    => 'native',
-					'value'     => $thumbnail_id ? $thumbnail_id : null,
-					'meta'      => array( 'url' => $thumbnail_id ? (string) wp_get_attachment_url( $thumbnail_id ) : '' ),
-				),
-			),
+			'fields' => $fields,
 		);
 	}
 }

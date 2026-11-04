@@ -32,6 +32,10 @@
 		}
 	} )();
 
+	// Mode formulaire : tous les champs d'un contenu, sans aperçu du site
+	// (contenus sans page : pages légales, témoignages, réglages…).
+	var FORM = 'form' === cfg.mode;
+
 	var PER_PAGE = 50;
 	var AUTOSAVE_MS = 2000;
 	var HISTORY_MAX = 50;
@@ -102,6 +106,7 @@
 		tabHistory: document.getElementById( 'okno-tab-history' ),
 		historyList: document.getElementById( 'okno-history-list' ),
 		saveState: document.getElementById( 'okno-save-state' ),
+		status: document.getElementById( 'okno-status' ),
 	};
 
 	/* ------------------------------------------------------------------ *
@@ -415,7 +420,7 @@
 	 * ------------------------------------------------------------------ */
 
 	function postToFrame( message ) {
-		if ( ! els.frame.contentWindow || ! cfg.frontOrigin ) {
+		if ( FORM || ! els.frame.contentWindow || ! cfg.frontOrigin ) {
 			return;
 		}
 		message.ns = 'okno';
@@ -1260,6 +1265,71 @@
 	 * Ouverture d'une page
 	 * ------------------------------------------------------------------ */
 
+	/* ------------------------------------------------------------------ *
+	 * Statut du contenu (brouillon, publié…) : changé sans quitter Okno
+	 * ------------------------------------------------------------------ */
+
+	var STATUS_LABELS = {
+		publish: __( 'Published', 'okno' ),
+		draft: __( 'Draft', 'okno' ),
+		pending: __( 'Pending review', 'okno' ),
+		private: __( 'Private', 'okno' ),
+		future: __( 'Scheduled', 'okno' ),
+	};
+
+	function renderStatus() {
+		var select = els.status;
+		if ( ! select ) {
+			return;
+		}
+		select.hidden = ! state.post;
+		if ( ! state.post ) {
+			return;
+		}
+		var type = ( cfg.postTypes || [] ).find( function ( t ) {
+			return t.name === state.post.type;
+		} );
+		var canPublish = ! type || false !== type.canPublish;
+		var current = state.post.status;
+		var options = canPublish ? [ 'draft', 'pending', 'publish', 'private' ] : [ 'draft', 'pending' ];
+		if ( options.indexOf( current ) === -1 ) {
+			options.unshift( current ); // Statut actuel (programmé…) toujours affiché.
+		}
+		select.innerHTML = '';
+		options.forEach( function ( status ) {
+			var opt = document.createElement( 'option' );
+			opt.value = status;
+			opt.textContent = STATUS_LABELS[ status ] || status;
+			opt.selected = status === current;
+			select.appendChild( opt );
+		} );
+		select.dataset.status = current;
+	}
+
+	if ( els.status ) {
+		els.status.addEventListener( 'change', function () {
+			if ( ! state.post ) {
+				return;
+			}
+			var post = state.post;
+			var wanted = els.status.value;
+			els.status.disabled = true;
+			apiFetch( { path: '/okno/v1/posts/' + post.id + '/status', method: 'POST', data: { status: wanted } } )
+				.then( function ( fresh ) {
+					post.status = fresh.status;
+					/* translators: %s: content status (e.g. Published). */
+					toast( sprintf( __( 'Status: %s.', 'okno' ), STATUS_LABELS[ fresh.status ] || fresh.status ) );
+				} )
+				.catch( function ( err ) {
+					toast( ( err && err.message ) || __( 'Couldn’t change the status.', 'okno' ), true );
+				} )
+				.finally( function () {
+					els.status.disabled = false;
+					renderStatus();
+				} );
+		} );
+	}
+
 	function closePost() {
 		state.post = null;
 		state.schemas = {};
@@ -1271,6 +1341,7 @@
 		state.sections = [];
 		state.selection = 'page';
 		els.title.textContent = '';
+		renderStatus();
 		els.tabStructure.disabled = true;
 		els.frame.hidden = true;
 		els.framePlaceholder.hidden = false;
@@ -1282,7 +1353,14 @@
 
 	function openPost( post, options ) {
 		options = options || {};
-		if ( ! post.preview_url ) {
+		// Contenu sans page sur le site (collection sans chemin) : formulaire.
+		if ( ! FORM && cfg.formUrl && ( cfg.formTypes || [] ).indexOf( post.type ) !== -1 ) {
+			if ( confirmLoseChanges() ) {
+				window.location.href = cfg.formUrl + '&post=' + post.id;
+			}
+			return;
+		}
+		if ( ! FORM && ! post.preview_url ) {
 			toast( __( 'This content has no mapped URL. Check the Okno settings.', 'okno' ), true );
 			return;
 		}
@@ -1297,6 +1375,7 @@
 		state.selection = 'page';
 
 		els.title.textContent = post.title || '';
+		renderStatus();
 		els.tabStructure.disabled = false;
 		if ( els.tabHistory ) {
 			els.tabHistory.disabled = false;
@@ -1323,6 +1402,16 @@
 			resetHistory();
 			renderStructure();
 			renderInspector();
+			if ( FORM ) {
+				document.title = ( post.title || __( 'Edit entry', 'okno' ) ) + ' ‹ Okno';
+				if ( state.pendingField ) {
+					var target = state.pendingField;
+					state.pendingField = '';
+					focusPanelField( fieldKey( post.id, target ), fieldKey( post.id, target.split( '.' )[ 0 ] ) );
+				}
+				setButtons();
+				return;
+			}
 			if ( options.keepFrame ) {
 				// L'iframe est déjà sur la bonne page (navigation client du site) :
 				// on rejoue son handshake au lieu de la recharger.
@@ -1879,7 +1968,15 @@
 		if ( ! state.post ) {
 			var empty = document.createElement( 'div' );
 			empty.className = 'okno-panel-empty';
-			empty.textContent = __( 'Pick a page in the Pages panel.', 'okno' );
+			empty.textContent = FORM ? __( 'Pick a content in Content.', 'okno' ) : __( 'Pick a page in the Pages panel.', 'okno' );
+			if ( FORM && cfg.contentUrl ) {
+				var back = document.createElement( 'a' );
+				back.className = 'okno-btn okno-btn--quiet';
+				back.href = cfg.contentUrl;
+				back.textContent = __( 'Go to Content', 'okno' );
+				empty.appendChild( document.createElement( 'br' ) );
+				empty.appendChild( back );
+			}
 			els.panel.appendChild( empty );
 			return;
 		}
@@ -1894,7 +1991,11 @@
 		title.textContent = section ? section.label : state.post.title || __( 'Page', 'okno' );
 		header.appendChild( title );
 		var subtitle = document.createElement( 'p' );
-		subtitle.textContent = section ? __( 'Fields in this section', 'okno' ) : __( 'Page fields (outside sections)', 'okno' );
+		subtitle.textContent = section
+			? __( 'Fields in this section', 'okno' )
+			: FORM
+			? __( 'All the fields of this content', 'okno' )
+			: __( 'Page fields (outside sections)', 'okno' );
 		header.appendChild( subtitle );
 		els.panel.appendChild( header );
 
@@ -2047,7 +2148,7 @@
 		label.appendChild( chip );
 		wrap.appendChild( label );
 
-		if ( false !== field.supported && ! isFieldVisible( field ) ) {
+		if ( ! FORM && false !== field.supported && ! isFieldVisible( field ) ) {
 			var badge = document.createElement( 'span' );
 			badge.className = 'okno-field-badge';
 			badge.textContent = __( 'not on this page', 'okno' );
@@ -3221,7 +3322,9 @@
 					clearDraft( state.post.id );
 				}
 
-				if ( needsReload ) {
+				if ( FORM ) {
+					state.structureStale = false;
+				} else if ( needsReload ) {
 					state.structureStale = false;
 					loadFrame( state.post.preview_url );
 				} else {
@@ -3766,6 +3869,10 @@
 
 	function applyTheme( theme ) {
 		els.root.dataset.theme = theme;
+		var app = document.getElementById( 'okno-app' );
+		if ( app ) {
+			app.dataset.theme = theme; // Coque de l'application autour de l'éditeur.
+		}
 		if ( els.theme ) {
 			els.theme.innerHTML = '';
 			els.theme.appendChild( icon( 'dark' === theme ? 'sun' : 'moon', 16 ) );
@@ -3799,7 +3906,20 @@
 
 	setButtons();
 	renderInspector();
-	loadPosts();
+	if ( FORM ) {
+		if ( cfg.initialPost ) {
+			apiFetch( { path: '/okno/v1/posts/' + cfg.initialPost } )
+				.then( openPost )
+				.catch( function () {
+					els.title.textContent = '';
+					toast( __( 'This content no longer exists or you’re not allowed to edit it.', 'okno' ), true );
+				} );
+		} else {
+			els.title.textContent = '';
+		}
+	} else {
+		loadPosts();
+	}
 
 	if ( state.deployId && cfg.driverSupportsStatus ) {
 		pollDeploy();

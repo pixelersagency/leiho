@@ -247,6 +247,45 @@ body > .screen-reader-text[role="status"] {
 	line-height: 1.25;
 }
 
+.okno-doc-row {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	min-width: 0;
+}
+
+.okno-editor .okno-status-select {
+	flex: 0 0 auto;
+	width: auto;
+	max-width: 150px;
+	height: 22px;
+	min-height: 0;
+	padding: 0 22px 0 8px;
+	border: 1px solid var(--okno-line);
+	border-radius: 999px;
+	background-color: var(--okno-surface);
+	background-position: right 4px top 50%;
+	background-size: 12px;
+	color: var(--okno-ink);
+	font-size: 11.5px;
+	font-weight: 600;
+	line-height: 1;
+	cursor: pointer;
+}
+
+.okno-editor .okno-status-select[data-status="publish"] {
+	border-color: transparent;
+	background-color: var(--okno-ok-soft);
+	color: var(--okno-ok);
+}
+
+.okno-editor .okno-status-select[data-status="draft"],
+.okno-editor .okno-status-select[data-status="pending"] {
+	border-color: transparent;
+	background-color: var(--okno-warn-soft);
+	color: var(--okno-warn);
+}
+
 .okno-current-title {
 	overflow: hidden;
 	color: var(--okno-ink);
