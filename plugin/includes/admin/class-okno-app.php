@@ -265,7 +265,7 @@ class Okno_App {
 		$embedded = in_array( $view, array( 'editor', 'form' ), true );
 		$user     = wp_get_current_user();
 		?>
-		<div id="okno-app" class="okno-app<?php echo $embedded ? ' okno-app--embedded' : ''; ?>" data-view="<?php echo esc_attr( $view ); ?>">
+		<div id="okno-app" class="okno-app okno-app--collapsed<?php echo $embedded ? ' okno-app--embedded' : ''; ?>" data-view="<?php echo esc_attr( $view ); ?>" data-theme="dark">
 			<a class="okno-skip" href="#okno-view"><?php esc_html_e( 'Skip to content', 'okno' ); ?></a>
 
 			<nav id="okno-nav" class="okno-nav" aria-label="<?php esc_attr_e( 'Okno navigation', 'okno' ); ?>">

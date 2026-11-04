@@ -140,34 +140,39 @@
 	}
 
 	/* ------------------------------------------------------------------ *
-	 * Squelette de la vue
+	 * Squelette de la vue : trois volets
 	 * ------------------------------------------------------------------ */
 
-	var listEl = h( 'nav', { class: 'okno-builder__list', 'aria-label': __( 'Collections', 'okno' ) } );
-	var editorEl = h( 'section', { class: 'okno-builder__editor', 'aria-live': 'off' } );
-	var applyBtn = null;
-	var dirtyNote = null;
 	var importInput = h( 'input', { type: 'file', accept: 'application/json,.json', hidden: true } );
-
-	App.clear( App.view );
-	App.append( App.view, [
-		h( 'div', { class: 'okno-view-head' }, [
-			h( 'div', {}, [
-				h( 'h1', { class: 'okno-view-title', text: __( 'Collections', 'okno' ) } ),
-				h( 'p', { class: 'okno-muted', text: __( 'Your content model: the content types of the site and their fields. No plugin needed.', 'okno' ) } ),
-			] ),
-			h( 'div', { class: 'okno-actions' }, [
-				h( 'button', { type: 'button', class: 'okno-btn okno-btn--quiet', onClick: exportSchema }, [ icon( 'download' ), __( 'Export', 'okno' ) ] ),
-				h( 'button', { type: 'button', class: 'okno-btn okno-btn--quiet', onClick: function () {
+	var listBody = h( 'div', { class: 'okno-pane__body' } );
+	var listEl = h( 'nav', { class: 'okno-pane okno-pane--nav okno-builder__list', 'aria-label': __( 'Collections', 'okno' ) }, [
+		h( 'div', { class: 'okno-pane__head' }, [
+			h( 'h1', { class: 'okno-pane__title', text: __( 'Collections', 'okno' ) } ),
+			h( 'div', { class: 'okno-pane__tools' }, [
+				h( 'button', { type: 'button', class: 'okno-icon-btn', title: __( 'Export', 'okno' ), 'aria-label': __( 'Export', 'okno' ), onClick: exportSchema }, icon( 'download' ) ),
+				h( 'button', { type: 'button', class: 'okno-icon-btn', title: __( 'Import', 'okno' ), 'aria-label': __( 'Import', 'okno' ), onClick: function () {
 					if ( confirmLeave() ) {
 						importInput.click();
 					}
-				} }, [ icon( 'upload' ), __( 'Import', 'okno' ) ] ),
+				} }, icon( 'upload' ) ),
+				h( 'button', { type: 'button', class: 'okno-icon-btn', title: __( 'New collection', 'okno' ), 'aria-label': __( 'New collection', 'okno' ), onClick: function () {
+					if ( confirmLeave() ) {
+						openNew();
+					}
+				} }, icon( 'plus' ) ),
 				importInput,
 			] ),
 		] ),
-		h( 'div', { class: 'okno-builder' }, [ listEl, editorEl ] ),
+		listBody,
 	] );
+	// Volets du milieu (champs) et de droite (réglages), refaits à chaque rendu.
+	var editorEl = h( 'div', { class: 'okno-builder__editor', 'aria-live': 'off' } );
+	var applyBtn = null;
+	var dirtyNote = null;
+
+	App.view.classList.add( 'okno-panes' );
+	App.clear( App.view );
+	App.append( App.view, [ listEl, editorEl ] );
 
 	importInput.addEventListener( 'change', function () {
 		var file = importInput.files && importInput.files[ 0 ];
@@ -197,45 +202,39 @@
 				}
 			} )
 			.catch( function ( err ) {
-				App.clear( editorEl ).appendChild( h( 'p', { class: 'okno-empty-line', text: App.errorMessage( err, __( 'Couldn’t load the collections.', 'okno' ) ) } ) );
+				App.clear( editorEl ).appendChild( h( 'p', { class: 'okno-list-empty', text: App.errorMessage( err, __( 'Couldn’t load the collections.', 'okno' ) ) } ) );
 			} );
 	}
 
 	function renderList() {
-		App.clear( listEl );
+		App.clear( listBody );
 		var groups = [
 			{ kind: 'collection', title: __( 'Collections', 'okno' ) },
 			{ kind: 'singleton', title: __( 'Single pages', 'okno' ) },
 		];
 
-		listEl.appendChild(
-			h( 'button', { type: 'button', class: 'okno-btn okno-builder__new', onClick: function () {
-				if ( confirmLeave() ) {
-					openNew();
-				}
-			} }, [ icon( 'plus' ), __( 'New collection', 'okno' ) ] )
-		);
-
 		groups.forEach( function ( group ) {
 			var items = state.items.filter( function ( i ) {
 				return group.kind === i.collection.kind;
 			} );
-			listEl.appendChild( h( 'h2', { class: 'okno-builder__group', text: group.title } ) );
+			listBody.appendChild( h( 'h2', { class: 'okno-group-label', text: group.title } ) );
 			if ( ! items.length ) {
-				listEl.appendChild( h( 'p', { class: 'okno-muted okno-builder__none', text: __( 'None yet.', 'okno' ) } ) );
+				listBody.appendChild( h( 'p', { class: 'okno-group-label okno-builder__none', text: __( 'None yet.', 'okno' ) } ) );
 				return;
 			}
-			listEl.appendChild(
+			listBody.appendChild(
 				h(
 					'ul',
-					{},
+					{ class: 'okno-rows' },
 					items.map( function ( item ) {
 						var c = item.collection;
 						var active = state.current && ! state.current.isNew && state.current.item.collection.id === c.id;
 						return h( 'li', {}, h( 'a', {
 							href: cfg.urls.collections + '&collection=' + c.id,
-							class: 'okno-builder__item' + ( active ? ' is-active' : '' ),
+							class: 'okno-coll' + ( active ? ' is-active' : '' ),
 							'aria-current': active ? 'page' : null,
+							/* translators: 1: collection label, 2: number of fields. */
+							'aria-label': sprintf( __( '%1$s, %2$s', 'okno' ), c.label, sprintf( _n( '%d field', '%d fields', c.fields.length, 'okno' ), c.fields.length ) ),
 							onClick: function ( event ) {
 								event.preventDefault();
 								if ( confirmLeave() ) {
@@ -243,30 +242,34 @@
 								}
 							},
 						}, [
-							icon( 'database' ),
-							h( 'span', { class: 'okno-builder__item-label', text: c.label } ),
-							h( 'span', { class: 'okno-builder__item-meta' }, [
-								/* translators: %d: number of fields. */
-								sprintf( _n( '%d field', '%d fields', c.fields.length, 'okno' ), c.fields.length ),
-								item.archived && item.archived.length ? h( 'span', { class: 'okno-pill okno-pill--warn', title: __( 'Archived columns', 'okno' ), text: String( item.archived.length ) } ) : null,
-							] ),
+							h( 'span', { class: 'okno-coll__icon okno-coll__icon--' + c.kind }, icon( 'singleton' === c.kind ? 'page' : 'database', 15 ) ),
+							h( 'span', { class: 'okno-coll__name', text: c.label } ),
+							item.archived && item.archived.length ? h( 'span', { class: 'okno-pill okno-pill--warn', title: __( 'Archived columns', 'okno' ), text: String( item.archived.length ) } ) : null,
+							h( 'span', { class: 'okno-coll__count', 'aria-hidden': 'true', text: String( c.fields.length ) } ),
 						] ) );
 					} )
 				)
 			);
 		} );
+
+		if ( state.current && state.current.isNew ) {
+			listBody.appendChild( h( 'ul', { class: 'okno-rows' }, h( 'li', {}, h( 'span', { class: 'okno-coll is-active', 'aria-current': 'true' }, [
+				h( 'span', { class: 'okno-coll__icon okno-coll__icon--collection' }, icon( 'plus', 15 ) ),
+				h( 'span', { class: 'okno-coll__name', text: state.current.draft.label || __( 'New collection', 'okno' ) } ),
+			] ) ) ) );
+		}
 	}
 
 	function renderWelcome() {
 		state.current = null;
 		state.dirty = false;
 		App.clear( editorEl ).appendChild(
-			h( 'div', { class: 'okno-card okno-empty' }, [
-				icon( 'database', 32 ),
+			h( 'section', { class: 'okno-pane okno-pane--detail' }, h( 'div', { class: 'okno-detail__body' }, h( 'div', { class: 'okno-empty-state' }, [
+				h( 'span', { class: 'okno-empty-state__icon' }, icon( 'database', 22 ) ),
 				h( 'h3', { text: state.items.length ? __( 'Pick a collection on the left', 'okno' ) : __( 'Define your first collection', 'okno' ) } ),
 				h( 'p', { text: __( 'A collection is a content type with many entries (services, testimonials, team members). A single page has exactly one entry (home, contact, legal notice, site settings).', 'okno' ) } ),
 				h( 'button', { type: 'button', class: 'okno-btn', onClick: openNew }, [ icon( 'plus' ), __( 'New collection', 'okno' ) ] ),
-			] )
+			] ) ) )
 		);
 	}
 
@@ -283,7 +286,7 @@
 	function open( item ) {
 		var draft = clone( item.collection );
 		prepare( draft.fields );
-		state.current = { isNew: false, item: item, draft: draft, errors: [] };
+		state.current = { isNew: false, item: item, draft: draft, errors: [], selected: 'general' };
 		state.dirty = false;
 		setUrl( item.collection.id );
 		renderList();
@@ -297,31 +300,93 @@
 			draft: { id: '', kind: 'collection', label: '', singular_label: '', path: '', supports: [], icon: '', fields: [] },
 			errors: [],
 			idTouched: false,
+			selected: 'general',
 		};
 		state.dirty = false;
 		setUrl( '' );
 		renderList();
 		renderEditor();
-		var first = editorEl.querySelector( 'input' );
+		var first = editorEl.querySelector( '.okno-pane--detail input' );
 		if ( first ) {
 			first.focus();
 		}
 	}
 
 	/* ------------------------------------------------------------------ *
-	 * Éditeur d'une collection
+	 * Éditeur d'une collection : champs (milieu) et réglages (droite)
 	 * ------------------------------------------------------------------ */
 
+	/** Champ racine sélectionné (ou null : réglages de la collection). */
+	function selectedField() {
+		var cur = state.current;
+		if ( ! cur || 'general' === cur.selected ) {
+			return null;
+		}
+		var index = cur.draft.fields.findIndex( function ( f ) {
+			return f._uid === cur.selected;
+		} );
+		if ( -1 === index ) {
+			cur.selected = 'general';
+			return null;
+		}
+		return { field: cur.draft.fields[ index ], index: index };
+	}
+
+	function select( uidOrGeneral, focusSelector ) {
+		state.current.selected = uidOrGeneral;
+		renderEditor( focusSelector );
+	}
+
 	function renderEditor( focusSelector ) {
-		var scroll = App.view.parentNode ? App.view.parentNode.scrollTop : 0;
+		var oldBody = editorEl.querySelector( '.okno-detail__body' );
+		var oldList = editorEl.querySelector( '.okno-builder__fields .okno-pane__body' );
+		var sameSelection = editorEl.dataset.selected === ( state.current && state.current.selected );
+		var scroll = oldBody && sameSelection ? oldBody.scrollTop : 0;
+		var listScroll = oldList ? oldList.scrollTop : 0;
 		var cur = state.current;
 		var d = cur.draft;
+		var sel = selectedField();
 		App.clear( editorEl );
+		editorEl.dataset.selected = cur.selected;
 
 		var title = cur.isNew ? __( 'New collection', 'okno' ) : d.label || d.id;
 		applyBtn = h( 'button', { type: 'button', class: 'okno-btn', disabled: ! state.dirty && ! cur.isNew, onClick: review }, cur.isNew ? __( 'Review and create', 'okno' ) : __( 'Review and apply', 'okno' ) );
 		dirtyNote = h( 'span', { class: 'okno-dirty-note', hidden: ! state.dirty, text: __( 'Changes not applied yet', 'okno' ) } );
 
+		/* Volet du milieu : réglages de la collection, puis ses champs. */
+		var general = errorsFor( '' ).concat( errorsFor( 'id' ), errorsFor( 'label' ), errorsFor( 'path' ) );
+		var fieldsBody = h( 'div', { class: 'okno-pane__body' }, [
+			h( 'ul', { class: 'okno-rows' }, h( 'li', { class: 'okno-item' + ( sel ? '' : ' is-active' ) + ( general.length ? ' has-error' : '' ) }, h( 'button', {
+				type: 'button',
+				class: 'okno-item__link okno-select-general',
+				'aria-pressed': sel ? 'false' : 'true',
+				onClick: function () {
+					select( 'general' );
+				},
+			}, [
+				h( 'span', { class: 'okno-coll__icon' }, icon( 'settings', 14 ) ),
+				h( 'span', { class: 'okno-item__title', text: __( 'General', 'okno' ) } ),
+			] ) ) ),
+			h( 'h3', { class: 'okno-group-label', text: __( 'Fields', 'okno' ) } ),
+			renderRootList( d.fields ),
+			h( 'p', { class: 'okno-help okno-pane__hint', text: __( 'Drag the handle or use the arrows to reorder. The title (and the features ticked above) come with every entry.', 'okno' ) } ),
+		] );
+
+		var fieldsPane = h( 'section', { class: 'okno-pane okno-pane--list okno-builder__fields', 'aria-label': __( 'Fields', 'okno' ) }, [
+			h( 'div', { class: 'okno-pane__head' }, [
+				h( 'h2', { class: 'okno-pane__title', text: title } ),
+				h( 'div', { class: 'okno-pane__tools' }, h( 'button', { type: 'button', class: 'okno-icon-btn', title: __( 'Add a field', 'okno' ), 'aria-label': __( 'Add a field', 'okno' ), onClick: function ( event ) {
+					pickType( event.currentTarget ).then( function ( type ) {
+						if ( type ) {
+							addField( d.fields, type );
+						}
+					} );
+				} }, icon( 'plus' ) ) ),
+			] ),
+			fieldsBody,
+		] );
+
+		/* Volet de droite : réglages de la sélection. */
 		var headActions = [ dirtyNote ];
 		if ( ! cur.isNew ) {
 			var entryLink = entryUrl( cur.item );
@@ -333,63 +398,59 @@
 		}
 		headActions.push( applyBtn );
 
-		editorEl.appendChild(
-			h( 'div', { class: 'okno-builder__head' }, [
-				h( 'div', {}, [
-					h( 'h2', { text: title } ),
-					cur.isNew
-						? null
-						: h( 'p', { class: 'okno-muted' }, [
-							'singleton' === d.kind ? __( 'Single page', 'okno' ) : __( 'Collection', 'okno' ),
-							' · ',
-							h( 'code', { text: d.id } ),
-						] ),
-				] ),
-				h( 'div', { class: 'okno-actions' }, headActions ),
-			] )
-		);
+		var detailTitle = sel ? sel.field.label || sel.field.name : __( 'General', 'okno' );
+		var head = h( 'div', { class: 'okno-detail__head' }, [
+			h( 'span', { class: 'okno-detail__icon' + ( sel ? '' : ' okno-detail__icon--purple' ) }, sel ? h( 'span', { class: 'okno-type-tag', text: typeAbbr( sel.field.type ) } ) : icon( 'database', 15 ) ),
+			h( 'h2', { class: 'okno-detail__title', dataset: sel ? { uid: sel.field._uid } : {}, text: detailTitle } ),
+			sel ? h( 'code', { class: 'okno-detail__path okno-fieldrow__name', text: sel.field.name } ) : cur.isNew ? null : h( 'span', { class: 'okno-detail__path', text: ( 'singleton' === d.kind ? __( 'Single page', 'okno' ) : __( 'Collection', 'okno' ) ) + ' · ' + d.id } ),
+			h( 'div', { class: 'okno-detail__actions' }, headActions ),
+		] );
 
-		var general = errorsFor( '' );
-		if ( general.length ) {
-			editorEl.appendChild( h( 'div', { class: 'okno-notice okno-notice--error', role: 'alert' }, general.map( function ( m ) {
+		var body = h( 'div', { class: 'okno-detail__body' } );
+		if ( general.length && ! sel ) {
+			body.appendChild( h( 'div', { class: 'okno-detail__card okno-notice okno-notice--error', role: 'alert' }, errorsFor( '' ).map( function ( m ) {
 				return h( 'p', { text: m } );
 			} ) ) );
 		}
-
-		editorEl.appendChild( renderGeneral( d, cur ) );
-
-		editorEl.appendChild(
-			h( 'div', { class: 'okno-card okno-builder__fields' }, [
-				h( 'div', { class: 'okno-card__head' }, [
-					h( 'h3', { text: __( 'Fields', 'okno' ) } ),
-					h( 'p', { class: 'okno-muted', text: __( 'Drag the handle or use the arrows to reorder. The title (and the features ticked above) come with every entry.', 'okno' ) } ),
-				] ),
-				renderFieldList( d.fields, 1, 'fields' ),
-			] )
-		);
-
-		if ( ! cur.isNew ) {
-			editorEl.appendChild( renderArchived( cur.item ) );
-			editorEl.appendChild(
-				h( 'div', { class: 'okno-card okno-danger-zone' }, [
-					h( 'div', {}, [
-						h( 'h3', { text: __( 'Remove this collection', 'okno' ) } ),
-						h( 'p', { class: 'okno-muted', text: __( 'It disappears from Okno and the content API. Its entries and their values are kept: create it again with the same id to get everything back.', 'okno' ) } ),
-					] ),
-					h( 'button', { type: 'button', class: 'okno-btn okno-btn--danger', onClick: removeCollection }, [ icon( 'trash' ), __( 'Remove', 'okno' ) ] ),
-				] )
-			);
+		if ( sel ) {
+			var path = 'fields.' + sel.index;
+			var errors = collectErrors( path );
+			body.appendChild( h( 'div', { class: 'okno-detail__card', dataset: { uid: sel.field._uid } }, h( 'div', { class: 'okno-field-settings' }, renderFieldSettings( d.fields, sel.field, 1, path, errors.own ) ) ) );
+		} else {
+			body.appendChild( renderGeneral( d, cur ) );
+			if ( ! cur.isNew ) {
+				body.appendChild( renderArchived( cur.item ) );
+				body.appendChild(
+					h( 'div', { class: 'okno-detail__card' }, h( 'div', { class: 'okno-danger-zone' }, [
+						h( 'div', {}, [
+							h( 'h3', { text: __( 'Remove this collection', 'okno' ) } ),
+							h( 'p', { class: 'okno-muted', text: __( 'It disappears from Okno and the content API. Its entries and their values are kept: create it again with the same id to get everything back.', 'okno' ) } ),
+						] ),
+						h( 'button', { type: 'button', class: 'okno-btn okno-btn--danger', onClick: removeCollection }, [ icon( 'trash' ), __( 'Remove', 'okno' ) ] ),
+					] ) )
+				);
+			}
 		}
 
-		if ( App.view.parentNode ) {
-			App.view.parentNode.scrollTop = scroll;
-		}
+		App.append( editorEl, [
+			fieldsPane,
+			h( 'section', { class: 'okno-pane okno-pane--detail', 'aria-label': detailTitle }, [ head, body ] ),
+		] );
+
+		body.scrollTop = scroll;
+		fieldsBody.scrollTop = listScroll;
 		if ( focusSelector ) {
 			var target = editorEl.querySelector( focusSelector );
 			if ( target ) {
 				target.focus();
 			}
 		}
+	}
+
+	/** Deux lettres pour la pastille de type (Te, Nu, Li…). */
+	function typeAbbr( type ) {
+		var label = ( TYPE_INDEX[ type ] || { label: type } ).label;
+		return label.slice( 0, 2 );
 	}
 
 	function entryUrl( item ) {
@@ -477,8 +538,8 @@
 		var idErrors = errorsFor( 'id' ).concat( errorsFor( 'label' ) );
 		var pathErrors = errorsFor( 'path' );
 
-		return h( 'div', { class: 'okno-card' }, [
-			h( 'div', { class: 'okno-card__head' }, h( 'h3', { text: __( 'General', 'okno' ) } ) ),
+		return h( 'div', { class: 'okno-detail__card' }, [
+			h( 'h3', { text: __( 'General', 'okno' ) } ),
 			h( 'div', { class: 'okno-settings-grid' }, [
 				field( __( 'Name (plural)', 'okno' ), label, null, labelId ),
 				field( __( 'Name of one entry', 'okno' ), singular, __( 'Optional. Used in “New service”.', 'okno' ), singularId ),
@@ -511,27 +572,118 @@
 	var drag = null; // { list, index } pendant un glisser.
 
 	/**
-	 * Liste de champs frères (racine, sous-champs d'une liste/d'un groupe,
-	 * champs d'un type de bloc). pathPrefix : chemin des erreurs du serveur.
+	 * Champs de premier niveau (volet du milieu) : une ligne de 32 px par
+	 * champ ; un clic ouvre ses réglages dans le volet de droite.
+	 */
+	function renderRootList( list ) {
+		var ol = h( 'ol', { class: 'okno-rows okno-fields okno-fields--root' } );
+		list.forEach( function ( f, index ) {
+			ol.appendChild( renderRootRow( list, f, index ) );
+		} );
+		if ( ! list.length ) {
+			ol.appendChild( h( 'li', { class: 'okno-list-empty', text: __( 'No fields yet. Each entry still has a title.', 'okno' ) } ) );
+		}
+		ol.appendChild( h( 'li', {}, h( 'button', { type: 'button', class: 'okno-item okno-item--add okno-add-field', onClick: function ( event ) {
+			pickType( event.currentTarget ).then( function ( type ) {
+				if ( type ) {
+					addField( list, type );
+				}
+			} );
+		} }, [ icon( 'plus', 13 ), __( 'Add a field', 'okno' ) ] ) ) );
+		return ol;
+	}
+
+	function renderRootRow( list, f, index ) {
+		var path = 'fields.' + index;
+		var errors = collectErrors( path );
+		var active = state.current.selected === f._uid;
+		var label = f.label || f.name;
+		var grip = h( 'span', { class: 'okno-grip', title: __( 'Drag to reorder', 'okno' ), 'aria-hidden': 'true' }, icon( 'grip', 12 ) );
+		var li = h( 'li', {
+			class: 'okno-item' + ( active ? ' is-active' : '' ) + ( errors.own.length || errors.nested ? ' has-error' : '' ),
+			dataset: { uid: f._uid },
+		}, [
+			grip,
+			h( 'button', {
+				type: 'button',
+				class: 'okno-item__link okno-field-select',
+				'aria-pressed': active ? 'true' : 'false',
+				onClick: function () {
+					select( f._uid, '[data-uid="' + f._uid + '"] .okno-field-label-input' );
+				},
+			}, [
+				h( 'span', { class: 'okno-type-tag', title: ( TYPE_INDEX[ f.type ] || { label: f.type } ).label, text: typeAbbr( f.type ) } ),
+				h( 'span', { class: 'okno-item__title okno-fieldrow__label', text: label + ( f.required ? ' *' : '' ) } ),
+				h( 'code', { class: 'okno-item__meta okno-fieldrow__name', text: f.name } ),
+			] ),
+			rowActions( list, f, index, label ),
+		] );
+		bindDrag( li, grip, list, index );
+		return li;
+	}
+
+	/** Monter, descendre, retirer : au survol de la ligne (et au clavier). */
+	function rowActions( list, f, index, label ) {
+		return h( 'div', { class: 'okno-item__actions okno-fieldrow__actions' }, [
+			h( 'button', {
+				type: 'button',
+				class: 'okno-icon-btn okno-move-up',
+				disabled: 0 === index,
+				/* translators: %s: field label. */
+				'aria-label': sprintf( __( 'Move “%s” up', 'okno' ), label ),
+				title: __( 'Move up', 'okno' ),
+				onClick: function () {
+					move( list, index, index - 1 );
+					renderEditor( '[data-uid="' + f._uid + '"] .okno-move-up:not([disabled]), [data-uid="' + f._uid + '"] .okno-move-down' );
+				},
+			}, icon( 'up' ) ),
+			h( 'button', {
+				type: 'button',
+				class: 'okno-icon-btn okno-move-down',
+				disabled: index === list.length - 1,
+				/* translators: %s: field label. */
+				'aria-label': sprintf( __( 'Move “%s” down', 'okno' ), label ),
+				title: __( 'Move down', 'okno' ),
+				onClick: function () {
+					move( list, index, index + 1 );
+					renderEditor( '[data-uid="' + f._uid + '"] .okno-move-down:not([disabled]), [data-uid="' + f._uid + '"] .okno-move-up' );
+				},
+			}, icon( 'down' ) ),
+			h( 'button', {
+				type: 'button',
+				class: 'okno-icon-btn okno-icon-btn--danger',
+				/* translators: %s: field label. */
+				'aria-label': sprintf( __( 'Remove “%s”', 'okno' ), label ),
+				title: __( 'Remove', 'okno' ),
+				onClick: function () {
+					removeField( list, index, f );
+				},
+			}, icon( 'trash' ) ),
+		] );
+	}
+
+	/**
+	 * Liste de sous-champs (d'une liste, d'un groupe, d'un type de bloc) :
+	 * lignes repliables dans un cadre, ajout en dernière ligne.
+	 * pathPrefix : chemin des erreurs du serveur.
 	 */
 	function renderFieldList( list, depth, pathPrefix ) {
 		var ol = h( 'ol', { class: 'okno-fields' } );
 		list.forEach( function ( f, index ) {
 			ol.appendChild( renderFieldRow( list, f, index, depth, pathPrefix + '.' + index ) );
 		} );
-		if ( ! list.length ) {
-			ol.appendChild( h( 'li', { class: 'okno-fields__empty', text: depth > 1 ? __( 'No sub-fields yet.', 'okno' ) : __( 'No fields yet. Each entry still has a title.', 'okno' ) } ) );
-		}
-		var wrap = h( 'div', { class: 'okno-fields-wrap' }, [ ol ] );
+		var wrap = h( 'div', { class: 'okno-list-field okno-fields-wrap' }, [
+			list.length ? ol : h( 'div', { class: 'okno-list-field__empty', text: __( 'No sub-fields yet.', 'okno' ) } ),
+		] );
 		if ( depth <= MAX_DEPTH ) {
 			wrap.appendChild(
-				h( 'button', { type: 'button', class: 'okno-btn okno-btn--quiet okno-btn--small okno-add-field', onClick: function ( event ) {
+				h( 'button', { type: 'button', class: 'okno-list-field__add okno-add-field', onClick: function ( event ) {
 					pickType( event.currentTarget ).then( function ( type ) {
 						if ( type ) {
 							addField( list, type );
 						}
 					} );
-				} }, [ icon( 'plus' ), depth > 1 ? __( 'Add a sub-field', 'okno' ) : __( 'Add a field', 'okno' ) ] )
+				} }, [ icon( 'plus' ), __( 'Add a sub-field', 'okno' ) ] )
 			);
 		}
 		return wrap;
@@ -620,6 +772,9 @@
 		f.label = TYPE_INDEX[ type ].label;
 		syncName( list, f );
 		list.push( f );
+		if ( list === state.current.draft.fields ) {
+			state.current.selected = f._uid; // Champ de premier niveau : ses réglages à droite.
+		}
 		markDirty();
 		renderEditor( '[data-uid="' + f._uid + '"] .okno-field-label-input' );
 	}
@@ -682,51 +837,14 @@
 				li.classList.toggle( 'is-open', f._open );
 			},
 		}, [
-			icon( 'chevron', 14 ),
+			icon( 'chevron', 12 ),
 			h( 'span', { class: 'okno-type-badge', text: meta.label } ),
 			h( 'span', { class: 'okno-fieldrow__label', text: ( f.label || f.name ) + ( f.required ? ' *' : '' ) } ),
 			h( 'code', { class: 'okno-fieldrow__name', text: f.name } ),
 		] );
 
-		var grip = h( 'span', { class: 'okno-grip', title: __( 'Drag to reorder', 'okno' ), 'aria-hidden': 'true' }, icon( 'grip' ) );
-
-		var label = f.label || f.name;
-		var actions = h( 'div', { class: 'okno-fieldrow__actions' }, [
-			h( 'button', {
-				type: 'button',
-				class: 'okno-icon-btn okno-move-up',
-				disabled: 0 === index,
-				/* translators: %s: field label. */
-				'aria-label': sprintf( __( 'Move “%s” up', 'okno' ), label ),
-				title: __( 'Move up', 'okno' ),
-				onClick: function () {
-					move( list, index, index - 1 );
-					renderEditor( '[data-uid="' + f._uid + '"] .okno-move-up:not([disabled]), [data-uid="' + f._uid + '"] .okno-move-down' );
-				},
-			}, icon( 'up' ) ),
-			h( 'button', {
-				type: 'button',
-				class: 'okno-icon-btn okno-move-down',
-				disabled: index === list.length - 1,
-				/* translators: %s: field label. */
-				'aria-label': sprintf( __( 'Move “%s” down', 'okno' ), label ),
-				title: __( 'Move down', 'okno' ),
-				onClick: function () {
-					move( list, index, index + 1 );
-					renderEditor( '[data-uid="' + f._uid + '"] .okno-move-down:not([disabled]), [data-uid="' + f._uid + '"] .okno-move-up' );
-				},
-			}, icon( 'down' ) ),
-			h( 'button', {
-				type: 'button',
-				class: 'okno-icon-btn okno-icon-btn--danger',
-				/* translators: %s: field label. */
-				'aria-label': sprintf( __( 'Remove “%s”', 'okno' ), label ),
-				title: __( 'Remove', 'okno' ),
-				onClick: function () {
-					removeField( list, index, f );
-				},
-			}, icon( 'trash' ) ),
-		] );
+		var grip = h( 'span', { class: 'okno-grip', title: __( 'Drag to reorder', 'okno' ), 'aria-hidden': 'true' }, icon( 'grip', 12 ) );
+		var actions = rowActions( list, f, index, f.label || f.name );
 
 		var body = h( 'div', { class: 'okno-fieldrow__body', id: bodyId, hidden: ! f._open }, renderFieldSettings( list, f, depth, path, errors.own ) );
 
@@ -752,7 +870,7 @@
 			event.preventDefault();
 			var ol = li.parentNode;
 			var rows = Array.prototype.filter.call( ol.children, function ( el ) {
-				return el.classList.contains( 'okno-fieldrow' );
+				return !! el.dataset.uid;
 			} );
 			var target = index;
 			drag = { list: list, index: index };
@@ -825,6 +943,9 @@
 		} ).then( function ( ok ) {
 			if ( ok ) {
 				list.splice( index, 1 );
+				if ( state.current.selected === f._uid ) {
+					state.current.selected = 'general';
+				}
 				markDirty();
 				renderEditor();
 			}
@@ -890,6 +1011,14 @@
 			if ( nameEl ) {
 				nameEl.textContent = f.name;
 			}
+			var titleEl = editorEl.querySelector( '.okno-detail__title[data-uid="' + f._uid + '"]' );
+			if ( titleEl ) {
+				titleEl.textContent = f.label || f.name;
+			}
+			var pathEl = titleEl && titleEl.parentNode.querySelector( '.okno-detail__path' );
+			if ( pathEl ) {
+				pathEl.textContent = f.name;
+			}
 		}
 
 		labelInput.addEventListener( 'input', function () {
@@ -952,39 +1081,39 @@
 			] )
 		);
 
-		var options = h( 'div', { class: 'okno-settings-grid okno-settings-grid--options' } );
-		options.appendChild( checkbox( __( 'Required', 'okno' ), f.required, function ( v ) {
-			f.required = v;
-			refreshHead();
-		} ) );
+		// Cases à cocher propres au type, réglages chiffrés repliés (options
+		// avancées), choix et cibles toujours visibles.
+		var flags = h( 'div', { class: 'okno-checks-inline' } );
+		var advanced = h( 'div', { class: 'okno-disclosure__body' } );
+		var wide = [];
 
 		if ( 'text' === f.type ) {
-			options.appendChild( checkbox( __( 'Several lines', 'okno' ), f.multiline, function ( v ) {
+			flags.appendChild( checkbox( __( 'Several lines', 'okno' ), f.multiline, function ( v ) {
 				f.multiline = v;
 			} ) );
 		}
 
 		if ( LENGTH_TYPES.indexOf( f.type ) !== -1 ) {
 			var lenId = App.uid( 'flen' );
-			options.appendChild( field( __( 'Maximum length', 'okno' ), numberInput( lenId, f.max_length || null, function ( v ) {
+			advanced.appendChild( field( __( 'Maximum length', 'okno' ), numberInput( lenId, f.max_length || null, function ( v ) {
 				f.max_length = v ? Math.max( 0, Math.round( v ) ) : 0;
 			}, { min: 0, placeholder: __( 'No limit', 'okno' ) } ), 'text' === f.type ? __( 'Up to 191 characters, the text is indexed (fast to sort and filter).', 'okno' ) : null, lenId ) );
 		}
 
 		if ( 'number' === f.type ) {
-			options.appendChild( checkbox( __( 'Whole numbers only', 'okno' ), f.integer, function ( v ) {
+			flags.appendChild( checkbox( __( 'Whole numbers only', 'okno' ), f.integer, function ( v ) {
 				f.integer = v;
 			} ) );
 			[ [ 'min', __( 'Minimum', 'okno' ) ], [ 'max', __( 'Maximum', 'okno' ) ], [ 'step', __( 'Step', 'okno' ) ] ].forEach( function ( pair ) {
 				var id = App.uid( 'fnum' );
-				options.appendChild( field( pair[ 1 ], numberInput( id, f[ pair[ 0 ] ], function ( v ) {
+				advanced.appendChild( field( pair[ 1 ], numberInput( id, f[ pair[ 0 ] ], function ( v ) {
 					f[ pair[ 0 ] ] = v;
 				}, { step: 'any' } ), null, id ) );
 			} );
 		}
 
 		if ( 'select' === f.type ) {
-			options.appendChild( checkbox( __( 'Several choices', 'okno' ), f.multiple, function ( v ) {
+			flags.appendChild( checkbox( __( 'Several choices', 'okno' ), f.multiple, function ( v ) {
 				f.multiple = v;
 			} ) );
 			var choicesId = App.uid( 'fchoices' );
@@ -996,7 +1125,7 @@
 				f.choices = parseChoices( choices.value );
 				markDirty();
 			} );
-			options.appendChild( h( 'div', { class: 'okno-setting okno-setting--wide' }, [
+			wide.push( h( 'div', { class: 'okno-setting okno-setting--wide' }, [
 				h( 'label', { class: 'okno-label', for: choicesId, text: __( 'Choices', 'okno' ) } ),
 				choices,
 				h( 'p', { class: 'okno-help', text: __( 'One choice per line. Write “value : Label” to show a label different from the stored value.', 'okno' ) } ),
@@ -1005,32 +1134,59 @@
 
 		if ( 'gallery' === f.type ) {
 			var gmax = App.uid( 'fmax' );
-			options.appendChild( field( __( 'Maximum images', 'okno' ), numberInput( gmax, f.max || null, function ( v ) {
+			advanced.appendChild( field( __( 'Maximum images', 'okno' ), numberInput( gmax, f.max || null, function ( v ) {
 				f.max = v ? Math.max( 0, Math.round( v ) ) : 0;
 			}, { min: 0, placeholder: __( 'No limit', 'okno' ) } ), null, gmax ) );
 		}
 
 		if ( 'reference' === f.type ) {
-			options.appendChild( checkbox( __( 'Several entries', 'okno' ), f.multiple, function ( v ) {
+			flags.appendChild( checkbox( __( 'Several entries', 'okno' ), f.multiple, function ( v ) {
 				f.multiple = v;
 			} ) );
 			var rmax = App.uid( 'fmax' );
-			options.appendChild( field( __( 'Maximum entries', 'okno' ), numberInput( rmax, f.max || null, function ( v ) {
+			advanced.appendChild( field( __( 'Maximum entries', 'okno' ), numberInput( rmax, f.max || null, function ( v ) {
 				f.max = v ? Math.max( 0, Math.round( v ) ) : 0;
 			}, { min: 0, placeholder: __( 'No limit', 'okno' ) } ), __( 'With “Several entries”.', 'okno' ), rmax ) );
-			options.appendChild( renderTargets( f ) );
+			wide.push( renderTargets( f ) );
 		}
 
 		if ( 'list' === f.type || 'blocks' === f.type ) {
 			[ [ 'min', __( 'Minimum rows', 'okno' ) ], [ 'max', __( 'Maximum rows', 'okno' ) ] ].forEach( function ( pair ) {
 				var id = App.uid( 'frows' );
-				options.appendChild( field( pair[ 1 ], numberInput( id, f[ pair[ 0 ] ] || null, function ( v ) {
+				advanced.appendChild( field( pair[ 1 ], numberInput( id, f[ pair[ 0 ] ] || null, function ( v ) {
 					f[ pair[ 0 ] ] = v ? Math.max( 0, Math.round( v ) ) : 0;
 				}, { min: 0, placeholder: 'max' === pair[ 0 ] ? __( 'No limit', 'okno' ) : '0' } ), null, id ) );
 			} );
 		}
 
-		out.push( options );
+		if ( flags.children.length ) {
+			out.push( flags );
+		}
+		wide.forEach( function ( node ) {
+			out.push( node );
+		} );
+		if ( advanced.children.length ) {
+			var details = h( 'details', { class: 'okno-disclosure', open: f._advanced || ownErrors.length ? true : null }, [
+				h( 'summary', {}, [ icon( 'chevron', 12 ), __( 'Advanced options', 'okno' ) ] ),
+				advanced,
+			] );
+			details.addEventListener( 'toggle', function () {
+				f._advanced = details.open;
+			} );
+			out.push( details );
+		}
+		out.push( h( 'div', { class: 'okno-field-settings__required' }, h( 'label', { class: 'okno-switch' }, [
+			( function () {
+				var input = h( 'input', { type: 'checkbox', checked: !! f.required } );
+				input.addEventListener( 'change', function () {
+					f.required = input.checked;
+					refreshHead();
+					markDirty();
+				} );
+				return input;
+			} )(),
+			__( 'Required', 'okno' ),
+		] ) ) );
 
 		if ( CONTAINERS.indexOf( f.type ) !== -1 ) {
 			f.fields = f.fields || [];
@@ -1270,11 +1426,9 @@
 
 	function renderArchived( item ) {
 		var archived = item.archived || [];
-		var card = h( 'div', { class: 'okno-card' }, [
-			h( 'div', { class: 'okno-card__head' }, [
-				h( 'h3', { text: __( 'Archived columns', 'okno' ) } ),
-				h( 'p', { class: 'okno-muted', text: __( 'Values of removed or retyped fields. They are kept until you purge them.', 'okno' ) } ),
-			] ),
+		var card = h( 'div', { class: 'okno-detail__card' }, [
+			h( 'h3', { text: __( 'Archived columns', 'okno' ) } ),
+			h( 'p', { class: 'okno-muted', text: __( 'Values of removed or retyped fields. They are kept until you purge them.', 'okno' ) } ),
 		] );
 		if ( ! archived.length ) {
 			card.appendChild( h( 'p', { class: 'okno-help', text: __( 'No archived columns.', 'okno' ) } ) );
@@ -1299,7 +1453,7 @@
 			] )
 		);
 		card.appendChild(
-			h( 'div', { class: 'okno-actions' }, h( 'button', { type: 'button', class: 'okno-btn okno-btn--danger', onClick: function () {
+			h( 'div', { class: 'okno-actions okno-archived-actions' }, h( 'button', { type: 'button', class: 'okno-btn okno-btn--danger', onClick: function () {
 				purge( item );
 			} }, [ icon( 'archive' ), __( 'Purge archived columns', 'okno' ) ] ) )
 		);
@@ -1437,8 +1591,13 @@
 		var errors = err && err.data && err.data.errors ? err.data.errors : null;
 		if ( errors ) {
 			state.current.errors = errors;
+			// La sélection va à la première erreur : réglages généraux ou champ.
+			var firstPath = errors[ 0 ] && errors[ 0 ].path ? String( errors[ 0 ].path ) : '';
+			var match = /^fields\.(\d+)/.exec( firstPath );
+			var target = match && state.current.draft.fields[ Number( match[ 1 ] ) ];
+			state.current.selected = target ? target._uid : 'general';
 			renderEditor();
-			var first = editorEl.querySelector( '.has-error, .okno-notice--error' );
+			var first = editorEl.querySelector( '.okno-pane--detail .has-error, .okno-pane--detail .okno-notice--error' );
 			if ( first ) {
 				first.scrollIntoView( { block: 'center', behavior: 'smooth' } );
 			}

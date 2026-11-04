@@ -3887,12 +3887,9 @@
 	var storedTheme = null;
 	try {
 		storedTheme = window.localStorage.getItem( 'okno-theme' );
-	} catch ( e ) { /* stockage indisponible : thème système. */ }
+	} catch ( e ) { /* stockage indisponible : thème sombre. */ }
 
-	applyTheme(
-		storedTheme ||
-			( window.matchMedia && window.matchMedia( '(prefers-color-scheme: dark)' ).matches ? 'dark' : 'light' )
-	);
+	applyTheme( 'light' === storedTheme ? 'light' : 'dark' ); // Sombre par défaut.
 
 	if ( els.theme ) {
 		els.theme.addEventListener( 'click', function () {

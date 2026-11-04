@@ -4,6 +4,13 @@
  * Plein écran au-dessus de wp-admin, trois zones : navigation du site à
  * gauche, aperçu au centre, champs de la sélection à droite. Mêmes tokens que
  * les pages d'administration (admin.css), thème clair et sombre.
+ *
+ * Dans l'application (app.css redéfinit les jetons), la fin de ce fichier
+ * resserre l'éditeur en interface de bureau : barre de 40 px, volets
+ * neutres, champs compacts.
+ *
+ * Portions derived from Stacki (https://github.com/flowtricks/stacki),
+ * Copyright (c) 2026 Timothy Ricks, MIT License — see licenses/stacki-MIT.txt.
  */
 
 /* L'attribut hidden gagne toujours, même sur un élément à display explicite. */
@@ -1419,4 +1426,523 @@ html.okno-fullscreen #mce-modal-block {
 	.okno-toolbar {
 		grid-template-columns: minmax( 0, 1fr ) auto;
 	}
+}
+
+/* ── Interface de bureau (dans l'application) ──────────────────────── */
+
+.okno-app .okno-editor {
+	background: var(--okno-panel);
+	font-family: var(--okno-font);
+	font-size: 12px;
+	-webkit-font-smoothing: antialiased;
+}
+
+.okno-app .okno-editor :focus-visible {
+	outline-offset: 1px;
+}
+
+.okno-app .okno-editor .okno-btn {
+	gap: 6px;
+	height: 28px;
+	min-height: 0;
+	padding: 0 12px;
+	border-radius: 8px;
+	font-size: 12px;
+}
+
+.okno-app .okno-editor .okno-btn--quiet {
+	border-color: transparent;
+	background: var(--okno-input);
+	font-weight: 500;
+}
+
+.okno-app .okno-editor .okno-btn--quiet:hover:not(:disabled) {
+	background: var(--okno-active);
+}
+
+.okno-app .okno-editor .okno-btn:disabled {
+	opacity: 0.4;
+}
+
+.okno-app .okno-editor .okno-icon-btn {
+	width: 28px;
+	height: 28px;
+	border: 0;
+	border-radius: 6px;
+}
+
+.okno-app .okno-editor .okno-icon-btn:hover:not(:disabled) {
+	background: var(--okno-hover);
+}
+
+/* Barre du haut : 40 px, comme la barre de titre de l'application. */
+.okno-app .okno-toolbar {
+	gap: 12px;
+	flex: 0 0 40px;
+	height: 40px;
+	padding: 0 8px;
+	background: var(--okno-panel);
+}
+
+.okno-app .okno-toolbar-start,
+.okno-app .okno-toolbar-end {
+	gap: 4px;
+}
+
+.okno-app .okno-toolbar-end .okno-btn {
+	margin-left: 2px;
+}
+
+.okno-app .okno-exit {
+	width: 28px;
+	height: 28px;
+	border-radius: 6px;
+}
+
+.okno-app .okno-exit:hover {
+	background: var(--okno-hover);
+}
+
+.okno-app .okno-mark {
+	width: 18px;
+	height: 18px;
+	margin: 0 4px;
+}
+
+.okno-app .okno-doc {
+	flex-direction: row;
+	align-items: center;
+	gap: 10px;
+}
+
+.okno-app .okno-current-title {
+	font-size: 12.5px;
+	font-weight: 600;
+}
+
+.okno-app .okno-save-state {
+	font-size: 11px;
+}
+
+.okno-app .okno-editor .okno-status-select {
+	height: 20px;
+	padding: 0 20px 0 7px;
+	border: 0;
+	border-radius: 99px;
+	background-color: var(--okno-input);
+	font-size: 10.5px;
+}
+
+.okno-app .okno-viewport-toggle {
+	padding: 2px;
+	border: 0;
+	border-radius: 8px;
+	background: var(--okno-input);
+}
+
+.okno-app .okno-vw {
+	width: 30px;
+	height: 24px;
+}
+
+.okno-app .okno-vw.active {
+	background: var(--okno-active);
+	color: var(--okno-ink);
+	box-shadow: none;
+}
+
+.okno-app .okno-deploy-banner {
+	padding: 3px 9px;
+	font-size: 11px;
+}
+
+/* Volets. */
+.okno-app .okno-sidebar {
+	flex-basis: 260px;
+	width: 260px;
+	background: var(--okno-panel);
+}
+
+.okno-app .okno-stage {
+	padding: 12px;
+	background: var(--okno-canvas);
+}
+
+.okno-app .okno-panel {
+	flex-basis: 322px;
+	width: 322px;
+	background: var(--okno-panel);
+}
+
+.okno-app .okno-sidebar-tabs {
+	gap: 2px;
+	margin: 12px 12px 4px;
+	padding: 2px;
+	border: 0;
+	border-radius: 8px;
+	background: var(--okno-input);
+}
+
+.okno-app .okno-sidebar-tab {
+	height: 24px;
+	font-size: 11.5px;
+	font-weight: 500;
+}
+
+.okno-app .okno-sidebar-tab.active {
+	background: var(--okno-active);
+	box-shadow: none;
+}
+
+.okno-app .okno-sidebar-body {
+	padding: 6px 8px 12px;
+}
+
+.okno-app .okno-pages-search,
+.okno-app .okno-editor .okno-sidebar select,
+.okno-app .okno-create-form input {
+	height: 28px;
+	min-height: 0;
+	padding: 4px 8px;
+	border: 1px solid transparent;
+	border-radius: 6px;
+	background-color: var(--okno-input);
+	font-size: 12px;
+}
+
+.okno-app .okno-tree-folder,
+.okno-app .okno-page-item,
+.okno-app .okno-tree-node {
+	min-height: 32px;
+	padding: 0 8px;
+	border-radius: 6px;
+	color: var(--okno-muted);
+	font-size: 12px;
+	font-weight: 500;
+}
+
+.okno-app .okno-tree-folder {
+	color: var(--okno-ink);
+}
+
+.okno-app .okno-tree-folder:hover,
+.okno-app .okno-page-item:hover,
+.okno-app .okno-tree-node:hover {
+	background: var(--okno-hover);
+	color: var(--okno-ink);
+}
+
+.okno-app .okno-page-item.active,
+.okno-app .okno-tree-node.active {
+	background: var(--okno-active);
+	color: var(--okno-ink);
+	font-weight: 500;
+}
+
+.okno-app .okno-page-item.active .okno-icon,
+.okno-app .okno-tree-node.active .okno-icon {
+	color: var(--okno-ink);
+}
+
+/* Inspecteur et formulaire : en-tête de détail, champs compacts. */
+.okno-app .okno-inspector-head {
+	padding: 10px 14px;
+	background: var(--okno-panel);
+}
+
+.okno-app .okno-inspector-head h2 {
+	font-size: 13px;
+	font-weight: 600;
+}
+
+.okno-app .okno-inspector-head p {
+	margin-top: 1px;
+	color: var(--okno-faint);
+	font-size: 11px;
+}
+
+.okno-app .okno-group {
+	padding: 18px 14px 4px;
+	border-bottom: 0;
+}
+
+.okno-app .okno-group + .okno-group {
+	border-top: 1px solid var(--okno-line);
+}
+
+.okno-app .okno-group > h3 {
+	margin: 0 0 12px;
+	color: var(--okno-ink);
+	font-size: 13px;
+	font-weight: 600;
+	letter-spacing: 0;
+	text-transform: none;
+}
+
+.okno-app .okno-editor[data-mode="form"] .okno-group {
+	padding: 20px 24px 6px;
+}
+
+.okno-app .okno-editor[data-mode="form"] .okno-group > h3 {
+	font-size: 15px;
+	margin-bottom: 14px;
+}
+
+.okno-app .okno-field {
+	margin-bottom: 14px;
+}
+
+.okno-app .okno-field-label {
+	gap: 4px;
+	margin-bottom: 5px;
+}
+
+.okno-app .okno-field-chip {
+	color: var(--okno-muted);
+	font-size: 11.5px;
+	font-weight: 500;
+}
+
+.okno-app .okno-field-badge {
+	padding: 0 6px;
+	background: var(--okno-input);
+	font-size: 10px;
+}
+
+.okno-app .okno-field-note {
+	margin-top: 5px;
+	color: var(--okno-faint);
+	font-size: 11.5px;
+}
+
+.okno-app .okno-field--error {
+	padding: 8px 10px;
+	margin-left: -10px;
+	margin-right: -10px;
+}
+
+.okno-app .okno-field-error {
+	font-size: 11.5px;
+}
+
+.okno-app .okno-panel input[type="text"],
+.okno-app .okno-panel input[type="url"],
+.okno-app .okno-panel input[type="email"],
+.okno-app .okno-panel input[type="number"],
+.okno-app .okno-panel input[type="date"],
+.okno-app .okno-panel input[type="datetime-local"],
+.okno-app .okno-panel input[type="time"],
+.okno-app .okno-panel textarea,
+.okno-app .okno-panel select {
+	min-height: 30px;
+	padding: 6px 9px;
+	border: 1px solid transparent;
+	border-radius: 6px;
+	background-color: var(--okno-input);
+	font-size: 12.5px;
+	line-height: 1.45;
+}
+
+.okno-app .okno-panel select:not([multiple]) {
+	padding-right: 28px;
+	background-size: 12px;
+	background-position: right 9px center;
+}
+
+.okno-app .okno-panel select option {
+	background: var(--okno-elevated);
+	color: var(--okno-ink);
+}
+
+.okno-app .okno-panel input::placeholder,
+.okno-app .okno-panel textarea::placeholder {
+	color: var(--okno-faint);
+}
+
+.okno-app .okno-panel input:focus,
+.okno-app .okno-panel textarea:focus,
+.okno-app .okno-panel select:focus,
+.okno-app .okno-pages-search:focus,
+.okno-app .okno-editor .okno-sidebar select:focus,
+.okno-app .okno-create-form input:focus {
+	border-color: var(--okno-accent-ink);
+	box-shadow: none;
+}
+
+.okno-app .okno-counter {
+	top: 8px;
+	font-size: 10.5px;
+}
+
+.okno-app .okno-toggle {
+	color: var(--okno-ink);
+	font-size: 12.5px;
+}
+
+.okno-app .okno-toggle input {
+	accent-color: var(--okno-accent);
+}
+
+/* Image, fichier, galerie : une surface pleine, sans pointillés. */
+.okno-app .okno-image-field {
+	padding: 8px;
+	border: 0;
+	border-radius: 8px;
+	background: var(--okno-input);
+}
+
+.okno-app .okno-image-actions .button,
+.okno-app .okno-image-field .button {
+	min-height: 26px;
+	height: 26px;
+	padding: 0 10px;
+	border: 0;
+	border-radius: 6px;
+	background: var(--okno-active);
+	color: var(--okno-ink);
+	font-size: 12px;
+	font-weight: 500;
+	line-height: 26px;
+	box-shadow: none;
+}
+
+.okno-app .okno-image-actions .button:hover,
+.okno-app .okno-image-field .button:hover {
+	background: var(--okno-line-strong);
+	color: var(--okno-ink);
+}
+
+.okno-app .okno-image-remove {
+	font-size: 12px;
+}
+
+.okno-app .okno-gallery-item {
+	border: 0;
+	border-radius: 6px;
+	background: var(--okno-input);
+}
+
+/* Groupes, listes répétées, blocs : lignes de liste. */
+.okno-app .okno-group-field {
+	padding: 12px;
+	border: 1px solid var(--okno-line-strong);
+	border-radius: 10px;
+	background: transparent;
+}
+
+.okno-app .okno-subfield-label {
+	color: var(--okno-muted);
+	font-size: 11.5px;
+	font-weight: 500;
+}
+
+.okno-app .okno-repeater-row,
+.okno-app .okno-group-field .okno-repeater-row {
+	margin-bottom: 4px;
+	padding: 8px 10px 10px;
+	border: 1px solid transparent;
+	border-radius: 8px;
+	background: var(--okno-input);
+}
+
+.okno-app .okno-repeater-head {
+	margin-bottom: 8px;
+}
+
+.okno-app .okno-repeater-title {
+	color: var(--okno-ink);
+	font-size: 12px;
+	font-weight: 500;
+}
+
+.okno-app .okno-repeater-btn {
+	width: 22px;
+	height: 22px;
+	border: 0;
+	border-radius: 5px;
+	background: transparent;
+	color: var(--okno-faint);
+}
+
+.okno-app .okno-repeater-btn:hover:not(:disabled) {
+	background: var(--okno-active);
+	color: var(--okno-ink);
+}
+
+.okno-app .okno-editor .okno-repeater-add {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: auto;
+	min-height: 0;
+	height: 26px;
+	padding: 0 10px;
+	border: 1px dashed var(--okno-line-strong);
+	border-radius: 6px;
+	background: transparent;
+	color: var(--okno-muted);
+	font-size: 11.5px;
+	font-weight: 500;
+}
+
+.okno-app .okno-editor .okno-repeater-add:hover:not(:disabled) {
+	border-color: var(--okno-line-strong);
+	background: var(--okno-hover);
+	color: var(--okno-ink);
+}
+
+.okno-app .okno-flex-add .okno-repeater-add {
+	flex: 0 0 auto;
+}
+
+.okno-app .okno-panel-empty {
+	margin: 32px 20px;
+	color: var(--okno-faint);
+	font-size: 12px;
+}
+
+.okno-app .okno-managed {
+	border-style: solid;
+	border-color: var(--okno-warn-soft);
+	border-radius: 8px;
+}
+
+.okno-app .okno-toast {
+	padding: 9px 13px;
+	border: 1px solid var(--okno-line-strong);
+	border-radius: 8px;
+	background: var(--okno-elevated);
+	color: var(--okno-ink);
+	font-family: var(--okno-font);
+	font-size: 12px;
+	box-shadow: var(--okno-shadow);
+}
+
+.okno-app .okno-toast-error {
+	border-color: rgba( 255, 69, 58, 0.5 );
+	color: var(--okno-error);
+}
+
+.okno-app .okno-editor-setup {
+	position: static;
+	max-width: 420px;
+	margin: 12vh auto;
+	padding: 32px;
+	border: 1px solid var(--okno-line-strong);
+	border-radius: 12px;
+	background: var(--okno-elevated);
+	color: var(--okno-body);
+	font-size: 12.5px;
+}
+
+.okno-app .okno-editor-setup h1 {
+	color: var(--okno-ink);
+	font-size: 15px;
+	font-weight: 600;
+}
+
+.okno-app .okno-editor-setup .okno-setup-btn {
+	min-height: 28px;
+	padding: 0 12px;
+	font-size: 12px;
 }

@@ -141,6 +141,11 @@ class Okno_Admin {
 			// L'éditeur gère lui-même la publication automatique.
 			$this->enqueue_editor( 'form' === $view ? 'form' : 'visual' );
 			$this->enqueue_shell( $view );
+			if ( 'form' === $view ) {
+				// Volets types / entrées à gauche du formulaire.
+				wp_enqueue_script( 'okno-app-content', OKNO_URL . 'assets/admin/app-content.js', array( 'okno-app', 'wp-api-fetch', 'wp-i18n' ), self::asset_version( 'assets/admin/app-content.js' ), true );
+				wp_set_script_translations( 'okno-app-content', 'okno', OKNO_DIR . 'languages' );
+			}
 			return;
 		}
 
@@ -395,6 +400,14 @@ class Okno_Admin {
 			</header>
 
 			<div class="okno-main">
+				<?php
+				if ( $form ) :
+					// Types et entrées à gauche du formulaire (app-content.js).
+					// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Navigation.
+					$okno_post = isset( $_GET['post'] ) ? absint( $_GET['post'] ) : 0;
+					?>
+					<div id="okno-form-browser" class="okno-form-browser" data-post="<?php echo esc_attr( $okno_post ); ?>" data-type="<?php echo esc_attr( $okno_post ? (string) get_post_type( $okno_post ) : '' ); ?>"></div>
+				<?php endif; ?>
 				<aside class="okno-sidebar" aria-label="<?php esc_attr_e( 'Site navigation', 'okno' ); ?>">
 					<div class="okno-sidebar-tabs">
 						<button type="button" id="okno-tab-pages" class="okno-sidebar-tab active">

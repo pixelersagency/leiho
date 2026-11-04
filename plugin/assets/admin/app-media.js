@@ -29,38 +29,40 @@
 		h( 'option', { value: 'audio', text: __( 'Audio', 'okno' ) } ),
 		h( 'option', { value: 'application', text: __( 'Documents', 'okno' ) } ),
 	] );
-	var summary = h( 'p', { class: 'okno-muted okno-list-summary', 'aria-live': 'polite' } );
+	var summary = h( 'span', { 'aria-live': 'polite' } );
 	var grid = h( 'ul', { class: 'okno-media-grid', 'aria-label': __( 'Media library', 'okno' ) } );
 	var more = h( 'div', { class: 'okno-pager' } );
-	var details = h( 'aside', { class: 'okno-media-details', 'aria-label': __( 'Media details', 'okno' ), hidden: true } );
+	var details = h( 'aside', { class: 'okno-pane okno-pane--aside okno-media-details', 'aria-label': __( 'Media details', 'okno' ) } );
 	var dropzone = h( 'div', { class: 'okno-media-drop', hidden: true }, [ icon( 'upload', 28 ), h( 'p', { text: __( 'Drop files to upload them', 'okno' ) } ) ] );
-	var progress = h( 'p', { class: 'okno-muted', role: 'status', 'aria-live': 'polite' } );
+	var progress = h( 'p', { class: 'okno-media-progress', role: 'status', 'aria-live': 'polite' } );
 
+	App.view.classList.add( 'okno-panes' );
 	App.clear( App.view );
 	App.append( App.view, [
-		h( 'div', { class: 'okno-view-head' }, [
-			h( 'div', {}, [
-				h( 'h1', { class: 'okno-view-title', text: __( 'Media', 'okno' ) } ),
-				h( 'p', { class: 'okno-muted', text: __( 'Images and files of the site. Drop files anywhere on this page to upload them.', 'okno' ) } ),
+		h( 'section', { class: 'okno-pane okno-media-main', 'aria-label': __( 'Media', 'okno' ) }, [
+			h( 'div', { class: 'okno-pane__head' }, [
+				h( 'h1', { class: 'okno-pane__title', title: __( 'Images and files of the site. Drop files anywhere on this page to upload them.', 'okno' ), text: __( 'Media', 'okno' ) } ),
+				h( 'div', { class: 'okno-pane__tools' }, [
+					App.cfg.canUpload
+						? h( 'button', { type: 'button', class: 'okno-btn okno-btn--small', onClick: function () {
+							fileInput.click();
+						} }, [ icon( 'upload' ), __( 'Upload', 'okno' ) ] )
+						: null,
+					fileInput,
+				] ),
 			] ),
-			App.cfg.canUpload
-				? h( 'button', { type: 'button', class: 'okno-btn', onClick: function () {
-					fileInput.click();
-				} }, [ icon( 'upload' ), __( 'Upload', 'okno' ) ] )
-				: null,
-			fileInput,
-		] ),
-		h( 'div', { class: 'okno-filters', role: 'search' }, [
-			h( 'div', { class: 'okno-filter okno-filter--grow' }, [
+			h( 'div', { class: 'okno-pane__search okno-media-filters', role: 'search' }, [
 				h( 'label', { for: searchId, class: 'okno-sr', text: __( 'Search', 'okno' ) } ),
-				h( 'span', { class: 'okno-input-icon' }, icon( 'search' ) ),
+				h( 'span', { class: 'okno-input-icon' }, icon( 'search', 14 ) ),
 				searchInput,
+				h( 'label', { for: kindId, class: 'okno-sr', text: __( 'Type', 'okno' ) } ),
+				kindSelect,
 			] ),
-			h( 'div', { class: 'okno-filter' }, [ h( 'label', { for: kindId, class: 'okno-sr', text: __( 'Type', 'okno' ) } ), kindSelect ] ),
+			progress,
+			h( 'div', { class: 'okno-pane__body okno-media__main' }, [ grid, more ] ),
+			h( 'div', { class: 'okno-pane__foot' }, summary ),
 		] ),
-		progress,
-		summary,
-		h( 'div', { class: 'okno-media' }, [ h( 'div', { class: 'okno-media__main' }, [ grid, more ] ), details ] ),
+		details,
 		dropzone,
 	] );
 
@@ -163,7 +165,7 @@
 		} );
 		App.clear( more );
 		if ( state.page < state.totalPages ) {
-			more.appendChild( h( 'button', { type: 'button', class: 'okno-btn okno-btn--quiet', onClick: function () {
+			more.appendChild( h( 'button', { type: 'button', class: 'okno-btn okno-btn--quiet okno-btn--small', onClick: function () {
 				load( true );
 			} }, __( 'Load more', 'okno' ) ) );
 		}
@@ -182,8 +184,11 @@
 	function renderDetails() {
 		var item = state.selected;
 		App.clear( details );
-		details.hidden = ! item;
 		if ( ! item ) {
+			details.appendChild( h( 'div', { class: 'okno-empty-state' }, [
+				h( 'span', { class: 'okno-empty-state__icon' }, icon( 'image', 22 ) ),
+				h( 'p', { text: __( 'Images and files of the site. Drop files anywhere on this page to upload them.', 'okno' ) } ),
+			] ) );
 			return;
 		}
 		var altId = App.uid( 'alt' );
@@ -213,16 +218,17 @@
 		} }, __( 'Save', 'okno' ) );
 
 		App.append( details, [
-			h( 'div', { class: 'okno-media-details__head' }, [
-				h( 'h2', { text: __( 'Details', 'okno' ) } ),
+			h( 'div', { class: 'okno-pane__head okno-media-details__head' }, [
+				h( 'h2', { class: 'okno-pane__title', text: __( 'Details', 'okno' ) } ),
 				h( 'button', { type: 'button', class: 'okno-icon-btn', 'aria-label': __( 'Close the details', 'okno' ), onClick: function () {
 					state.selected = null;
 					render();
 					renderDetails();
 				} }, icon( 'close' ) ),
 			] ),
+			h( 'div', { class: 'okno-media-details__body' }, [
 			src ? h( 'img', { class: 'okno-media-details__preview', src: item.source_url, alt: '' } ) : null,
-			h( 'p', { class: 'okno-muted' }, [
+			h( 'p', { class: 'okno-media-details__meta' }, [
 				( item.mime_type || '' ),
 				md.width ? ' · ' + md.width + ' × ' + md.height : '',
 				md.filesize ? ' · ' + Math.round( md.filesize / 1024 ) + ' KB' : '',
@@ -254,6 +260,7 @@
 				h( 'button', { type: 'button', class: 'okno-btn okno-btn--danger', onClick: function () {
 					remove( item );
 				} }, __( 'Delete', 'okno' ) ),
+			] ),
 			] ),
 		] );
 	}
@@ -357,5 +364,6 @@
 		upload( event.dataTransfer.files );
 	} );
 
+	renderDetails();
 	load( false );
 } )();

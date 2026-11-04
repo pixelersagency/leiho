@@ -44,126 +44,133 @@ class Okno_Dashboard {
 		$week_count = Okno_Activity::count_since( time() - WEEK_IN_SECONDS );
 		$activities = Okno_Activity::recent( 40 );
 		?>
-		<div class="okno-page">
-
-			<?php if ( ! $configured && current_user_can( 'manage_options' ) ) : ?>
-				<div class="okno-card okno-card--accent okno-open">
-					<div class="okno-open__text">
-						<span class="okno-eyebrow"><?php esc_html_e( 'First step', 'okno' ); ?></span>
-						<h2><?php esc_html_e( 'Connect your site to Okno', 'okno' ); ?></h2>
-						<p><?php esc_html_e( 'Enter your site’s URL, allow the editor to display it, install the bridge: four guided steps, each with a check.', 'okno' ); ?></p>
-					</div>
-					<a class="okno-btn" href="<?php echo esc_url( Okno_App::url( 'start' ) ); ?>">
-						<?php esc_html_e( 'Get started', 'okno' ); ?>
-						<?php Okno_Icons::render( 'arrow', 16 ); ?>
-					</a>
-				</div>
-			<?php else : ?>
-				<div class="okno-card okno-card--accent okno-open">
-					<div class="okno-open__text">
-						<h2><?php esc_html_e( 'Edit your site as you see it', 'okno' ); ?></h2>
-						<p><?php esc_html_e( 'Click any text or image on your site to edit it. You see the result right away, before you save.', 'okno' ); ?></p>
-					</div>
-					<div class="okno-actions" style="margin-top:0">
-						<a class="okno-btn" href="<?php echo esc_url( Okno_App::url( 'editor' ) ); ?>">
-							<?php esc_html_e( 'Open the editor', 'okno' ); ?>
+		<div class="okno-home">
+			<div class="okno-home__main">
+				<?php if ( ! $configured && current_user_can( 'manage_options' ) ) : ?>
+					<div class="okno-home__intro">
+						<div>
+							<h2><?php esc_html_e( 'Connect your site to Okno', 'okno' ); ?></h2>
+							<p><?php esc_html_e( 'Enter your site’s URL, allow the editor to display it, install the bridge: four guided steps, each with a check.', 'okno' ); ?></p>
+						</div>
+						<a class="okno-btn" href="<?php echo esc_url( Okno_App::url( 'start' ) ); ?>">
+							<?php esc_html_e( 'Get started', 'okno' ); ?>
+							<?php Okno_Icons::render( 'arrow', 14 ); ?>
 						</a>
-						<?php if ( $configured ) : ?>
-							<a class="okno-btn okno-btn--quiet" href="<?php echo esc_url( $settings['front_url'] ); ?>" target="_blank" rel="noopener">
-								<?php esc_html_e( 'View site', 'okno' ); ?>
-								<?php Okno_Icons::render( 'external', 14 ); ?>
-							</a>
-						<?php endif; ?>
-					</div>
-				</div>
-			<?php endif; ?>
-
-			<div class="okno-stats">
-				<div class="okno-stat">
-					<span class="okno-stat__label"><?php esc_html_e( 'Site connection', 'okno' ); ?></span>
-					<?php if ( ! $connection ) : ?>
-						<span class="okno-stat__value"><span class="okno-dot"></span><?php esc_html_e( 'Not tested yet', 'okno' ); ?></span>
-					<?php elseif ( $connection['ok'] ) : ?>
-						<span class="okno-stat__value"><span class="okno-dot okno-dot--ok"></span><?php esc_html_e( 'Working', 'okno' ); ?></span>
-						<span class="okno-stat__hint">
-							<?php
-							/* translators: %s: relative time (e.g. 5 mins). */
-							echo esc_html( sprintf( __( 'Checked %s ago', 'okno' ), human_time_diff( $connection['at'] ) ) );
-							?>
-						</span>
-					<?php else : ?>
-						<span class="okno-stat__value"><span class="okno-dot okno-dot--error"></span><?php esc_html_e( 'Needs attention', 'okno' ); ?></span>
-						<span class="okno-stat__hint"><?php esc_html_e( 'The last test failed.', 'okno' ); ?></span>
-					<?php endif; ?>
-				</div>
-
-				<div class="okno-stat">
-					<span class="okno-stat__label"><?php esc_html_e( 'Publishing', 'okno' ); ?></span>
-					<span class="okno-stat__value">
-						<span class="okno-dot <?php echo '' === $settings['deploy_driver'] ? '' : 'okno-dot--ok'; ?>"></span>
-						<?php echo esc_html( self::driver_label( $settings['deploy_driver'] ) ); ?>
-					</span>
-					<?php if ( $last ) : ?>
-						<span class="okno-stat__hint">
-							<?php
-							/* translators: 1: deployment status, 2: relative time (e.g. 5 mins). */
-							echo esc_html( sprintf( __( 'Last deployment: %1$s, %2$s ago', 'okno' ), self::status_label( $last['status'] ), human_time_diff( $last['started'] ) ) );
-							?>
-						</span>
-					<?php endif; ?>
-				</div>
-
-				<div class="okno-stat">
-					<span class="okno-stat__label"><?php esc_html_e( 'Changes this week', 'okno' ); ?></span>
-					<span class="okno-stat__value"><?php echo esc_html( number_format_i18n( $week_count ) ); ?></span>
-				</div>
-			</div>
-
-			<h2 class="okno-heading" style="margin-top:40px"><?php esc_html_e( 'Quick links', 'okno' ); ?></h2>
-			<div class="okno-quick">
-				<?php
-				$links = array(
-					array( 'content', array( 'new' => '1' ), 'plus', __( 'New content', 'okno' ), __( 'A page, an article or a collection entry.', 'okno' ), 'edit_posts' ),
-					array( 'content', array(), 'list', __( 'All content', 'okno' ), __( 'Search, filter, duplicate, restore.', 'okno' ), 'edit_posts' ),
-					array( 'editor', array(), 'edit', __( 'Visual editor', 'okno' ), __( 'Edit your pages as visitors see them.', 'okno' ), 'edit_posts' ),
-					array( 'collections', array(), 'database', __( 'Collections', 'okno' ), __( 'Define your content types and their fields.', 'okno' ), Okno_App::views()['collections']['cap'] ),
-					array( 'media', array(), 'image', __( 'Media', 'okno' ), __( 'Images and files of the site.', 'okno' ), 'upload_files' ),
-				);
-				foreach ( $links as $link ) :
-					if ( ! current_user_can( $link[5] ) ) {
-						continue;
-					}
-					?>
-					<a class="okno-quick__item" href="<?php echo esc_url( Okno_App::url( $link[0], $link[1] ) ); ?>">
-						<span class="okno-quick__icon"><?php Okno_Icons::render( $link[2], 18 ); ?></span>
-						<strong><?php echo esc_html( $link[3] ); ?></strong>
-						<span><?php echo esc_html( $link[4] ); ?></span>
-					</a>
-				<?php endforeach; ?>
-			</div>
-
-			<h2 class="okno-heading" style="margin-top:40px"><?php esc_html_e( 'Recent changes', 'okno' ); ?></h2>
-
-			<div class="okno-card okno-card--flush">
-				<?php if ( ! $activities ) : ?>
-					<div class="okno-empty">
-						<?php Okno_Icons::render( 'history', 32 ); ?>
-						<h3><?php esc_html_e( 'No changes yet', 'okno' ); ?></h3>
-						<p><?php esc_html_e( 'Every save made in the editor shows up here: who changed which field, when, with the before and after values.', 'okno' ); ?></p>
 					</div>
 				<?php else : ?>
-					<ul class="okno-log">
-						<?php foreach ( $activities as $activity ) : ?>
-							<?php
-							if ( ! current_user_can( 'edit_post', (int) $activity->post_id ) ) {
+					<div class="okno-home__intro">
+						<div>
+							<h2><?php esc_html_e( 'Edit your site as you see it', 'okno' ); ?></h2>
+							<p><?php esc_html_e( 'Click any text or image on your site to edit it. You see the result right away, before you save.', 'okno' ); ?></p>
+						</div>
+						<div class="okno-actions" style="margin-top:0">
+							<?php if ( $configured ) : ?>
+								<a class="okno-btn okno-btn--quiet" href="<?php echo esc_url( $settings['front_url'] ); ?>" target="_blank" rel="noopener">
+									<?php esc_html_e( 'View site', 'okno' ); ?>
+									<?php Okno_Icons::render( 'external', 13 ); ?>
+								</a>
+							<?php endif; ?>
+							<a class="okno-btn" href="<?php echo esc_url( Okno_App::url( 'editor' ) ); ?>">
+								<?php esc_html_e( 'Open the editor', 'okno' ); ?>
+							</a>
+						</div>
+					</div>
+				<?php endif; ?>
+
+				<section class="okno-home__section">
+					<h2 class="okno-home__label"><?php esc_html_e( 'Recent changes', 'okno' ); ?></h2>
+					<div class="okno-card okno-card--flush">
+						<?php if ( ! $activities ) : ?>
+							<div class="okno-empty">
+								<?php Okno_Icons::render( 'history', 24 ); ?>
+								<h3><?php esc_html_e( 'No changes yet', 'okno' ); ?></h3>
+								<p><?php esc_html_e( 'Every save made in the editor shows up here: who changed which field, when, with the before and after values.', 'okno' ); ?></p>
+							</div>
+						<?php else : ?>
+							<ul class="okno-log">
+								<?php foreach ( $activities as $activity ) : ?>
+									<?php
+									if ( ! current_user_can( 'edit_post', (int) $activity->post_id ) ) {
+										continue;
+									}
+									self::render_activity( $activity );
+									?>
+								<?php endforeach; ?>
+							</ul>
+						<?php endif; ?>
+					</div>
+				</section>
+			</div>
+
+			<aside class="okno-home__side">
+				<section class="okno-home__section">
+					<h2 class="okno-home__label"><?php esc_html_e( 'Publishing', 'okno' ); ?></h2>
+					<ul class="okno-status-list">
+						<li>
+							<?php if ( ! $connection ) : ?>
+								<span class="okno-dot"></span>
+								<span class="okno-status-list__text"><strong><?php esc_html_e( 'Site connection', 'okno' ); ?></strong><span><?php esc_html_e( 'Not tested yet', 'okno' ); ?></span></span>
+							<?php elseif ( $connection['ok'] ) : ?>
+								<span class="okno-dot okno-dot--ok"></span>
+								<span class="okno-status-list__text"><strong><?php esc_html_e( 'Site connection', 'okno' ); ?></strong><span>
+									<?php esc_html_e( 'Working', 'okno' ); ?> ·
+									<?php
+									/* translators: %s: relative time (e.g. 5 mins). */
+									echo esc_html( sprintf( __( 'Checked %s ago', 'okno' ), human_time_diff( $connection['at'] ) ) );
+									?>
+								</span></span>
+							<?php else : ?>
+								<span class="okno-dot okno-dot--error"></span>
+								<span class="okno-status-list__text"><strong><?php esc_html_e( 'Site connection', 'okno' ); ?></strong><span><?php esc_html_e( 'Needs attention', 'okno' ); ?> · <?php esc_html_e( 'The last test failed.', 'okno' ); ?></span></span>
+							<?php endif; ?>
+						</li>
+						<li>
+							<span class="okno-dot <?php echo '' === $settings['deploy_driver'] ? '' : 'okno-dot--ok'; ?>"></span>
+							<span class="okno-status-list__text">
+								<strong><?php echo esc_html( self::driver_label( $settings['deploy_driver'] ) ); ?></strong>
+								<?php if ( $last ) : ?>
+									<span>
+										<?php
+										/* translators: 1: deployment status, 2: relative time (e.g. 5 mins). */
+										echo esc_html( sprintf( __( 'Last deployment: %1$s, %2$s ago', 'okno' ), self::status_label( $last['status'] ), human_time_diff( $last['started'] ) ) );
+										?>
+									</span>
+								<?php endif; ?>
+							</span>
+						</li>
+						<li>
+							<span class="okno-dot okno-dot--accent"></span>
+							<span class="okno-status-list__text"><strong><?php echo esc_html( number_format_i18n( $week_count ) ); ?></strong><span><?php esc_html_e( 'Changes this week', 'okno' ); ?></span></span>
+						</li>
+					</ul>
+				</section>
+
+				<section class="okno-home__section">
+					<h2 class="okno-home__label"><?php esc_html_e( 'Quick links', 'okno' ); ?></h2>
+					<ul class="okno-rows">
+						<?php
+						$links = array(
+							array( 'content', array( 'new' => '1' ), 'plus', __( 'New content', 'okno' ), __( 'A page, an article or a collection entry.', 'okno' ), 'edit_posts' ),
+							array( 'content', array(), 'list', __( 'All content', 'okno' ), __( 'Search, filter, duplicate, restore.', 'okno' ), 'edit_posts' ),
+							array( 'editor', array(), 'edit', __( 'Visual editor', 'okno' ), __( 'Edit your pages as visitors see them.', 'okno' ), 'edit_posts' ),
+							array( 'collections', array(), 'database', __( 'Collections', 'okno' ), __( 'Define your content types and their fields.', 'okno' ), Okno_App::views()['collections']['cap'] ),
+							array( 'media', array(), 'image', __( 'Media', 'okno' ), __( 'Images and files of the site.', 'okno' ), 'upload_files' ),
+						);
+						foreach ( $links as $link ) :
+							if ( ! current_user_can( $link[5] ) ) {
 								continue;
 							}
-							self::render_activity( $activity );
 							?>
+							<li>
+								<a class="okno-coll" href="<?php echo esc_url( Okno_App::url( $link[0], $link[1] ) ); ?>" title="<?php echo esc_attr( $link[4] ); ?>">
+									<span class="okno-coll__icon<?php echo 'database' === $link[2] ? ' okno-coll__icon--collection' : ''; ?>"><?php Okno_Icons::render( $link[2], 15 ); ?></span>
+									<span class="okno-coll__name"><?php echo esc_html( $link[3] ); ?></span>
+								</a>
+							</li>
 						<?php endforeach; ?>
 					</ul>
-				<?php endif; ?>
-			</div>
+				</section>
+			</aside>
 		</div>
 		<?php
 	}

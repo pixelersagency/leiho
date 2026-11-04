@@ -117,6 +117,8 @@
 		check: 'M5 12.5l4.5 4.5L19 7.5',
 		draft: 'M12 4a8 8 0 1 0 0 16 8 8 0 0 0 0-16z M9 12h6',
 		archive: 'M3 4h18v4H3z M5 8v12h14V8 M10 12h4',
+		list: 'M8 6h12 M8 12h12 M8 18h12 M4 6h.01 M4 12h.01 M4 18h.01',
+		settings: 'M4 7h10 M18 7h2 M4 17h4 M12 17h8 M14 5v4 M10 15v4',
 	};
 
 	function icon( name, size ) {
@@ -423,10 +425,8 @@
 		}
 	}
 
-	applyTheme(
-		storage( 'okno-theme' ) ||
-			( window.matchMedia && window.matchMedia( '(prefers-color-scheme: dark)' ).matches ? 'dark' : 'light' )
-	);
+	// Sombre par défaut, comme une application de bureau ; le choix est gardé.
+	applyTheme( 'light' === storage( 'okno-theme' ) ? 'light' : 'dark' );
 
 	if ( themeBtn ) {
 		themeBtn.addEventListener( 'click', function () {
@@ -461,8 +461,9 @@
 		}
 	}
 
-	// L'éditeur a besoin de place : menu replié, quel que soit le choix enregistré.
-	setCollapsed( embedded || 'collapsed' === storage( 'okno-nav' ), false );
+	// Rail d'icônes par défaut (les volets ont besoin de place) ; l'éditeur
+	// reste replié quel que soit le choix enregistré.
+	setCollapsed( embedded || 'expanded' !== storage( 'okno-nav' ), false );
 
 	if ( collapseBtn ) {
 		collapseBtn.addEventListener( 'click', function () {
