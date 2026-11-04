@@ -31,6 +31,7 @@ define( 'OKNO_DIR', plugin_dir_path( __FILE__ ) );
 define( 'OKNO_URL', plugin_dir_url( __FILE__ ) );
 
 require_once OKNO_DIR . 'includes/adapters/interface-okno-adapter.php';
+require_once OKNO_DIR . 'includes/adapters/abstract-okno-field-adapter.php';
 require_once OKNO_DIR . 'includes/adapters/class-okno-acf-adapter.php';
 require_once OKNO_DIR . 'includes/deploy/interface-okno-deploy-driver.php';
 require_once OKNO_DIR . 'includes/deploy/class-okno-build-hook-driver.php';

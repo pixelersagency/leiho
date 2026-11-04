@@ -47,6 +47,7 @@ function __( $s, $d = '' ) { return $s; }
 function _x( $s, $c, $d = '' ) { return $s; }
 
 require __DIR__ . '/../includes/adapters/interface-okno-adapter.php';
+require __DIR__ . '/../includes/adapters/abstract-okno-field-adapter.php';
 require __DIR__ . '/../includes/adapters/class-okno-acf-adapter.php';
 
 function field( $name, $type, $extra = array() ) {
