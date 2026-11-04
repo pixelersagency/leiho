@@ -2,7 +2,7 @@
 
 Okno Collections lets a site define its content model in Okno itself, without ACF: "Strapi / Webflow collections inside WordPress". A site needs WordPress and Okno, nothing else. ACF keeps working through its adapter; both can run side by side.
 
-Phase 1 (this document) covers the storage engine, the schema format, migrations, revisions, the admin REST API and the adapter that plugs Collections into the visual editor and the content API. The schema builder UI and the ACF → Collections import come later and build on the API described here.
+Phase 1 covers the storage engine, the schema format, migrations, revisions, the admin REST API and the adapter that plugs Collections into the visual editor and the content API. Phase 2 is the schema builder UI, phase 3 the ACF → Collections import (§9); both build on the API described here.
 
 ## 1. Concepts
 
@@ -77,6 +77,8 @@ The schema lives in the `okno_collections` option and can be exported to / impor
 | `path` | | Front-end URL pattern (`/services/{slug}`, `{id}` also works). Used unless the Okno settings set one. |
 | `supports` | | Extra post features: `editor`, `excerpt`, `thumbnail`, `page-attributes`. `title` and `revisions` are always on. |
 | `icon` | | A `dashicons-*` name for the admin menu. |
+| `external` | bool | The post type is registered outside Okno (theme, plugin, ACF): Okno doesn't register it, doesn't refuse it because it already exists, and doesn't add it to the types served by the content API (the Okno settings decide, as before). Okno only owns its fields. Never a singleton. Set by the ACF import. |
+| `source` | `""` \| `acf` | `acf`: imported from ACF. Field and block names then keep their ACF API name (`^[A-Za-z_][A-Za-z0-9_-]{0,63}$`, camelCase and hyphens included) so the front end receives the same JSON; keys stay `^[a-z][a-z0-9_]{0,47}$`. |
 | `fields` | | Fields, max 200 at the top level. |
 
 ### Field
@@ -84,7 +86,7 @@ The schema lives in the `okno_collections` option and can be exported to / impor
 | Property | | |
 |---|---|---|
 | `key` | stable id | `^[a-z][a-z0-9_]{0,47}$`, unique among siblings. Never change it: it names the column and the JSON keys. Defaults to `name` when omitted (on creation only). |
-| `name` | API name | `^[a-z][a-z0-9_]{0,63}$` (snake_case), unique among siblings. Renaming = changing `name`, keeping `key`. |
+| `name` | API name | `^[a-z][a-z0-9_]{0,63}$` (snake_case; see `source` for imported collections), unique among siblings. Renaming = changing `name`, keeping `key`. |
 | `label` | | Defaults to `name`. |
 | `type` | | See below. |
 | `required` | bool | A required field can't be emptied (checked on every write, by any client). |
@@ -95,7 +97,7 @@ The schema lives in the `okno_collections` option and can be exported to / impor
 |---|---|---|---|
 | `text` | `multiline`, `max_length` | `string` | `VARCHAR(191)` indexed when `0 < max_length <= 191`, else `TEXT` |
 | `richtext` | | rendered HTML `string` | `LONGTEXT` |
-| `number` | `integer`, `min`, `max`, `step` | `number \| null` | `BIGINT` if `integer`, else `DECIMAL(20,6)`; indexed |
+| `number` | `integer`, `min`, `max`, `step` | `number \| null` (a whole number is served as `5`, never `5.0`) | `BIGINT` if `integer`, else `DECIMAL(20,6)`; indexed |
 | `boolean` | | `boolean` | `TINYINT(1)` indexed |
 | `date` | | `"YYYY-MM-DD"` | `DATE` indexed |
 | `datetime` | | `"YYYY-MM-DD HH:MM:SS"` (site time) | `DATETIME` indexed |
@@ -195,6 +197,14 @@ A migration report: `{ dry_run, operations: [{ op, collection, key?, column?, �
 | `GET /collections/export` | `okno.schema.json` (attachment). |
 | `POST /collections/import` | Replace the whole schema with a file's content. `?dry_run=1`. |
 
+| `GET /collections/import-acf` | Content types with ACF fields and their import state; `elsewhere`: field groups attached to no content type. §9. |
+| `GET /collections/import-acf/preview?post_type=` | Preview of an import. |
+| `POST /collections/import-acf/run` | `{ post_type }`: starts the import, then copies one batch per call. |
+| `GET /collections/import-acf/status?post_type=` | Import record. |
+| `POST /collections/import-acf/rollback` | `{ post_type, confirm }` (confirm = post type): back to ACF. |
+
+`DELETE /collections/{id}` refuses an imported collection (`409`): go back to ACF instead.
+
 Invalid schemas answer `400` with `data.errors`: a list of `{ path, message }` (`collections.1.fields.3.key`; relative to the collection, `fields.3.key`, on the single-collection routes).
 
 ### Content and editor
@@ -223,7 +233,55 @@ Sanitization mirrors the ACF adapter (required, `max_length`, attachments and re
 
 - The classic wp-admin edit screen shows the post fields only; collection fields are edited in the Okno editor (or its form view, for collections without a `path`) or through the APIs.
 - Phase 2 (done): the schema builder in Okno → Collections, a UI on top of the REST routes above. New fields get `key = name` (made unique among siblings) when they are first applied; the builder never changes the key of a saved field.
-- ACF → Collections import (phase 3) can build a schema from ACF field groups (types map one to one through the table in §7), call `save_schema()`, then copy values with `save_entry()` per post.
+- Phase 3 (done): ACF → Collections import, §9.
 - Per-request cache only; the export reads one row per entry (primary key lookups).
 - `datetime` values are stored as entered (site time), like ACF.
 - Uninstalling Okno drops the collection tables and options (define `OKNO_KEEP_DATA` to keep them); entries stay in `wp_posts`.
+
+## 9. ACF import
+
+`Okno_ACF_Import` moves the ACF fields of one content type into an Okno collection. Nothing is deleted from ACF (postmeta, field groups, ACF post types): the import is reversible.
+
+### Preview
+
+The field groups attached to the post type are the active groups whose location rules name it (`Okno_ACF_Adapter::targets()`), in ACF's order. A group whose rules add other conditions (page template, taxonomy…) is imported too, and reported: its fields become available on every entry. Each ACF field becomes:
+
+| ACF | Okno | Notes |
+|---|---|---|
+| `text`, `textarea` | `text` (`multiline` for a textarea) | `maxlength` → `max_length` |
+| `wysiwyg` | `richtext` | Rendered like ACF (`acf_the_content`), even once ACF is deactivated |
+| `number`, `range` | `number` | `min`, `max`, `step` |
+| `email`, `url` | same | |
+| `oembed` | `url` | The URL, as ACF served it |
+| `image`, `file`, `gallery` | same | Media restrictions (size, dimensions, types) dropped, reported |
+| `select` / `checkbox` / `radio`, `button_group` | `select` / `select` + `multiple` / `select` | Choices kept in order; values outside them are refused (reported) |
+| `true_false` | `boolean` | |
+| `link` | `link` | |
+| `post_object` / `relationship` | `reference` (+ `multiple`) | `to` = ACF's post types, or every editable type when ACF sets none; taxonomy filters and bidirectionality dropped |
+| `date_picker` / `date_time_picker` | `date` / `datetime` | `Ymd` → `Y-m-d` |
+| `time_picker` | `text` | `HH:MM:SS` |
+| `color_picker` | `color` | |
+| `repeater` / `group` / `flexible_content` | `list` / `group` / `blocks` | Recursively; layouts become block types with the same name |
+| `clone` | its fields / `group` | A seamless clone is already replaced by the cloned fields in ACF's definitions; a clone shown as a group becomes a group (same JSON). A clone with nothing to clone is dropped |
+| `tab`, `message`, `accordion` | — | No value: ignored |
+| `page_link`, `taxonomy`, `user`, `password`, `google_map`, others | — | Not carried over: their values leave the content API (they stay in ACF) |
+
+Keys are derived from the names (`heroTitle` → `herotitle`, unique among siblings); names are kept (`source: "acf"`). Conditional logic and default values are dropped and reported. The generated collection is `external: true` and validated like any schema before anything is written; a post type that can't be a collection id (`post`, `page`, hyphens, more than 20 characters) is not importable, with the reason: Okno fields belong to a collection's own post type, there is no "Okno fields on pages".
+
+### Run
+
+`start()` creates the collection (`put_collection()`) and the import record, in the `okno_acf_import` option (post type → `{ status, origin, args, total, done, cursor, imported, failed, different, failures, diffs, … }`). Each `step()` copies the next batch of entries (all statuses but `auto-draft` and `inherit`, by increasing id from `cursor`): it resets the entry's row, reads every ACF value raw (`get_field( key, id, false )`, ACF default values included), converts it to the editor's input format (rows keyed by name, `_layout` for blocks, `Ymd` dates, vanished media and posts removed) and writes it with `Okno_Collections::save_entry()`, i.e. the editor's validation, without a revision per entry. A refused field is recorded (`post_id`, `field`, `code`, `message`) and the rest of the entry and of the import go on. Then the value served by Okno (`Okno_Native_Adapter::get_content()`) is compared with the value ACF served before the copy, field by field (canonical JSON: `5` and `5.0` are equal); any difference is recorded. The first 200 failures and differences are kept; the counters are exact.
+
+While the record is `running`, ACF still serves the type (the native adapter only serves it to the import itself). When the last batch is done the record becomes `done` and the type is served by Okno: `Okno_ACF_Adapter` ignores it (`retired()`), and the ACF location rules no longer match it (`acf/location/rule_match`), so the classic edit screen doesn't show the ACF groups anymore. If the collection disappears from the schema afterwards (a schema file imported without it), ACF serves the type again.
+
+### Post type registration
+
+`origin` is `acf` (declared in ACF's Post Types screen), `external` (theme, plugin, mu-plugin) or `builtin`. For `acf`, the arguments ACF registers the type with (`ACF_Post_Type::get_post_type_args()`) are stored in the record, and `Okno_ACF_Import::register_post_types()` (`init`, priority 6, after ACF) registers the type with them when nothing else did, i.e. once ACF is deactivated. Taxonomies declared in ACF are not taken over. For `external`, the theme or plugin keeps registering it.
+
+### Rollback
+
+`rollback()` (ACF must be active) removes the collection from the schema, drops its table and its state (`Okno_Collections_Store::drop()`) and deletes the record: ACF serves the original values again. Values edited in Okno since the import are not written back to ACF; they are lost with the table.
+
+### Front-end compatibility
+
+For the imported fields, `/export`, `/content` and `/types` give the same JSON as before: same names and order, media objects, references (unpublished targets omitted), repeater rows, blocks with `_layout` first, rendered rich text, select / checkbox values as strings, `Y-m-d` dates, numbers (whole numbers as integers), booleans, `null` / `""` / `[]` for empty values. Known differences, all reported by the preview or the import: fields that aren't carried over disappear; values the editor's validation refuses (unknown choice, text over `max_length`, missing required sub-field…) are left empty; values it rewrites (tags or line breaks in a single-line text, unsafe HTML in rich text) are listed as differences; in `/types`, fields of groups with extra location rules are no longer optional; numbers with more than 6 decimals are rounded by `DECIMAL(20,6)`. The editor shows one group (the collection) instead of one per ACF group; dotted paths (`sections.2.cartes.1.titre`) are unchanged.

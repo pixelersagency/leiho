@@ -2,6 +2,24 @@
 
 All notable changes to Okno are documented here. The project follows [Semantic Versioning](https://semver.org/). The plugin and the bridge package share one version number.
 
+## [Unreleased]
+
+### Added
+
+- **Import from ACF into Okno Collections**, one content type at a time (Okno → Collections, **Import into Okno** on an ACF type, administrators). A preview lists the ACF field groups attached to the type, what each field becomes in Okno and what doesn't carry over (fields without an equivalent such as `page_link` or `taxonomy`, conditional logic, default values, media restrictions, location rules other than the content type, ACF Pro repeater options), with the number of entries, fields and stored values. The import creates the collection, then copies the entries in batches with a progress bar, through the editor's validation; refused values are listed with a link to the entry without stopping the import, and every entry is checked afterwards: the JSON Okno serves is compared field by field with what ACF served. An interrupted import resumes where it stopped.
+- After the import the type is **served by Okno**: `/okno/v1/export`, `/content` and `/types` give the same JSON as before, and the visual editor's dotted paths keep working. Nothing is deleted from ACF (postmeta, field groups and post types stay); the ACF field groups no longer apply to the imported type, on Okno's side and on the classic edit screen.
+- **Go back to ACF** in the settings of an imported collection: ACF serves its original values again and the Okno table of the collection is deleted. Values edited in Okno after the import are not written back to ACF (the dialog says so).
+- Content types declared in ACF's **Post Types** screen stay registered (same labels, slug, archive, supports…) when ACF is deactivated after their import; types registered by the theme or a plugin keep their registration, Okno only owns their fields.
+- REST: `GET /okno/v1/collections/import-acf`, `GET …/import-acf/preview`, `POST …/import-acf/run`, `GET …/import-acf/status`, `POST …/import-acf/rollback`. WP-CLI: `wp okno acf-import list|preview|run|rollback`. Filters `okno_acf_import_batch` and `okno_collections_save_revision`; actions `okno_acf_import_started`, `okno_acf_imported`, `okno_acf_import_rolled_back`.
+- Clone fields: a seamless clone is imported as the fields it clones, a clone shown as a group becomes a group.
+- Collections schema: `external` (a content type registered outside Okno, which only owns its fields) and `source: "acf"` (field and block names keep their ACF API name, camelCase and hyphens included).
+
+### Changed
+
+- A whole number stored in a decimal `number` column is served as `5`, not `5.0`, like ACF and like numbers inside lists.
+- Rich text of a collection imported from ACF is rendered like ACF renders it (paragraphs, typography, shortcodes, embeds) even once ACF is deactivated.
+- An Okno collection imported from ACF can't be removed with `DELETE /okno/v1/collections/{id}`: go back to ACF instead.
+
 ## [1.0.0-beta.8] — 2026-11-04
 
 ### Changed

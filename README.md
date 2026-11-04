@@ -139,7 +139,7 @@ Click **Okno** in wp-admin and it opens full screen: the WordPress menu, admin b
 |---|---|
 | **Home** | Recent changes with before / after values, connection and publishing status, quick links. |
 | **Visual editor** | The site as visitors see it, editable in place. |
-| **Collections** | All your content in three panes, whatever its engine: content types on the left (WordPress pages and posts, ACF or theme post types, Okno collections and single pages, with their entry counts), the entries of the selected type in the middle (search, status filter, sort, create, duplicate, publish or unpublish, trash and restore), and the selected entry edited in place on the right with every field (undo / redo, local drafts, conflict protection, history), its status, **Save**, and a link to the visual editor or the live page when it has one. The **Fields** tab of an Okno collection opens the schema builder (administrators, see below); ACF types point to ACF. |
+| **Collections** | All your content in three panes, whatever its engine: content types on the left (WordPress pages and posts, ACF or theme post types, Okno collections and single pages, with their entry counts), the entries of the selected type in the middle (search, status filter, sort, create, duplicate, publish or unpublish, trash and restore), and the selected entry edited in place on the right with every field (undo / redo, local drafts, conflict protection, history), its status, **Save**, and a link to the visual editor or the live page when it has one. The **Fields** tab of an Okno collection opens the schema builder (administrators, see below); ACF types point to ACF and offer **Import into Okno** (see [Import from ACF](#import-from-acf)). |
 | **Media** | The media library: grid, search, upload (button or drag and drop), alternative text. |
 | **Publishing** | Deployment history. The **Publish** button in the top bar shows when changes aren't published yet. |
 | **Settings** | Everything Okno needs (administrators). |
@@ -249,6 +249,27 @@ From PHP: `Okno_Collections::import( $json )`, `Okno_Collections::save_entry( $p
 
 **Schema builder.** Okno → **Collections** builds the same schema without writing JSON: collections and single pages, labels, URL pattern, built-in features, and a field editor with all 19 types and their options (choices, min / max, reference targets, sub-fields of lists and groups, block types of a blocks field), reordered by drag and drop or with the keyboard. Field keys are generated from the name and fixed once applied; only the name and the label change afterwards. **Review** runs the migration as a dry run and lists what will happen (new columns, conversions, archived columns) before anything is applied; validation errors point at the field concerned. Archived columns are listed with a purge button (type the collection id to confirm), and `okno.schema.json` is one click away for import and export. Entries are then edited in Okno → **Collections** (and in the visual editor when the collection has a URL). **+ New collection** at the bottom of the list of types starts a new one.
 
+### Import from ACF
+
+An existing ACF site can move to Okno Collections one content type at a time. In Okno → **Collections**, an ACF type has **Import into Okno** (administrators):
+
+1. **Preview**: every ACF field group attached to the type, what each field becomes in Okno (`text` → Text, `repeater` → List, `flexible_content` → Blocks, `relationship` → Reference…), and what doesn't carry over (fields without an equivalent such as `page_link`, `taxonomy` or `user`, conditional logic, default values, media restrictions, location rules other than the content type, ACF Pro repeater options), with the number of entries, fields and stored values.
+2. **Import**: Okno creates the collection with the same API names (camelCase and hyphenated names included), then copies the entries in batches through the editor's validation, with a progress bar. A refused value doesn't stop the import: it is listed with a link to the entry. Each entry is then checked: the JSON Okno serves is compared, field by field, with what ACF served, and any difference is listed.
+3. The type is now **served by Okno**: `/export`, `/content` and `/types` give the same JSON as before (media objects, references, repeater rows, `_layout` of blocks, rendered rich text, choices, dates, numbers, booleans), and the visual editor's dotted paths keep working. The ACF field groups stay in place but no longer apply to this type.
+4. **Go back to ACF** (in the collection's settings) serves the ACF values again and deletes the Okno table of the collection.
+
+Nothing is ever deleted from ACF: no postmeta, no field group, no post type. Values edited in Okno after the import are **not** written back to ACF; going back restores the values of the import day. A content type registered by the theme or a plugin stays registered there (Okno only takes over its fields); one declared in ACF's **Post Types** screen is registered by Okno with the same settings if ACF is deactivated. Pages and posts can't become collections: their ACF fields stay in ACF.
+
+| Endpoint (administrators) | |
+|---|---|
+| `GET /wp-json/okno/v1/collections/import-acf` | Content types with ACF fields, their import state, and the field groups attached to no content type (options pages…). |
+| `GET /wp-json/okno/v1/collections/import-acf/preview?post_type=ville` | The preview above, and the collection that would be created. |
+| `POST /wp-json/okno/v1/collections/import-acf/run` | `{ "post_type": "ville" }`: the first call creates the collection, each next call copies a batch (25 entries, filter `okno_acf_import_batch`) and returns the progress, failures and differences, until `status` is `done`. An interrupted import resumes where it stopped. |
+| `GET /wp-json/okno/v1/collections/import-acf/status?post_type=ville` | Progress and report. |
+| `POST /wp-json/okno/v1/collections/import-acf/rollback` | `{ "post_type": "ville", "confirm": "ville" }`: back to ACF. |
+
+With WP-CLI: `wp okno acf-import list`, `wp okno acf-import preview ville`, `wp okno acf-import run ville`, `wp okno acf-import rollback ville --yes`.
+
 ## Security
 
 - Editing routes check a nonce and `edit_post` on the content. The content API only serves published items of the Okno content types; it can require a token (compared in constant time, sent in `X-Okno-Token`). Publishing requires `publish_pages` (filter `okno_deploy_capability`), settings require `manage_options`.
@@ -283,6 +304,7 @@ php plugin/tests/test-acf-adapter.php
 php plugin/tests/test-content.php
 php plugin/tests/test-cache.php
 php plugin/tests/test-collections.php
+php plugin/tests/test-acf-import.php
 php plugin/tests/test-activity.php
 php plugin/tests/test-frame-verdict.php
 php plugin/tests/test-updater.php
