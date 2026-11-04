@@ -365,6 +365,19 @@ abstract class Okno_Field_Adapter implements Okno_Adapter_Interface, Okno_Conten
 					'meta'  => array( 'items' => $labels ),
 				);
 
+			case 'select':
+				// Select multiple : une liste de choix, pas une chaîne « Array ».
+				if ( ! empty( $field['multiple'] ) ) {
+					return array(
+						'value' => array_values( array_map( 'strval', array_filter( (array) $raw, 'is_scalar' ) ) ),
+						'meta'  => null,
+					);
+				}
+				return array(
+					'value' => null === $raw || is_array( $raw ) ? '' : (string) $raw,
+					'meta'  => null,
+				);
+
 			default:
 				return array(
 					'value' => null === $raw ? '' : (string) $raw,
