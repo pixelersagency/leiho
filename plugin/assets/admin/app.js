@@ -248,6 +248,10 @@
 		}
 
 		function onKey( event ) {
+			// Menu ou calendrier ouvert par-dessus : il gère lui-même Échap et Tab.
+			if ( event.target && event.target.closest && event.target.closest( '.okno-listbox, .okno-datepicker' ) ) {
+				return;
+			}
 			if ( 'Escape' === event.key ) {
 				event.preventDefault();
 				event.stopPropagation();
