@@ -5,8 +5,13 @@
  *                    liste (role listbox) stylés. Le <select> reste dans la
  *                    page, masqué : sa valeur, ses évènements change et les
  *                    formulaires PHP fonctionnent comme avant.
- * - autoSelects( root ) : applique select() à tous les <select> simples de
- *                    root, y compris ceux ajoutés plus tard.
+ * - date( el )     : remplace l'apparence d'un <input type="date",
+ *                    "datetime-local" ou "time"> par un bouton et un
+ *                    calendrier (role dialog). L'input reste dans la page,
+ *                    masqué, et garde sa valeur au format natif.
+ * - autoSelects( root ) : applique select() et date() à tous les <select>
+ *                    simples et champs de date de root, y compris ceux
+ *                    ajoutés plus tard.
  * - chips( opts )  : choix multiples en pastilles, avec recherche et, si
  *                    demandé, création d'une valeur (« Créer « … » »).
  * - theme          : lecture / enregistrement du thème clair ou sombre.
@@ -58,6 +63,11 @@
 		check: [ 'M5 12.5l4.5 4.5L19 7.5' ],
 		close: [ 'M6 6l12 12', 'M18 6L6 18' ],
 		plus: [ 'M12 5v14', 'M5 12h14' ],
+		left: [ 'M15 6l-6 6 6 6' ],
+		right: [ 'M9 6l6 6-6 6' ],
+		// Calendrier : cadre arrondi, deux anneaux, une ligne d'en-tête.
+		calendar: [ 'M6 5h12a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2z', 'M4 10h16', 'M8.5 3v4', 'M15.5 3v4' ],
+		clock: [ 'M12 3.5a8.5 8.5 0 1 0 0 17 8.5 8.5 0 0 0 0-17z', 'M12 7.5V12l3 2' ],
 	};
 
 	/** Couche où poser les listes : la coque de l'app (jetons de couleur). */
@@ -632,17 +642,26 @@
 			return;
 		}
 		var target = document.getElementById( l.getAttribute( 'for' ) );
-		if ( target && target.oknoSelect ) {
+		var widget = target && ( target.oknoSelect || target.oknoDate );
+		if ( widget ) {
 			e.preventDefault();
-			target.oknoSelect.button.focus();
+			widget.button.focus();
 		}
 	} );
 
+	var DATE_SELECTOR = 'input[type="date"], input[type="datetime-local"], input[type="time"]';
+
+	function enhanceAll( root ) {
+		[].forEach.call( root.querySelectorAll( 'select' ), enhanceSelect );
+		[].forEach.call( root.querySelectorAll( DATE_SELECTOR ), enhanceDate );
+	}
+
+	/** Menus et champs de date de root, y compris ceux ajoutés plus tard. */
 	function autoSelects( root ) {
 		if ( ! root ) {
 			return;
 		}
-		[].forEach.call( root.querySelectorAll( 'select' ), enhanceSelect );
+		enhanceAll( root );
 		var pending = false;
 		new MutationObserver( function ( records ) {
 			if ( pending ) {
@@ -650,7 +669,7 @@
 			}
 			var found = records.some( function ( r ) {
 				return [].some.call( r.addedNodes, function ( n ) {
-					return 1 === n.nodeType && ( 'SELECT' === n.tagName || ( n.querySelector && n.querySelector( 'select' ) ) );
+					return 1 === n.nodeType && ( 'SELECT' === n.tagName || 'INPUT' === n.tagName || ( n.querySelector && n.querySelector( 'select, ' + DATE_SELECTOR ) ) );
 				} );
 			} );
 			if ( ! found ) {
@@ -660,7 +679,7 @@
 			// Après le rendu en cours : les options sont posées, la valeur aussi.
 			Promise.resolve().then( function () {
 				pending = false;
-				[].forEach.call( root.querySelectorAll( 'select' ), enhanceSelect );
+				enhanceAll( root );
 			} );
 		} ).observe( root, { childList: true, subtree: true } );
 	}
@@ -913,6 +932,1007 @@
 	}
 
 	/* ------------------------------------------------------------------ *
+	 * date() : date, date et heure, heure
+	 * ------------------------------------------------------------------ */
+
+	/*
+	 * Un bouton au format d'un champ montre la valeur dans la langue du site
+	 * (« 11 août 2026, 21:56 ») et ouvre un calendrier (role dialog, non
+	 * modal). L'<input type="date|datetime-local|time"> reste dans la page,
+	 * masqué : il garde la valeur au format attendu (YYYY-MM-DD,
+	 * YYYY-MM-DDTHH:MM, HH:MM) et reçoit input / change comme avant.
+	 */
+
+	var inputValueDesc = Object.getOwnPropertyDescriptor( HTMLInputElement.prototype, 'value' );
+	var DATE_TYPES = [ 'date', 'datetime-local', 'time' ];
+	var dateFmt = null;
+
+	function pad( n ) {
+		return ( n < 10 ? '0' : '' ) + n;
+	}
+
+	/** Langue, premier jour de la semaine et format horaire du site (OknoUIConfig). */
+	function dateSetup() {
+		if ( dateFmt ) {
+			return dateFmt;
+		}
+		var cfg = window.OknoUIConfig || {};
+		var locale;
+		[ cfg.locale, document.documentElement.lang ].some( function ( cand ) {
+			if ( ! cand ) {
+				return false;
+			}
+			try {
+				new Intl.DateTimeFormat( cand );
+				locale = cand;
+				return true;
+			} catch ( e ) {
+				return false;
+			}
+		} );
+		var hour12 = 'boolean' === typeof cfg.hour12
+			? cfg.hour12
+			: !! new Intl.DateTimeFormat( locale, { hour: 'numeric' } ).resolvedOptions().hour12;
+		var start = parseInt( cfg.startOfWeek, 10 );
+		function f( opts ) {
+			return new Intl.DateTimeFormat( locale, opts );
+		}
+		dateFmt = {
+			locale: locale,
+			hour12: hour12,
+			start: start >= 0 && start <= 6 ? start : 1,
+			date: f( { day: 'numeric', month: 'long', year: 'numeric' } ),
+			full: f( { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' } ),
+			time: f( { hour: hour12 ? 'numeric' : '2-digit', minute: '2-digit', hour12: hour12 } ),
+			monthYear: f( { month: 'long', year: 'numeric' } ),
+			month: f( { month: 'long' } ),
+			monthShort: f( { month: 'short' } ),
+			weekday: f( { weekday: 'long' } ),
+			weekdayShort: f( { weekday: 'short' } ),
+			period: f( { hour: 'numeric', hour12: true } ),
+		};
+		return dateFmt;
+	}
+
+	/** Midi : pas de saut d'un jour au changement d'heure. Années < 100 comprises. */
+	function makeDate( y, m, d ) {
+		var dt = new Date( 2000, 0, 1, 12 );
+		dt.setFullYear( y, m, d );
+		return dt;
+	}
+
+	function daysIn( y, m ) {
+		return makeDate( y, m + 1, 0 ).getDate();
+	}
+
+	function ymd( dt ) {
+		var y = dt.getFullYear();
+		return ( y < 1000 ? ( '000' + y ).slice( -4 ) : y ) + '-' + pad( dt.getMonth() + 1 ) + '-' + pad( dt.getDate() );
+	}
+
+	function parseDay( s ) {
+		var m = /^(\d{4})-(\d{2})-(\d{2})/.exec( String( s || '' ) );
+		if ( ! m ) {
+			return null;
+		}
+		var dt = makeDate( +m[ 1 ], +m[ 2 ] - 1, +m[ 3 ] );
+		return ymd( dt ) === m[ 0 ] ? dt : null;
+	}
+
+	function parseTime( s ) {
+		var m = /^(\d{2}):(\d{2})/.exec( String( s || '' ) );
+		if ( ! m || +m[ 1 ] > 23 || +m[ 2 ] > 59 ) {
+			return null;
+		}
+		return { h: +m[ 1 ], i: +m[ 2 ] };
+	}
+
+	function capitalize( s ) {
+		return s ? s.charAt( 0 ).toLocaleUpperCase( dateSetup().locale ) + s.slice( 1 ) : s;
+	}
+
+	/** Nom de la période (« AM » / « PM » dans la langue du site). */
+	function periodLabel( pm ) {
+		var parts = dateSetup().period.formatToParts( new Date( 2000, 0, 1, pm ? 15 : 9 ) );
+		var found = parts.filter( function ( p ) {
+			return 'dayPeriod' === p.type || 'dayperiod' === p.type;
+		} )[ 0 ];
+		return found ? found.value : pm ? 'PM' : 'AM';
+	}
+
+	function canEnhanceDate( el ) {
+		return (
+			el &&
+			'INPUT' === el.tagName &&
+			DATE_TYPES.indexOf( String( el.getAttribute( 'type' ) || '' ).toLowerCase() ) !== -1 &&
+			! el.oknoDate &&
+			! el.hasAttribute( 'data-okno-native' ) &&
+			! el.closest( '[data-okno-native]' ) &&
+			el.parentNode
+		);
+	}
+
+	function enhanceDate( input ) {
+		if ( ! canEnhanceDate( input ) ) {
+			return input && input.oknoDate ? input.oknoDate : null;
+		}
+		var fmt = dateSetup();
+		var type = String( input.getAttribute( 'type' ) ).toLowerCase();
+		var mode = 'datetime-local' === type ? 'datetime' : type;
+		var hasDate = 'time' !== mode;
+		var hasTime = 'date' !== mode;
+
+		/* ---- Champ : bouton + effacer ---- */
+
+		var wrap = document.createElement( 'span' );
+		wrap.className = 'okno-date';
+		var button = document.createElement( 'button' );
+		button.type = 'button';
+		button.setAttribute( 'aria-haspopup', 'dialog' );
+		button.setAttribute( 'aria-expanded', 'false' );
+		button.appendChild( svg( hasDate ? ICONS.calendar : ICONS.clock, 'okno-date__icon' ) );
+		var label = document.createElement( 'span' );
+		label.className = 'okno-select__label okno-date__label';
+		label.id = uid( 'date-value' );
+		button.appendChild( label );
+		var clear = document.createElement( 'button' );
+		clear.type = 'button';
+		clear.className = 'okno-date__clear';
+		clear.appendChild( svg( ICONS.close ) );
+		wrap.appendChild( button );
+		wrap.appendChild( clear );
+
+		var api = { input: input, button: button };
+
+		function raw() {
+			return inputValueDesc.get.call( input );
+		}
+
+		function required() {
+			return input.required || 'true' === input.getAttribute( 'aria-required' );
+		}
+
+		function fieldLabel() {
+			var l = input.labels && input.labels.length ? input.labels[ 0 ] : null;
+			return input.getAttribute( 'aria-label' ) || ( l ? l.textContent.trim() : '' );
+		}
+
+		function parts( value ) {
+			value = String( value || '' );
+			return {
+				day: hasDate ? parseDay( value.slice( 0, 10 ) ) : null,
+				time: 'time' === mode ? parseTime( value ) : 'datetime' === mode ? parseTime( value.slice( 11 ) ) : null,
+			};
+		}
+
+		function display( value ) {
+			var p = parts( value );
+			if ( ( hasDate && ! p.day ) || ( 'time' === mode && ! p.time ) ) {
+				return value || '';
+			}
+			var text = hasDate ? fmt.date.format( p.day ) : '';
+			if ( hasTime && p.time ) {
+				var t = fmt.time.format( new Date( 2000, 0, 1, p.time.h, p.time.i ) );
+				text = text ? text + ', ' + t : t;
+			}
+			return text;
+		}
+
+		function placeholder() {
+			if ( input.placeholder ) {
+				return input.placeholder;
+			}
+			if ( 'time' === mode ) {
+				return __( 'Choose a time', 'okno' );
+			}
+			return 'datetime' === mode ? __( 'Choose a date and time', 'okno' ) : __( 'Choose a date', 'okno' );
+		}
+
+		function sync() {
+			var value = raw();
+			label.textContent = value ? display( value ) : placeholder();
+			label.classList.toggle( 'is-placeholder', ! value );
+			var classes = ( input.getAttribute( 'class' ) || '' ).split( /\s+/ ).filter( function ( c ) {
+				return c && 'okno-date-native' !== c;
+			} );
+			button.className = [ 'okno-select', 'okno-date__trigger' ].concat( classes ).join( ' ' );
+			button.disabled = input.disabled || input.readOnly;
+			wrap.hidden = input.hidden;
+			button.title = input.title || '';
+			var canClear = !! value && ! required() && ! button.disabled;
+			clear.hidden = ! canClear;
+			wrap.classList.toggle( 'is-clearable', canClear );
+			var name = fieldLabel();
+			/* translators: %s: field label. */
+			clear.setAttribute( 'aria-label', name ? sprintf( __( 'Clear %s', 'okno' ), name ) : __( 'Clear', 'okno' ) );
+			if ( input.id && input.labels && input.labels.length ) {
+				var ids = [];
+				[].forEach.call( input.labels, function ( l ) {
+					if ( ! l.id ) {
+						l.id = uid( 'label' );
+					}
+					ids.push( l.id );
+				} );
+				button.setAttribute( 'aria-labelledby', ids.join( ' ' ) + ' ' + label.id );
+				button.removeAttribute( 'aria-label' );
+			} else if ( name ) {
+				button.setAttribute( 'aria-label', name + ' : ' + label.textContent );
+			}
+			[ 'aria-describedby', 'aria-invalid' ].forEach( function ( attr ) {
+				if ( input.getAttribute( attr ) ) {
+					button.setAttribute( attr, input.getAttribute( attr ) );
+				} else {
+					button.removeAttribute( attr );
+				}
+			} );
+			if ( required() ) {
+				button.setAttribute( 'aria-required', 'true' );
+			} else {
+				button.removeAttribute( 'aria-required' );
+			}
+		}
+
+		/** Bornes min / max de l'input, au format de sa valeur. */
+		function bound( which ) {
+			var v = input.getAttribute( which ) || '';
+			if ( 'datetime' === mode && /^\d{4}-\d{2}-\d{2}$/.test( v ) ) {
+				v += 'max' === which ? 'T23:59' : 'T00:00';
+			}
+			return 'datetime' === mode ? v.slice( 0, 16 ) : 'time' === mode ? v.slice( 0, 5 ) : v.slice( 0, 10 );
+		}
+
+		function clamp( value ) {
+			var min = bound( 'min' );
+			var max = bound( 'max' );
+			if ( value && min && value < min ) {
+				return min;
+			}
+			if ( value && max && value > max ) {
+				return max;
+			}
+			return value;
+		}
+
+		function dayDisabled( dt ) {
+			var key = ymd( dt );
+			var min = bound( 'min' ).slice( 0, 10 );
+			var max = bound( 'max' ).slice( 0, 10 );
+			return ( min && key < min ) || ( max && key > max );
+		}
+
+		function setValue( value ) {
+			value = clamp( value );
+			if ( raw() === value ) {
+				return;
+			}
+			inputValueDesc.set.call( input, value );
+			sync();
+			input.dispatchEvent( new Event( 'input', { bubbles: true } ) );
+			input.dispatchEvent( new Event( 'change', { bubbles: true } ) );
+		}
+
+		/** Pas des minutes : attribut step (secondes), 1 min par défaut. */
+		function minuteStep() {
+			var step = parseFloat( input.getAttribute( 'step' ) );
+			return step > 0 ? Math.min( 60, Math.max( 1, Math.round( step / 60 ) ) ) : 1;
+		}
+
+		function nowTime() {
+			var now = new Date();
+			var s = minuteStep();
+			return { h: now.getHours(), i: Math.floor( now.getMinutes() / s ) * s };
+		}
+
+		function compose( day, time ) {
+			var t = time ? pad( time.h ) + ':' + pad( time.i ) : '';
+			if ( 'time' === mode ) {
+				return t;
+			}
+			if ( 'date' === mode ) {
+				return ymd( day );
+			}
+			return ymd( day ) + 'T' + ( t || '00:00' );
+		}
+
+		/* ---- Calendrier ---- */
+
+		var dialog = null;
+		var els = {};
+		var state = { view: 'days', y: 0, m: 0, focus: null };
+		var isOpen = false;
+
+		function today() {
+			var n = new Date();
+			return makeDate( n.getFullYear(), n.getMonth(), n.getDate() );
+		}
+
+		function el( tag, cls, attrs ) {
+			var node = document.createElement( tag );
+			if ( cls ) {
+				node.className = cls;
+			}
+			Object.keys( attrs || {} ).forEach( function ( k ) {
+				if ( 'text' === k ) {
+					node.textContent = attrs[ k ];
+				} else {
+					node.setAttribute( k, attrs[ k ] );
+				}
+			} );
+			return node;
+		}
+
+		function navButton( dir ) {
+			var b = el( 'button', 'okno-datepicker__nav', { type: 'button' } );
+			b.appendChild( svg( dir < 0 ? ICONS.left : ICONS.right ) );
+			b.addEventListener( 'click', function () {
+				if ( 'months' === state.view ) {
+					state.y += dir;
+					render();
+				} else {
+					shiftFocus( 0, dir, false );
+				}
+			} );
+			return b;
+		}
+
+		function buildDialog() {
+			dialog = el( 'div', 'okno-datepicker okno-datepicker--' + mode, {
+				role: 'dialog',
+				'aria-modal': 'false',
+				id: uid( 'datepicker' ),
+			} );
+			if ( hasDate ) {
+				var head = el( 'div', 'okno-datepicker__head' );
+				els.prev = navButton( -1 );
+				els.next = navButton( 1 );
+				els.title = el( 'button', 'okno-datepicker__title', { type: 'button', id: uid( 'datepicker-title' ), 'aria-live': 'off' } );
+				els.titleText = el( 'span' );
+				els.title.appendChild( els.titleText );
+				els.title.appendChild( svg( ICONS.chevron, 'okno-datepicker__title-chevron' ) );
+				els.title.addEventListener( 'click', function () {
+					state.view = 'days' === state.view ? 'months' : 'months' === state.view ? 'years' : 'days';
+					render( true );
+				} );
+				head.appendChild( els.prev );
+				head.appendChild( els.title );
+				head.appendChild( els.next );
+				dialog.appendChild( head );
+				els.live = el( 'div', 'okno-sr', { 'aria-live': 'polite', 'aria-atomic': 'true' } );
+				dialog.appendChild( els.live );
+				els.body = el( 'div', 'okno-datepicker__body' );
+				dialog.appendChild( els.body );
+			}
+			if ( hasTime ) {
+				dialog.appendChild( buildTime() );
+			}
+			var foot = el( 'div', 'okno-datepicker__foot' );
+			els.today = el( 'button', 'okno-datepicker__action', { type: 'button', text: hasDate ? __( 'Today', 'okno' ) : __( 'Now', 'okno' ) } );
+			els.today.addEventListener( 'click', pickToday );
+			foot.appendChild( els.today );
+			els.erase = el( 'button', 'okno-datepicker__action', { type: 'button', text: __( 'Clear', 'okno' ) } );
+			els.erase.addEventListener( 'click', function () {
+				setValue( '' );
+				close( 'pick' );
+			} );
+			foot.appendChild( els.erase );
+			if ( hasTime ) {
+				var done = el( 'button', 'okno-datepicker__action okno-datepicker__action--primary', { type: 'button', text: __( 'Done', 'okno' ) } );
+				done.addEventListener( 'click', function () {
+					close( 'pick' );
+				} );
+				foot.appendChild( done );
+			}
+			dialog.appendChild( foot );
+			dialog.addEventListener( 'keydown', onDialogKey );
+			dialog.addEventListener( 'focusout', function ( e ) {
+				var to = e.relatedTarget;
+				if ( isOpen && to && ! dialog.contains( to ) && ! wrap.contains( to ) && ! ( to.closest && to.closest( '.okno-listbox' ) ) ) {
+					close( 'tab' );
+				}
+			} );
+		}
+
+		/* Heure : deux menus OknoUI (heures, minutes), plus AM / PM en 12 h. */
+		function buildTime() {
+			var row = el( 'div', 'okno-datepicker__time' );
+			var title = el( 'span', 'okno-datepicker__time-label', { id: uid( 'time-label' ), text: __( 'Time', 'okno' ) } );
+			row.appendChild( title );
+			els.hour = el( 'select', 'okno-select--compact okno-datepicker__hour', { 'aria-label': __( 'Hour', 'okno' ) } );
+			els.minute = el( 'select', 'okno-select--compact okno-datepicker__minute', { 'aria-label': __( 'Minutes', 'okno' ) } );
+			var hours = fmt.hour12 ? [ 12, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11 ] : null;
+			( hours || Array.apply( null, { length: 24 } ).map( function ( _, i ) {
+				return i;
+			} ) ).forEach( function ( hh ) {
+				els.hour.appendChild( el( 'option', '', { value: String( hh ), text: fmt.hour12 ? String( hh ) : pad( hh ) } ) );
+			} );
+			row.appendChild( els.hour );
+			row.appendChild( el( 'span', 'okno-datepicker__colon', { 'aria-hidden': 'true', text: ':' } ) );
+			row.appendChild( els.minute );
+			if ( fmt.hour12 ) {
+				els.period = el( 'select', 'okno-select--compact okno-datepicker__period', { 'aria-label': __( 'AM or PM', 'okno' ) } );
+				els.period.appendChild( el( 'option', '', { value: 'am', text: periodLabel( false ) } ) );
+				els.period.appendChild( el( 'option', '', { value: 'pm', text: periodLabel( true ) } ) );
+				row.appendChild( els.period );
+			}
+			[ els.hour, els.minute, els.period ].forEach( function ( s ) {
+				if ( s ) {
+					s.addEventListener( 'change', onTimeChange );
+					enhanceSelect( s );
+				}
+			} );
+			return row;
+		}
+
+		function fillMinutes( current ) {
+			var step = minuteStep();
+			var values = [];
+			for ( var i = 0; i < 60; i += step ) {
+				values.push( i );
+			}
+			if ( null !== current && values.indexOf( current ) === -1 ) {
+				values.push( current );
+				values.sort( function ( a, b ) {
+					return a - b;
+				} );
+			}
+			var key = values.join( ',' );
+			if ( els.minute.dataset.values !== key ) {
+				els.minute.dataset.values = key;
+				els.minute.innerHTML = '';
+				values.forEach( function ( v ) {
+					els.minute.appendChild( el( 'option', '', { value: String( v ), text: pad( v ) } ) );
+				} );
+			}
+		}
+
+		function syncTime() {
+			var t = parts( raw() ).time || nowTime();
+			fillMinutes( t.i );
+			if ( fmt.hour12 ) {
+				els.hour.value = String( t.h % 12 || 12 );
+				els.period.value = t.h >= 12 ? 'pm' : 'am';
+			} else {
+				els.hour.value = String( t.h );
+			}
+			els.minute.value = String( t.i );
+		}
+
+		function onTimeChange() {
+			var h = parseInt( els.hour.value, 10 );
+			if ( fmt.hour12 ) {
+				h = ( h % 12 ) + ( 'pm' === els.period.value ? 12 : 0 );
+			}
+			var time = { h: h, i: parseInt( els.minute.value, 10 ) };
+			var day = parts( raw() ).day || state.focus || today();
+			setValue( compose( day, time ) );
+			syncTime();
+			if ( hasDate ) {
+				render();
+			}
+		}
+
+		function pickToday() {
+			if ( 'time' === mode ) {
+				setValue( compose( null, nowTime() ) );
+				close( 'pick' );
+				return;
+			}
+			var t = today();
+			if ( dayDisabled( t ) ) {
+				return;
+			}
+			pickDay( t );
+		}
+
+		function pickDay( dt ) {
+			if ( dayDisabled( dt ) ) {
+				return;
+			}
+			if ( 'date' === mode ) {
+				setValue( compose( dt ) );
+				close( 'pick' );
+				return;
+			}
+			setValue( compose( dt, parts( raw() ).time || nowTime() ) );
+			state.focus = dt;
+			state.y = dt.getFullYear();
+			state.m = dt.getMonth();
+			syncTime();
+			render( true );
+		}
+
+		function announce( text ) {
+			if ( els.live ) {
+				els.live.textContent = text;
+			}
+		}
+
+		/** Déplace le jour actif de days jours, months mois (le jour reste dans le mois). */
+		function shiftFocus( days, months, focusIt ) {
+			var f = state.focus || makeDate( state.y, state.m, 1 );
+			var next;
+			if ( months ) {
+				var y = f.getFullYear();
+				var m = f.getMonth() + months;
+				var first = makeDate( y, m, 1 );
+				next = makeDate( first.getFullYear(), first.getMonth(), Math.min( f.getDate(), daysIn( first.getFullYear(), first.getMonth() ) ) );
+			} else {
+				next = makeDate( f.getFullYear(), f.getMonth(), f.getDate() + days );
+			}
+			moveTo( next, false !== focusIt );
+		}
+
+		function moveTo( dt, focusIt ) {
+			var changed = dt.getFullYear() !== state.y || dt.getMonth() !== state.m;
+			state.focus = dt;
+			state.y = dt.getFullYear();
+			state.m = dt.getMonth();
+			render( focusIt );
+			if ( changed ) {
+				announce( capitalize( fmt.monthYear.format( makeDate( state.y, state.m, 1 ) ) ) );
+			}
+		}
+
+		function weekdayOrder() {
+			var out = [];
+			for ( var k = 0; k < 7; k++ ) {
+				out.push( ( fmt.start + k ) % 7 );
+			}
+			return out;
+		}
+
+		function render( focusIt ) {
+			if ( ! dialog || ! hasDate ) {
+				return;
+			}
+			var view = state.view;
+			dialog.dataset.view = view;
+			var first = makeDate( state.y, state.m, 1 );
+			if ( 'days' === view ) {
+				els.titleText.textContent = capitalize( fmt.monthYear.format( first ) );
+				/* translators: %s: a month and its year (e.g. August 2026). */
+				els.title.setAttribute( 'aria-label', sprintf( __( '%s, choose a month', 'okno' ), capitalize( fmt.monthYear.format( first ) ) ) );
+				els.prev.setAttribute( 'aria-label', __( 'Previous month', 'okno' ) );
+				els.next.setAttribute( 'aria-label', __( 'Next month', 'okno' ) );
+				renderDays( focusIt );
+			} else if ( 'months' === view ) {
+				els.titleText.textContent = String( state.y );
+				/* translators: %s: a year. */
+				els.title.setAttribute( 'aria-label', sprintf( __( '%s, choose a year', 'okno' ), state.y ) );
+				els.prev.setAttribute( 'aria-label', __( 'Previous year', 'okno' ) );
+				els.next.setAttribute( 'aria-label', __( 'Next year', 'okno' ) );
+				renderMonths( focusIt );
+			} else {
+				els.titleText.textContent = String( state.y );
+				els.title.setAttribute( 'aria-label', __( 'Back to the calendar', 'okno' ) );
+				renderYears( focusIt );
+			}
+			els.prev.hidden = els.next.hidden = 'years' === view;
+			els.title.setAttribute( 'aria-expanded', 'days' === view ? 'false' : 'true' );
+			if ( els.today ) {
+				els.today.disabled = dayDisabled( today() );
+			}
+			if ( els.erase ) {
+				els.erase.hidden = required();
+			}
+			position();
+		}
+
+		function renderDays( focusIt ) {
+			var selected = parts( raw() ).day;
+			var selKey = selected ? ymd( selected ) : '';
+			var todayKey = ymd( today() );
+			var focusKey = ymd( state.focus );
+			var table = el( 'table', 'okno-datepicker__grid', { role: 'grid', 'aria-labelledby': els.title.id } );
+			var thead = el( 'thead' );
+			var hr = el( 'tr' );
+			// Le 2 janvier 2000 est un dimanche : 2 + n donne le jour n.
+			weekdayOrder().forEach( function ( wd ) {
+				var ref = makeDate( 2000, 0, 2 + wd );
+				var th = el( 'th', '', {
+					scope: 'col',
+					abbr: fmt.weekday.format( ref ),
+					text: fmt.weekdayShort.format( ref ).replace( /\.$/, '' ),
+				} );
+				hr.appendChild( th );
+			} );
+			thead.appendChild( hr );
+			table.appendChild( thead );
+			var tbody = el( 'tbody' );
+			var lead = ( makeDate( state.y, state.m, 1 ).getDay() - fmt.start + 7 ) % 7;
+			var cursor = makeDate( state.y, state.m, 1 - lead );
+			for ( var w = 0; w < 6; w++ ) {
+				var tr = el( 'tr' );
+				for ( var d = 0; d < 7; d++ ) {
+					var key = ymd( cursor );
+					var td = el( 'td', 'okno-datepicker__day', {
+						role: 'gridcell',
+						'data-date': key,
+						tabindex: key === focusKey ? '0' : '-1',
+						'aria-selected': key === selKey ? 'true' : 'false',
+						'aria-label': fmt.full.format( cursor ),
+						text: String( cursor.getDate() ),
+					} );
+					if ( cursor.getMonth() !== state.m ) {
+						td.classList.add( 'is-outside' );
+					}
+					if ( key === todayKey ) {
+						td.classList.add( 'is-today' );
+						td.setAttribute( 'aria-current', 'date' );
+					}
+					if ( dayDisabled( cursor ) ) {
+						td.setAttribute( 'aria-disabled', 'true' );
+					}
+					tr.appendChild( td );
+					cursor = makeDate( cursor.getFullYear(), cursor.getMonth(), cursor.getDate() + 1 );
+				}
+				tbody.appendChild( tr );
+			}
+			table.appendChild( tbody );
+			table.addEventListener( 'click', function ( e ) {
+				var cell = e.target.closest( 'td[data-date]' );
+				if ( cell && 'true' !== cell.getAttribute( 'aria-disabled' ) ) {
+					pickDay( parseDay( cell.dataset.date ) );
+				}
+			} );
+			table.addEventListener( 'keydown', onGridKey );
+			els.body.innerHTML = '';
+			els.body.appendChild( table );
+			if ( focusIt ) {
+				var cell = table.querySelector( '[tabindex="0"]' );
+				if ( cell ) {
+					cell.focus( { preventScroll: true } );
+				}
+			}
+		}
+
+		function onGridKey( e ) {
+			var handled = true;
+			var f = state.focus;
+			switch ( e.key ) {
+				case 'ArrowLeft':
+					shiftFocus( -1 );
+					break;
+				case 'ArrowRight':
+					shiftFocus( 1 );
+					break;
+				case 'ArrowUp':
+					shiftFocus( -7 );
+					break;
+				case 'ArrowDown':
+					shiftFocus( 7 );
+					break;
+				case 'PageUp':
+					shiftFocus( 0, e.shiftKey ? -12 : -1 );
+					break;
+				case 'PageDown':
+					shiftFocus( 0, e.shiftKey ? 12 : 1 );
+					break;
+				case 'Home':
+					shiftFocus( -( ( f.getDay() - fmt.start + 7 ) % 7 ) );
+					break;
+				case 'End':
+					shiftFocus( 6 - ( ( f.getDay() - fmt.start + 7 ) % 7 ) );
+					break;
+				case 'Enter':
+				case ' ':
+					pickDay( f );
+					break;
+				default:
+					handled = false;
+			}
+			if ( handled ) {
+				e.preventDefault();
+			}
+		}
+
+		/** Grille de boutons (mois, années) : flèches, Début / Fin, Entrée. */
+		function choiceGrid( cls, items, cols, onChoose, focusIt ) {
+			var grid = el( 'div', 'okno-datepicker__choices ' + cls, { role: 'group', 'aria-labelledby': els.title.id } );
+			var active = 0;
+			items.forEach( function ( item, i ) {
+				var b = el( 'button', 'okno-datepicker__choice', {
+					type: 'button',
+					tabindex: item.active ? '0' : '-1',
+					'aria-pressed': item.selected ? 'true' : 'false',
+					text: item.label,
+				} );
+				if ( item.label !== item.name ) {
+					b.setAttribute( 'aria-label', item.name );
+				}
+				if ( item.current ) {
+					b.classList.add( 'is-today' );
+				}
+				if ( item.disabled ) {
+					b.disabled = true;
+				}
+				if ( item.active ) {
+					active = i;
+				}
+				b.addEventListener( 'click', function () {
+					onChoose( item.value );
+				} );
+				grid.appendChild( b );
+			} );
+			grid.addEventListener( 'keydown', function ( e ) {
+				var buttons = [].slice.call( grid.children );
+				var i = buttons.indexOf( document.activeElement );
+				if ( i < 0 ) {
+					return;
+				}
+				var to = { ArrowLeft: i - 1, ArrowRight: i + 1, ArrowUp: i - cols, ArrowDown: i + cols, Home: 0, End: buttons.length - 1 }[ e.key ];
+				if ( undefined === to ) {
+					return;
+				}
+				e.preventDefault();
+				to = Math.max( 0, Math.min( buttons.length - 1, to ) );
+				buttons[ i ].tabIndex = -1;
+				buttons[ to ].tabIndex = 0;
+				buttons[ to ].focus();
+				if ( buttons[ to ].scrollIntoView ) {
+					buttons[ to ].scrollIntoView( { block: 'nearest' } );
+				}
+			} );
+			els.body.innerHTML = '';
+			els.body.appendChild( grid );
+			var target = grid.children[ active ];
+			if ( target && target.scrollIntoView ) {
+				target.scrollIntoView( { block: 'center' } );
+			}
+			if ( focusIt && target ) {
+				target.focus( { preventScroll: true } );
+			}
+		}
+
+		function renderMonths( focusIt ) {
+			var selected = parts( raw() ).day;
+			var now = today();
+			var min = bound( 'min' ).slice( 0, 7 );
+			var max = bound( 'max' ).slice( 0, 7 );
+			var items = [];
+			for ( var m = 0; m < 12; m++ ) {
+				var dt = makeDate( state.y, m, 1 );
+				var key = ymd( dt ).slice( 0, 7 );
+				items.push( {
+					value: m,
+					label: capitalize( fmt.monthShort.format( dt ).replace( /\.$/, '' ) ),
+					name: capitalize( fmt.monthYear.format( dt ) ),
+					selected: !! selected && selected.getFullYear() === state.y && selected.getMonth() === m,
+					current: now.getFullYear() === state.y && now.getMonth() === m,
+					active: m === state.m,
+					disabled: ( min && key < min ) || ( max && key > max ),
+				} );
+			}
+			choiceGrid( 'okno-datepicker__months', items, 3, function ( m ) {
+				var f = state.focus || makeDate( state.y, m, 1 );
+				state.view = 'days';
+				moveTo( makeDate( state.y, m, Math.min( f.getDate(), daysIn( state.y, m ) ) ), true );
+			}, focusIt );
+		}
+
+		function renderYears( focusIt ) {
+			var selected = parts( raw() ).day;
+			var now = today().getFullYear();
+			var min = parseInt( bound( 'min' ).slice( 0, 4 ), 10 );
+			var max = parseInt( bound( 'max' ).slice( 0, 4 ), 10 );
+			var from = Math.min( isNaN( min ) ? now - 100 : min, state.y );
+			var to = Math.max( isNaN( max ) ? now + 20 : max, state.y );
+			var items = [];
+			for ( var y = from; y <= to; y++ ) {
+				items.push( {
+					value: y,
+					label: String( y ),
+					name: String( y ),
+					selected: !! selected && selected.getFullYear() === y,
+					current: now === y,
+					active: y === state.y,
+				} );
+			}
+			choiceGrid( 'okno-datepicker__years', items, 4, function ( y ) {
+				state.y = y;
+				state.view = 'months';
+				render( true );
+			}, focusIt );
+		}
+
+		function onDialogKey( e ) {
+			if ( 'Escape' === e.key ) {
+				e.preventDefault();
+				e.stopPropagation();
+				close( 'escape' );
+			} else if ( 'Tab' === e.key ) {
+				// Non modal : sortir du calendrier au clavier le referme et
+				// rend le focus au champ.
+				var list = [].filter.call( dialog.querySelectorAll( 'button, [tabindex="0"]' ), function ( b ) {
+					return b.tabIndex >= 0 && ! b.disabled && ! b.hidden && null !== b.offsetParent;
+				} );
+				var first = list[ 0 ];
+				var last = list[ list.length - 1 ];
+				if ( ( e.shiftKey && document.activeElement === first ) || ( ! e.shiftKey && document.activeElement === last ) ) {
+					e.preventDefault();
+					close( 'escape' );
+				}
+			}
+		}
+
+		function onDocDown( e ) {
+			var t = e.target;
+			if ( dialog.contains( t ) || wrap.contains( t ) || ( t.closest && t.closest( '.okno-listbox' ) ) ) {
+				return;
+			}
+			close( 'outside' );
+		}
+
+		function onReflow( e ) {
+			if ( e && 'scroll' === e.type && e.target && e.target.nodeType === 1 && ( dialog.contains( e.target ) || ( e.target.closest && e.target.closest( '.okno-listbox' ) ) ) ) {
+				return;
+			}
+			position();
+		}
+
+		/** Sous le champ si la place le permet, sinon au-dessus ; toujours dans la fenêtre. */
+		function position() {
+			if ( ! isOpen ) {
+				return;
+			}
+			var r = button.getBoundingClientRect();
+			var vw = document.documentElement.clientWidth;
+			var vh = document.documentElement.clientHeight;
+			if ( r.bottom < 0 || r.top > vh ) {
+				close( 'scroll' );
+				return;
+			}
+			var gap = 4;
+			var margin = 8;
+			var h = dialog.offsetHeight;
+			var w = dialog.offsetWidth;
+			var below = vh - r.bottom - gap - margin;
+			var above = r.top - gap - margin;
+			var top = below >= h || below >= above ? r.bottom + gap : r.top - gap - h;
+			dialog.style.top = Math.max( margin, Math.min( top, vh - h - margin ) ) + 'px';
+			dialog.style.left = Math.max( margin, Math.min( r.left, vw - w - margin ) ) + 'px';
+		}
+
+		function open() {
+			if ( isOpen || button.disabled ) {
+				return;
+			}
+			if ( ! dialog ) {
+				buildDialog();
+			}
+			var p = parts( raw() );
+			var start = p.day || today();
+			var min = parseDay( bound( 'min' ) );
+			var max = parseDay( bound( 'max' ) );
+			if ( ! p.day && min && start < min ) {
+				start = min;
+			} else if ( ! p.day && max && start > max ) {
+				start = max;
+			}
+			state.view = 'days';
+			state.focus = start;
+			state.y = start.getFullYear();
+			state.m = start.getMonth();
+			dialog.setAttribute( 'aria-label', fieldLabel() || placeholder() );
+			isOpen = true;
+			layerFor( wrap ).appendChild( dialog );
+			button.setAttribute( 'aria-expanded', 'true' );
+			button.setAttribute( 'aria-controls', dialog.id );
+			if ( hasTime ) {
+				syncTime();
+			}
+			if ( hasDate ) {
+				render( true );
+			} else {
+				if ( els.erase ) {
+					els.erase.hidden = required();
+				}
+				position();
+				els.hour.focus( { preventScroll: true } );
+			}
+			document.addEventListener( 'mousedown', onDocDown, true );
+			document.addEventListener( 'touchstart', onDocDown, true );
+			window.addEventListener( 'resize', onReflow );
+			window.addEventListener( 'scroll', onReflow, true );
+		}
+
+		function close( reason ) {
+			if ( ! isOpen ) {
+				return;
+			}
+			isOpen = false;
+			[ els.hour, els.minute, els.period ].forEach( function ( s ) {
+				if ( s && s.oknoSelect ) {
+					s.oknoSelect.close();
+				}
+			} );
+			if ( dialog.parentNode ) {
+				dialog.parentNode.removeChild( dialog );
+			}
+			button.setAttribute( 'aria-expanded', 'false' );
+			button.removeAttribute( 'aria-controls' );
+			document.removeEventListener( 'mousedown', onDocDown, true );
+			document.removeEventListener( 'touchstart', onDocDown, true );
+			window.removeEventListener( 'resize', onReflow );
+			window.removeEventListener( 'scroll', onReflow, true );
+			if ( 'outside' !== reason && 'scroll' !== reason && 'tab' !== reason ) {
+				button.focus( { preventScroll: true } );
+			}
+		}
+
+		/* ---- Évènements du champ ---- */
+
+		button.addEventListener( 'click', function () {
+			if ( isOpen ) {
+				close( 'toggle' );
+			} else {
+				open();
+			}
+		} );
+		button.addEventListener( 'keydown', function ( e ) {
+			if ( 'ArrowDown' === e.key || 'ArrowUp' === e.key ) {
+				e.preventDefault();
+				open();
+			} else if ( ( 'Delete' === e.key || 'Backspace' === e.key ) && ! clear.hidden ) {
+				e.preventDefault();
+				setValue( '' );
+			}
+		} );
+		// Le code qui écoute le focus de l'input (éditeur : champ suivi dans
+		// l'aperçu) le reçoit quand le bouton le prend.
+		button.addEventListener( 'focus', function () {
+			input.dispatchEvent( new FocusEvent( 'focus' ) );
+		} );
+		clear.addEventListener( 'click', function () {
+			setValue( '' );
+			button.focus();
+		} );
+
+		// L'input reste la source de vérité : valeur, bornes, état.
+		Object.defineProperty( input, 'value', {
+			configurable: true,
+			get: function () {
+				return inputValueDesc.get.call( input );
+			},
+			set: function ( v ) {
+				inputValueDesc.set.call( input, v );
+				sync();
+				if ( isOpen ) {
+					if ( hasTime ) {
+						syncTime();
+					}
+					render();
+				}
+			},
+		} );
+		input.focus = function ( options ) {
+			button.focus( options );
+		};
+		if ( input.form ) {
+			input.form.addEventListener( 'reset', function () {
+				setTimeout( sync, 0 );
+			} );
+		}
+		new MutationObserver( sync ).observe( input, {
+			attributes: true,
+			attributeFilter: [ 'hidden', 'disabled', 'readonly', 'required', 'class', 'title', 'placeholder', 'aria-invalid', 'aria-label', 'aria-required', 'aria-describedby', 'min', 'max' ],
+		} );
+
+		input.classList.add( 'okno-date-native' );
+		input.setAttribute( 'tabindex', '-1' );
+		input.setAttribute( 'aria-hidden', 'true' );
+		input.parentNode.insertBefore( wrap, input.nextSibling );
+		input.oknoDate = api;
+		api.sync = sync;
+		api.open = open;
+		api.close = function () {
+			close( 'api' );
+		};
+		sync();
+		return api;
+	}
+
+	/* ------------------------------------------------------------------ *
 	 * Thème : sombre par défaut ; le choix est gardé côté serveur (méta
 	 * utilisateur, imprimée par PHP au premier rendu : pas de flash), en
 	 * cookie et dans le navigateur.
@@ -947,6 +1967,7 @@
 
 	window.OknoUI = {
 		select: enhanceSelect,
+		date: enhanceDate,
 		autoSelects: autoSelects,
 		chips: chips,
 		theme: { current: currentTheme, save: saveTheme },

@@ -297,6 +297,53 @@ class Okno_App {
 	}
 
 	/* ---------------------------------------------------------------------
+	 * Dates : langue, premier jour de la semaine, format horaire
+	 * ------------------------------------------------------------------- */
+
+	/**
+	 * Réglages des champs de date de l'application (OknoUI.date) : langue
+	 * de l'utilisateur en balise BCP 47, premier jour de la semaine et
+	 * horloge de 12 ou 24 heures, d'après les réglages de WordPress.
+	 *
+	 * @param string     $locale        Locale WordPress (fr_FR, en_US…).
+	 * @param int|string $start_of_week Option start_of_week (0 = dimanche).
+	 * @param string     $time_format   Option time_format (H:i, g:i a…).
+	 * @return array { locale, startOfWeek, hour12 } ; hour12 absent si le format ne le dit pas.
+	 */
+	public static function date_config( $locale, $start_of_week, $time_format ) {
+		$tag = str_replace( '_', '-', preg_replace( '/[^A-Za-z0-9_-]/', '', (string) $locale ) );
+		// Variantes WordPress (de_DE_formal, nl_NL_formal) : langue et pays seulement.
+		$tag   = preg_match( '/^([a-z]{2,3}(?:-[A-Z]{2})?)(?:-|$)/', $tag, $m ) ? $m[1] : '';
+		$start = is_numeric( $start_of_week ) ? (int) $start_of_week : 1;
+		$out   = array(
+			'locale'      => $tag,
+			'startOfWeek' => $start >= 0 && $start <= 6 ? $start : 1,
+		);
+		// Lettres échappées (\h) ignorées ; g / h = 12 heures, G / H = 24 heures.
+		$format = preg_replace( '/\\\\./', '', (string) $time_format );
+		if ( preg_match( '/[gh]/', $format ) ) {
+			$out['hour12'] = true;
+		} elseif ( preg_match( '/[GH]/', $format ) ) {
+			$out['hour12'] = false;
+		}
+		return $out;
+	}
+
+	/**
+	 * Script imprimé avant ui.js : window.OknoUIConfig.
+	 *
+	 * @return string
+	 */
+	public static function ui_config_script() {
+		$config = self::date_config(
+			function_exists( 'get_user_locale' ) ? get_user_locale() : get_locale(),
+			get_option( 'start_of_week', 1 ),
+			get_option( 'time_format', 'H:i' )
+		);
+		return 'window.OknoUIConfig = ' . wp_json_encode( $config ) . ';';
+	}
+
+	/* ---------------------------------------------------------------------
 	 * Thème clair / sombre
 	 * ------------------------------------------------------------------- */
 

@@ -9,7 +9,7 @@ msgstr ""
 "X-Domain: okno\n"
 
 #: assets/admin/admin.js:25 assets/admin/app-media.js:250
-#: includes/admin/class-okno-admin.php:244
+#: includes/admin/class-okno-admin.php:245
 msgid "Copied"
 msgstr "Copié"
 
@@ -756,7 +756,7 @@ msgstr "Le fichier remplace tout le schéma par : %s."
 
 #: assets/admin/app-collections.js:1796 assets/admin/app-collections.js:1855
 #: assets/admin/app-content.js:613 assets/admin/app-content.js:670
-#: assets/admin/app-content.js:1238 assets/admin/app.js:337
+#: assets/admin/app-content.js:1238 assets/admin/app.js:341
 msgid "Cancel"
 msgstr "Annuler"
 
@@ -768,7 +768,7 @@ msgstr "Importer"
 msgid "Schema imported."
 msgstr "Schéma importé."
 
-#: assets/admin/app-content.js:47 assets/admin/app.js:669
+#: assets/admin/app-content.js:47 assets/admin/app.js:673
 #: assets/admin/editor.js:1282
 msgid "Published"
 msgstr "Publié"
@@ -864,7 +864,7 @@ msgid "Search by title…"
 msgstr "Rechercher par titre…"
 
 #: assets/admin/app-content.js:230 assets/admin/app-content.js:258
-#: includes/admin/class-okno-admin.php:445
+#: includes/admin/class-okno-admin.php:446
 msgid "Status"
 msgstr "Statut"
 
@@ -1197,8 +1197,8 @@ msgstr "(sans titre)"
 msgid "Restore"
 msgstr "Restaurer"
 
-#: assets/admin/app-content.js:966 includes/admin/class-okno-admin.php:464
-#: includes/admin/class-okno-admin.php:466 includes/admin/class-okno-app.php:58
+#: assets/admin/app-content.js:966 includes/admin/class-okno-admin.php:465
+#: includes/admin/class-okno-admin.php:467 includes/admin/class-okno-app.php:58
 #: includes/admin/class-okno-dashboard.php:155
 msgid "Visual editor"
 msgstr "Éditeur visuel"
@@ -1410,7 +1410,7 @@ msgid "Media saved."
 msgstr "Média enregistré."
 
 #: assets/admin/app-media.js:218 assets/admin/editor.js:3690
-#: includes/admin/class-okno-admin.php:481
+#: includes/admin/class-okno-admin.php:482
 #: includes/admin/class-okno-dashboard.php:655
 msgid "Save"
 msgstr "Enregistrer"
@@ -1435,7 +1435,7 @@ msgstr "Décrit l’image pour les personnes qui ne la voient pas, et pour les m
 msgid "File URL"
 msgstr "URL du fichier"
 
-#: assets/admin/app-media.js:255 includes/admin/class-okno-admin.php:245
+#: assets/admin/app-media.js:255 includes/admin/class-okno-admin.php:246
 #: includes/admin/class-okno-dashboard.php:337
 #: includes/admin/class-okno-dashboard.php:358
 #: includes/admin/class-okno-dashboard.php:368
@@ -1477,111 +1477,111 @@ msgstr[0] "%d fichier envoyé."
 msgstr[1] "%d fichiers envoyés."
 
 #. translators: %s: text the user must type to confirm.
-#: assets/admin/app.js:323
+#: assets/admin/app.js:327
 msgid "Type %s to confirm"
 msgstr "Tapez %s pour confirmer"
 
-#: assets/admin/app.js:339
+#: assets/admin/app.js:343
 msgid "Confirm"
 msgstr "Confirmer"
 
-#: assets/admin/app.js:390 assets/admin/editor.js:3810
+#: assets/admin/app.js:394 assets/admin/editor.js:3810
 msgid "just now"
 msgstr "à l’instant"
 
 #. translators: %d: number of minutes.
-#: assets/admin/app.js:394 assets/admin/editor.js:3814
+#: assets/admin/app.js:398 assets/admin/editor.js:3814
 msgid "%d minute ago"
 msgid_plural "%d minutes ago"
 msgstr[0] "il y a %d min"
 msgstr[1] "il y a %d min"
 
 #. translators: %d: number of hours.
-#: assets/admin/app.js:398 assets/admin/editor.js:3819
+#: assets/admin/app.js:402 assets/admin/editor.js:3819
 msgid "%d hour ago"
 msgid_plural "%d hours ago"
 msgstr[0] "il y a %d h"
 msgstr[1] "il y a %d h"
 
-#: assets/admin/app.js:418
+#: assets/admin/app.js:422
 msgid "Something went wrong."
 msgstr "Un problème est survenu."
 
-#: assets/admin/app.js:444 assets/admin/editor.js:4206
-#: includes/admin/class-okno-admin.php:479
-#: includes/admin/class-okno-app.php:494
+#: assets/admin/app.js:448 assets/admin/editor.js:4206
+#: includes/admin/class-okno-admin.php:480
+#: includes/admin/class-okno-app.php:541
 msgid "Switch to dark theme"
 msgstr "Passer au thème sombre"
 
-#: assets/admin/app.js:444 assets/admin/editor.js:4206
+#: assets/admin/app.js:448 assets/admin/editor.js:4206
 msgid "Switch to light theme"
 msgstr "Passer au thème clair"
 
-#: assets/admin/app.js:479 includes/admin/class-okno-app.php:439
-#: includes/admin/class-okno-app.php:441
+#: assets/admin/app.js:483 includes/admin/class-okno-app.php:486
+#: includes/admin/class-okno-app.php:488
 msgid "Collapse the menu"
 msgstr "Replier le menu"
 
-#: assets/admin/app.js:479
+#: assets/admin/app.js:483
 msgid "Expand the menu"
 msgstr "Déplier le menu"
 
-#: assets/admin/app.js:505
+#: assets/admin/app.js:509
 msgid "Close the menu"
 msgstr "Fermer le menu"
 
-#: assets/admin/app.js:505 includes/admin/class-okno-app.php:474
+#: assets/admin/app.js:509 includes/admin/class-okno-app.php:521
 msgid "Open the menu"
 msgstr "Ouvrir le menu"
 
-#: assets/admin/app.js:626
+#: assets/admin/app.js:630
 msgid "Changes are waiting to be published. They will be published automatically."
 msgstr "Des modifications attendent d’être publiées. Elles le seront automatiquement."
 
-#: assets/admin/app.js:627
+#: assets/admin/app.js:631
 msgid "Some changes aren’t published yet."
 msgstr "Des modifications ne sont pas encore publiées."
 
-#: assets/admin/app.js:628
+#: assets/admin/app.js:632
 msgid "Everything is published"
 msgstr "Tout est publié"
 
-#: assets/admin/app.js:631 includes/admin/class-okno-admin.php:482
-#: includes/admin/class-okno-app.php:491
+#: assets/admin/app.js:635 includes/admin/class-okno-admin.php:483
+#: includes/admin/class-okno-app.php:538
 msgid "Publish"
 msgstr "Publier"
 
-#: assets/admin/app.js:631
+#: assets/admin/app.js:635
 msgid "Publish (unpublished changes)"
 msgstr "Publier (modifications non publiées)"
 
-#: assets/admin/app.js:634 assets/admin/app.js:660 assets/admin/app.js:695
+#: assets/admin/app.js:638 assets/admin/app.js:664 assets/admin/app.js:699
 #: assets/admin/editor.js:3981
 msgid "Publishing…"
 msgstr "Mise en ligne…"
 
-#: assets/admin/app.js:670
+#: assets/admin/app.js:674
 msgid "Your site is up to date."
 msgstr "Votre site est à jour."
 
-#: assets/admin/app.js:672
+#: assets/admin/app.js:676
 msgid "Publishing failed"
 msgstr "Échec de la publication"
 
-#: assets/admin/app.js:673 assets/admin/app.js:719
+#: assets/admin/app.js:677 assets/admin/app.js:723
 msgid "Publishing failed."
 msgstr "La publication a échoué."
 
-#: assets/admin/app.js:699 assets/admin/app.js:711
+#: assets/admin/app.js:703 assets/admin/app.js:715
 msgid "Publishing started."
 msgstr "Publication lancée."
 
-#: assets/admin/app.js:706
+#: assets/admin/app.js:710
 msgid "Publishing started"
 msgstr "Publication lancée"
 
 #. translators: %d: estimated build time in minutes.
-#: assets/admin/app.js:710
+#: assets/admin/app.js:714
 msgid "Publishing started. Your site will be up to date in about %d min."
 msgstr "Publication lancée. Votre site sera à jour dans %d min environ."
 
@@ -2028,7 +2028,7 @@ msgstr "Ouvrir dans un nouvel onglet"
 msgid "Search or add…"
 msgstr "Rechercher ou ajouter…"
 
-#: assets/admin/editor.js:3377 assets/admin/ui.js:706
+#: assets/admin/editor.js:3377 assets/admin/ui.js:725
 msgid "Search…"
 msgstr "Rechercher…"
 
@@ -2185,7 +2185,7 @@ msgstr "Enregistré. Cliquez sur « Publier » pour mettre en ligne."
 msgid "Saving failed."
 msgstr "Échec de l’enregistrement."
 
-#: assets/admin/editor.js:3707 includes/admin/class-okno-app.php:540
+#: assets/admin/editor.js:3707 includes/admin/class-okno-app.php:587
 msgid "Loading…"
 msgstr "Chargement…"
 
@@ -2277,27 +2277,106 @@ msgstr "Mise en ligne dans %d s"
 msgid "Your saved changes go live automatically. Click “Publish” to do it now."
 msgstr "Vos modifications enregistrées seront mises en ligne automatiquement. Cliquez sur « Publier » pour le faire tout de suite."
 
-#: assets/admin/ui.js:499
+#: assets/admin/ui.js:509
 msgid "Options"
 msgstr "Options"
 
-#: assets/admin/ui.js:783
+#: assets/admin/ui.js:802
 msgid "New: created when you save"
 msgstr "Nouvelle : créée à l’enregistrement"
 
 #. translators: %s: item name (e.g. a tag).
-#: assets/admin/ui.js:789
+#: assets/admin/ui.js:808
 msgid "Remove %s"
 msgstr "Retirer %s"
 
 #. translators: %s: name typed by the user (e.g. a new tag).
-#: assets/admin/ui.js:819
+#: assets/admin/ui.js:838
 msgid "Create “%s”"
 msgstr "Créer « %s »"
 
-#: assets/admin/ui.js:831
+#: assets/admin/ui.js:850
 msgid "No results"
 msgstr "Aucun résultat"
+
+#: assets/admin/ui.js:1126
+msgid "Choose a time"
+msgstr "Choisir une heure"
+
+#: assets/admin/ui.js:1128
+msgid "Choose a date"
+msgstr "Choisir une date"
+
+#: assets/admin/ui.js:1128
+msgid "Choose a date and time"
+msgstr "Choisir une date et une heure"
+
+#: assets/admin/ui.js:1147 assets/admin/ui.js:1312
+msgid "Clear"
+msgstr "Effacer"
+
+#. translators: %s: field label.
+#: assets/admin/ui.js:1147
+msgid "Clear %s"
+msgstr "Effacer %s"
+
+#: assets/admin/ui.js:1309
+msgid "Now"
+msgstr "Maintenant"
+
+#: assets/admin/ui.js:1309
+msgid "Today"
+msgstr "Aujourd’hui"
+
+#: assets/admin/ui.js:1319
+msgid "Done"
+msgstr "OK"
+
+#: assets/admin/ui.js:1338
+msgid "Time"
+msgstr "Heure"
+
+#: assets/admin/ui.js:1340
+msgid "Hour"
+msgstr "Heures"
+
+#: assets/admin/ui.js:1341
+msgid "Minutes"
+msgstr "Minutes"
+
+#: assets/admin/ui.js:1352
+msgid "AM or PM"
+msgstr "Matin ou après-midi"
+
+#. translators: %s: a month and its year (e.g. August 2026).
+#: assets/admin/ui.js:1494
+msgid "%s, choose a month"
+msgstr "%s, choisir un mois"
+
+#: assets/admin/ui.js:1495
+msgid "Previous month"
+msgstr "Mois précédent"
+
+#: assets/admin/ui.js:1496
+msgid "Next month"
+msgstr "Mois suivant"
+
+#. translators: %s: a year.
+#: assets/admin/ui.js:1501
+msgid "%s, choose a year"
+msgstr "%s, choisir une année"
+
+#: assets/admin/ui.js:1502
+msgid "Previous year"
+msgstr "Année précédente"
+
+#: assets/admin/ui.js:1503
+msgid "Next year"
+msgstr "Année suivante"
+
+#: assets/admin/ui.js:1507
+msgid "Back to the calendar"
+msgstr "Revenir au calendrier"
 
 #: includes/admin/class-okno-admin.php:95
 #: includes/collections/class-okno-collections.php:574
@@ -2309,196 +2388,196 @@ msgstr "Modifier avec Okno"
 msgid "Get started"
 msgstr "Démarrer"
 
-#: includes/admin/class-okno-admin.php:246
+#: includes/admin/class-okno-admin.php:247
 msgid "Checking…"
 msgstr "Vérification…"
 
-#: includes/admin/class-okno-admin.php:247
+#: includes/admin/class-okno-admin.php:248
 msgid "Connecting to the site…"
 msgstr "Connexion au site…"
 
 #. translators: 1: bridge version, 2: number of fields, 3: number of sections.
-#: includes/admin/class-okno-admin.php:249
+#: includes/admin/class-okno-admin.php:250
 msgid "Bridge v%1$s detected: %2$d annotated field(s) and %3$d section(s) on the home page. The editor is ready."
 msgstr "Bridge v%1$s détecté : %2$d champ(s) annoté(s) et %3$d section(s) sur la page d’accueil. L’éditeur est prêt."
 
-#: includes/admin/class-okno-admin.php:250
+#: includes/admin/class-okno-admin.php:251
 msgid "The bridge responds, but no field is annotated on the home page. Add data-wp-post and data-wp-field to your content elements."
 msgstr "Le bridge répond, mais aucun champ n’est annoté sur la page d’accueil. Ajoutez data-wp-post et data-wp-field aux éléments de contenu."
 
-#: includes/admin/class-okno-admin.php:251
+#: includes/admin/class-okno-admin.php:252
 msgid "The site didn’t respond within 10 seconds. Either the frame-ancestors header blocks display (step 2), or the bridge isn’t loaded (step 3)."
 msgstr "Le site n’a pas répondu en 10 secondes. Soit l’en-tête frame-ancestors bloque l’affichage (étape 2), soit le bridge n’est pas chargé (étape 3)."
 
-#: includes/admin/class-okno-admin.php:252
+#: includes/admin/class-okno-admin.php:253
 msgid "Can’t reach the site from the WordPress server."
 msgstr "Impossible de joindre le site depuis le serveur WordPress."
 
-#: includes/admin/class-okno-admin.php:365
+#: includes/admin/class-okno-admin.php:366
 msgid "Okno isn’t connected to your site yet"
 msgstr "Okno n’est pas encore connecté à votre site"
 
-#: includes/admin/class-okno-admin.php:366
+#: includes/admin/class-okno-admin.php:367
 msgid "Enter your site’s URL and install the bridge. The editor will then open right on your pages."
 msgstr "Indiquez l’adresse du site et installez le bridge : l’éditeur s’ouvrira ensuite directement sur vos pages."
 
-#: includes/admin/class-okno-admin.php:368
+#: includes/admin/class-okno-admin.php:369
 msgid "Connect the site"
 msgstr "Connecter le site"
 
-#: includes/admin/class-okno-admin.php:370
+#: includes/admin/class-okno-admin.php:371
 msgid "Ask the site administrator to finish the setup."
 msgstr "Demandez à l’administrateur du site de terminer la configuration."
 
-#: includes/admin/class-okno-admin.php:385
+#: includes/admin/class-okno-admin.php:386
 msgid "Selection fields"
 msgstr "Champs de la sélection"
 
-#: includes/admin/class-okno-admin.php:405
+#: includes/admin/class-okno-admin.php:406
 msgid "Entry"
 msgstr "Entrée"
 
-#: includes/admin/class-okno-admin.php:408
+#: includes/admin/class-okno-admin.php:409
 msgid "Entry fields"
 msgstr "Champs de l’entrée"
 
-#: includes/admin/class-okno-admin.php:430
+#: includes/admin/class-okno-admin.php:431
 msgid "Editor actions"
 msgstr "Actions de l’éditeur"
 
-#: includes/admin/class-okno-admin.php:433
+#: includes/admin/class-okno-admin.php:434
 msgid "Back to the entries"
 msgstr "Retour aux entrées"
 
-#: includes/admin/class-okno-admin.php:437
+#: includes/admin/class-okno-admin.php:438
 msgid "Back to Okno home"
 msgstr "Retour à l’accueil d’Okno"
 
-#: includes/admin/class-okno-admin.php:444
+#: includes/admin/class-okno-admin.php:445
 msgid "No page open"
 msgstr "Aucune page ouverte"
 
-#: includes/admin/class-okno-admin.php:454
+#: includes/admin/class-okno-admin.php:455
 msgid "Preview width"
 msgstr "Largeur de l’aperçu"
 
-#: includes/admin/class-okno-admin.php:455
+#: includes/admin/class-okno-admin.php:456
 msgid "Desktop"
 msgstr "Bureau"
 
-#: includes/admin/class-okno-admin.php:455
+#: includes/admin/class-okno-admin.php:456
 msgid "Desktop preview"
 msgstr "Aperçu bureau"
 
-#: includes/admin/class-okno-admin.php:456
+#: includes/admin/class-okno-admin.php:457
 msgid "Tablet"
 msgstr "Tablette"
 
-#: includes/admin/class-okno-admin.php:456
+#: includes/admin/class-okno-admin.php:457
 msgid "Tablet preview"
 msgstr "Aperçu tablette"
 
-#: includes/admin/class-okno-admin.php:457
+#: includes/admin/class-okno-admin.php:458
 msgid "Mobile"
 msgstr "Mobile"
 
-#: includes/admin/class-okno-admin.php:457
+#: includes/admin/class-okno-admin.php:458
 msgid "Mobile preview"
 msgstr "Aperçu mobile"
 
-#: includes/admin/class-okno-admin.php:468
+#: includes/admin/class-okno-admin.php:469
 msgid "View on the site"
 msgstr "Voir sur le site"
 
-#: includes/admin/class-okno-admin.php:468
+#: includes/admin/class-okno-admin.php:469
 msgid "View on the site (new tab)"
 msgstr "Voir sur le site (nouvel onglet)"
 
-#: includes/admin/class-okno-admin.php:471
-#: includes/admin/class-okno-admin.php:505
+#: includes/admin/class-okno-admin.php:472
+#: includes/admin/class-okno-admin.php:506
 msgid "History"
 msgstr "Historique"
 
-#: includes/admin/class-okno-admin.php:471
+#: includes/admin/class-okno-admin.php:472
 msgid "Show the history of this entry"
 msgstr "Afficher l’historique de cette entrée"
 
-#: includes/admin/class-okno-admin.php:475
+#: includes/admin/class-okno-admin.php:476
 msgid "Undo and redo"
 msgstr "Annuler et rétablir"
 
-#: includes/admin/class-okno-admin.php:476
+#: includes/admin/class-okno-admin.php:477
 msgid "Undo (Ctrl+Z)"
 msgstr "Annuler (Ctrl+Z)"
 
-#: includes/admin/class-okno-admin.php:476
+#: includes/admin/class-okno-admin.php:477
 msgid "Undo the last change"
 msgstr "Annuler la dernière modification"
 
-#: includes/admin/class-okno-admin.php:477
+#: includes/admin/class-okno-admin.php:478
 msgid "Redo (Ctrl+Shift+Z)"
 msgstr "Rétablir (Ctrl+Maj+Z)"
 
-#: includes/admin/class-okno-admin.php:477
+#: includes/admin/class-okno-admin.php:478
 msgid "Redo the undone change"
 msgstr "Rétablir la modification annulée"
 
-#: includes/admin/class-okno-admin.php:479
-#: includes/admin/class-okno-app.php:494
+#: includes/admin/class-okno-admin.php:480
+#: includes/admin/class-okno-app.php:541
 msgid "Light or dark theme"
 msgstr "Thème clair ou sombre"
 
-#: includes/admin/class-okno-admin.php:496
+#: includes/admin/class-okno-admin.php:497
 msgid "Site navigation"
 msgstr "Navigation du site"
 
-#: includes/admin/class-okno-admin.php:499
+#: includes/admin/class-okno-admin.php:500
 msgid "Pages"
 msgstr "Pages"
 
-#: includes/admin/class-okno-admin.php:502
+#: includes/admin/class-okno-admin.php:503
 msgid "Structure"
 msgstr "Structure"
 
-#: includes/admin/class-okno-admin.php:526
+#: includes/admin/class-okno-admin.php:527
 msgid "Pick a page on the left to show it here."
 msgstr "Choisissez une page à gauche pour l’afficher ici."
 
-#: includes/admin/class-okno-admin.php:528
+#: includes/admin/class-okno-admin.php:529
 msgid "Site preview"
 msgstr "Aperçu du site"
 
-#: includes/admin/class-okno-admin.php:531
+#: includes/admin/class-okno-admin.php:532
 msgid "The site isn’t responding"
 msgstr "Le site ne répond pas"
 
-#: includes/admin/class-okno-admin.php:532
+#: includes/admin/class-okno-admin.php:533
 msgid "The preview loaded, but the Okno bridge didn’t check in. Two possible causes:"
 msgstr "L’aperçu s’est chargé, mais le bridge Okno ne s’est pas présenté. Deux causes possibles :"
 
-#: includes/admin/class-okno-admin.php:534
+#: includes/admin/class-okno-admin.php:535
 msgid "Its frame-ancestors header must allow this address."
 msgstr "Son en-tête frame-ancestors doit autoriser cette adresse."
 
-#: includes/admin/class-okno-admin.php:534
+#: includes/admin/class-okno-admin.php:535
 msgid "The site refuses to be displayed in wp-admin."
 msgstr "Le site refuse d’être affiché dans wp-admin."
 
-#: includes/admin/class-okno-admin.php:535
+#: includes/admin/class-okno-admin.php:536
 msgid "Check the installation."
 msgstr "Vérifiez l’installation."
 
-#: includes/admin/class-okno-admin.php:535
+#: includes/admin/class-okno-admin.php:536
 msgid "The bridge isn’t loaded on this page."
 msgstr "Le bridge n’est pas chargé sur cette page."
 
-#: includes/admin/class-okno-admin.php:538
+#: includes/admin/class-okno-admin.php:539
 #: includes/admin/class-okno-dashboard.php:374
 #: includes/admin/class-okno-dashboard.php:378
 msgid "Test the connection"
 msgstr "Tester la connexion"
 
-#: includes/admin/class-okno-admin.php:552 includes/class-okno-cache.php:520
+#: includes/admin/class-okno-admin.php:553 includes/class-okno-cache.php:520
 #: includes/class-okno-rest.php:487
 msgid "Access denied."
 msgstr "Accès refusé."
@@ -2516,37 +2595,37 @@ msgstr "Publications"
 msgid "Settings"
 msgstr "Réglages"
 
-#: includes/admin/class-okno-app.php:409
+#: includes/admin/class-okno-app.php:456
 msgid "Skip to content"
 msgstr "Aller au contenu"
 
-#: includes/admin/class-okno-app.php:411
+#: includes/admin/class-okno-app.php:458
 msgid "Okno navigation"
 msgstr "Navigation d’Okno"
 
-#: includes/admin/class-okno-app.php:434 includes/admin/class-okno-app.php:436
+#: includes/admin/class-okno-app.php:481 includes/admin/class-okno-app.php:483
 msgid "Back to WordPress"
 msgstr "Retour à WordPress"
 
-#: includes/admin/class-okno-app.php:478
+#: includes/admin/class-okno-app.php:525
 #: includes/admin/class-okno-dashboard.php:492
 msgid "Your site"
 msgstr "Votre site"
 
-#: includes/admin/class-okno-app.php:481
+#: includes/admin/class-okno-app.php:528
 #: includes/admin/class-okno-dashboard.php:69
 msgid "View site"
 msgstr "Voir le site"
 
-#: includes/admin/class-okno-app.php:505
+#: includes/admin/class-okno-app.php:552
 msgid "Profile"
 msgstr "Profil"
 
-#: includes/admin/class-okno-app.php:509
+#: includes/admin/class-okno-app.php:556
 msgid "Log out"
 msgstr "Se déconnecter"
 
-#: includes/admin/class-okno-app.php:541
+#: includes/admin/class-okno-app.php:588
 msgid "Okno needs JavaScript."
 msgstr "Okno a besoin de JavaScript."
 

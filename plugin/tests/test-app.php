@@ -246,5 +246,19 @@ Okno_App::print_theme_head();
 $head = ob_get_clean();
 check( 'tête : thème posé sur <html> avant le rendu', false !== strpos( $head, "setAttribute( 'data-okno-theme'" ) && false !== strpos( $head, '"light"' ), $head );
 
+/* --- Champs de date : langue, premier jour, horloge --- */
+
+$fr = Okno_App::date_config( 'fr_FR', '1', 'H:i' );
+check( 'dates fr : balise BCP 47, lundi, 24 h', array( 'locale' => 'fr-FR', 'startOfWeek' => 1, 'hour12' => false ) === $fr, $fr );
+$us = Okno_App::date_config( 'en_US', 0, 'g:i a' );
+check( 'dates en_US : dimanche, 12 h', 'en-US' === $us['locale'] && 0 === $us['startOfWeek'] && true === $us['hour12'], $us );
+$formal = Okno_App::date_config( 'de_DE_formal', 6, 'G:i' );
+check( 'variante formelle : langue et pays', 'de-DE' === $formal['locale'] && 6 === $formal['startOfWeek'] && false === $formal['hour12'], $formal );
+check( 'langue seule (fr)', 'fr' === Okno_App::date_config( 'fr', 1, 'H:i' )['locale'] );
+check( 'jour invalide : lundi', 1 === Okno_App::date_config( 'fr_FR', 9, 'H:i' )['startOfWeek'] && 1 === Okno_App::date_config( 'fr_FR', 'x', 'H:i' )['startOfWeek'] );
+check( 'lettre échappée ignorée (\\h)', false === Okno_App::date_config( 'fr_FR', 1, 'G\\hi' )['hour12'] );
+check( 'format sans heure : horloge laissée au navigateur', ! array_key_exists( 'hour12', Okno_App::date_config( 'fr_FR', 1, 'i' ) ) );
+check( 'locale bizarre : vide', '' === Okno_App::date_config( '<script>', 1, 'H:i' )['locale'] );
+
 echo empty( $GLOBALS['failed'] ) ? "\nTout est vert.\n" : "\nÉCHECS.\n";
 exit( empty( $GLOBALS['failed'] ) ? 0 : 1 );

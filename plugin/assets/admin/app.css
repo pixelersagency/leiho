@@ -3850,6 +3850,373 @@ body.okno-app-body #wpbody-content {
 	font-weight: 500;
 }
 
+/* ── Dates et heures (OknoUI.date) ─────────────────────────────────── */
+
+/*
+ * Bouton au format d'un champ + calendrier (role dialog) à la place de
+ * <input type="date|datetime-local|time">, qui reste dans la page, masqué,
+ * pour la valeur.
+ */
+.okno-date-native {
+	display: none !important;
+}
+
+.okno-date {
+	position: relative;
+	display: flex;
+	width: 100%;
+	min-width: 0;
+}
+
+.okno-date[hidden] {
+	display: none;
+}
+
+.okno-date__icon {
+	flex: 0 0 auto;
+	width: 16px;
+	height: 16px;
+	color: var(--okno-faint);
+}
+
+.okno-date__trigger[aria-expanded="true"] .okno-date__icon {
+	color: var(--okno-accent-ink);
+}
+
+.okno-date.is-clearable .okno-date__trigger {
+	padding-right: 38px;
+}
+
+.okno-date__clear {
+	position: absolute;
+	top: 50%;
+	right: 5px;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 26px;
+	height: 26px;
+	min-height: 0;
+	margin: 0;
+	padding: 0;
+	border: 0;
+	border-radius: 5px;
+	background: transparent;
+	color: var(--okno-faint);
+	box-shadow: none;
+	cursor: pointer;
+	transform: translateY( -50% );
+}
+
+.okno-date__clear[hidden] {
+	display: none;
+}
+
+.okno-date__clear:hover {
+	background: var(--okno-active);
+	color: var(--okno-ink);
+}
+
+.okno-date__clear svg {
+	width: 14px;
+	height: 14px;
+}
+
+.okno-datepicker {
+	position: fixed;
+	z-index: 160000; /* Comme les menus : sous la médiathèque (1000000). */
+	width: 300px;
+	max-width: calc( 100vw - 16px );
+	box-sizing: border-box;
+	padding: 10px;
+	border: 1px solid var(--okno-line-strong);
+	border-radius: 10px;
+	background: var(--okno-elevated, #1d1d1d);
+	box-shadow: var(--okno-shadow);
+	color: var(--okno-ink);
+	font-family: var(--okno-font);
+	font-size: var(--okno-text-base, 14px);
+	line-height: 1.3;
+	animation: okno-listbox-in 0.1s ease-out;
+}
+
+@media ( prefers-reduced-motion: reduce ) {
+	.okno-datepicker {
+		animation: none;
+	}
+}
+
+.okno-datepicker button {
+	font-family: inherit;
+}
+
+.okno-datepicker__head {
+	display: flex;
+	align-items: center;
+	gap: 4px;
+	margin-bottom: 6px;
+}
+
+.okno-datepicker__nav,
+.okno-datepicker__title {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	height: var(--okno-control-sm, 30px);
+	min-height: 0;
+	margin: 0;
+	padding: 0;
+	border: 0;
+	border-radius: 6px;
+	background: transparent;
+	color: var(--okno-ink);
+	box-shadow: none;
+	cursor: pointer;
+}
+
+.okno-datepicker__nav {
+	flex: 0 0 auto;
+	width: var(--okno-control-sm, 30px);
+	color: var(--okno-muted);
+}
+
+.okno-datepicker__nav[hidden] {
+	display: none;
+}
+
+.okno-datepicker__nav svg {
+	width: 16px;
+	height: 16px;
+}
+
+.okno-datepicker__title {
+	flex: 1 1 auto;
+	gap: 6px;
+	padding: 0 8px;
+	font-size: var(--okno-text-base, 14px);
+	font-weight: 600;
+}
+
+.okno-datepicker__title-chevron {
+	width: 14px;
+	height: 14px;
+	color: var(--okno-faint);
+	transition: transform 0.12s ease;
+}
+
+.okno-datepicker__title[aria-expanded="true"] .okno-datepicker__title-chevron {
+	transform: rotate( 180deg );
+}
+
+.okno-datepicker__nav:hover,
+.okno-datepicker__title:hover {
+	background: var(--okno-hover);
+	color: var(--okno-ink);
+}
+
+.okno-datepicker__grid {
+	width: 100%;
+	border-collapse: collapse;
+	border-spacing: 0;
+	table-layout: fixed;
+}
+
+.okno-datepicker__grid th {
+	height: 28px;
+	padding: 0;
+	color: var(--okno-faint);
+	font-size: var(--okno-text-xs, 12px);
+	font-weight: 500;
+	text-align: center;
+	text-transform: lowercase;
+}
+
+.okno-datepicker__day {
+	height: 36px;
+	padding: 0;
+	border: 0;
+	border-radius: 7px;
+	color: var(--okno-ink);
+	font-size: var(--okno-text-sm, 13px);
+	font-variant-numeric: tabular-nums;
+	text-align: center;
+	cursor: pointer;
+	user-select: none;
+}
+
+.okno-datepicker__day:hover {
+	background: var(--okno-hover);
+}
+
+.okno-datepicker__day.is-outside {
+	color: var(--okno-faint);
+	opacity: 0.6;
+}
+
+.okno-datepicker__day.is-today {
+	box-shadow: inset 0 0 0 1px var(--okno-accent-line);
+	font-weight: 600;
+}
+
+.okno-datepicker__day[aria-selected="true"],
+.okno-datepicker__day[aria-selected="true"]:hover {
+	background: var(--okno-accent);
+	color: var(--okno-on-accent);
+	font-weight: 600;
+	opacity: 1;
+}
+
+.okno-datepicker__day[aria-disabled="true"] {
+	background: none;
+	color: var(--okno-faint);
+	opacity: 0.35;
+	text-decoration: line-through;
+	cursor: not-allowed;
+}
+
+.okno-app .okno-datepicker__day:focus-visible,
+.okno-app .okno-datepicker__choice:focus-visible {
+	outline: 2px solid var(--okno-accent-ink);
+	outline-offset: -2px;
+}
+
+.okno-app .okno-datepicker__day[aria-selected="true"]:focus-visible {
+	outline-color: var(--okno-on-accent);
+	box-shadow: 0 0 0 2px var(--okno-accent);
+}
+
+.okno-datepicker__choices {
+	display: grid;
+	grid-template-columns: repeat( 3, 1fr );
+	gap: 4px;
+	padding: 2px;
+}
+
+.okno-datepicker__years {
+	grid-template-columns: repeat( 4, 1fr );
+	max-height: 252px;
+	overflow-y: auto;
+	overscroll-behavior: contain;
+}
+
+.okno-datepicker__choice {
+	height: 40px;
+	min-height: 0;
+	margin: 0;
+	padding: 0 4px;
+	border: 0;
+	border-radius: 7px;
+	background: transparent;
+	color: var(--okno-ink);
+	box-shadow: none;
+	font-size: var(--okno-text-sm, 13px);
+	font-variant-numeric: tabular-nums;
+	cursor: pointer;
+}
+
+.okno-datepicker__choice:hover {
+	background: var(--okno-hover);
+}
+
+.okno-datepicker__choice.is-today {
+	box-shadow: inset 0 0 0 1px var(--okno-accent-line);
+}
+
+.okno-datepicker__choice[aria-pressed="true"],
+.okno-datepicker__choice[aria-pressed="true"]:hover {
+	background: var(--okno-accent);
+	color: var(--okno-on-accent);
+	font-weight: 600;
+}
+
+.okno-datepicker__choice:disabled {
+	opacity: 0.35;
+	cursor: not-allowed;
+}
+
+.okno-datepicker__time {
+	display: flex;
+	align-items: center;
+	gap: 6px;
+	margin-top: 8px;
+	padding-top: 10px;
+	border-top: 1px solid var(--okno-line);
+}
+
+.okno-datepicker--time .okno-datepicker__time {
+	margin-top: 0;
+	padding-top: 0;
+	border-top: 0;
+}
+
+.okno-datepicker__time-label {
+	flex: 1 1 auto;
+	color: var(--okno-muted);
+	font-size: var(--okno-text-sm, 13px);
+	font-weight: 500;
+}
+
+.okno-datepicker__time .okno-select {
+	width: auto;
+	min-width: 64px;
+	font-variant-numeric: tabular-nums;
+}
+
+.okno-datepicker__colon {
+	color: var(--okno-faint);
+	font-weight: 600;
+}
+
+.okno-datepicker__foot {
+	display: flex;
+	align-items: center;
+	gap: 6px;
+	margin-top: 10px;
+	padding-top: 10px;
+	border-top: 1px solid var(--okno-line);
+}
+
+.okno-datepicker__action {
+	display: inline-flex;
+	align-items: center;
+	height: var(--okno-control-sm, 30px);
+	min-height: 0;
+	margin: 0;
+	padding: 0 10px;
+	border: 0;
+	border-radius: 6px;
+	background: var(--okno-input);
+	color: var(--okno-ink);
+	box-shadow: none;
+	font-size: var(--okno-text-sm, 13px);
+	font-weight: 500;
+	cursor: pointer;
+}
+
+.okno-datepicker__action:hover {
+	background: var(--okno-active);
+}
+
+.okno-datepicker__action[hidden] {
+	display: none;
+}
+
+.okno-datepicker__action:disabled {
+	opacity: 0.4;
+	cursor: not-allowed;
+}
+
+.okno-datepicker__action--primary {
+	margin-left: auto;
+	background: var(--okno-accent);
+	color: var(--okno-on-accent);
+	font-weight: 600;
+}
+
+.okno-datepicker__action--primary:hover {
+	background: var(--okno-accent-hover);
+}
+
 /* ── Choix multiples en pastilles (OknoUI.chips) ───────────────────── */
 
 .okno-chips {

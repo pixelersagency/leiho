@@ -144,9 +144,10 @@ class Okno_Admin {
 
 		$view = Okno_App::current_view();
 		wp_enqueue_style( 'okno-app', OKNO_URL . 'assets/admin/app.css', array(), self::asset_version( 'assets/admin/app.css' ) );
-		// Composants partagés (listes déroulantes, pastilles, thème).
+		// Composants partagés (listes déroulantes, dates, pastilles, thème).
 		wp_register_script( 'okno-ui', OKNO_URL . 'assets/admin/ui.js', array( 'wp-api-fetch', 'wp-i18n' ), self::asset_version( 'assets/admin/ui.js' ), true );
 		wp_set_script_translations( 'okno-ui', 'okno', OKNO_DIR . 'languages' );
+		wp_add_inline_script( 'okno-ui', Okno_App::ui_config_script(), 'before' );
 
 		if ( 'editor' === $view || 'collections' === $view ) {
 			// L'éditeur gère lui-même la publication automatique.

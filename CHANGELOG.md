@@ -2,6 +2,17 @@
 
 All notable changes to Okno are documented here. The project follows [Semantic Versioning](https://semver.org/). The plugin and the bridge package share one version number.
 
+## [Unreleased]
+
+### Changed
+
+- **Dates and times are picked with Okno's own picker** instead of the browser's (date, date and time, time fields of ACF and Okno collections, and the publish date). The field shows the value in the site's language (« 11 août 2026, 21:56 »), with a calendar icon and a clear button when the field isn't required. The calendar follows the app's theme in light and dark: weeks start on the day set in Settings → General, today is marked, the selected day is lime, days of the neighbouring months are dimmed, days outside a field's minimum / maximum are disabled; the month title opens a month grid, then a year list; **Today** / **Now** and **Clear** actions. Date and time fields get an hour and a minutes menu (24 h or 12 h after the site's time format, the field's step for minutes) and **Done**. Keyboard: arrows move by day / week, Page Up / Page Down by month (with Shift: by year), Home / End to the start / end of the week, Enter picks, Escape closes and returns to the field. `dialog` / `grid` semantics, selected day and month changes announced. The native input stays in the page, hidden, with the same value formats (`YYYY-MM-DD`, `YYYY-MM-DDTHH:MM`, `HH:MM`): nothing changes in what is saved.
+- `window.OknoUI.date( input )` enhances a date, date-time or time input; `OknoUI.autoSelects()` now also upgrades the date inputs it finds, including those added later. The site's language, first day of the week and clock are passed to the scripts as `window.OknoUIConfig`.
+
+### Fixed
+
+- Escape in a menu or a calendar opened inside an Okno dialog closes only the menu, not the dialog.
+
 ## [1.0.0-beta.10] — 2026-11-04
 
 ### Fixed
