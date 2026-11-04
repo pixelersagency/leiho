@@ -378,6 +378,11 @@
 		} else {
 			body.appendChild( renderGeneral( d, cur ) );
 			if ( ! cur.isNew ) {
+				// Contexte de la collection pour l'IA (ai.js), enregistré à part.
+				var aiCard = window.OknoAI ? window.OknoAI.collectionCard( d.id ) : null;
+				if ( aiCard ) {
+					body.appendChild( aiCard );
+				}
 				body.appendChild( renderArchived( cur.item ) );
 				var imported = cur.item.acf_import;
 				if ( imported ) {

@@ -159,6 +159,7 @@
 		undo: 'M9 7l-5 5 5 5 M4 12h10a5 5 0 0 1 0 10h-3',
 		redo: 'M15 7l5 5-5 5 M20 12H10a5 5 0 0 0 0 10h3',
 		moon: 'M20 14.5A8.5 8.5 0 0 1 9.5 4a8.5 8.5 0 1 0 10.5 10.5z',
+		sparkle: 'M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8z M19 17l.7 2 2 .7-2 .7-.7 2-.7-2-2-.7 2-.7z',
 		sun: 'M12 8.5a3.5 3.5 0 1 0 0 7 3.5 3.5 0 0 0 0-7z M12 3v2 M12 19v2 M3 12h2 M19 12h2 M5.6 5.6l1.4 1.4 M17 17l1.4 1.4 M5.6 18.4L7 17 M17 7l1.4-1.4',
 	};
 
@@ -2265,7 +2266,9 @@
 			return wrap;
 		}
 
-		var control = buildControl( rootCtx( field ), { onlyRows: onlyRows, id: controlId } );
+		var rootContext = rootCtx( field );
+		var control = buildControl( rootContext, { onlyRows: onlyRows, id: controlId } );
+		addAiTrigger( wrap, rootContext, field.label );
 		if ( control ) {
 			wrap.appendChild( control );
 		}
@@ -2582,10 +2585,135 @@
 
 		var ctx = childCtx( topField, sub, path, holder, metaHolder, sub.path );
 		var control = buildControl( ctx, { id: id } );
+		addAiTrigger( wrap, ctx, sub.label );
 		if ( control ) {
 			wrap.appendChild( control );
 		}
 		return wrap;
+	}
+
+	/* ------------------------------------------------------------------ *
+	 * IA (ai.js) : menu des champs texte, contexte de l'entrée
+	 * ------------------------------------------------------------------ */
+
+	/**
+	 * Bouton « IA » d'un champ texte, posé après son libellé. Le texte
+	 * accepté passe par le contrôle lui-même (input, TinyMCE) : compteur,
+	 * aperçu, brouillon local et historique d'annulation suivent.
+	 */
+	function addAiTrigger( wrap, ctx, label ) {
+		var ai = window.OknoAI;
+		if ( ! ai || ! ai.isTextField( ctx.def ) ) {
+			return;
+		}
+		var btn = ai.fieldTrigger( {
+			postId: Number( ctx.topField._post ),
+			path: ctx.path,
+			def: ctx.def,
+			label: ctx.path === ctx.topField.path ? label : composedLabel( ctx ),
+			read: function () {
+				var value = ctx.read();
+				return null === value || undefined === value ? '' : String( value );
+			},
+			write: function ( value ) {
+				aiWrite( wrap, ctx, value );
+			},
+			context: function () {
+				return entryTexts( ctx.topField._post, ctx.path );
+			},
+		} );
+		if ( btn ) {
+			wrap.classList.add( 'has-ai' );
+			var labelEl = wrap.querySelector( 'label' );
+			wrap.insertBefore( btn, labelEl ? labelEl.nextSibling : wrap.firstChild );
+		}
+	}
+
+	/** « Sections › #2 › Titre » pour une cellule. */
+	function composedLabel( ctx ) {
+		var parts = [ ctx.topField.label ];
+		var def = ctx.topField;
+		ctx.path.split( '.' ).slice( 1 ).forEach( function ( seg ) {
+			if ( /^\d+$/.test( seg ) ) {
+				parts.push( '#' + ( Number( seg ) + 1 ) );
+				return;
+			}
+			var subs = def.sub_fields || [];
+			( def.layouts || [] ).forEach( function ( l ) {
+				subs = subs.concat( l.sub_fields || [] );
+			} );
+			var sub = subs.find( function ( f ) {
+				return f.path === seg;
+			} );
+			if ( sub ) {
+				parts.push( sub.label );
+				def = sub;
+			}
+		} );
+		return parts.join( ' › ' );
+	}
+
+	function aiWrite( wrap, ctx, value ) {
+		if ( 'wysiwyg' === ctx.def.type ) {
+			var area = wrap.querySelector( 'textarea' );
+			var ed = area && window.tinymce ? window.tinymce.get( area.id ) : null;
+			if ( ed && ! ed.isHidden() ) {
+				ed.undoManager.transact( function () {
+					ed.setContent( value );
+				} );
+				ed.fire( 'change' );
+				ed.focus();
+				return;
+			}
+			if ( area ) {
+				area.value = value;
+			}
+			ctx.write( value, { rendered: value } );
+			return;
+		}
+		var input = wrap.querySelector( 'input:not([type="checkbox"]):not([type="radio"]), textarea' );
+		if ( input ) {
+			input.value = value;
+			input.dispatchEvent( new Event( 'input', { bubbles: true } ) );
+			input.focus();
+			return;
+		}
+		ctx.write( value );
+	}
+
+	/**
+	 * Textes de l'entrée tels qu'ils sont dans l'éditeur (changements non
+	 * enregistrés compris) : contexte envoyé à l'IA.
+	 */
+	function entryTexts( postId, skipPath ) {
+		var out = [];
+		var schema = state.schemas[ String( postId ) ];
+		if ( ! schema ) {
+			return out;
+		}
+		schema.groups.forEach( function ( group ) {
+			group.fields.forEach( function ( field ) {
+				if ( false === field.supported ) {
+					return;
+				}
+				walkField( field, field.value, field.meta, field.path, function ( path, display, type ) {
+					if ( out.length >= 60 || path === skipPath || [ 'text', 'textarea', 'wysiwyg' ].indexOf( type ) === -1 ) {
+						return;
+					}
+					var text = String( display || '' );
+					if ( 'wysiwyg' === type ) {
+						var div = document.createElement( 'div' );
+						div.innerHTML = text;
+						text = div.textContent || '';
+					}
+					text = text.replace( /\s+/g, ' ' ).trim();
+					if ( text ) {
+						out.push( { path: path, label: path === field.path ? field.label : field.label + ' › ' + path.split( '.' ).slice( 1 ).join( ' › ' ), value: text.slice( 0, 1500 ) } );
+					}
+				} );
+			} );
+		} );
+		return out;
 	}
 
 	/* ------------------------------------------------------------------ *
@@ -3152,6 +3280,32 @@
 
 		row.appendChild( choose );
 		row.appendChild( remove );
+
+		// Texte alternatif écrit par l'IA, enregistré sur l'image (médiathèque).
+		var altBtn = isImage && window.OknoAI ? window.OknoAI.altTrigger( {
+			attachmentId: function () {
+				return Number( ctx.read() ) || 0;
+			},
+			postId: Number( ctx.topField._post ),
+			context: ctx.def.label,
+			small: true,
+			onAccept: function ( text ) {
+				var id = Number( ctx.read() ) || 0;
+				return apiFetch( { path: '/wp/v2/media/' + id, method: 'POST', data: { alt_text: text } } ).then( function () {
+					toast( __( 'Alternative text saved on the image.', 'okno' ) );
+				} );
+			},
+		} ) : null;
+		if ( altBtn ) {
+			altBtn.hidden = ! ctx.read();
+			row.appendChild( altBtn );
+			var setMediaBase = setMedia;
+			setMedia = function ( attachment ) {
+				setMediaBase( attachment );
+				altBtn.hidden = ! attachment;
+			};
+		}
+
 		container.appendChild( row );
 		container.appendChild( cropNote );
 		return container;
@@ -3751,6 +3905,16 @@
 		meta.className = 'okno-timeline-meta';
 		meta.textContent = ( item.user || __( 'Unknown user', 'okno' ) ) + ' · ' + relativeTime( item.when );
 		li.appendChild( meta );
+
+		// Action d'IA : le libellé de l'action, sans avant / après.
+		if ( 'ai' === item.type ) {
+			var action = document.createElement( 'span' );
+			action.className = 'okno-timeline-ai';
+			action.appendChild( icon( 'sparkle', 13 ) );
+			action.appendChild( document.createTextNode( ' ' + ( item.action || __( 'AI', 'okno' ) ) ) );
+			li.appendChild( action );
+			return li;
+		}
 
 		var change = document.createElement( 'span' );
 		change.className = 'okno-timeline-change';

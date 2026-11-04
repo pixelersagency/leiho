@@ -200,12 +200,19 @@ class Okno_Dashboard {
 						?>
 					</span>
 				</div>
-				<?php if ( $post_id && get_post( $post_id ) ) : ?>
+				<?php if ( $post_id && get_post( $post_id ) && 'attachment' !== get_post_type( $post_id ) ) : ?>
 					<a class="okno-btn okno-btn--quiet okno-btn--small" href="<?php echo esc_url( $open_url ); ?>">
 						<?php esc_html_e( 'Open', 'okno' ); ?>
 					</a>
 				<?php endif; ?>
 			</div>
+			<?php if ( Okno_Activity::TYPE_AI === $activity->field_type ) : ?>
+				<p class="okno-log__ai"><?php Okno_Icons::render( 'sparkle', 14 ); ?> <?php echo esc_html( Okno_Activity::ai_label( $activity->new_value ) ); ?></p>
+			</li>
+				<?php
+				return;
+			endif;
+			?>
 			<div class="okno-diff">
 				<div class="okno-diff__value">
 					<span class="okno-diff__label"><?php esc_html_e( 'Before', 'okno' ); ?></span>
@@ -644,6 +651,8 @@ class Okno_Dashboard {
 					</div>
 				</section>
 
+				<?php self::render_brand_settings(); ?>
+
 				<?php self::render_content_api_settings( $settings ); ?>
 
 				<div class="okno-savebar">
@@ -657,6 +666,110 @@ class Okno_Dashboard {
 				</div>
 			</form>
 		</div>
+		<?php
+	}
+
+	/**
+	 * Contexte de marque : ce que l'IA doit savoir pour écrire à la place de
+	 * la marque, et l'état du fournisseur d'IA.
+	 *
+	 * @return void
+	 */
+	private static function render_brand_settings() {
+		$brand  = Okno_AI_Brand::get();
+		$status = Okno_AI::status();
+		$lines  = static function ( $items ) {
+			return implode( "\n", (array) $items );
+		};
+		$fields = array(
+			'prefer'    => array( __( 'Words to prefer', 'okno' ), __( 'One per line: your terms, how you name your offer.', 'okno' ) ),
+			'avoid'     => array( __( 'Words to avoid', 'okno' ), __( 'One per line: jargon, competitors’ terms, overused words.', 'okno' ) ),
+			'forbidden' => array( __( 'Forbidden claims', 'okno' ), __( 'One per line. Never written by the AI, and flagged in every proposal before you accept it. Matched without case or accents, at the start of a word (“guarantee” also flags “guaranteed”, “4 h” also flags “4h”); write /pattern/i for a regular expression.', 'okno' ) ),
+			'facts'     => array( __( 'Mandatory facts', 'okno' ), __( 'One per line: phone number, legal mentions, figures that must stay exact.', 'okno' ) ),
+		);
+		?>
+		<section class="okno-form-section" id="okno-brand" data-okno-brand>
+			<h2><?php esc_html_e( 'Brand context (AI)', 'okno' ); ?></h2>
+			<p class="okno-help"><?php esc_html_e( 'What the AI needs to know to write like you. It’s sent with every AI request, together with the entry being edited.', 'okno' ); ?></p>
+
+			<div class="okno-row">
+				<span class="okno-row__label"><?php esc_html_e( 'AI provider', 'okno' ); ?></span>
+				<div>
+					<?php if ( ! $status['client'] ) : ?>
+						<span class="okno-pill okno-pill--warn"><?php esc_html_e( 'Unavailable', 'okno' ); ?></span>
+						<span class="okno-help"><?php esc_html_e( 'AI in Okno uses the AI client of WordPress 7.0 and later. Update WordPress to use it.', 'okno' ); ?></span>
+					<?php elseif ( ! $status['text'] ) : ?>
+						<span class="okno-pill okno-pill--warn"><?php esc_html_e( 'Not configured', 'okno' ); ?></span>
+						<span class="okno-help"><?php esc_html_e( 'No AI provider is set up for text generation yet. Okno never stores API keys: it uses the provider configured in WordPress.', 'okno' ); ?></span>
+						<a class="okno-btn okno-btn--quiet" href="<?php echo esc_url( Okno_AI::connectors_url() ); ?>"><?php Okno_Icons::render( 'sparkle', 14 ); ?> <?php esc_html_e( 'Set up an AI provider', 'okno' ); ?></a>
+					<?php else : ?>
+						<span class="okno-pill okno-pill--ok"><?php esc_html_e( 'Ready', 'okno' ); ?></span>
+						<span class="okno-help">
+							<?php
+							echo esc_html( $status['image'] ? __( 'Text generation and image descriptions (alternative text) are available.', 'okno' ) : __( 'Text generation is available. The provider can’t read images, so alternative text isn’t offered.', 'okno' ) );
+							?>
+							<a href="<?php echo esc_url( Okno_AI::connectors_url() ); ?>"><?php esc_html_e( 'Settings → Connectors', 'okno' ); ?></a>
+						</span>
+					<?php endif; ?>
+					<span class="okno-help okno-ai-privacy"><?php esc_html_e( 'Privacy: when someone uses an AI action, the brand context, the text of the field and the other fields of the entry (or the image, for alternative text) are sent to the provider configured in Settings → Connectors, under its terms. Okno keeps a line in the change log (who, which field, which action), never the prompt.', 'okno' ); ?></span>
+				</div>
+			</div>
+
+			<div class="okno-row">
+				<label for="okno_brand_name"><?php esc_html_e( 'Brand name', 'okno' ); ?></label>
+				<div><input type="text" id="okno_brand_name" name="okno_brand[name]" value="<?php echo esc_attr( $brand['name'] ); ?>" data-brand-key="name"></div>
+			</div>
+			<div class="okno-row">
+				<label for="okno_brand_offer"><?php esc_html_e( 'Activity and offer', 'okno' ); ?></label>
+				<div>
+					<textarea id="okno_brand_offer" name="okno_brand[offer]" rows="3" data-brand-key="offer"><?php echo esc_textarea( $brand['offer'] ); ?></textarea>
+					<span class="okno-help"><?php esc_html_e( 'What you do and sell, in a few sentences.', 'okno' ); ?></span>
+				</div>
+			</div>
+			<div class="okno-row">
+				<label for="okno_brand_audience"><?php esc_html_e( 'Audience', 'okno' ); ?></label>
+				<div><textarea id="okno_brand_audience" name="okno_brand[audience]" rows="2" data-brand-key="audience"><?php echo esc_textarea( $brand['audience'] ); ?></textarea></div>
+			</div>
+			<div class="okno-row">
+				<label for="okno_brand_tone"><?php esc_html_e( 'Tone of voice', 'okno' ); ?></label>
+				<div>
+					<textarea id="okno_brand_tone" name="okno_brand[tone]" rows="2" data-brand-key="tone" placeholder="<?php esc_attr_e( 'Direct, expert, warm; short sentences; “vous”.', 'okno' ); ?>"><?php echo esc_textarea( $brand['tone'] ); ?></textarea>
+				</div>
+			</div>
+			<div class="okno-row">
+				<label for="okno_brand_language"><?php esc_html_e( 'Language', 'okno' ); ?></label>
+				<div>
+					<input type="text" id="okno_brand_language" name="okno_brand[language]" value="<?php echo esc_attr( $brand['language'] ); ?>" placeholder="<?php esc_attr_e( 'French (France)', 'okno' ); ?>" data-brand-key="language">
+					<span class="okno-help"><?php esc_html_e( 'Language of the texts written by the AI. Empty: the language of the existing content.', 'okno' ); ?></span>
+				</div>
+			</div>
+			<?php foreach ( $fields as $key => $field ) : ?>
+				<div class="okno-row">
+					<label for="okno_brand_<?php echo esc_attr( $key ); ?>"><?php echo esc_html( $field[0] ); ?></label>
+					<div>
+						<textarea id="okno_brand_<?php echo esc_attr( $key ); ?>" name="okno_brand[<?php echo esc_attr( $key ); ?>]" rows="<?php echo 'forbidden' === $key ? 5 : 3; ?>" data-brand-key="<?php echo esc_attr( $key ); ?>" data-brand-list><?php echo esc_textarea( $lines( $brand[ $key ] ) ); ?></textarea>
+						<span class="okno-help"><?php echo esc_html( $field[1] ); ?></span>
+					</div>
+				</div>
+			<?php endforeach; ?>
+			<div class="okno-row">
+				<span class="okno-row__label"><?php esc_html_e( 'Sample texts', 'okno' ); ?></span>
+				<div class="okno-brand-samples">
+					<?php for ( $i = 0; $i < Okno_AI_Brand::SAMPLES; $i++ ) : ?>
+						<textarea name="okno_brand[samples][]" rows="3" data-brand-key="samples" aria-label="<?php echo esc_attr( sprintf( /* translators: %d: sample number. */ __( 'Sample text %d', 'okno' ), $i + 1 ) ); ?>"><?php echo esc_textarea( isset( $brand['samples'][ $i ] ) ? $brand['samples'][ $i ] : '' ); ?></textarea>
+					<?php endfor; ?>
+					<span class="okno-help"><?php esc_html_e( 'Up to three texts written in your voice (a page intro, a product description…). The AI takes their style, not their content.', 'okno' ); ?></span>
+				</div>
+			</div>
+			<div class="okno-row">
+				<span class="okno-row__label"><?php esc_html_e( 'Share', 'okno' ); ?></span>
+				<div class="okno-brand-tools">
+					<button type="button" class="okno-btn okno-btn--quiet" data-okno-brand-export><?php esc_html_e( 'Export (JSON)', 'okno' ); ?></button>
+					<button type="button" class="okno-btn okno-btn--quiet" data-okno-brand-import><?php esc_html_e( 'Import…', 'okno' ); ?></button>
+					<span class="okno-help"><?php esc_html_e( 'Reuse the same brand context on another site. Importing fills the fields above: check them, then save.', 'okno' ); ?></span>
+				</div>
+			</div>
+		</section>
 		<?php
 	}
 

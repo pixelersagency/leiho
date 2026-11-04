@@ -235,7 +235,20 @@
 			] ),
 			'image' === item.media_type
 				? h( 'div', { class: 'okno-setting' }, [
-					h( 'label', { class: 'okno-label', for: altId, text: __( 'Alternative text', 'okno' ) } ),
+					h( 'div', { class: 'okno-setting__head' }, [
+						h( 'label', { class: 'okno-label', for: altId, text: __( 'Alternative text', 'okno' ) } ),
+						// Proposition de l'IA (ai.js) : remplit le champ, « Enregistrer » la garde.
+						window.OknoAI ? window.OknoAI.altTrigger( {
+							attachmentId: function () {
+								return item.id;
+							},
+							small: true,
+							onAccept: function ( text ) {
+								alt.value = text;
+								alt.focus();
+							},
+						} ) : null,
+					] ),
 					alt,
 					h( 'p', { class: 'okno-help', text: __( 'Describes the image for people who can’t see it, and for search engines.', 'okno' ) } ),
 				] )

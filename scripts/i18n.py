@@ -35,7 +35,7 @@ PLURAL_FORMS = 'nplurals=2; plural=(n > 1);'
 JS_FILES = [
     'assets/admin/editor.js', 'assets/admin/admin.js', 'assets/admin/app.js',
     'assets/admin/app-content.js', 'assets/admin/app-collections.js', 'assets/admin/app-media.js',
-    'assets/admin/ui.js',
+    'assets/admin/ui.js', 'assets/admin/ai.js',
 ]
 
 PHP_KEYWORDS = [

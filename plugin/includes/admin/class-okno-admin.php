@@ -153,11 +153,12 @@ class Okno_Admin {
 			// L'éditeur gère lui-même la publication automatique.
 			$this->enqueue_editor( 'collections' === $view ? 'form' : 'visual' );
 			$this->enqueue_shell( $view );
+			$this->enqueue_ai();
 			if ( 'collections' === $view ) {
 				// Constructeur de champs des collections Okno (administrateurs).
-				$deps = array( 'okno-app', 'okno-editor', 'wp-api-fetch', 'wp-i18n' );
+				$deps = array( 'okno-app', 'okno-ai', 'okno-editor', 'wp-api-fetch', 'wp-i18n' );
 				if ( Okno_Collections_Rest::can_manage() ) {
-					wp_enqueue_script( 'okno-app-collections', OKNO_URL . 'assets/admin/app-collections.js', array( 'okno-app', 'wp-api-fetch', 'wp-i18n' ), self::asset_version( 'assets/admin/app-collections.js' ), true );
+					wp_enqueue_script( 'okno-app-collections', OKNO_URL . 'assets/admin/app-collections.js', array( 'okno-app', 'okno-ai', 'wp-api-fetch', 'wp-i18n' ), self::asset_version( 'assets/admin/app-collections.js' ), true );
 					wp_set_script_translations( 'okno-app-collections', 'okno', OKNO_DIR . 'languages' );
 					$deps[] = 'okno-app-collections';
 				}
@@ -171,10 +172,15 @@ class Okno_Admin {
 		if ( in_array( $view, array( 'home', 'start', 'settings', 'deploys' ), true ) ) {
 			$this->enqueue_dashboard();
 			$this->enqueue_shell( $view );
+			if ( 'settings' === $view ) {
+				// Contexte de marque : export / import JSON.
+				$this->enqueue_ai();
+			}
 		} else {
-			wp_enqueue_script( 'okno-app-' . $view, OKNO_URL . 'assets/admin/app-' . $view . '.js', array( 'okno-app', 'wp-api-fetch', 'wp-i18n' ), self::asset_version( 'assets/admin/app-' . $view . '.js' ), true );
-			wp_set_script_translations( 'okno-app-' . $view, 'okno', OKNO_DIR . 'languages' );
 			$this->enqueue_shell( $view );
+			$this->enqueue_ai();
+			wp_enqueue_script( 'okno-app-' . $view, OKNO_URL . 'assets/admin/app-' . $view . '.js', array( 'okno-app', 'okno-ai', 'wp-api-fetch', 'wp-i18n' ), self::asset_version( 'assets/admin/app-' . $view . '.js' ), true );
+			wp_set_script_translations( 'okno-app-' . $view, 'okno', OKNO_DIR . 'languages' );
 		}
 		$this->enqueue_autopublish();
 	}
@@ -190,6 +196,19 @@ class Okno_Admin {
 		wp_enqueue_script( 'okno-app', OKNO_URL . 'assets/admin/app.js', array( 'okno-ui', 'wp-api-fetch', 'wp-i18n' ), self::asset_version( 'assets/admin/app.js' ), true );
 		wp_set_script_translations( 'okno-app', 'okno', OKNO_DIR . 'languages' );
 		wp_add_inline_script( 'okno-app', 'window.OknoAppConfig = ' . wp_json_encode( Okno_App::config( $view ) ) . ';', 'before' );
+	}
+
+	/**
+	 * Outils d'IA (window.OknoAI) : actions sur les champs, nouvelle entrée,
+	 * texte alternatif, contexte de marque. Le script est chargé même sans
+	 * fournisseur : il affiche alors le lien vers les connecteurs.
+	 *
+	 * @return void
+	 */
+	private function enqueue_ai() {
+		wp_enqueue_script( 'okno-ai', OKNO_URL . 'assets/admin/ai.js', array( 'okno-app', 'wp-api-fetch', 'wp-i18n' ), self::asset_version( 'assets/admin/ai.js' ), true );
+		wp_set_script_translations( 'okno-ai', 'okno', OKNO_DIR . 'languages' );
+		wp_add_inline_script( 'okno-ai', 'window.OknoAIConfig = ' . wp_json_encode( Okno_AI::client_config() ) . ';', 'before' );
 	}
 
 	/**
@@ -601,6 +620,12 @@ class Okno_Admin {
 		}
 
 		update_option( Okno_Plugin::OPTION_SETTINGS, $settings );
+
+		// Contexte de marque (IA) : ses propres champs, les contextes des
+		// collections sont gardés.
+		if ( isset( $_POST['okno_brand'] ) && is_array( $_POST['okno_brand'] ) ) {
+			Okno_AI_Brand::save( wp_unslash( $_POST['okno_brand'] ) ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Okno_AI_Brand::normalize() nettoie chaque valeur.
+		}
 
 		// Secrets : champ vide = inchangé, valeur = remplacement.
 		$secrets = isset( $_POST['okno_secret'] ) && is_array( $_POST['okno_secret'] ) ? wp_unslash( $_POST['okno_secret'] ) : array(); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized

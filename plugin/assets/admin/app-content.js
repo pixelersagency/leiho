@@ -322,6 +322,21 @@
 		} }, icon( 'plus' ) );
 	}
 
+	/** Nouvelle entrée écrite par l'IA (ai.js), créée en brouillon puis ouverte. */
+	function aiEntryButton() {
+		var t = currentType();
+		if ( ! t || ! t.canCreate || t.singleton || ! window.OknoAI ) {
+			return null;
+		}
+		return window.OknoAI.newEntryButton( t, function ( post ) {
+			guardEntry().then( function ( ok ) {
+				if ( ok ) {
+					showCreated( post, t.name );
+				}
+			} );
+		} );
+	}
+
 	function setPanel( panel ) {
 		if ( panel === state.panel ) {
 			return;
@@ -717,7 +732,7 @@
 	function renderListHead() {
 		var t = currentType();
 		listTitle.textContent = t ? t.label : __( 'No content type', 'okno' );
-		App.append( App.clear( listTools ), [ canImport( t ) ? importButton( t, false ) : null, tabsControl(), newEntryButton() ] );
+		App.append( App.clear( listTools ), [ canImport( t ) ? importButton( t, false ) : null, tabsControl(), aiEntryButton(), newEntryButton() ] );
 	}
 
 	function newCollection() {
@@ -1263,21 +1278,7 @@
 				App.api( { path: '/okno/v1/posts', method: 'POST', data: { post_type: postType, title: title.value.trim() } } )
 					.then( function ( post ) {
 						dialog.close();
-						App.notifyChanged();
-						if ( Editor && Editor.current() ) {
-							Editor.close();
-						}
-						state.current = 0;
-						if ( postType !== state.type ) {
-							state.type = postType;
-							state.page = 1;
-						}
-						state.panel = 'entries';
-						applyPanel();
-						loadCounts();
-						return load().then( function () {
-							selectEntry( post );
-						} );
+						return showCreated( post, postType );
 					} )
 					.catch( function ( err ) {
 						busy = false;
@@ -1285,6 +1286,25 @@
 					} );
 			} );
 		}
+	}
+
+	/** Entrée créée : la liste de son type se recharge et l'entrée s'ouvre. */
+	function showCreated( post, postType ) {
+		App.notifyChanged();
+		if ( Editor && Editor.current() ) {
+			Editor.close();
+		}
+		state.current = 0;
+		if ( postType !== state.type ) {
+			state.type = postType;
+			state.page = 1;
+		}
+		state.panel = 'entries';
+		applyPanel();
+		loadCounts();
+		return load().then( function () {
+			selectEntry( post );
+		} );
 	}
 
 	/* ------------------------------------------------------------------ *
