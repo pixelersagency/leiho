@@ -50,7 +50,7 @@ Parts of the Okno app's layout and styles (three-pane Collections view, list row
 == Changelog ==
 
 = 1.0.0-beta.10 =
-* Publishing mode cards no longer overlap their radio button. Field types show an icon in "Add a field".
+* Dates and times are picked with Okno's own calendar. Publishing mode cards no longer overlap their radio button. Field types show an icon in "Add a field".
 
 = 1.0.0-beta.9 =
 * Import from ACF into Okno Collections, one content type at a time, with a preview, a resumable import checked entry by entry, and a way back to ACF. Entries show WordPress's own fields (content, excerpt, slug, taxonomies, author, date, parent and order); the app is larger and uses Okno menus, chips, checkboxes and switches; no theme flash between views.
