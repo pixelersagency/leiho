@@ -41,6 +41,20 @@
 	// aperçu du site, quel que soit son type.
 	var FORM = 'form' === cfg.mode;
 
+	// Langues : chaque appel /leiho/v1/ part dans la langue éditée (lecture,
+	// enregistrement, liste des contenus et leurs adresses préfixées).
+	var I18N = cfg.i18n && cfg.i18n.enabled ? cfg.i18n : null;
+	if ( I18N ) {
+		apiFetch.use( function ( options, next ) {
+			if ( state.locale && options.path && 0 === options.path.indexOf( '/leiho/v1/' ) && ! /[?&]locale=/.test( options.path ) ) {
+				options = Object.assign( {}, options, {
+					path: options.path + ( options.path.indexOf( '?' ) === -1 ? '?' : '&' ) + 'locale=' + encodeURIComponent( state.locale ),
+				} );
+			}
+			return next( options );
+		} );
+	}
+
 	var PER_PAGE = 50;
 	var AUTOSAVE_MS = 2000;
 	var HISTORY_MAX = 50;
@@ -76,6 +90,8 @@
 		frameUrl: '', // Dernière URL annoncée par le bridge (navigation client comprise).
 		pendingField: cfg.initialField || '', // Lien profond : champ à ouvrir au premier handshake.
 		saving: false,
+		// Langue éditée (Collections avec plusieurs langues) : vide = langue par défaut.
+		locale: '',
 		fieldErrors: {}, // "postId:path" -> code d'erreur renvoyé par le dernier enregistrement.
 		publishing: false, // Clic sur « Publier » en cours (son save n'arme pas la minuterie).
 		auto: {
@@ -113,6 +129,8 @@
 		historyList: document.getElementById( 'leiho-history-list' ),
 		saveState: document.getElementById( 'leiho-save-state' ),
 		status: document.getElementById( 'leiho-status' ),
+		locale: document.getElementById( 'leiho-locale' ),
+		translate: document.getElementById( 'leiho-translate' ),
 		openVisual: document.getElementById( 'leiho-open-visual' ),
 		openSite: document.getElementById( 'leiho-open-site' ),
 		historyToggle: document.getElementById( 'leiho-history-toggle' ),
@@ -362,7 +380,7 @@
 	 * ------------------------------------------------------------------ */
 
 	function draftKey( postId ) {
-		return 'leiho-draft-' + postId;
+		return 'leiho-draft-' + postId + ( state.locale ? '-' + state.locale : '' );
 	}
 
 	function scheduleDraft() {
@@ -1435,6 +1453,138 @@
 		document.dispatchEvent( new CustomEvent( 'leiho:entry-changed', { detail: { id: post.id, type: post.type, status: post.status } } ) );
 	}
 
+	/* ------------------------------------------------------------------ *
+	 * Langues
+	 * ------------------------------------------------------------------ */
+
+	var LOCALE_STATUS = {
+		missing: __( 'not translated', 'leiho' ),
+		partial: __( 'partly translated', 'leiho' ),
+		outdated: __( 'original changed', 'leiho' ),
+	};
+	var LOCALE_DOTS = { complete: 'ok', partial: 'warn', outdated: 'warn', missing: 'neutral' };
+
+	/** Sélecteur de langue : seulement pour une entrée de Collections traduisible. */
+	function renderLocale( info ) {
+		var select = els.locale;
+		if ( ! select ) {
+			return;
+		}
+		var translation = !! info && info.locale !== info.default;
+		select.hidden = ! info;
+		els.root.classList.toggle( 'is-translation', translation );
+		if ( els.translate ) {
+			els.translate.hidden = ! translation || ! window.LeihoAI || ! window.LeihoAI.enabled();
+		}
+		if ( ! info ) {
+			return;
+		}
+		select.innerHTML = '';
+		info.locales.forEach( function ( locale ) {
+			var status = ( info.statuses || {} )[ locale.code ] || 'complete';
+			var opt = document.createElement( 'option' );
+			opt.value = locale.code;
+			opt.textContent = LOCALE_STATUS[ status ]
+				? /* translators: 1: language name, 2: translation status. */ sprintf( __( '%1$s · %2$s', 'leiho' ), locale.label, LOCALE_STATUS[ status ] )
+				: locale.label;
+			opt.dataset.dot = LOCALE_DOTS[ status ] || 'neutral';
+			opt.selected = locale.code === info.locale;
+			select.appendChild( opt );
+		} );
+		select.dataset.status = ( info.statuses || {} )[ info.locale ] || 'complete';
+	}
+
+	/** Change la langue éditée et rouvre l'entrée courante dans cette langue. */
+	function switchLocale( code ) {
+		if ( ! state.post || ! I18N ) {
+			return;
+		}
+		var wanted = code === I18N.default ? '' : code;
+		if ( wanted === state.locale ) {
+			return;
+		}
+		if ( ! confirmLoseChanges() ) {
+			renderLocale( ( state.schemas[ String( state.post.id ) ] || {} ).i18n );
+			return;
+		}
+		state.locale = wanted;
+		var id = state.post.id;
+		apiFetch( { path: '/leiho/v1/posts/' + id } )
+			.then( function ( fresh ) {
+				openPost( fresh );
+				if ( ! FORM ) {
+					loadPosts(); // Titres et adresses de la liste dans cette langue.
+				}
+			} )
+			.catch( function ( err ) {
+				toast( ( err && err.message ) || __( 'Couldn’t switch language.', 'leiho' ), true );
+			} );
+	}
+
+	if ( els.locale ) {
+		els.locale.addEventListener( 'change', function () {
+			switchLocale( els.locale.value );
+		} );
+	}
+
+	/**
+	 * Traduction par l'IA des champs pas encore traduits : les textes
+	 * arrivent comme une saisie (aperçu, annuler), à relire puis enregistrer.
+	 */
+	function translateWithAI() {
+		var post = state.post;
+		if ( ! post || ! state.locale || state.saving ) {
+			return;
+		}
+		if ( isDirty() ) {
+			// L'IA part de la traduction enregistrée : rien de la saisie en cours n'est perdu.
+			toast( __( 'Save your changes first, then translate.', 'leiho' ), true );
+			return;
+		}
+		els.translate.disabled = true;
+		els.translate.classList.add( 'is-busy' );
+		apiFetch( { path: '/leiho/v1/ai/translate', method: 'POST', data: { post_id: post.id, locale: state.locale, mode: 'missing' } } )
+			.then( function ( result ) {
+				if ( state.post !== post ) {
+					return;
+				}
+				var count = 0;
+				Object.keys( result.values || {} ).forEach( function ( path ) {
+					var field = state.fields[ fieldKey( post.id, path ) ];
+					if ( field ) {
+						rootCtx( field ).write( clone( result.values[ path ] ) );
+					}
+				} );
+				count = ( result.items || [] ).length;
+				renderInspector();
+				var warnings = Object.keys( result.warnings || {} ).length;
+				var message = sprintf(
+					/* translators: %d: number of translated texts. */
+					_n( '%d text translated. Review it, then save.', '%d texts translated. Review them, then save.', count, 'leiho' ),
+					count
+				);
+				if ( warnings ) {
+					/* translators: %d: number of texts to check. */
+					message += ' ' + sprintf( _n( '%d needs a check (length or forbidden words).', '%d need a check (length or forbidden words).', warnings, 'leiho' ), warnings );
+				}
+				if ( result.remaining ) {
+					message += ' ' + __( 'Save, then translate again for the rest.', 'leiho' );
+				}
+				toast( message, false );
+			} )
+			.catch( function ( err ) {
+				toast( ( err && err.message ) || __( 'Couldn’t translate this entry.', 'leiho' ), true );
+			} )
+			.then( function () {
+				els.translate.disabled = false;
+				els.translate.classList.remove( 'is-busy' );
+			} );
+	}
+
+	if ( els.translate ) {
+		els.translate.addEventListener( 'click', translateWithAI );
+	}
+
 	function openPost( post, options ) {
 		options = options || {};
 		// Contenu sans page sur le site (collection sans chemin) : sa collection.
@@ -1470,6 +1620,7 @@
 
 		return apiFetch( { path: '/leiho/v1/schema/' + post.id } ).then( function ( schema ) {
 			indexSchema( schema );
+			renderLocale( schema.i18n );
 
 			var draft = readDraft( post.id );
 			if ( draft && draft.revision === schema.revision && draft.dirty ) {
@@ -1512,7 +1663,8 @@
 					hydrateFrame();
 				}
 			} else {
-				loadFrame( post.preview_url );
+				// Le schéma donne l'adresse dans la langue éditée (/fr/…).
+				loadFrame( schema.preview_url || post.preview_url );
 			}
 			switchTab( 'structure' );
 			setButtons();
@@ -2481,6 +2633,10 @@
 		}
 
 		input.id = options.id || uid( 'input' );
+		// Traduction : le texte d'origine en indication tant que le champ est vide.
+		if ( def.original && ( 'TEXTAREA' === input.tagName || 'text' === input.type ) ) {
+			input.placeholder = def.original;
+		}
 		if ( def.required ) {
 			input.setAttribute( 'aria-required', 'true' );
 		}

@@ -328,6 +328,7 @@ class Leiho_Admin {
 			'canDeploy'            => Leiho_Deploy_Manager::user_can_deploy(),
 			'autoDeploy'           => Leiho_Deploy_Manager::auto_enabled() ? self::autopublish_config() : null,
 			'formTypes'            => self::form_types(),
+			'i18n'                 => Leiho_I18n::client_config(),
 		);
 		// phpcs:enable
 
@@ -465,6 +466,9 @@ class Leiho_Admin {
 						<span id="leiho-current-title" class="leiho-current-title"><?php echo esc_html( $form ? '' : __( 'No page open', 'leiho' ) ); ?></span>
 						<label class="screen-reader-text" for="leiho-status"><?php esc_html_e( 'Status', 'leiho' ); ?></label>
 						<select id="leiho-status" class="leiho-status-select" hidden></select>
+						<label class="screen-reader-text" for="leiho-locale"><?php esc_html_e( 'Language', 'leiho' ); ?></label>
+						<select id="leiho-locale" class="leiho-status-select leiho-locale-select" hidden></select>
+						<button type="button" id="leiho-translate" class="leiho-btn leiho-btn--quiet leiho-btn--small leiho-translate-btn" hidden><?php esc_html_e( 'Translate with AI', 'leiho' ); ?></button>
 					</span>
 					<span id="leiho-save-state" class="leiho-save-state" aria-live="polite"></span>
 				</div>

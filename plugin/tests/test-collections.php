@@ -574,12 +574,17 @@ $en = $adapter->get_content( 1 );
 check( 'langue par défaut inchangée', 'Bonjour' === $en['hero_title'] && 'bonjour@example.com' === $en['contact']['email'], $en );
 
 /* Repli : un champ traduisible vide dans la traduction reprend l'original. */
-$adapter->save_values( 1, array( 'sections' => array( array( '_layout' => 'hero', 'body' => '<p>Hello</p>' ) ) ) );
+$adapter->save_values( 1, array( 'sections' => array( array( '_layout' => 'hero', 'body' => '<p>Hello</p>' ), array( '_layout' => 'hero', 'body' => '<p>Second</p>' ) ) ) );
 Leiho_I18n::set_current( 'fr' );
 check( 'repli sur l\'original', false !== strpos( $adapter->get_content( 1 )['sections'][0]['body'], 'Hello' ), $adapter->get_content( 1 )['sections'] );
 check( 'statut partiel', 'partial' === Leiho_I18n::status( 1, 'fr' ) );
 $r = $adapter->save_values( 1, array( 'sections.0.body' => '<p>Bonjour</p>' ) );
 check( 'traduction partielle d\'une liste : part de l\'original', array() === $r['errors'] && false !== strpos( $adapter->get_content( 1 )['sections'][0]['body'], 'Bonjour' ), $r );
+$fr = $adapter->get_content( 1 );
+check( 'ligne pas encore traduite : repli par élément', false !== strpos( $fr['sections'][1]['body'], 'Second' ), $fr['sections'] );
+$stored = Leiho_I18n::row( 1, 'fr' )['data']['sections'];
+check( 'texte d\'origine pas copié dans la traduction', false === strpos( (string) $stored, 'Second' ), $stored );
+check( 'statut partiel tant qu\'une ligne manque', 'partial' === Leiho_I18n::status( 1, 'fr' ) );
 Leiho_I18n::set_current( 'en' );
 check( 'original de la liste intact', false !== strpos( $adapter->get_content( 1 )['sections'][0]['body'], 'Hello' ) );
 

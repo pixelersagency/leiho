@@ -92,6 +92,7 @@ function wp_json_encode( $v, $o = 0 ) { return json_encode( $v, $o ); }
 function sanitize_text_field( $v ) { return trim( preg_replace( '/[\r\n\t ]+/', ' ', strip_tags( (string) $v ) ) ); }
 function sanitize_textarea_field( $v ) { return trim( strip_tags( (string) $v ) ); }
 function sanitize_key( $v ) { return strtolower( preg_replace( '/[^a-z0-9_\-]/i', '', (string) $v ) ); }
+function wp_strip_all_tags( $v ) { return strip_tags( (string) $v ); }
 function absint( $v ) { return abs( (int) $v ); }
 function wp_kses_post( $v ) { return preg_replace( '#<script.*?</script>#is', '', (string) $v ); }
 function admin_url( $p = '' ) { return 'https://wp.test/wp-admin/' . $p; }
@@ -127,9 +128,26 @@ class Leiho_Schema {
 	public static $fixture = null;
 	public static $saved   = array();
 	public function __construct( $p = null ) {}
-	public function get( $id ) { return self::$fixture; }
+	public static $by_locale = array();
+	public function get( $id ) { return isset( self::$by_locale[ Leiho_I18n::current() ] ) ? self::$by_locale[ Leiho_I18n::current() ] : self::$fixture; }
 	public function save( $id, $values ) { self::$saved[ $id ] = $values; return array( 'saved' => array_keys( $values ), 'errors' => array(), 'schema' => null ); }
 	public static function revision( $id ) { return 'rev1'; }
+}
+/** Langues : en par défaut, fr déclarée. */
+class Leiho_I18n {
+	public static $current = 'en';
+	public static $statuses = array();
+	public static function enabled() { return true; }
+	public static function default_locale() { return 'en'; }
+	public static function codes() { return array( 'en', 'fr' ); }
+	public static function valid( $c ) { $c = strtolower( (string) $c ); return in_array( $c, self::codes(), true ) ? $c : null; }
+	public static function label( $c ) { return 'fr' === $c ? 'French' : 'English'; }
+	public static function current() { return self::$current; }
+	public static function status( $id, $c ) { return isset( self::$statuses[ $c ] ) ? self::$statuses[ $c ] : 'partial'; }
+	public static function in_locale( $c, $fn ) { $prev = self::$current; self::$current = $c; try { return $fn(); } finally { self::$current = $prev; } }
+}
+class Leiho_Collections {
+	public static function for_post_type( $t ) { return 'service' === $t ? array( 'id' => 'service' ) : null; }
 }
 class Leiho_Native_Fields {
 	public static function content_fields( $post ) {
@@ -179,6 +197,7 @@ require __DIR__ . '/../includes/ai/class-leiho-ai-prompt.php';
 require __DIR__ . '/../includes/ai/class-leiho-ai-brand.php';
 require __DIR__ . '/../includes/ai/class-leiho-ai.php';
 require __DIR__ . '/../includes/ai/class-leiho-ai-rest.php';
+require __DIR__ . '/../includes/ai/class-leiho-ai-translate.php';
 require __DIR__ . '/../includes/ai/class-leiho-ai-abilities.php';
 
 /**
@@ -687,7 +706,8 @@ check( 'contexte de marque : interdits et consigne', in_array( 'COFRAC', $ctx['b
  * Capacités : recherche, nouveau brouillon, texte alternatif
  * ------------------------------------------------------------------- */
 
-check( 'capacités : sept capacités de contenu', array( 'leiho/get-brand-context', 'leiho/list-collections', 'leiho/get-entry', 'leiho/update-entry-fields', 'leiho/search-entries', 'leiho/create-draft', 'leiho/suggest-alt-text' ) === array_keys( Leiho_AI_Abilities::definitions() ) );
+check( 'capacités : onze capacités de contenu', array( 'leiho/get-brand-context', 'leiho/list-collections', 'leiho/get-entry', 'leiho/update-entry-fields', 'leiho/search-entries', 'leiho/create-draft', 'leiho/suggest-alt-text', 'leiho/list-translations', 'leiho/get-translation', 'leiho/update-translation', 'leiho/translate-entry' ) === array_keys( Leiho_AI_Abilities::definitions() ), array_keys( Leiho_AI_Abilities::definitions() ) );
+check( 'capacités : traduction lue en lecture seule, écrite sans destruction', true === Leiho_AI_Abilities::definitions()['leiho/get-translation']['meta']['annotations']['readonly'] && false === Leiho_AI_Abilities::definitions()['leiho/update-translation']['meta']['annotations']['destructive'] );
 Fake_Builder::$image_ok = false;
 Leiho_AI::status( true );
 $GLOBALS['abilities'] = array();
@@ -767,6 +787,63 @@ if ( ! is_wp_error( $alt ) ) {
 } else {
 	check( 'texte alternatif : image lisible dans le test', false, $alt );
 }
+
+/* ---------------------------------------------------------------------
+ * Traduction
+ * ------------------------------------------------------------------- */
+
+$GLOBALS['posts'][90] = (object) array( 'ID' => 90, 'post_type' => 'service', 'post_status' => 'publish', 'post_title' => 'Audit' );
+$GLOBALS['posts'][91] = (object) array( 'ID' => 91, 'post_type' => 'page', 'post_status' => 'publish', 'post_title' => 'Page' );
+$tr_schema = function ( $title, $intro, $rows, $code ) {
+	return array(
+		'post_id' => 90, 'title' => $title, 'status' => 'publish', 'revision' => 'r',
+		'groups'  => array(
+			array( 'fields' => array(
+				array( 'path' => '_title', 'type' => 'text', 'label' => 'Title', 'localized' => true, 'value' => $title ),
+				array( 'path' => 'intro', 'type' => 'wysiwyg', 'label' => 'Intro', 'localized' => true, 'value' => $intro ),
+				array( 'path' => 'code', 'type' => 'textarea', 'label' => 'Snippet', 'code' => true, 'localized' => true, 'value' => $code ),
+				array( 'path' => 'price', 'type' => 'text', 'label' => 'Price', 'localized' => false, 'value' => '90 €' ),
+				array( 'path' => 'steps', 'type' => 'repeater', 'label' => 'Steps', 'localized' => true, 'value' => $rows, 'sub_fields' => array(
+					array( 'path' => 'title', 'type' => 'text', 'label' => 'Title', 'max_length' => 20 ),
+					array( 'path' => 'image', 'type' => 'image', 'label' => 'Image' ),
+				) ),
+			) ),
+		),
+	);
+};
+Leiho_Schema::$by_locale = array(
+	'en' => $tr_schema( 'Air audit', '<p>We <strong>measure</strong> the air.</p>', array( array( 'title' => 'Visit', 'image' => 5 ), array( 'title' => 'Report', 'image' => 6 ) ), '<div>x</div>' ),
+	'fr' => $tr_schema( 'Audit de l’air', '', array( array( 'title' => 'Visite', 'image' => 5 ), array( 'title' => '', 'image' => 6 ) ), '' ),
+);
+$units = Leiho_AI_Translate::units( 90, 'fr' );
+$by    = array_column( $units['units'], null, 'path' );
+check( 'traduction : textes traduisibles seulement (pas de code, pas de champ partagé)', array( '_title', 'intro', 'steps.0.title', 'steps.1.title' ) === array_keys( $by ), array_keys( $by ) );
+check( 'traduction : original et traduction actuelle', 'Report' === $by['steps.1.title']['source'] && '' === $by['steps.1.title']['translation'] );
+check( 'traduction : format html et longueur', 'html' === $by['intro']['format'] && 20 === $by['steps.0.title']['max_length'] );
+check( 'traduction : langue par défaut refusée', is_wp_error( Leiho_AI_Translate::units( 90, 'en' ) ) && is_wp_error( Leiho_AI_Translate::units( 90, 'de' ) ) );
+check( 'traduction : type sans langues refusé', is_wp_error( Leiho_AI_Translate::units( 91, 'fr' ) ) );
+
+Fake_Builder::$log     = array();
+Fake_Builder::$error   = null;
+Fake_Builder::$answers = array( '{"t1":"<p>Nous <strong>mesurons</strong> l’air.</p><script>x</script>","t2":"Rapport"}' );
+$res = Leiho_AI_Translate::translate( 90, 'fr' );
+check( 'traduction IA : seulement les textes manquants', ! is_wp_error( $res ) && array( 'intro', 'steps.1.title' ) === array_keys( (array) $res['translations'] ), $res );
+$prompt = end( Fake_Builder::$log )['prompt'];
+check( 'traduction IA : langues et règle des balises dans la demande', false !== strpos( $prompt, 'to French (fr)' ) && false !== strpos( $prompt, 'keep every HTML tag' ) && false !== strpos( $prompt, 'We <strong>measure</strong>' ) );
+check( 'traduction IA : HTML nettoyé', false === strpos( $res['translations']->intro, '<script' ) );
+$values = (array) $res['values'];
+check( 'traduction IA : valeur complète de la liste, traduction existante gardée', 'Visite' === $values['steps'][0]['title'] && 'Rapport' === $values['steps'][1]['title'] && 6 === $values['steps'][1]['image'], $values );
+Fake_Builder::$answers = array( '{"t1":"x"}' );
+$res = Leiho_AI_Translate::translate( 90, 'fr', 'all' );
+check( 'traduction IA : texte manquant signalé', ! is_wp_error( $res ) && 'missing' === $res['warnings']->intro, $res );
+
+Leiho_Schema::$saved = array();
+$w = Leiho_AI_Translate::write( 90, 'fr', array( '_title' => 'Autre', 'steps.1.title' => 'Rapport', 'price' => '1 €' ), false );
+check( 'agent : entrée en ligne, texte déjà traduit refusé', 'already_translated' === $w['errors']->_title, $w );
+check( 'agent : champ partagé refusé', 'not_translatable' === $w['errors']->price );
+check( 'agent : texte vide rempli dans la langue demandée', array( 'steps.1.title' => 'Rapport' ) === Leiho_Schema::$saved[90] && array( 'steps.1.title' ) === $w['saved'], Leiho_Schema::$saved );
+$w = Leiho_AI_Translate::write( 90, 'fr', array( '_title' => 'Autre' ), true );
+check( 'agent : brouillon, tout modifiable', array( '_title' ) === $w['saved'] );
 
 echo empty( $GLOBALS['failed'] ) ? "\nTOUS LES TESTS PASSENT\n" : "\nÉCHECS\n";
 exit( empty( $GLOBALS['failed'] ) ? 0 : 1 );

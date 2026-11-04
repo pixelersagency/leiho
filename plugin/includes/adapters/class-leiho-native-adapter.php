@@ -169,13 +169,18 @@ class Leiho_Native_Adapter extends Leiho_Field_Adapter {
 			return array();
 		}
 
-		$raw    = $this->raw_values( $collection, $post_id );
+		$raw = $this->raw_values( $collection, $post_id );
+		// Traduction : le texte d'origine sert d'indication dans les champs vides.
+		$source = Leiho_I18n::is_translation() ? $this->raw_values( $collection, $post_id, Leiho_I18n::default_locale() ) : null;
 		$fields = array();
 		foreach ( $this->fields( $collection ) as $name => $def ) {
 			$entry              = array_merge( $this->describe( $def['engine'] ), $this->read_value( $def['engine'], $raw[ $name ] ) );
 			$entry['source']    = 'collections';
 			$entry['localized'] = Leiho_I18n::is_localized( $def['field'] );
-			$fields[]        = $entry;
+			if ( $source && $entry['localized'] && is_string( $source[ $name ] ) && '' !== $source[ $name ] ) {
+				$entry['original'] = wp_strip_all_tags( $source[ $name ] );
+			}
+			$fields[] = $entry;
 		}
 
 		return array(
@@ -240,7 +245,7 @@ class Leiho_Native_Adapter extends Leiho_Field_Adapter {
 			foreach ( array_keys( $batches ) as $root ) {
 				if ( Leiho_I18n::is_localized( $defs[ $root ]['field'] ) && $this->is_blank( $raw[ $root ] ) ) {
 					$source       = null === $source ? $this->raw_values( $collection, $post_id, Leiho_I18n::default_locale() ) : $source;
-					$raw[ $root ] = $source[ $root ];
+					$raw[ $root ] = $this->blank_texts( $defs[ $root ]['engine'], $source[ $root ] );
 				}
 			}
 		}
@@ -339,12 +344,97 @@ class Leiho_Native_Adapter extends Leiho_Field_Adapter {
 		$out      = array();
 		foreach ( $this->fields( $collection ) as $name => $def ) {
 			$value = $raw[ $name ];
-			if ( $fallback && Leiho_I18n::is_localized( $def['field'] ) && $this->is_blank( $value ) ) {
-				$value = $fallback[ $name ];
+			if ( $fallback && Leiho_I18n::is_localized( $def['field'] ) ) {
+				$value = $this->fill( $value, $fallback[ $name ] );
 			}
 			$out[ $name ] = $this->public_value( $def['engine'], $value );
 		}
 		return $out;
+	}
+
+	/**
+	 * Structure d'origine aux textes vidés : point de départ d'une traduction
+	 * partielle (images, liens et choix gardés, textes à traduire).
+	 *
+	 * @param array $field Champ moteur.
+	 * @param mixed $value Valeur brute d'origine.
+	 * @return mixed
+	 */
+	private function blank_texts( $field, $value ) {
+		$type = isset( $field['type'] ) ? $field['type'] : '';
+		if ( in_array( $type, array( 'text', 'textarea', 'wysiwyg' ), true ) && empty( $field['code'] ) ) {
+			return null;
+		}
+		if ( ! is_array( $value ) ) {
+			return $value;
+		}
+		if ( 'group' === $type ) {
+			return $this->blank_row( $field['sub_fields'], $value );
+		}
+		if ( 'repeater' === $type ) {
+			return array_map(
+				function ( $row ) use ( $field ) {
+					return is_array( $row ) ? $this->blank_row( $field['sub_fields'], $row ) : $row;
+				},
+				$value
+			);
+		}
+		if ( 'flexible_content' === $type ) {
+			$layouts = array();
+			foreach ( $field['layouts'] as $layout ) {
+				$layouts[ $layout['name'] ] = $layout['sub_fields'];
+			}
+			return array_map(
+				function ( $row ) use ( $layouts ) {
+					$name = is_array( $row ) && isset( $row['acf_fc_layout'] ) ? $row['acf_fc_layout'] : '';
+					return isset( $layouts[ $name ] ) ? $this->blank_row( $layouts[ $name ], $row ) : $row;
+				},
+				$value
+			);
+		}
+		return $value;
+	}
+
+	/**
+	 * @param array $subs Sous-champs moteur.
+	 * @param array $row  Ligne brute.
+	 * @return array
+	 */
+	private function blank_row( $subs, $row ) {
+		foreach ( $subs as $sub ) {
+			if ( array_key_exists( $sub['key'], $row ) ) {
+				$row[ $sub['key'] ] = $this->blank_texts( $sub, $row[ $sub['key'] ] );
+			}
+		}
+		return $row;
+	}
+
+	/**
+	 * Valeur traduite complétée par l'original là où elle est vide (champ,
+	 * ligne ou sous-champ pas encore traduit).
+	 *
+	 * @param mixed $value    Valeur traduite.
+	 * @param mixed $fallback Valeur d'origine.
+	 * @return mixed
+	 */
+	private function fill( $value, $fallback ) {
+		if ( $this->is_blank( $value ) ) {
+			return $fallback;
+		}
+		if ( is_array( $value ) && is_array( $fallback ) ) {
+			if ( isset( $value['acf_fc_layout'], $fallback['acf_fc_layout'] ) && $value['acf_fc_layout'] !== $fallback['acf_fc_layout'] ) {
+				return $value; // Section d'un autre type : rien à reprendre.
+			}
+			$row = array_keys( $value ) !== range( 0, count( $value ) - 1 );
+			foreach ( $fallback as $key => $item ) {
+				if ( array_key_exists( $key, $value ) ) {
+					$value[ $key ] = $this->fill( $value[ $key ], $item );
+				} elseif ( $row ) {
+					$value[ $key ] = $item; // Sous-champ vidé (non stocké) : l'original.
+				}
+			}
+		}
+		return $value;
 	}
 
 	/**

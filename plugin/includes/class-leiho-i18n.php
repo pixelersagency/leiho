@@ -522,7 +522,7 @@ class Leiho_I18n {
 			$stored = Leiho_Collections_Store::values( $collection['id'], $post_id );
 			foreach ( self::localized_keys( $collection ) as $key ) {
 				$source = isset( $stored[ $key ] ) ? $stored[ $key ] : null;
-				if ( null !== $source && '' !== $source && ! isset( $row['data'][ $key ] ) ) {
+				if ( self::missing( isset( $row['data'][ $key ] ) ? $row['data'][ $key ] : null, $source ) ) {
 					return 'partial';
 				}
 			}
@@ -531,6 +531,47 @@ class Leiho_I18n {
 			return 'outdated';
 		}
 		return 'complete';
+	}
+
+	/**
+	 * Un texte de l'original manque-t-il dans la traduction (champ, ligne
+	 * d'une liste, sous-champ) ?
+	 *
+	 * @param mixed $value  Valeur stockée de la traduction.
+	 * @param mixed $source Valeur stockée de l'original.
+	 * @return bool
+	 */
+	private static function missing( $value, $source ) {
+		$source = self::decode( $source );
+		if ( null === $source || '' === $source || array() === $source ) {
+			return false;
+		}
+		$value = self::decode( $value );
+		if ( null === $value || '' === $value || array() === $value ) {
+			return true;
+		}
+		if ( is_array( $source ) && is_array( $value ) ) {
+			foreach ( $source as $key => $item ) {
+				if ( self::missing( isset( $value[ $key ] ) ? $value[ $key ] : null, $item ) ) {
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+
+	/**
+	 * Valeur stockée en JSON (listes, groupes, sections) décodée.
+	 *
+	 * @param mixed $value Valeur.
+	 * @return mixed
+	 */
+	private static function decode( $value ) {
+		if ( is_string( $value ) && '' !== $value && ( '[' === $value[0] || '{' === $value[0] ) ) {
+			$decoded = json_decode( $value, true );
+			return null === $decoded ? $value : $decoded;
+		}
+		return $value;
 	}
 
 	/**

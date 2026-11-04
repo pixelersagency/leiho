@@ -180,9 +180,9 @@ $GLOBALS['registered'] = array();
 Leiho_AI_Abilities::register_category();
 Leiho_AI_Abilities::register();
 Leiho_AI_Admin_Abilities::register();
-// Catégorie + 6 capacités de contenu (pas de texte alternatif sans
+// Catégorie + 10 capacités de contenu (pas de texte alternatif sans
 // fournisseur qui lit les images) + 4 capacités d'administration.
-$smoke_abilities = 11 === count( $GLOBALS['registered'] ) && ! in_array( 'leiho/suggest-alt-text', $GLOBALS['registered'], true );
+$smoke_abilities = 15 === count( $GLOBALS['registered'] ) && ! in_array( 'leiho/suggest-alt-text', $GLOBALS['registered'], true );
 $smoke_ai_ok     = $smoke_ai_ok && $smoke_abilities;
 echo 'capacités : ' . ( $smoke_abilities ? 'enregistrées' : 'ÉCHEC' ) . "\n";
 exit( $smoke_ai_ok ? 0 : 1 );

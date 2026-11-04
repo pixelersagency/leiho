@@ -247,6 +247,7 @@ class Leiho_Schema {
 				'source'    => 'native',
 				'value'     => $translated ? ( $l10n ? (string) $l10n['title'] : '' ) : $post->post_title,
 				'localized' => true,
+				'original'  => $translated ? $post->post_title : null,
 			),
 		);
 

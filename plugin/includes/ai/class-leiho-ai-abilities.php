@@ -273,6 +273,131 @@ class Leiho_AI_Abilities {
 					)
 				),
 			),
+			'leiho/list-translations'   => array(
+				'label'               => __( 'List the translations of a content type', 'leiho' ),
+				'description'         => __( 'For a Leiho collection with several languages, lists its entries with the state of each translation: missing (nothing translated), partial (some fields left), outdated (the original changed since) or complete. Use it to find what to translate next.', 'leiho' ),
+				'category'            => self::CATEGORY,
+				'input_schema'        => array(
+					'type'                 => 'object',
+					'properties'           => array(
+						'post_type' => array(
+							'type'        => 'string',
+							'description' => __( 'Content type (collection ID).', 'leiho' ),
+						),
+						'locale'    => array(
+							'type'        => 'string',
+							'description' => __( 'Optional language code (for example fr). Default: every language except the default one.', 'leiho' ),
+						),
+					),
+					'required'             => array( 'post_type' ),
+					'additionalProperties' => false,
+				),
+				'output_schema'       => array( 'type' => 'object' ),
+				'execute_callback'    => array( __CLASS__, 'list_translations' ),
+				'permission_callback' => array( __CLASS__, 'can_read' ),
+				'meta'                => $meta( $readonly ),
+			),
+			'leiho/get-translation'     => array(
+				'label'               => __( 'Get the translation of an entry', 'leiho' ),
+				'description'         => __( 'Returns every translatable text of an entry, by path: the original (default language) and the current translation in the requested language (empty when not translated yet), with its format (text, multiline or html: keep the tags) and maximum length. Translate the empty ones, then write them with leiho/update-translation.', 'leiho' ),
+				'category'            => self::CATEGORY,
+				'input_schema'        => array(
+					'type'                 => 'object',
+					'properties'           => array(
+						'id'     => array(
+							'type'        => 'integer',
+							'description' => __( 'Entry ID.', 'leiho' ),
+							'minimum'     => 1,
+						),
+						'locale' => array(
+							'type'        => 'string',
+							'description' => __( 'Language code to translate into (for example fr).', 'leiho' ),
+						),
+					),
+					'required'             => array( 'id', 'locale' ),
+					'additionalProperties' => false,
+				),
+				'output_schema'       => array( 'type' => 'object' ),
+				'execute_callback'    => array( __CLASS__, 'get_translation' ),
+				'permission_callback' => array( __CLASS__, 'can_edit_entry' ),
+				'meta'                => $meta( $readonly ),
+			),
+			'leiho/update-translation'  => array(
+				'label'               => __( 'Write translations', 'leiho' ),
+				'description'         => __( 'Writes translated texts of an entry in one language, by path (as returned by leiho/get-translation). The original language is never changed. On a draft any translation can be written; on a published entry only empty translations can be filled: texts already translated are refused (already_translated) so that reviewed work is never replaced. Never publishes.', 'leiho' ),
+				'category'            => self::CATEGORY,
+				'input_schema'        => array(
+					'type'                 => 'object',
+					'properties'           => array(
+						'id'     => array(
+							'type'        => 'integer',
+							'description' => __( 'Entry ID.', 'leiho' ),
+							'minimum'     => 1,
+						),
+						'locale' => array(
+							'type'        => 'string',
+							'description' => __( 'Language code (for example fr).', 'leiho' ),
+						),
+						'values' => array(
+							'type'                 => 'object',
+							'description'          => __( 'Translated texts by path, for example { "_title": "…", "points.0.title": "…" }.', 'leiho' ),
+							'additionalProperties' => array( 'type' => 'string' ),
+						),
+					),
+					'required'             => array( 'id', 'locale', 'values' ),
+					'additionalProperties' => false,
+				),
+				'output_schema'       => array( 'type' => 'object' ),
+				'execute_callback'    => array( __CLASS__, 'update_translation' ),
+				'permission_callback' => array( __CLASS__, 'can_update_entry' ),
+				'meta'                => $meta(
+					array(
+						'readonly'    => false,
+						'destructive' => false,
+						'idempotent'  => true,
+					)
+				),
+			),
+			'leiho/translate-entry'     => array(
+				'label'               => __( 'Translate an entry with the site AI', 'leiho' ),
+				'description'         => __( 'Asks the AI provider configured on the site to translate the texts of an entry that are not translated yet (or all of them), with the brand context. Returns the proposed translations by path without saving them, unless save is true (same rules as leiho/update-translation).', 'leiho' ),
+				'category'            => self::CATEGORY,
+				'input_schema'        => array(
+					'type'                 => 'object',
+					'properties'           => array(
+						'id'     => array(
+							'type'        => 'integer',
+							'description' => __( 'Entry ID.', 'leiho' ),
+							'minimum'     => 1,
+						),
+						'locale' => array(
+							'type'        => 'string',
+							'description' => __( 'Language code (for example fr).', 'leiho' ),
+						),
+						'mode'   => array(
+							'type'        => 'string',
+							'enum'        => array( 'missing', 'all' ),
+							'description' => __( 'missing (default): only texts not translated yet. all: every text.', 'leiho' ),
+						),
+						'save'   => array(
+							'type'        => 'boolean',
+							'description' => __( 'Save the translations (default false).', 'leiho' ),
+						),
+					),
+					'required'             => array( 'id', 'locale' ),
+					'additionalProperties' => false,
+				),
+				'output_schema'       => array( 'type' => 'object' ),
+				'execute_callback'    => array( __CLASS__, 'translate_entry' ),
+				'permission_callback' => array( __CLASS__, 'can_update_entry' ),
+				'meta'                => $meta(
+					array(
+						'readonly'    => false,
+						'destructive' => false,
+						'idempotent'  => false,
+					)
+				),
+			),
 		);
 	}
 
@@ -438,6 +563,9 @@ class Leiho_AI_Abilities {
 					'purpose'  => $context['purpose'],
 					'audience' => $context['audience'],
 				);
+			}
+			if ( Leiho_I18n::enabled() && Leiho_Collections::for_post_type( $type['name'] ) ) {
+				$item['languages'] = Leiho_I18n::codes(); // La première est la langue par défaut.
 			}
 			if ( $fields ) {
 				$item['fields'] = self::public_fields( Leiho_AI::type_fields( $type['name'] ) );
@@ -676,6 +804,95 @@ class Leiho_AI_Abilities {
 	 * ------------------------------------------------------------------- */
 
 	/**
+	 * @param mixed $input { post_type, locale }.
+	 * @return array|WP_Error
+	 */
+	public static function list_translations( $input = null ) {
+		$type = sanitize_key( (string) $input['post_type'] );
+		if ( ! in_array( $type, Leiho_Content::post_types(), true ) ) {
+			return new WP_Error( 'leiho_not_found', __( 'Unknown content type.', 'leiho' ), array( 'status' => 404 ) );
+		}
+		return Leiho_AI_Translate::overview( $type, isset( $input['locale'] ) ? (string) $input['locale'] : '' );
+	}
+
+	/**
+	 * @param mixed $input { id, locale }.
+	 * @return array|WP_Error
+	 */
+	public static function get_translation( $input = null ) {
+		$data = Leiho_AI_Translate::units( (int) $input['id'], (string) $input['locale'] );
+		if ( is_wp_error( $data ) ) {
+			return $data;
+		}
+		$post             = get_post( (int) $input['id'] );
+		$data['id']       = (int) $input['id'];
+		$data['default']  = Leiho_I18n::default_locale();
+		$data['editable'] = self::is_draft( $post->post_status ) ? 'all' : 'empty_only';
+		return $data;
+	}
+
+	/**
+	 * @param mixed $input { id, locale, values }.
+	 * @return array|WP_Error
+	 */
+	public static function update_translation( $input = null ) {
+		$id     = (int) $input['id'];
+		$values = isset( $input['values'] ) && is_array( $input['values'] ) ? $input['values'] : array();
+		if ( ! $values ) {
+			return new WP_Error( 'leiho_bad_request', __( 'Nothing to save.', 'leiho' ), array( 'status' => 400 ) );
+		}
+		$post = get_post( $id );
+		if ( ! $post ) {
+			return new WP_Error( 'leiho_not_found', __( 'Content not found.', 'leiho' ), array( 'status' => 404 ) );
+		}
+		set_transient( Leiho_Deploy_Manager::TRANSIENT_SAVE, 1, 30 );
+		$result = Leiho_AI_Translate::write( $id, (string) $input['locale'], $values, self::is_draft( $post->post_status ) );
+		delete_transient( Leiho_Deploy_Manager::TRANSIENT_SAVE );
+		if ( ! is_wp_error( $result ) && $result['saved'] ) {
+			Leiho_Activity::record_ai(
+				$id,
+				implode( ', ', array_slice( $result['saved'], 0, 5 ) ),
+				/* translators: 1: language code, 2: number of fields. */
+				sprintf( _n( '%1$s translation, %2$d field', '%1$s translation, %2$d fields', count( $result['saved'] ), 'leiho' ), $result['locale'], count( $result['saved'] ) ),
+				'ability'
+			);
+		}
+		return $result;
+	}
+
+	/**
+	 * @param mixed $input { id, locale, mode, save }.
+	 * @return array|WP_Error
+	 */
+	public static function translate_entry( $input = null ) {
+		$throttle = Leiho_AI::throttle( get_current_user_id() );
+		if ( is_wp_error( $throttle ) ) {
+			return $throttle;
+		}
+		$mode   = isset( $input['mode'] ) && 'all' === $input['mode'] ? 'all' : 'missing';
+		$result = Leiho_AI_Translate::translate( (int) $input['id'], (string) $input['locale'], $mode );
+		if ( is_wp_error( $result ) ) {
+			return $result;
+		}
+		$out = array(
+			'locale'       => $result['locale'],
+			'translations' => $result['translations'],
+			'remaining'    => $result['remaining'],
+			'warnings'     => $result['warnings'],
+		);
+		if ( ! empty( $input['save'] ) ) {
+			$out['saved'] = self::update_translation(
+				array(
+					'id'     => (int) $input['id'],
+					'locale' => $result['locale'],
+					'values' => (array) $result['translations'],
+				)
+			);
+		}
+		return $out;
+	}
+
+	/**
 	 * @param array $fields Champs (format éditeur).
 	 * @return array
 	 */
@@ -703,7 +920,7 @@ class Leiho_AI_Abilities {
 			'type'  => (string) $field['type'],
 			'label' => isset( $field['label'] ) ? (string) $field['label'] : (string) $field['path'],
 		);
-		foreach ( array( 'required', 'max_length', 'help', 'multiple', 'min', 'max', 'readonly' ) as $key ) {
+		foreach ( array( 'required', 'max_length', 'help', 'multiple', 'min', 'max', 'readonly', 'localized' ) as $key ) {
 			if ( isset( $field[ $key ] ) && '' !== $field[ $key ] && false !== $field[ $key ] && 0 !== $field[ $key ] ) {
 				$out[ $key ] = $field[ $key ];
 			}

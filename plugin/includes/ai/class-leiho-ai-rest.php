@@ -153,6 +153,31 @@ class Leiho_AI_Rest {
 
 		register_rest_route(
 			$ns,
+			'/ai/translate',
+			array(
+				'methods'             => WP_REST_Server::CREATABLE,
+				'callback'            => array( __CLASS__, 'translate' ),
+				'permission_callback' => array( __CLASS__, 'can_translate' ),
+				'args'                => array(
+					'post_id' => array(
+						'type'     => 'integer',
+						'required' => true,
+					),
+					'locale'  => array(
+						'type'     => 'string',
+						'required' => true,
+					),
+					'mode'    => array(
+						'type'    => 'string',
+						'enum'    => array( 'missing', 'all' ),
+						'default' => 'missing',
+					),
+				),
+			)
+		);
+
+		register_rest_route(
+			$ns,
 			'/ai/brand',
 			array(
 				array(
@@ -242,6 +267,30 @@ class Leiho_AI_Rest {
 		}
 		$type = sanitize_key( (string) $request['post_type'] );
 		return '' !== $type && ( new Leiho_Rest( Leiho_Plugin::instance() ) )->can_create_type( $type );
+	}
+
+	/**
+	 * @return bool
+	 */
+	public static function can_translate( $request ) {
+		$id = (int) $request['post_id'];
+		return $id > 0 && Leiho_AI::user_can() && current_user_can( 'edit_post', $id );
+	}
+
+	/**
+	 * POST /ai/translate : traduction des champs d'une entrée, à relire
+	 * dans l'éditeur (rien n'est enregistré).
+	 *
+	 * @param WP_REST_Request $request Requête.
+	 * @return WP_REST_Response|WP_Error
+	 */
+	public static function translate( $request ) {
+		$throttle = Leiho_AI::throttle( get_current_user_id() );
+		if ( is_wp_error( $throttle ) ) {
+			return $throttle;
+		}
+		$result = Leiho_AI_Translate::translate( (int) $request['post_id'], (string) $request['locale'], (string) $request['mode'] );
+		return is_wp_error( $result ) ? $result : rest_ensure_response( $result );
 	}
 
 	/**

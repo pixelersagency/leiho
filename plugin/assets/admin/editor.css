@@ -293,6 +293,15 @@ body > .screen-reader-text[role="status"] {
 	color: var(--leiho-warn);
 }
 
+/* Langue éditée : à traduire ou à revoir, en couleur d'alerte. */
+.leiho-editor .leiho-locale-select[data-status="missing"],
+.leiho-editor .leiho-locale-select[data-status="partial"],
+.leiho-editor .leiho-locale-select[data-status="outdated"] {
+	border-color: transparent;
+	background-color: var(--leiho-warn-soft);
+	color: var(--leiho-warn);
+}
+
 .leiho-current-title {
 	overflow: hidden;
 	color: var(--leiho-ink);
