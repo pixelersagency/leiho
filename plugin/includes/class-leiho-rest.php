@@ -701,7 +701,7 @@ class Leiho_Rest {
 	}
 
 	public function post_item( $post, Leiho_Url_Mapper $mapper ) {
-		return array(
+		$item = array(
 			'id'          => $post->ID,
 			'title'       => Leiho_Plugin::title( $post ),
 			'type'        => $post->post_type,
@@ -711,6 +711,11 @@ class Leiho_Rest {
 			'front_url'   => $mapper->front_url( $post ),
 			'can_delete'  => current_user_can( 'delete_post', $post->ID ),
 		);
+		// Entrée traduisible : état de chaque autre langue (liste des entrées).
+		if ( Leiho_I18n::enabled() && Leiho_Collections::for_post_type( $post->post_type ) ) {
+			$item['translations'] = array_diff_key( Leiho_I18n::statuses( $post->ID ), array( Leiho_I18n::default_locale() => true ) );
+		}
+		return $item;
 	}
 
 	/**

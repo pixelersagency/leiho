@@ -43,6 +43,8 @@ export function exportUrl( url ) {
  * @param {object}   [options]
  * @param {string}   [options.url]      Adresse du CMS. Défaut : process.env.LEIHO_URL.
  * @param {string}   [options.token]    Jeton (accès restreint). Défaut : process.env.LEIHO_TOKEN.
+ * @param {string}   [options.locale]   Langue (Collections traduites) : contenu traduit, repli sur la
+ *                                      langue par défaut, chemins préfixés (/fr/…). Défaut : langue par défaut.
  * @param {string|false} [options.snapshot] Fichier d'instantané, false pour s'en passer.
  * @param {'snapshot'|'error'} [options.fallback] Si WordPress ne répond pas : instantané (défaut) ou échec.
  * @param {number}   [options.retries]  Tentatives (défaut 3).
@@ -54,9 +56,12 @@ export function exportUrl( url ) {
 export async function loadLeihoContent( options = {} ) {
 	const env = typeof process !== 'undefined' ? process.env : {};
 	// OKNO_URL / OKNO_TOKEN : noms d'avant le renommage en Leiho, encore lus.
-	const url = exportUrl( options.url || env.LEIHO_URL || env.OKNO_URL );
+	const locale = options.locale ? String( options.locale ) : '';
+	const base = exportUrl( options.url || env.LEIHO_URL || env.OKNO_URL );
+	const url = locale ? base + ( base.includes( '?' ) ? '&' : '?' ) + 'locale=' + encodeURIComponent( locale ) : base;
 	const token = options.token ?? env.LEIHO_TOKEN ?? env.OKNO_TOKEN ?? '';
-	const snapshotPath = options.snapshot === false ? null : options.snapshot || DEFAULT_SNAPSHOT;
+	// Un instantané par langue : .leiho/content.fr.json.
+	const snapshotPath = options.snapshot === false ? null : options.snapshot || ( locale ? DEFAULT_SNAPSHOT.replace( /\.json$/, '.' + locale + '.json' ) : DEFAULT_SNAPSHOT );
 	const fallback = options.fallback || 'snapshot';
 	const retries = Math.max( 1, options.retries ?? 3 );
 	const timeout = options.timeout ?? 30000;
@@ -64,9 +69,13 @@ export async function loadLeihoContent( options = {} ) {
 	const logger = options.logger || console;
 
 	// Instantané d'avant le renommage (.okno/) : repris tant qu'aucun .leiho/ n'existe.
-	const snapshot = snapshotPath
+	let snapshot = snapshotPath
 		? ( await readSnapshot( snapshotPath ) ) ?? ( snapshotPath === DEFAULT_SNAPSHOT ? await readSnapshot( LEGACY_SNAPSHOT ) : null )
 		: null;
+	// Instantané d'une autre langue (chemin choisi à la main) : pas réutilisable.
+	if ( snapshot && ( snapshot.locale || '' ) !== locale ) {
+		snapshot = null;
+	}
 
 	const headers = { Accept: 'application/json' };
 	if ( token ) {
@@ -98,6 +107,9 @@ export async function loadLeihoContent( options = {} ) {
 			const data = await response.json();
 			if ( ! data || ! Array.isArray( data.items ) ) {
 				throw new Error( 'Leiho: unexpected response from ' + url + ' (is Leiho 1.0.0-beta.6+ active?)' );
+			}
+			if ( locale ) {
+				data.locale = locale;
 			}
 			if ( snapshotPath ) {
 				// Un serveur en lecture seule (serverless, à la requête) ne peut

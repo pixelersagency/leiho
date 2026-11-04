@@ -205,6 +205,7 @@
 	var navTools = h( 'div', { class: 'leiho-pane__tools' } );
 	if ( cfg.canCollections && Builder ) {
 		App.append( navTools, [
+			h( 'button', { type: 'button', class: 'leiho-icon-btn', title: __( 'Languages', 'leiho' ), 'aria-label': __( 'Languages of the collections', 'leiho' ), onClick: Builder.languages }, icon( 'globe' ) ),
 			h( 'button', { type: 'button', class: 'leiho-icon-btn', title: __( 'Export the schema', 'leiho' ), 'aria-label': __( 'Export the schema (leiho.schema.json)', 'leiho' ), onClick: Builder.exportSchema }, icon( 'download' ) ),
 			h( 'button', { type: 'button', class: 'leiho-icon-btn', title: __( 'Import a schema', 'leiho' ), 'aria-label': __( 'Import a schema (leiho.schema.json)', 'leiho' ), onClick: Builder.importSchema }, icon( 'upload' ) ),
 			h( 'button', { type: 'button', class: 'leiho-icon-btn', title: __( 'New collection', 'leiho' ), 'aria-label': __( 'New collection', 'leiho' ), onClick: newCollection }, icon( 'plus' ) ),
@@ -963,6 +964,12 @@
 		}
 	}
 
+	var TRANSLATION_STATES = {
+		missing: __( 'Not translated', 'leiho' ),
+		partial: __( 'Partly translated', 'leiho' ),
+		outdated: __( 'Original changed since the translation', 'leiho' ),
+	};
+
 	function row( item ) {
 		var type = typeIndex[ item.type ];
 		var trashed = 'trash' === item.status;
@@ -1011,6 +1018,13 @@
 			h( 'span', { class: 'leiho-status-dot leiho-status-dot--' + statusLevel( item.status ), title: statusText } ),
 			h( 'span', { class: 'leiho-item__title' + ( item.title ? '' : ' is-blank' ), text: title } ),
 		];
+		// Langues à traduire ou à revoir (rien quand tout est traduit).
+		Object.keys( item.translations || {} ).forEach( function ( code ) {
+			var level = item.translations[ code ];
+			if ( 'complete' !== level ) {
+				main.push( h( 'span', { class: 'leiho-l10n-badge is-' + level, title: TRANSLATION_STATES[ level ] || level, text: code.toUpperCase() } ) );
+			}
+		} );
 
 		return h( 'li', { class: 'leiho-item' + ( active ? ' is-active' : '' ), dataset: { id: String( item.id ) } }, [
 			trashed

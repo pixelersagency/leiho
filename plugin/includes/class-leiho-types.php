@@ -167,6 +167,10 @@ export interface LeihoItem<TType extends string, TFields> {
 	featured_image: LeihoMedia | null;
 	terms: Record<string, LeihoTerm[]>;
 	fields: TFields;
+	/** Language of this item (translated Collections only). */
+	locale?: string;
+	/** Path of this item in each language (translated Collections only). */
+	translations?: Record<string, string>;
 }
 
 TS;

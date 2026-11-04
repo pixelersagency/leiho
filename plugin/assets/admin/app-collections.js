@@ -183,6 +183,7 @@
 		state.loaded = App.api( { path: '/leiho/v1/collections' } )
 			.then( function ( body ) {
 				state.items = body.collections || [];
+				state.i18n = body.i18n || null;
 				return state.items;
 			} )
 			.catch( function ( err ) {
@@ -271,6 +272,7 @@
 			state.current = null;
 		},
 		exportSchema: exportSchema,
+		languages: editLanguages,
 		importSchema: function () {
 			if ( confirmLeave() ) {
 				importInput.click();
@@ -1181,6 +1183,24 @@
 			} );
 			out.push( details );
 		}
+		// Site en plusieurs langues : un champ racine se traduit ou reste partagé.
+		if ( state.i18n && 1 === depth && state.current && list === state.current.draft.fields ) {
+			out.push( h( 'div', { class: 'leiho-field-settings__required' }, [
+				h( 'label', { class: 'leiho-switch' }, [
+					( function () {
+						var input = h( 'input', { type: 'checkbox', checked: undefined === f.localized ? LOCALIZED_TYPES.indexOf( f.type ) !== -1 : !! f.localized } );
+						input.addEventListener( 'change', function () {
+							f.localized = input.checked;
+							markDirty();
+						} );
+						return input;
+					} )(),
+					__( 'Translatable', 'leiho' ),
+				] ),
+				h( 'p', { class: 'leiho-help', text: __( 'On: one value per language. Off: the same value in every language (prices, images, dates).', 'leiho' ) } ),
+			] ) );
+		}
+
 		out.push( h( 'div', { class: 'leiho-field-settings__required' }, h( 'label', { class: 'leiho-switch' }, [
 			( function () {
 				var input = h( 'input', { type: 'checkbox', checked: !! f.required } );
@@ -1753,6 +1773,66 @@
 	/* ------------------------------------------------------------------ *
 	 * Import / export de leiho.schema.json
 	 * ------------------------------------------------------------------ */
+
+	/* ------------------------------------------------------------------ *
+	 * Langues du site
+	 * ------------------------------------------------------------------ */
+
+	// Champs traduits par défaut (comme Leiho_I18n::localized_by_default).
+	var LOCALIZED_TYPES = [ 'text', 'richtext', 'link', 'list', 'blocks', 'group' ];
+
+	/** Langues des Collections : codes, le premier est la langue par défaut. */
+	function editLanguages() {
+		( state.loaded || load() ).then( function () {
+			var current = state.i18n ? state.i18n.locales.map( function ( l ) {
+				return l.code;
+			} ) : [];
+			var inputId = App.uid( 'languages' );
+			var input = h( 'input', { type: 'text', id: inputId, class: 'leiho-input leiho-mono leiho-languages-input', value: current.join( ', ' ), placeholder: 'en, fr, de', spellcheck: 'false', autofocus: true } );
+			var error = h( 'p', { class: 'leiho-help leiho-error', role: 'alert', hidden: true } );
+			var dialog = App.modal( {
+				title: __( 'Languages', 'leiho' ),
+				body: [
+					h( 'p', { text: __( 'Translate your collections without duplicating entries: each translatable field gets one value per language, and pages get a /fr/… address.', 'leiho' ) } ),
+					h( 'label', { class: 'leiho-label', for: inputId, text: __( 'Language codes', 'leiho' ) } ),
+					input,
+					h( 'p', { class: 'leiho-help', text: __( 'Separated by commas. The first one is the default language: its content stays where it is. Leave empty for a single-language site; translations already written are kept.', 'leiho' ) } ),
+					error,
+				],
+				actions: [
+					{ label: __( 'Cancel', 'leiho' ) },
+					{
+						label: __( 'Save', 'leiho' ),
+						primary: true,
+						onClick: function ( close, btn ) {
+							var codes = input.value.split( /[\s,;]+/ ).filter( Boolean );
+							btn.disabled = true;
+							App.api( {
+								path: '/leiho/v1/collections/languages',
+								method: 'POST',
+								data: { i18n: codes.length > 1 ? { default: codes[ 0 ], locales: codes } : null },
+							} )
+								.then( function ( body ) {
+									state.i18n = body.i18n || null;
+									close();
+									App.toast( state.i18n ? __( 'Languages saved.', 'leiho' ) : __( 'Single-language site.', 'leiho' ) );
+									if ( state.current ) {
+										renderEditor();
+									}
+								} )
+								.catch( function ( err ) {
+									btn.disabled = false;
+									error.hidden = false;
+									var first = err && err.data && err.data.errors && err.data.errors[ 0 ];
+									error.textContent = first ? first.message : App.errorMessage( err, __( 'Couldn’t save the languages.', 'leiho' ) );
+								} );
+						},
+					},
+				],
+			} );
+			return dialog;
+		} );
+	}
 
 	function exportSchema() {
 		App.api( { path: '/leiho/v1/collections/export' } )

@@ -5720,3 +5720,28 @@ mark.leiho-ai-flag {
 		padding: 12px;
 	}
 }
+
+/* Langue à traduire (liste des entrées) : code court, couleur de l'état. */
+.leiho-app .leiho-l10n-badge {
+	flex: 0 0 auto;
+	padding: 1px 5px;
+	border-radius: 4px;
+	background: var(--leiho-input);
+	color: var(--leiho-muted, currentColor);
+	font-size: 10px;
+	font-weight: 700;
+	letter-spacing: 0.04em;
+	line-height: 1.4;
+}
+
+.leiho-app .leiho-l10n-badge.is-partial,
+.leiho-app .leiho-l10n-badge.is-outdated {
+	background: var(--leiho-warn-soft);
+	color: var(--leiho-warn);
+}
+
+.leiho-app .leiho-languages-input {
+	box-sizing: border-box;
+	width: 100%;
+	margin: 0;
+}

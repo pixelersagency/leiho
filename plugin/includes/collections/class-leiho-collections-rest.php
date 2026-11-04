@@ -55,6 +55,16 @@ class Leiho_Collections_Rest {
 
 		register_rest_route(
 			Leiho_Rest::NS,
+			'/collections/languages',
+			array(
+				'methods'             => WP_REST_Server::CREATABLE,
+				'callback'            => array( $this, 'save_languages' ),
+				'permission_callback' => $admin,
+			)
+		);
+
+		register_rest_route(
+			Leiho_Rest::NS,
 			'/collections/import',
 			array(
 				'methods'             => WP_REST_Server::CREATABLE,
@@ -120,9 +130,32 @@ class Leiho_Collections_Rest {
 		return rest_ensure_response(
 			array(
 				'version'     => Leiho_Collections_Schema::VERSION,
+				'i18n'        => Leiho_I18n::config(),
 				'collections' => $out,
 			)
 		);
+	}
+
+	/**
+	 * POST /collections/languages : langues du site ({ default, locales }, ou
+	 * null pour une seule langue). Les traductions déjà écrites sont gardées.
+	 *
+	 * @param WP_REST_Request $request Requête.
+	 * @return WP_REST_Response|WP_Error
+	 */
+	public function save_languages( WP_REST_Request $request ) {
+		$body   = $request->get_json_params();
+		$schema = Leiho_Collections::export();
+		$i18n   = is_array( $body ) && isset( $body['i18n'] ) ? $body['i18n'] : null;
+		unset( $schema['i18n'] );
+		if ( $i18n ) {
+			$schema['i18n'] = $i18n;
+		}
+		$result = Leiho_Collections::save_schema( $schema );
+		if ( is_wp_error( $result ) ) {
+			return $result;
+		}
+		return rest_ensure_response( array( 'i18n' => Leiho_I18n::config() ) );
 	}
 
 	public function get_collection( WP_REST_Request $request ) {

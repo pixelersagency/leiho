@@ -163,3 +163,35 @@ test( 'field, block, entry : attributs d’annotation', async () => {
 	assert.equal( root.field, field );
 	assert.equal( content.field, field );
 } );
+
+test( 'langue : ?locale=, instantané par langue, langue notée', async () => {
+	const dir = await fs.mkdtemp( path.join( os.tmpdir(), 'leiho-' ) );
+	const cwd = process.cwd();
+	process.chdir( dir );
+	try {
+		let seen;
+		const result = await loadLeihoContent( {
+			url: 'https://cms.example.com',
+			locale: 'fr',
+			fetch: async ( url ) => {
+				seen = url;
+				return respond( 200, { ...sample, items: [ { ...sample.items[ 1 ], path: '/fr/services/audit', locale: 'fr' } ] } );
+			},
+		} );
+		assert.equal( seen, 'https://cms.example.com/wp-json/leiho/v1/export?locale=fr' );
+		assert.equal( result.data.locale, 'fr' );
+		const saved = JSON.parse( await fs.readFile( path.join( dir, '.leiho/content.fr.json' ), 'utf8' ) );
+		assert.equal( saved.items[ 0 ].path, '/fr/services/audit' );
+		assert.ok( indexLeihoContent( result.data ).byPath( '/fr/services/audit' ) );
+	} finally {
+		process.chdir( cwd );
+	}
+} );
+
+test( 'langue : un instantané d’une autre langue n’est pas servi', async () => {
+	const snapshot = await tmpSnapshot();
+	await fs.writeFile( snapshot, JSON.stringify( { ...sample, locale: 'fr' } ) );
+	await assert.rejects(
+		loadLeihoContent( { url: 'https://cms.example.com', snapshot, retries: 1, logger: silent, fetch: async () => respond( 500, {} ) } )
+	);
+} );
