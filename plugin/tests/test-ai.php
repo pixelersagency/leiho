@@ -119,7 +119,8 @@ class Leiho_Plugin {
 	public static function instance() { return new self(); }
 	public static function settings() { return array( 'post_types' => array( 'page', 'service' ) ); }
 	public function adapters() { return array(); }
-	public static function bump_usage( $e ) {}
+	public static function bump_usage( $e ) { $GLOBALS['usage'][] = $e; }
+	public static function title( $post ) { return $post->post_title; }
 }
 class Leiho_Schema {
 	const PATH_TITLE = '_title';
@@ -141,7 +142,36 @@ class Leiho_App {
 }
 class Leiho_Collections_Rest { public static function can_manage() { return current_user_can( 'manage_options' ); } }
 class Leiho_Deploy_Manager { const TRANSIENT_SAVE = 'leiho_saving'; }
-class Leiho_Url_Mapper {}
+class Leiho_Url_Mapper {
+	public function path( $post ) { return '/' . $post->post_type . '/' . $post->ID; }
+	public function front_url( $post ) { return 'https://site.test' . $this->path( $post ); }
+}
+class Leiho_Content {
+	public static function post_types() { return Leiho_Plugin::settings()['post_types']; }
+}
+/** Requête : filtre les faux contenus comme WP_Query le ferait (type, statut, titre). */
+class WP_Query {
+	public static $last = null;
+	public $posts = array();
+	public $found_posts = 0;
+	public $max_num_pages = 0;
+	public function __construct( $args ) {
+		self::$last = $args;
+		foreach ( $GLOBALS['posts'] as $post ) {
+			if ( ! in_array( $post->post_type, (array) $args['post_type'], true ) || ! in_array( $post->post_status, (array) $args['post_status'], true ) ) {
+				continue;
+			}
+			if ( ! empty( $args['s'] ) && false === stripos( $post->post_title, $args['s'] ) ) {
+				continue;
+			}
+			$this->posts[] = $post;
+		}
+		$this->found_posts   = count( $this->posts );
+		$this->max_num_pages = (int) ceil( $this->found_posts / $args['posts_per_page'] );
+		$this->posts         = array_slice( $this->posts, ( $args['paged'] - 1 ) * $args['posts_per_page'], $args['posts_per_page'] );
+	}
+}
+function mysql2date( $f, $d, $t = true ) { return '2026-11-04T10:00:00+00:00'; }
 abstract class Leiho_Field_Adapter {}
 
 require __DIR__ . '/../includes/class-leiho-activity.php';
@@ -613,7 +643,7 @@ check( 'REST : titre obligatoire', is_wp_error( $notitle ) && 400 === $notitle->
 Leiho_AI_Abilities::register_category();
 Leiho_AI_Abilities::register();
 check( 'capacités : catégorie leiho', isset( $GLOBALS['categories']['leiho'] ) );
-check( 'capacités : quatre capacités', array( 'leiho/get-brand-context', 'leiho/list-collections', 'leiho/get-entry', 'leiho/update-entry-fields' ) === array_keys( $GLOBALS['abilities'] ) );
+check( 'capacités : toutes enregistrées quand le fournisseur lit les images', array_keys( Leiho_AI_Abilities::definitions() ) === array_keys( $GLOBALS['abilities'] ), array_keys( $GLOBALS['abilities'] ) );
 $ok_shape = true;
 foreach ( $GLOBALS['abilities'] as $name => $args ) {
 	if ( 'leiho' !== $args['category'] || ! is_callable( $args['execute_callback'] ) || ! is_callable( $args['permission_callback'] ) || empty( $args['meta']['show_in_rest'] ) || '' === $args['description'] ) {
@@ -652,6 +682,91 @@ $row = end( $GLOBALS['ai_log'] );
 check( 'écriture : journalisée comme action d’agent', 'ability' === $row['new_value'] && 42 === $row['post_id'] );
 $ctx = Leiho_AI_Abilities::get_brand_context( array( 'post_type' => 'service' ) );
 check( 'contexte de marque : interdits et consigne', in_array( 'COFRAC', $ctx['brand']['forbidden'], true ) && false !== strpos( $ctx['instructions'], 'FORBIDDEN CLAIMS' ) && 'Syndics' === $ctx['collection']['audience'] );
+
+/* ---------------------------------------------------------------------
+ * Capacités : recherche, nouveau brouillon, texte alternatif
+ * ------------------------------------------------------------------- */
+
+check( 'capacités : sept capacités de contenu', array( 'leiho/get-brand-context', 'leiho/list-collections', 'leiho/get-entry', 'leiho/update-entry-fields', 'leiho/search-entries', 'leiho/create-draft', 'leiho/suggest-alt-text' ) === array_keys( Leiho_AI_Abilities::definitions() ) );
+Fake_Builder::$image_ok = false;
+Leiho_AI::status( true );
+$GLOBALS['abilities'] = array();
+Leiho_AI_Abilities::register();
+check( 'capacités : texte alternatif non annoncé si le fournisseur ne lit pas les images', ! isset( $GLOBALS['abilities']['leiho/suggest-alt-text'] ) && isset( $GLOBALS['abilities']['leiho/create-draft'] ) );
+$defs = Leiho_AI_Abilities::definitions();
+check( 'capacités : recherche en lecture seule, brouillon en écriture non idempotente', true === $defs['leiho/search-entries']['meta']['annotations']['readonly'] && false === $defs['leiho/create-draft']['meta']['annotations']['readonly'] && false === $defs['leiho/create-draft']['meta']['annotations']['idempotent'] && false === $defs['leiho/create-draft']['meta']['annotations']['destructive'] );
+check( 'capacités : toutes publiques pour MCP', ! in_array( false, array_map( static function ( $d ) { return ! empty( $d['meta']['mcp']['public'] ); }, $defs ), true ) );
+check( 'capacités : recherche bornée à 50 par page', 50 === $defs['leiho/search-entries']['input_schema']['properties']['per_page']['maximum'] );
+
+$GLOBALS['posts'][44] = (object) array( 'ID' => 44, 'post_type' => 'page', 'post_status' => 'publish', 'post_title' => 'Audit radon', 'post_modified_gmt' => '2026-11-04 10:00:00' );
+$GLOBALS['posts'][45] = (object) array( 'ID' => 45, 'post_type' => 'page', 'post_status' => 'trash', 'post_title' => 'Audit jeté', 'post_modified_gmt' => '2026-11-04 10:00:00' );
+$GLOBALS['posts'][46] = (object) array( 'ID' => 46, 'post_type' => 'page', 'post_status' => 'draft', 'post_title' => 'Audit secret', 'post_modified_gmt' => '2026-11-04 10:00:00' );
+$GLOBALS['posts'][42]->post_modified_gmt = '2026-11-04 10:00:00';
+$GLOBALS['post_caps']['edit_post:44'] = true;
+$GLOBALS['post_caps']['edit_post:45'] = true;
+$GLOBALS['post_caps']['edit_post:46'] = false;
+$found = Leiho_AI_Abilities::search_entries( array( 'search' => 'Audit' ) );
+$ids   = array_column( $found['items'], 'id' );
+check( 'recherche : titres, hors corbeille, hors types non gérés, sans les entrées interdites', array( 42, 44 ) === $ids, $found );
+check( 'recherche : titre seulement', array( 'post_title' ) === WP_Query::$last['search_columns'] && 'modified' === WP_Query::$last['orderby'] );
+$first = $found['items'][0];
+check( 'recherche : champs rendus (chemin, droits)', '/service/42' === $first['path'] && 'draft' === $first['status'] && true === $first['can_edit'] && true === $first['agent_writes'] && false === $found['items'][1]['agent_writes'], $first );
+$only = Leiho_AI_Abilities::search_entries( array( 'post_type' => 'page', 'status' => 'publish', 'per_page' => 500 ) );
+check( 'recherche : filtre type et statut, page bornée', array( 44 ) === array_column( $only['items'], 'id' ) && 50 === WP_Query::$last['posts_per_page'] && array( 'publish' ) === WP_Query::$last['post_status'], $only );
+Leiho_AI_Abilities::search_entries( array( 'status' => 'trash' ) );
+check( 'recherche : la corbeille n’est jamais visée', ! in_array( 'trash', WP_Query::$last['post_status'], true ) );
+$bad = Leiho_AI_Abilities::search_entries( array( 'post_type' => 'product' ) );
+check( 'recherche : type hors de Leiho refusé', is_wp_error( $bad ) && 400 === $bad->data['status'] );
+
+check( 'brouillon : autorisé pour un type géré', true === Leiho_AI_Abilities::can_create_draft( array( 'post_type' => 'service', 'title' => 'x' ) ) );
+check( 'brouillon : type hors de Leiho refusé', false === Leiho_AI_Abilities::can_create_draft( array( 'post_type' => 'product' ) ) );
+check( 'brouillon : sans type refusé', false === Leiho_AI_Abilities::can_create_draft( array() ) );
+$GLOBALS['caps']['edit_posts'] = false;
+check( 'brouillon : refusé sans le droit de créer', false === Leiho_AI_Abilities::can_create_draft( array( 'post_type' => 'service' ) ) );
+$GLOBALS['caps']['edit_posts'] = true;
+$GLOBALS['filters']['leiho_ai_capability'][] = static function () { return 'use_leiho_ai'; };
+check( 'brouillon : refusé sans la capability d’IA', false === Leiho_AI_Abilities::can_create_draft( array( 'post_type' => 'service' ) ) );
+unset( $GLOBALS['filters']['leiho_ai_capability'] );
+
+Leiho_Schema::$saved = array();
+$draft = Leiho_AI_Abilities::create_draft( array( 'post_type' => 'service', 'title' => 'Audit amiante', 'fields' => array( 'hero_title' => 'Respirez', '_status' => 'publish', '_title' => 'Autre' ) ) );
+check( 'brouillon : créé en brouillon, jamais publié', ! is_wp_error( $draft ) && 'draft' === $draft['status'] && 'draft' === $GLOBALS['posts'][99]->post_status && 'Audit amiante' === $GLOBALS['posts'][99]->post_title, $draft );
+check( 'brouillon : champs par le chemin de l’éditeur, statut et titre retirés', array( 'hero_title' => 'Respirez' ) === Leiho_Schema::$saved[99] && array( '_title', 'hero_title' ) === $draft['saved'], Leiho_Schema::$saved );
+$row = end( $GLOBALS['ai_log'] );
+check( 'brouillon : journalisé comme action d’agent', 'draft' === $row['new_value'] && 99 === $row['post_id'] && 'AI agent · Draft created' === Leiho_Activity::ai_label( 'draft' ), $row );
+$notitle = Leiho_AI_Abilities::create_draft( array( 'post_type' => 'service', 'title' => '  ' ) );
+check( 'brouillon : titre obligatoire', is_wp_error( $notitle ) && 400 === $notitle->data['status'] );
+
+$GLOBALS['posts'][50] = (object) array( 'ID' => 50, 'post_type' => 'attachment', 'post_status' => 'inherit', 'post_title' => 'Capteur', 'post_excerpt' => '' );
+$GLOBALS['post_caps']['edit_post:50'] = true;
+check( 'texte alternatif : image modifiable', true === Leiho_AI_Abilities::can_describe_image( array( 'id' => 50 ) ) );
+check( 'texte alternatif : un contenu n’est pas une image', false === Leiho_AI_Abilities::can_describe_image( array( 'id' => 42 ) ) );
+$GLOBALS['post_caps']['edit_post:50'] = false;
+check( 'texte alternatif : sans le droit sur l’image', false === Leiho_AI_Abilities::can_describe_image( array( 'id' => 50 ) ) );
+$GLOBALS['post_caps']['edit_post:50'] = true;
+Fake_Builder::$image_ok = false;
+Leiho_AI::status( true );
+$noimg = Leiho_AI_Abilities::suggest_alt_text( array( 'id' => 50 ) );
+check( 'texte alternatif : erreur claire sans fournisseur qui lit les images', is_wp_error( $noimg ) && 'leiho_ai_no_image' === $noimg->code && 501 === $noimg->data['status'] );
+Fake_Builder::$image_ok = true;
+Leiho_AI::status( true );
+$GLOBALS['abilities'] = array();
+Leiho_AI_Abilities::register();
+check( 'texte alternatif : annoncé quand le fournisseur lit les images', isset( $GLOBALS['abilities']['leiho/suggest-alt-text'] ) );
+function get_post_mime_type( $id ) { return 50 === $id ? 'image/png' : 'text/plain'; }
+function image_get_intermediate_size( $id, $size ) { return false; }
+function get_attached_file( $id ) { return __FILE__; }
+function wp_check_filetype( $p ) { return array( 'type' => 'image/png' ); }
+Fake_Builder::$answers = array( '« Capteur de radon posé sur une étagère »' );
+$alt = Leiho_AI_Abilities::suggest_alt_text( array( 'id' => 50, 'context' => 'Page radon' ) );
+if ( ! is_wp_error( $alt ) ) {
+	$log = array_pop( Fake_Builder::$log );
+	check( 'texte alternatif : proposé par la même logique que l’éditeur, rien d’enregistré', 'Capteur de radon posé sur une étagère' === $alt['alt_text'] && false === $alt['saved'] && in_array( 'with_file', $log['calls'], true ) && false !== strpos( $log['prompt'], 'Page radon' ), $alt );
+	$row = end( $GLOBALS['ai_log'] );
+	check( 'texte alternatif : journalisé', 'alt' === $row['new_value'] && 'alt:50' === $row['field_path'] );
+} else {
+	check( 'texte alternatif : image lisible dans le test', false, $alt );
+}
 
 echo empty( $GLOBALS['failed'] ) ? "\nTOUS LES TESTS PASSENT\n" : "\nÉCHECS\n";
 exit( empty( $GLOBALS['failed'] ) ? 0 : 1 );

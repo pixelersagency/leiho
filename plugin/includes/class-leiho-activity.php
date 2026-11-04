@@ -166,6 +166,9 @@ class Leiho_Activity {
 			'alt'       => __( 'AI · Alternative text', 'leiho' ),
 			'entry'     => __( 'AI · New entry', 'leiho' ),
 			'ability'   => __( 'AI agent · Fields updated', 'leiho' ),
+			'draft'     => __( 'AI agent · Draft created', 'leiho' ),
+			'settings'  => __( 'AI agent · Settings changed', 'leiho' ),
+			'secret'    => __( 'AI agent · Secret changed', 'leiho' ),
 		);
 		return isset( $labels[ $action ] ) ? $labels[ $action ] : __( 'AI', 'leiho' );
 	}

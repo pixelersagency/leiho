@@ -604,8 +604,48 @@ class Leiho_Admin {
 
 		$input = isset( $_POST['leiho_settings'] ) && is_array( $_POST['leiho_settings'] ) ? wp_unslash( $_POST['leiho_settings'] ) : array(); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 
-		$settings = Leiho_Plugin::settings();
+		$settings = self::sanitize_settings( $input, Leiho_Plugin::settings() );
 
+		update_option( Leiho_Plugin::OPTION_SETTINGS, $settings );
+
+		// Secrets : champ vide = inchangé, valeur = remplacement.
+		$secrets = isset( $_POST['leiho_secret'] ) && is_array( $_POST['leiho_secret'] ) ? wp_unslash( $_POST['leiho_secret'] ) : array(); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+		foreach ( array( 'coolify_token', 'gh_pat' ) as $name ) {
+			if ( isset( $secrets[ $name ] ) && '' !== trim( $secrets[ $name ] ) ) {
+				Leiho_Secrets::set( $name, trim( $secrets[ $name ] ) );
+			}
+			if ( ! empty( $_POST[ 'leiho_clear_' . $name ] ) ) {
+				Leiho_Secrets::set( $name, '' );
+			}
+		}
+
+		// Jeton de l'API de contenu : créé au passage en accès restreint,
+		// renouvelé sur demande (l'ancien cesse aussitôt de fonctionner).
+		self::ensure_content_token( $settings, ! empty( $_POST['leiho_regen_content_token'] ) );
+
+		// Contrôle préalable GitHub (dépôt, branche, workflow, token) : sans lui,
+		// un « Not Found » ne se découvre qu'au premier déploiement raté.
+		if ( 'github' === $settings['deploy_driver'] ) {
+			Leiho_Github_Preflight::run_and_store( $settings['gh_repo'], $settings['gh_branch'], $settings['gh_workflow'] );
+		} elseif ( 'github_commit' === $settings['deploy_driver'] ) {
+			Leiho_Github_Preflight::run_and_store( $settings['gh_repo'], $settings['gh_branch'] );
+		}
+
+		wp_safe_redirect( Leiho_App::url( 'settings', array( 'leiho_saved' => '1' ) ) );
+		exit;
+	}
+
+	/**
+	 * Réglages techniques validés, depuis une saisie au format du formulaire
+	 * des réglages. Partagé par le formulaire et la capacité
+	 * leiho/update-settings : une clé absente de la saisie prend la valeur
+	 * d'une case décochée ou d'un champ vide, comme dans le formulaire.
+	 *
+	 * @param array $input    Saisie (non échappée).
+	 * @param array $settings Réglages actuels (clés hors formulaire gardées).
+	 * @return array
+	 */
+	public static function sanitize_settings( array $input, array $settings ) {
 		$settings['front_url']   = esc_url_raw( isset( $input['front_url'] ) ? untrailingslashit( trim( $input['front_url'] ) ) : '' );
 		$settings['preview_url'] = esc_url_raw( isset( $input['preview_url'] ) ? untrailingslashit( trim( $input['preview_url'] ) ) : '' );
 
@@ -648,35 +688,23 @@ class Leiho_Admin {
 			$settings[ $flag ] = ! empty( $input[ $flag ] );
 		}
 
-		update_option( Leiho_Plugin::OPTION_SETTINGS, $settings );
+		return $settings;
+	}
 
-		// Secrets : champ vide = inchangé, valeur = remplacement.
-		$secrets = isset( $_POST['leiho_secret'] ) && is_array( $_POST['leiho_secret'] ) ? wp_unslash( $_POST['leiho_secret'] ) : array(); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
-		foreach ( array( 'coolify_token', 'gh_pat' ) as $name ) {
-			if ( isset( $secrets[ $name ] ) && '' !== trim( $secrets[ $name ] ) ) {
-				Leiho_Secrets::set( $name, trim( $secrets[ $name ] ) );
-			}
-			if ( ! empty( $_POST[ 'leiho_clear_' . $name ] ) ) {
-				Leiho_Secrets::set( $name, '' );
-			}
-		}
-
-		// Jeton de l'API de contenu : créé au passage en accès restreint,
-		// renouvelé sur demande (l'ancien cesse aussitôt de fonctionner).
+	/**
+	 * Jeton de l'API de contenu : créé au passage en accès restreint,
+	 * renouvelé sur demande (l'ancien cesse aussitôt de fonctionner).
+	 *
+	 * @param array $settings Réglages enregistrés.
+	 * @param bool  $regen    Renouveler le jeton.
+	 * @return bool Jeton créé ou renouvelé.
+	 */
+	public static function ensure_content_token( array $settings, $regen = false ) {
 		$token_status = Leiho_Secrets::status( Leiho_Content::SECRET_TOKEN );
-		if ( ! empty( $_POST['leiho_regen_content_token'] ) || ( 'token' === $settings['content_access'] && 'ok' !== $token_status ) ) {
+		if ( $regen || ( 'token' === $settings['content_access'] && 'ok' !== $token_status ) ) {
 			Leiho_Secrets::set( Leiho_Content::SECRET_TOKEN, wp_generate_password( 40, false ) );
+			return true;
 		}
-
-				// Contrôle préalable GitHub (dépôt, branche, workflow, token) : sans lui,
-		// un « Not Found » ne se découvre qu'au premier déploiement raté.
-		if ( 'github' === $settings['deploy_driver'] ) {
-			Leiho_Github_Preflight::run_and_store( $settings['gh_repo'], $settings['gh_branch'], $settings['gh_workflow'] );
-		} elseif ( 'github_commit' === $settings['deploy_driver'] ) {
-			Leiho_Github_Preflight::run_and_store( $settings['gh_repo'], $settings['gh_branch'] );
-		}
-
-		wp_safe_redirect( Leiho_App::url( 'settings', array( 'leiho_saved' => '1' ) ) );
-		exit;
+		return false;
 	}
 }

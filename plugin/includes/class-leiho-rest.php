@@ -365,6 +365,17 @@ class Leiho_Rest {
 	 * le serveur, si.
 	 */
 	public function check_headers() {
+		$verdict = self::headers_check();
+		return is_wp_error( $verdict ) ? $verdict : rest_ensure_response( $verdict );
+	}
+
+	/**
+	 * Contrôle des en-têtes du site (aperçu, sinon production) depuis le
+	 * serveur. Partagé par GET /connection et les capacités d'administration.
+	 *
+	 * @return array|WP_Error { reachable, level, message, status? }
+	 */
+	public static function headers_check() {
 		$settings = Leiho_Plugin::settings();
 		$url      = '' !== $settings['preview_url'] ? $settings['preview_url'] : $settings['front_url'];
 		if ( '' === $url ) {
@@ -381,12 +392,10 @@ class Leiho_Rest {
 		);
 
 		if ( is_wp_error( $response ) ) {
-			return rest_ensure_response(
-				array(
-					'reachable' => false,
-					'level'     => 'error',
-					'message'   => sprintf( /* translators: %s: network error message. */ __( 'Can’t reach the site from the server: %s', 'leiho' ), $response->get_error_message() ),
-				)
+			return array(
+				'reachable' => false,
+				'level'     => 'error',
+				'message'   => sprintf( /* translators: %s: network error message. */ __( 'Can’t reach the site from the server: %s', 'leiho' ), $response->get_error_message() ),
 			);
 		}
 
@@ -398,7 +407,7 @@ class Leiho_Rest {
 
 		$verdict['reachable'] = true;
 		$verdict['status']    = (int) wp_remote_retrieve_response_code( $response );
-		return rest_ensure_response( $verdict );
+		return $verdict;
 	}
 
 	/**

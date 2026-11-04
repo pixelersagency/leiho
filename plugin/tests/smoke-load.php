@@ -154,6 +154,7 @@ $smoke_ai_ok = $smoke_ai_ok && ! $ai['client'] && ! $ai['text'] && ! Leiho_AI::c
 echo 'IA sans WordPress 7 : ' . ( $smoke_ai_ok ? 'masquée' : 'ÉCHEC' ) . "\n";
 Leiho_AI_Abilities::register_category();
 Leiho_AI_Abilities::register();
+Leiho_AI_Admin_Abilities::register();
 echo "capacités sans Abilities API : OK\n";
 $err         = Leiho_AI::generate( '', 'x' );
 $smoke_ai_ok = $smoke_ai_ok && $err instanceof WP_Error;
@@ -178,6 +179,10 @@ echo 'IA sans fournisseur : ' . ( $no_provider ? 'masquée, lien des connecteurs
 $GLOBALS['registered'] = array();
 Leiho_AI_Abilities::register_category();
 Leiho_AI_Abilities::register();
-$smoke_ai_ok = $smoke_ai_ok && 5 === count( $GLOBALS['registered'] );
-echo 'capacités : ' . ( 5 === count( $GLOBALS['registered'] ) ? 'enregistrées' : 'ÉCHEC' ) . "\n";
+Leiho_AI_Admin_Abilities::register();
+// Catégorie + 6 capacités de contenu (pas de texte alternatif sans
+// fournisseur qui lit les images) + 4 capacités d'administration.
+$smoke_abilities = 11 === count( $GLOBALS['registered'] ) && ! in_array( 'leiho/suggest-alt-text', $GLOBALS['registered'], true );
+$smoke_ai_ok     = $smoke_ai_ok && $smoke_abilities;
+echo 'capacités : ' . ( $smoke_abilities ? 'enregistrées' : 'ÉCHEC' ) . "\n";
 exit( $smoke_ai_ok ? 0 : 1 );
