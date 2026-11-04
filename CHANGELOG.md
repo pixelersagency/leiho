@@ -2,6 +2,29 @@
 
 All notable changes to Okno are documented here. The project follows [Semantic Versioning](https://semver.org/). The plugin and the bridge package share one version number.
 
+## [Unreleased]
+
+### Added
+
+- **Articles are fully editable in Collections.** The entry form shows WordPress's own fields for the types that support them: **Content** (WordPress's rich text editor with paragraph / headings, bold, italic, links, lists, quote, alignment and **Add media**, saved in the classic editor's format), **Excerpt** (with a character count), **URL slug** (with a preview of the full address), **categories, tags and every other public taxonomy** (chips with search; typing a new tag offers « Create “…” », the term is created on save — a new category needs the right to manage categories), **Author** (users who can write that type; needs `edit_others_posts`), **Publish date** (a future date schedules a published entry), and **Parent** / **Order** for hierarchical types. Pages get their content too. Everything goes through Okno's save path: one `wp_update_post()`, server-side sanitization (`wp_kses_post()` without `unfiltered_html`), per-field capability checks, conflict detection and the change log. These fields stay out of the visual editor's panel.
+- **Content written with the block editor is protected**: the form shows a read-only preview and **Open in the WordPress editor**; the server refuses to overwrite it (`blocks_protected`). Other fields of the entry (excerpt, taxonomies, slug…) stay editable.
+- REST: `POST /okno/v1/preferences` (`theme`: `light` | `dark`). Native save paths `_content`, `_excerpt`, `_slug`, `_date`, `_author`, `_parent`, `_menu_order`, `_tax_<taxonomy>` on `POST /okno/v1/save/{id}`.
+
+### Changed
+
+- **The app is at a comfortable scale on large screens**: 14 px body text (13 px secondary, 13 px labels, 16–20 px section titles), 36 px fields, selects and buttons, 38 px list rows and navigation links, a 48 px top bar, larger icons and spacing, and a 720 px form column, through new size tokens (`--okno-text-*`, `--okno-control*`, `--okno-row`, `--okno-bar`, `--okno-pane-*`, `--okno-form-width`) shared by every view and the visual editor's chrome. Panes are a little narrower on 1440 px screens so the entry keeps its room; the entries filters no longer cut « Tous les statuts ».
+- **Menus instead of native selects** everywhere in the app (status filters, sorting, the entry's status, choice fields of forms, settings): a button and a list with a check mark on the current item, a coloured dot per status (published, scheduled, draft, pending review, private, trash), arrows / Home / End / Enter / Escape and type-ahead, `listbox` / `option` semantics, closing on outside click, placed inside the window. The native `<select>` stays in the page, hidden, for its value and for PHP forms.
+- **Multiple choices are chips** with search (ACF relationship and taxonomy fields, multiple choices of Okno collections, WordPress taxonomies).
+- **Checkboxes, radios and switches drawn by Okno** in light and dark: rounded square with a lime check, circle with a lime dot, radio cards (collection nature) with a clear selected state (border, tint, dot), switches for true / false fields, proper disabled states.
+- **WordPress's media library, link dialog and rich text editor match Okno** inside the app: Okno surfaces and text in light and dark, lime primary button instead of WordPress blue, accent selection ring and check in the grid, themed tabs, drop zone and attachment details; the editor's toolbar, tabs and text area follow the theme.
+
+### Fixed
+
+- **No more light flash when switching views in dark mode** (and no dark flash in light mode). The theme is saved per user on the server (user meta, cookie as a fallback) and printed by PHP on `<html>`, the app shell and the visual editor before the first paint; a choice made before this version in the browser is picked up and saved once. Dark stays the default.
+- **No more blue frame on click.** Buttons, links, navigation items and form controls only show a focus ring with the keyboard (`:focus-visible`), in Okno's accent ink; WordPress's `:focus` box-shadows (`#2271b1`) no longer leak into the app.
+- **The media library no longer looks greyed out** when opened from the visual editor or Collections (« Replace » on a featured image, image / gallery / file fields): its backdrop was stacked above the window. Same fix for the link dialog and TinyMCE's windows and menus (paragraph / heading list).
+- The **Visual editor** button of an entry keeps an accessible name when its label is hidden on narrow screens.
+
 ## [1.0.0-beta.8] — 2026-11-04
 
 ### Changed
