@@ -32,7 +32,10 @@ DOMAIN = 'okno'
 LOCALE = 'fr_FR'
 PLURAL_FORMS = 'nplurals=2; plural=(n > 1);'
 
-JS_FILES = ['assets/admin/editor.js', 'assets/admin/admin.js']
+JS_FILES = [
+    'assets/admin/editor.js', 'assets/admin/admin.js', 'assets/admin/app.js',
+    'assets/admin/app-content.js', 'assets/admin/app-collections.js', 'assets/admin/app-media.js',
+]
 
 PHP_KEYWORDS = [
     '__:1', '_e:1', 'esc_html__:1', 'esc_html_e:1', 'esc_attr__:1', 'esc_attr_e:1',

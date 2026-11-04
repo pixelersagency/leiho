@@ -221,7 +221,8 @@ Sanitization mirrors the ACF adapter (required, `max_length`, attachments and re
 
 ## 8. Limits and next phases
 
-- The classic wp-admin edit screen shows the post fields only; collection fields are edited in the Okno editor or through the APIs. The schema builder (phase 2) adds an admin UI on top of the REST routes above.
+- The classic wp-admin edit screen shows the post fields only; collection fields are edited in the Okno editor (or its form view, for collections without a `path`) or through the APIs.
+- Phase 2 (done): the schema builder in Okno → Collections, a UI on top of the REST routes above. New fields get `key = name` (made unique among siblings) when they are first applied; the builder never changes the key of a saved field.
 - ACF → Collections import (phase 3) can build a schema from ACF field groups (types map one to one through the table in §7), call `save_schema()`, then copy values with `save_entry()` per post.
 - Per-request cache only; the export reads one row per entry (primary key lookups).
 - `datetime` values are stored as entered (site time), like ACF.

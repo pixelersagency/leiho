@@ -19,6 +19,22 @@ Le headless donne aux développeurs un front moderne, mais retire aux rédacteur
 - **Rien de public.** Le bridge n'appelle jamais l'API WordPress et ne détient aucun secret. Chaque message est vérifié par son origine, des deux côtés.
 - **Une mise en ligne adaptée à votre hébergement.** Contenu en direct, build hook (Vercel, Netlify, Cloudflare Pages), GitHub Actions avec suivi du build, commit de publication ou Coolify.
 
+## Okno, c'est le back-office
+
+Un clic sur **Okno** dans wp-admin et il s'ouvre en plein écran : menu WordPress, barre d'administration, pied de page et notices des autres extensions disparaissent (sur cette page seulement), remplacés par la navigation d'Okno. WordPress + Okno suffisent, les rédacteurs n'ont jamais besoin d'en sortir.
+
+| | |
+|---|---|
+| **Accueil** | Dernières modifications (avant / après), état de la connexion et des publications, raccourcis. |
+| **Éditeur visuel** | Le site tel que le voient les visiteurs, modifiable sur place. |
+| **Contenus** | Tous les contenus éditables (pages, articles, types ACF, collections) : recherche, filtres par type et par statut, création, duplication, mise en ligne ou retour en brouillon, corbeille et restauration. Ouverture dans l'éditeur visuel, ou dans un **formulaire** avec tous les champs et sans aperçu, pour les contenus sans page sur le site (mentions légales, témoignages, réglages). |
+| **Collections** | Le constructeur de schéma (administrateurs), voir plus bas. |
+| **Médias** | La médiathèque : grille, recherche, envoi (bouton ou glisser-déposer), texte alternatif. |
+| **Publications** | L'historique des déploiements. Le bouton **Publier** de la barre du haut signale les changements pas encore publiés. |
+| **Réglages** | Tout ce dont Okno a besoin (administrateurs). |
+
+Éditeurs et auteurs arrivent dans Okno dès la connexion (réglage activé par défaut) ; les administrateurs gardent le tableau de bord WordPress et un lien **Retour à WordPress**. La navigation se replie, se pilote au clavier et devient un tiroir sur petit écran ; le thème clair ou sombre est partagé avec l'éditeur. Les anciennes adresses (`admin.php?page=okno-settings`, `okno-editor`…) redirigent vers leur vue.
+
 ## Démarrage rapide
 
 ### 1. Installer le plugin
@@ -139,6 +155,7 @@ Okno Collections est un modèle de contenu intégré à Okno, sans ACF : des **c
 - **Migrations sûres** : renommer un champ ne coûte rien (clé stable), un changement de type copie les valeurs dans une nouvelle colonne, les colonnes retirées sont archivées, jamais supprimées. `dry_run` montre le plan avant.
 - **Révisions** : restaurer une révision restaure aussi les champs.
 - **Même éditeur, même API** que pour ACF : chemins pointés (`sections.2.items.1.title`), `/okno/v1/export`, `/content` et `/types`.
+- **Constructeur de schéma** dans Okno → **Collections** : collections et pages uniques, libellés, modèle d'URL, fonctionnalités, et un éditeur de champs avec les 19 types et leurs options (choix, min / max, cibles des références, sous-champs des listes et groupes, types de blocs), réordonnés par glisser-déposer ou au clavier. La clé d'un champ est générée à partir de son nom et figée une fois appliquée : seuls le nom et le libellé changent ensuite. **Vérifier** lance la migration à blanc et liste ce qui va se passer (nouvelles colonnes, conversions, colonnes archivées) avant de rien appliquer ; les erreurs pointent le champ concerné. Colonnes archivées listées avec un bouton de purge (confirmée en tapant l'identifiant), import et export d'`okno.schema.json` en un clic. Les entrées s'éditent ensuite dans l'éditeur visuel, ou dans le formulaire quand la collection n'a pas d'URL.
 
 Format et API : [plugin/docs/collections-spec.md](plugin/docs/collections-spec.md) (en anglais).
 

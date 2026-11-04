@@ -2,6 +2,26 @@
 
 All notable changes to Okno are documented here. The project follows [Semantic Versioning](https://semver.org/). The plugin and the bridge package share one version number.
 
+## [Unreleased]
+
+### Added
+
+- **Okno opens full screen and is the back office.** One wp-admin page (`admin.php?page=okno`) hides the WordPress menu, admin bar, footer and other plugins' notices (this page only; the admin bar isn't even rendered) and shows Okno's own navigation: Home, Visual editor, Content, Collections, Media, Publishing, Settings, plus **Back to WordPress** for administrators. The navigation collapses, works with the keyboard (arrows, Escape) and becomes a drawer below 782 px. The top bar carries the site name, a **Publish** button that shows when changes aren't published yet, the light / dark switch shared with the editor, and a user menu (profile, log out).
+- **Content view**: every editable entry (pages, posts, ACF post types, collections) with search, filters by type and status (trash included), create, duplicate, publish / back to draft, trash and restore, and opening in the visual editor or in a form.
+- **Entry form**: the editor's field panel without the preview, for content that has no page on the site (legal pages, testimonials, settings singletons). Same widgets, undo / redo, local drafts, conflict protection and change history as the visual editor. Collections without a URL open there from everywhere (Content, the editor's page list, the edit screen, the change log).
+- **Collections builder** on top of the `okno/v1/collections` API: list of collections and single pages, create / edit (id, labels, kind, URL pattern, features), field editor with drag and drop and keyboard reordering, every one of the 19 field types and their options (choices, min / max, reference targets, nested sub-fields of lists and groups, block types of blocks fields), keys generated from the name and fixed once applied, review of the migration plan (`dry_run`) before applying, validation errors attached to the field concerned, archived columns with purge (typed confirmation), removal of a collection, import and export of `okno.schema.json`.
+- **Media view**: the media library as a grid, with search, type filter, upload by button or drag and drop, and a details panel (alternative text, title, file URL, delete).
+- **Status from the editor**: a status menu in the editor toolbar (draft, pending review, published, private) so content created in Okno can go live without wp-admin. Users who can't publish submit for review.
+- Editors land in Okno after logging in (`login_redirect`, for users without `manage_options`, unless another destination was asked for). Setting **Editors → After logging in**, on by default.
+- REST: `GET /okno/v1/posts` takes `type`, `status` and `orderby=modified` and returns `modified`; `POST /okno/v1/posts/{id}/status`, `POST /okno/v1/posts/{id}/restore`, `GET /okno/v1/deploy/state` (pending changes, active and last deployment).
+
+### Changed
+
+- Okno has a single menu entry. The former pages (`okno-start`, `okno-settings`, `okno-deploys`, `okno-editor`) still answer and redirect to their view, with their parameters.
+- Changes are marked as pending even without automatic publishing (as long as a publishing mode is set), so the **Publish** button can show them; **Publish** clears the mark as before.
+- Duplicating a collection entry copies its field values.
+- The editor offers the featured image only for content types that support it (a collection without the *Featured image* feature no longer shows one), or when the content already has one.
+
 ## [1.0.0-beta.6] — 2026-11-04
 
 ### Added

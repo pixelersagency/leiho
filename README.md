@@ -131,13 +131,29 @@ Client-side navigation (React Router, Next.js links, `history.pushState`) and re
 
 Other field types show up read-only, with a link to the classic WordPress editor.
 
+## Okno is the back office
+
+Click **Okno** in wp-admin and it opens full screen: the WordPress menu, admin bar, footer and other plugins' notices are gone (on this page only), replaced by Okno's own navigation. Install WordPress and Okno, and editors never need to leave it.
+
+| | |
+|---|---|
+| **Home** | Recent changes with before / after values, connection and publishing status, quick links. |
+| **Visual editor** | The site as visitors see it, editable in place. |
+| **Content** | Every editable entry (pages, posts, ACF post types, collections) with search, filters by type and status, create, duplicate, publish or unpublish, trash and restore. Opens in the visual editor, or in a **form** with every field and no preview, for content that has no page on the site (legal pages, testimonials, settings). |
+| **Collections** | The schema builder (administrators): see below. |
+| **Media** | The media library: grid, search, upload (button or drag and drop), alternative text. |
+| **Publishing** | Deployment history. The **Publish** button in the top bar shows when changes aren't published yet. |
+| **Settings** | Everything Okno needs (administrators). |
+
+Editors and authors land in Okno right after logging in (a setting, on by default); administrators keep the WordPress dashboard and get a **Back to WordPress** link. The navigation collapses, works with the keyboard, and becomes a drawer on small screens; the light or dark theme is shared with the editor. Old addresses (`admin.php?page=okno-settings`, `okno-editor`, …) redirect to their view.
+
 ## What editors get
 
 - Live preview while typing, with character counters where fields have a limit.
 - Undo / redo (Ctrl+Z, Ctrl+Shift+Z) and Ctrl+S to save.
 - Local drafts: unsaved changes survive a closed tab, and are offered back on return.
 - Page composition: add, reorder, duplicate and remove flexible content blocks.
-- Create, duplicate and trash pages without leaving the editor.
+- Create, duplicate and trash pages without leaving the editor, and change their status (draft, pending review, published, private) from the toolbar.
 - Conflict protection: if someone else changed the page meanwhile, Okno refuses to overwrite it and offers to reload.
 - Change history: every saved change, with its before and after values and its author.
 - Deep links: "Edit with Okno" in the admin bar opens the current page.
@@ -230,7 +246,9 @@ Okno Collections is a content model built into Okno: "Strapi or Webflow collecti
 | `GET /wp-json/okno/v1/collections/export` | The current `okno.schema.json`. |
 | `POST`, `PUT`, `DELETE /wp-json/okno/v1/collections/{id}` | Create, replace or remove one collection (data is kept). |
 
-From PHP: `Okno_Collections::import( $json )`, `Okno_Collections::save_entry( $post_id, array( 'price' => 120 ) )`, `Okno_Collections::entry( 'home' )`. The schema builder in wp-admin comes next; the format is documented in [plugin/docs/collections-spec.md](plugin/docs/collections-spec.md).
+From PHP: `Okno_Collections::import( $json )`, `Okno_Collections::save_entry( $post_id, array( 'price' => 120 ) )`, `Okno_Collections::entry( 'home' )`. The format is documented in [plugin/docs/collections-spec.md](plugin/docs/collections-spec.md).
+
+**Schema builder.** Okno → **Collections** builds the same schema without writing JSON: collections and single pages, labels, URL pattern, built-in features, and a field editor with all 19 types and their options (choices, min / max, reference targets, sub-fields of lists and groups, block types of a blocks field), reordered by drag and drop or with the keyboard. Field keys are generated from the name and fixed once applied; only the name and the label change afterwards. **Review** runs the migration as a dry run and lists what will happen (new columns, conversions, archived columns) before anything is applied; validation errors point at the field concerned. Archived columns are listed with a purge button (type the collection id to confirm), and `okno.schema.json` is one click away for import and export. Entries are then edited in the visual editor, or in the form when the collection has no URL.
 
 ## Security
 
@@ -269,6 +287,8 @@ php plugin/tests/test-collections.php
 php plugin/tests/test-activity.php
 php plugin/tests/test-frame-verdict.php
 php plugin/tests/test-updater.php
+php plugin/tests/test-autopublish.php
+php plugin/tests/test-app.php
 php plugin/tests/smoke-load.php
 
 # Content client tests
