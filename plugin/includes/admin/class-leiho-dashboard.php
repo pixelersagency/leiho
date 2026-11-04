@@ -1942,6 +1942,83 @@ CODE;
 				. ' --env ' . $quote( 'WP_API_USERNAME=' . $login )
 				. ' --env ' . $quote( 'WP_API_PASSWORD=' . $password )
 				. ' --transport stdio ' . $server . ' -- npx -y ' . $package;
+			$codex_cli = 'codex mcp add ' . $server
+				. ' --env ' . $quote( 'WP_API_URL=' . $endpoint )
+				. ' --env ' . $quote( 'WP_API_USERNAME=' . $login )
+				. ' --env ' . $quote( 'WP_API_PASSWORD=' . $password )
+				. ' -- npx -y ' . $package;
+			$toml_string = static function ( $value ) {
+				return '"' . addcslashes( $value, "\\\"" ) . '"';
+			};
+			// Codex (CLI, extension et app) lit ~/.codex/config.toml.
+			$toml = '[mcp_servers.' . $server . "]\n"
+				. "command = \"npx\"\n"
+				. 'args = ["-y", ' . $toml_string( $package ) . "]\n\n"
+				. '[mcp_servers.' . $server . ".env]\n"
+				. 'WP_API_URL = ' . $toml_string( $endpoint ) . "\n"
+				. 'WP_API_USERNAME = ' . $toml_string( $login ) . "\n"
+				. 'WP_API_PASSWORD = ' . $toml_string( $password );
+			// VS Code attend « servers » et un « type », pas « mcpServers ».
+			$vscode = wp_json_encode(
+				array(
+					'servers' => array(
+						$server => array(
+							'type'    => 'stdio',
+							'command' => 'npx',
+							'args'    => array( '-y', $package ),
+							'env'     => array(
+								'WP_API_URL'      => $endpoint,
+								'WP_API_USERNAME' => $login,
+								'WP_API_PASSWORD' => $password,
+							),
+						),
+					),
+				),
+				JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE
+			);
+
+			$clients = array(
+				'claude-desktop' => array(
+					'label' => 'Claude Desktop',
+					'help'  => __( 'In Claude Desktop, open Settings → Developer → Edit Config. Add this server to claude_desktop_config.json (inside mcpServers if the file already has some), save, then restart Claude.', 'leiho' ),
+					'code'  => array( $json ),
+				),
+				'claude-code'    => array(
+					'label' => 'Claude Code',
+					'help'  => __( 'Run this command in a terminal. --scope user makes the server available in all your projects; remove it to add it to the current project only.', 'leiho' ),
+					'code'  => array( $cli ),
+				),
+				'codex'          => array(
+					'label' => 'Codex',
+					'help'  => __( 'Run this command in a terminal, or add the second block to ~/.codex/config.toml. The Codex CLI, IDE extension and app share this configuration. Check the connection with /mcp.', 'leiho' ),
+					'code'  => array( $codex_cli, $toml ),
+				),
+				'cursor'         => array(
+					'label' => 'Cursor',
+					'help'  => __( 'Add this server to .cursor/mcp.json in your project, or to ~/.cursor/mcp.json for all your projects, then reload Cursor.', 'leiho' ),
+					'code'  => array( $json ),
+				),
+				'vscode'         => array(
+					'label' => 'VS Code · Copilot',
+					'help'  => __( 'In VS Code, run “MCP: Open User Configuration” from the command palette, or create .vscode/mcp.json in your project. Add this server, start it, then use Copilot Chat in agent mode.', 'leiho' ),
+					'code'  => array( $vscode ),
+				),
+				'gemini'         => array(
+					'label' => 'Gemini CLI',
+					'help'  => __( 'Add this server to ~/.gemini/settings.json (inside mcpServers if the file already has some), then restart Gemini CLI and check the connection with /mcp.', 'leiho' ),
+					'code'  => array( $json ),
+				),
+				'windsurf'       => array(
+					'label' => 'Windsurf',
+					'help'  => __( 'In Windsurf, open the MCP settings of Cascade and view the raw configuration (mcp_config.json). Add this server, save, then refresh the servers.', 'leiho' ),
+					'code'  => array( $json ),
+				),
+				'other'          => array(
+					'label' => __( 'Other agents', 'leiho' ),
+					'help'  => __( 'Any client that runs local (stdio) MCP servers works: Zed, Cline, Goose, LM Studio… Most read this format. Otherwise, the command is npx with the arguments -y @automattic/mcp-wordpress-remote@latest and the three environment variables below.', 'leiho' ),
+					'code'  => array( $json ),
+				),
+			);
 
 			$prompts = array(
 				__( 'Read the brand context of my site, then write a draft service page about indoor air audits.', 'leiho' ),
@@ -1952,7 +2029,7 @@ CODE;
 				$prompts[] = __( 'Run the Leiho diagnostics and tell me what to fix, step by step.', 'leiho' );
 			}
 			?>
-			<p class="leiho-help"><?php esc_html_e( 'Claude, Cursor and other AI agents can work on this site through MCP, with the rights of the user they connect as. Content abilities never publish: they read, and they write drafts only.', 'leiho' ); ?></p>
+			<p class="leiho-help"><?php esc_html_e( 'Claude, Codex, Cursor, Copilot, Gemini and other AI agents can work on this site through MCP, with the rights of the user they connect as. Content abilities never publish: they read, and they write drafts only.', 'leiho' ); ?></p>
 
 			<div class="leiho-row">
 				<span class="leiho-row__label"><?php esc_html_e( 'Abilities API', 'leiho' ); ?></span>
@@ -2000,31 +2077,25 @@ CODE;
 					<p><?php esc_html_e( 'The configuration below is filled in with this site’s address and your username. Replace xxxx xxxx xxxx xxxx xxxx xxxx with the application password. Node.js must be installed on your computer: the client starts a small bridge with npx.', 'leiho' ); ?></p>
 					<div class="leiho-ai-tabs">
 						<div class="leiho-segmented" role="tablist" data-leiho-segmented>
-							<button type="button" role="tab" aria-selected="true" data-panel="claude-desktop"><?php esc_html_e( 'Claude Desktop', 'leiho' ); ?></button>
-							<button type="button" role="tab" aria-selected="false" data-panel="claude-code"><?php esc_html_e( 'Claude Code', 'leiho' ); ?></button>
-							<button type="button" role="tab" aria-selected="false" data-panel="cursor"><?php esc_html_e( 'Cursor', 'leiho' ); ?></button>
+							<?php $first = true; ?>
+							<?php foreach ( $clients as $id => $client ) : ?>
+								<button type="button" role="tab" aria-selected="<?php echo $first ? 'true' : 'false'; ?>" data-panel="<?php echo esc_attr( $id ); ?>"><?php echo esc_html( $client['label'] ); ?></button>
+								<?php $first = false; ?>
+							<?php endforeach; ?>
 						</div>
-						<div data-panel-id="claude-desktop">
-							<p class="leiho-help"><?php esc_html_e( 'In Claude Desktop, open Settings → Developer → Edit Config. Add this server to claude_desktop_config.json (inside mcpServers if the file already has some), save, then restart Claude.', 'leiho' ); ?></p>
-							<div class="leiho-code">
-								<pre><?php echo esc_html( $json ); ?></pre>
-								<button type="button" data-leiho-copy="<?php echo esc_attr( $json ); ?>"><?php esc_html_e( 'Copy', 'leiho' ); ?></button>
+						<?php $first = true; ?>
+						<?php foreach ( $clients as $id => $client ) : ?>
+							<div data-panel-id="<?php echo esc_attr( $id ); ?>"<?php echo $first ? '' : ' hidden'; ?>>
+								<p class="leiho-help"><?php echo esc_html( $client['help'] ); ?></p>
+								<?php foreach ( $client['code'] as $code ) : ?>
+									<div class="leiho-code">
+										<pre><?php echo esc_html( $code ); ?></pre>
+										<button type="button" data-leiho-copy="<?php echo esc_attr( $code ); ?>"><?php esc_html_e( 'Copy', 'leiho' ); ?></button>
+									</div>
+								<?php endforeach; ?>
 							</div>
-						</div>
-						<div data-panel-id="claude-code" hidden>
-							<p class="leiho-help"><?php esc_html_e( 'Run this command in a terminal. --scope user makes the server available in all your projects; remove it to add it to the current project only.', 'leiho' ); ?></p>
-							<div class="leiho-code">
-								<pre><?php echo esc_html( $cli ); ?></pre>
-								<button type="button" data-leiho-copy="<?php echo esc_attr( $cli ); ?>"><?php esc_html_e( 'Copy', 'leiho' ); ?></button>
-							</div>
-						</div>
-						<div data-panel-id="cursor" hidden>
-							<p class="leiho-help"><?php esc_html_e( 'Add this server to .cursor/mcp.json in your project, or to ~/.cursor/mcp.json for all your projects, then reload Cursor.', 'leiho' ); ?></p>
-							<div class="leiho-code">
-								<pre><?php echo esc_html( $json ); ?></pre>
-								<button type="button" data-leiho-copy="<?php echo esc_attr( $json ); ?>"><?php esc_html_e( 'Copy', 'leiho' ); ?></button>
-							</div>
-						</div>
+							<?php $first = false; ?>
+						<?php endforeach; ?>
 					</div>
 				</li>
 

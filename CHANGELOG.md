@@ -2,6 +2,12 @@
 
 All notable changes to Leiho (called Okno until 1.0.0-beta.11) are documented here. The project follows [Semantic Versioning](https://semver.org/). The plugin and the bridge package share one version number.
 
+## [Unreleased]
+
+### Added
+
+- **More AI clients in the MCP guide.** The AI screen now gives a ready-to-copy configuration for Codex (`codex mcp add` command and `~/.codex/config.toml` block, shared by the CLI, IDE extension and app), VS Code with GitHub Copilot (`servers` format), Gemini CLI and Windsurf, besides Claude Desktop, Claude Code and Cursor, plus a generic one for any client that runs local MCP servers.
+
 ## [1.0.0-beta.13] — 2026-11-04
 
 ### Added

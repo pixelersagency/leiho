@@ -473,7 +473,7 @@ msgid "A day."
 msgstr ""
 
 #: assets/admin/app-collections.js:42 assets/admin/app-content.js:415
-#: includes/admin/class-leiho-dashboard.php:2192
+#: includes/admin/class-leiho-dashboard.php:2263
 msgid "Date"
 msgstr ""
 
@@ -1886,9 +1886,7 @@ msgstr ""
 
 #: assets/admin/app-media.js:268 includes/admin/class-leiho-admin.php:266
 #: includes/admin/class-leiho-dashboard.php:1432
-#: includes/admin/class-leiho-dashboard.php:2011
-#: includes/admin/class-leiho-dashboard.php:2018
-#: includes/admin/class-leiho-dashboard.php:2025
+#: includes/admin/class-leiho-dashboard.php:2093
 msgid "Copy"
 msgstr ""
 
@@ -3391,7 +3389,7 @@ msgid "Read the content from these URLs, at build time or on each request."
 msgstr ""
 
 #: includes/admin/class-leiho-dashboard.php:667
-#: includes/admin/class-leiho-dashboard.php:2076
+#: includes/admin/class-leiho-dashboard.php:2147
 msgid "Content API"
 msgstr ""
 
@@ -3997,358 +3995,370 @@ msgstr ""
 msgid "Leiho offers abilities to external AI agents from WordPress 6.9 (Abilities API)."
 msgstr ""
 
-#: includes/admin/class-leiho-dashboard.php:1947
-msgid "Read the brand context of my site, then write a draft service page about indoor air audits."
-msgstr ""
-
-#: includes/admin/class-leiho-dashboard.php:1948
-msgid "Find my drafts in Leiho and fill in the empty fields of the most recent one."
-msgstr ""
-
-#: includes/admin/class-leiho-dashboard.php:1949
-msgid "List the content types and their fields, then create a draft FAQ entry from these notes: …"
-msgstr ""
-
-#: includes/admin/class-leiho-dashboard.php:1952
-msgid "Run the Leiho diagnostics and tell me what to fix, step by step."
-msgstr ""
-
-#: includes/admin/class-leiho-dashboard.php:1955
-msgid "Claude, Cursor and other AI agents can work on this site through MCP, with the rights of the user they connect as. Content abilities never publish: they read, and they write drafts only."
-msgstr ""
-
-#: includes/admin/class-leiho-dashboard.php:1958
-msgid "Abilities API"
-msgstr ""
-
-#: includes/admin/class-leiho-dashboard.php:1959
-msgid "Available"
-msgstr ""
-
-#: includes/admin/class-leiho-dashboard.php:1962
-msgid "MCP Adapter"
-msgstr ""
-
-#: includes/admin/class-leiho-dashboard.php:1965
-msgid "Active"
-msgstr ""
-
-#: includes/admin/class-leiho-dashboard.php:1968
-msgid "Not active"
-msgstr ""
-
-#: includes/admin/class-leiho-dashboard.php:1969
-msgid "The official MCP Adapter plugin, by WordPress.org, turns these abilities into MCP tools. Install and activate it first."
-msgstr ""
-
-#: includes/admin/class-leiho-dashboard.php:1974
-msgid "Connect an AI agent"
-msgstr ""
-
-#: includes/admin/class-leiho-dashboard.php:1977
-msgid "Install the MCP Adapter plugin"
-msgstr ""
-
-#: includes/admin/class-leiho-dashboard.php:1979
-msgid "Done: the adapter is active and serves this site’s MCP server at the address above."
-msgstr ""
-
-#: includes/admin/class-leiho-dashboard.php:1981
-msgid "Search for “MCP Adapter” in Plugins → Add New Plugin, install it and activate it. It adds the address AI clients connect to."
-msgstr ""
-
 #: includes/admin/class-leiho-dashboard.php:1983
-msgid "Install MCP Adapter"
-msgstr ""
-
-#: includes/admin/class-leiho-dashboard.php:1989
-msgid "Create an application password"
-msgstr ""
-
-#: includes/admin/class-leiho-dashboard.php:1990
-msgid "In your profile, under Application Passwords, add one named after the client (for example “Claude on my laptop”) and copy it: WordPress shows it only once. The site must use HTTPS."
-msgstr ""
-
-#: includes/admin/class-leiho-dashboard.php:1991
-msgid "The agent acts with the rights of that user. Prefer a dedicated user with the Editor role or lower: content abilities only write drafts, and you can revoke the password at any time from the profile."
-msgstr ""
-
-#: includes/admin/class-leiho-dashboard.php:1992
-msgid "Administration abilities (diagnostics, settings, secrets) work only when the agent connects as an administrator. Create an administrator application password just for a setup or debugging session, then revoke it."
-msgstr ""
-
-#: includes/admin/class-leiho-dashboard.php:1994
-msgid "Open my application passwords"
-msgstr ""
-
-#: includes/admin/class-leiho-dashboard.php:1999
-msgid "Add the site to your AI client"
-msgstr ""
-
-#: includes/admin/class-leiho-dashboard.php:2000
-msgid "The configuration below is filled in with this site’s address and your username. Replace xxxx xxxx xxxx xxxx xxxx xxxx with the application password. Node.js must be installed on your computer: the client starts a small bridge with npx."
-msgstr ""
-
-#: includes/admin/class-leiho-dashboard.php:2003
-msgid "Claude Desktop"
-msgstr ""
-
-#: includes/admin/class-leiho-dashboard.php:2004
-msgid "Claude Code"
-msgstr ""
-
-#: includes/admin/class-leiho-dashboard.php:2005
-msgid "Cursor"
-msgstr ""
-
-#: includes/admin/class-leiho-dashboard.php:2008
 msgid "In Claude Desktop, open Settings → Developer → Edit Config. Add this server to claude_desktop_config.json (inside mcpServers if the file already has some), save, then restart Claude."
 msgstr ""
 
-#: includes/admin/class-leiho-dashboard.php:2015
+#: includes/admin/class-leiho-dashboard.php:1988
 msgid "Run this command in a terminal. --scope user makes the server available in all your projects; remove it to add it to the current project only."
 msgstr ""
 
-#: includes/admin/class-leiho-dashboard.php:2022
+#: includes/admin/class-leiho-dashboard.php:1993
+msgid "Run this command in a terminal, or add the second block to ~/.codex/config.toml. The Codex CLI, IDE extension and app share this configuration. Check the connection with /mcp."
+msgstr ""
+
+#: includes/admin/class-leiho-dashboard.php:1998
 msgid "Add this server to .cursor/mcp.json in your project, or to ~/.cursor/mcp.json for all your projects, then reload Cursor."
 msgstr ""
 
-#: includes/admin/class-leiho-dashboard.php:2032
-msgid "Ask the agent"
+#: includes/admin/class-leiho-dashboard.php:2003
+msgid "In VS Code, run “MCP: Open User Configuration” from the command palette, or create .vscode/mcp.json in your project. Add this server, start it, then use Copilot Chat in agent mode."
 msgstr ""
 
-#: includes/admin/class-leiho-dashboard.php:2033
-msgid "Start a new conversation and check the connection with “List the WordPress abilities you can use on my site.” Then, for example:"
+#: includes/admin/class-leiho-dashboard.php:2008
+msgid "Add this server to ~/.gemini/settings.json (inside mcpServers if the file already has some), then restart Gemini CLI and check the connection with /mcp."
+msgstr ""
+
+#: includes/admin/class-leiho-dashboard.php:2013
+msgid "In Windsurf, open the MCP settings of Cascade and view the raw configuration (mcp_config.json). Add this server, save, then refresh the servers."
+msgstr ""
+
+#: includes/admin/class-leiho-dashboard.php:2017
+msgid "Other agents"
+msgstr ""
+
+#: includes/admin/class-leiho-dashboard.php:2018
+msgid "Any client that runs local (stdio) MCP servers works: Zed, Cline, Goose, LM Studio… Most read this format. Otherwise, the command is npx with the arguments -y @automattic/mcp-wordpress-remote@latest and the three environment variables below."
+msgstr ""
+
+#: includes/admin/class-leiho-dashboard.php:2024
+msgid "Read the brand context of my site, then write a draft service page about indoor air audits."
+msgstr ""
+
+#: includes/admin/class-leiho-dashboard.php:2025
+msgid "Find my drafts in Leiho and fill in the empty fields of the most recent one."
+msgstr ""
+
+#: includes/admin/class-leiho-dashboard.php:2026
+msgid "List the content types and their fields, then create a draft FAQ entry from these notes: …"
+msgstr ""
+
+#: includes/admin/class-leiho-dashboard.php:2029
+msgid "Run the Leiho diagnostics and tell me what to fix, step by step."
+msgstr ""
+
+#: includes/admin/class-leiho-dashboard.php:2032
+msgid "Claude, Codex, Cursor, Copilot, Gemini and other AI agents can work on this site through MCP, with the rights of the user they connect as. Content abilities never publish: they read, and they write drafts only."
+msgstr ""
+
+#: includes/admin/class-leiho-dashboard.php:2035
+msgid "Abilities API"
+msgstr ""
+
+#: includes/admin/class-leiho-dashboard.php:2036
+msgid "Available"
+msgstr ""
+
+#: includes/admin/class-leiho-dashboard.php:2039
+msgid "MCP Adapter"
 msgstr ""
 
 #: includes/admin/class-leiho-dashboard.php:2042
+msgid "Active"
+msgstr ""
+
+#: includes/admin/class-leiho-dashboard.php:2045
+msgid "Not active"
+msgstr ""
+
+#: includes/admin/class-leiho-dashboard.php:2046
+msgid "The official MCP Adapter plugin, by WordPress.org, turns these abilities into MCP tools. Install and activate it first."
+msgstr ""
+
+#: includes/admin/class-leiho-dashboard.php:2051
+msgid "Connect an AI agent"
+msgstr ""
+
+#: includes/admin/class-leiho-dashboard.php:2054
+msgid "Install the MCP Adapter plugin"
+msgstr ""
+
+#: includes/admin/class-leiho-dashboard.php:2056
+msgid "Done: the adapter is active and serves this site’s MCP server at the address above."
+msgstr ""
+
+#: includes/admin/class-leiho-dashboard.php:2058
+msgid "Search for “MCP Adapter” in Plugins → Add New Plugin, install it and activate it. It adds the address AI clients connect to."
+msgstr ""
+
+#: includes/admin/class-leiho-dashboard.php:2060
+msgid "Install MCP Adapter"
+msgstr ""
+
+#: includes/admin/class-leiho-dashboard.php:2066
+msgid "Create an application password"
+msgstr ""
+
+#: includes/admin/class-leiho-dashboard.php:2067
+msgid "In your profile, under Application Passwords, add one named after the client (for example “Claude on my laptop”) and copy it: WordPress shows it only once. The site must use HTTPS."
+msgstr ""
+
+#: includes/admin/class-leiho-dashboard.php:2068
+msgid "The agent acts with the rights of that user. Prefer a dedicated user with the Editor role or lower: content abilities only write drafts, and you can revoke the password at any time from the profile."
+msgstr ""
+
+#: includes/admin/class-leiho-dashboard.php:2069
+msgid "Administration abilities (diagnostics, settings, secrets) work only when the agent connects as an administrator. Create an administrator application password just for a setup or debugging session, then revoke it."
+msgstr ""
+
+#: includes/admin/class-leiho-dashboard.php:2071
+msgid "Open my application passwords"
+msgstr ""
+
+#: includes/admin/class-leiho-dashboard.php:2076
+msgid "Add the site to your AI client"
+msgstr ""
+
+#: includes/admin/class-leiho-dashboard.php:2077
+msgid "The configuration below is filled in with this site’s address and your username. Replace xxxx xxxx xxxx xxxx xxxx xxxx with the application password. Node.js must be installed on your computer: the client starts a small bridge with npx."
+msgstr ""
+
+#: includes/admin/class-leiho-dashboard.php:2103
+msgid "Ask the agent"
+msgstr ""
+
+#: includes/admin/class-leiho-dashboard.php:2104
+msgid "Start a new conversation and check the connection with “List the WordPress abilities you can use on my site.” Then, for example:"
+msgstr ""
+
+#: includes/admin/class-leiho-dashboard.php:2113
 #: includes/class-leiho-native-fields.php:76
 msgid "Content"
 msgstr ""
 
-#: includes/admin/class-leiho-dashboard.php:2049
+#: includes/admin/class-leiho-dashboard.php:2120
 msgid "Needs an AI provider that reads images."
 msgstr ""
 
-#: includes/admin/class-leiho-dashboard.php:2055
+#: includes/admin/class-leiho-dashboard.php:2126
 msgid "Site administration (administrators)"
 msgstr ""
 
-#: includes/admin/class-leiho-dashboard.php:2061
+#: includes/admin/class-leiho-dashboard.php:2132
 msgid "They never return a secret and never publish. Every change made by an agent is logged in Recent AI actions."
 msgstr ""
 
-#: includes/admin/class-leiho-dashboard.php:2077
+#: includes/admin/class-leiho-dashboard.php:2148
 msgid "Your front end reads its content here, in a single request at build time. WordPress stays the only source of truth."
 msgstr ""
 
-#: includes/admin/class-leiho-dashboard.php:2080
+#: includes/admin/class-leiho-dashboard.php:2151
 msgid "Endpoints"
 msgstr ""
 
-#: includes/admin/class-leiho-dashboard.php:2083
+#: includes/admin/class-leiho-dashboard.php:2154
 msgid "All published content, cached and refreshed on every change. An unchanged build gets a 304."
 msgstr ""
 
-#: includes/admin/class-leiho-dashboard.php:2085
+#: includes/admin/class-leiho-dashboard.php:2156
 msgid "TypeScript types of that content, generated from your fields. In the front-end project: npx leiho types."
 msgstr ""
 
-#: includes/admin/class-leiho-dashboard.php:2090
+#: includes/admin/class-leiho-dashboard.php:2161
 msgid "Access"
 msgstr ""
 
-#: includes/admin/class-leiho-dashboard.php:2092
+#: includes/admin/class-leiho-dashboard.php:2163
 msgid "Public: published content only, as on the site"
 msgstr ""
 
-#: includes/admin/class-leiho-dashboard.php:2093
+#: includes/admin/class-leiho-dashboard.php:2164
 msgid "Restricted: the front end sends a token"
 msgstr ""
 
-#: includes/admin/class-leiho-dashboard.php:2098
+#: includes/admin/class-leiho-dashboard.php:2169
 msgid "Cache"
 msgstr ""
 
-#: includes/admin/class-leiho-dashboard.php:2100
+#: includes/admin/class-leiho-dashboard.php:2171
 msgid "Keep API responses in cache until the content changes"
 msgstr ""
 
 #. translators: %s: object cache name (Redis, Memcached…).
-#: includes/admin/class-leiho-dashboard.php:2106
+#: includes/admin/class-leiho-dashboard.php:2177
 #, php-format
 msgid "Persistent object cache detected: %s. Leiho stores the export, items and types there."
 msgstr ""
 
-#: includes/admin/class-leiho-dashboard.php:2108
+#: includes/admin/class-leiho-dashboard.php:2179
 msgid "No persistent object cache: Leiho keeps its own copy of the export."
 msgstr ""
 
-#: includes/admin/class-leiho-dashboard.php:2112
+#: includes/admin/class-leiho-dashboard.php:2183
 msgid "Responses carry an ETag, and page caches (LiteSpeed, WP Rocket, W3 Total Cache…) are purged for the API whenever content changes."
 msgstr ""
 
-#: includes/admin/class-leiho-dashboard.php:2113
+#: includes/admin/class-leiho-dashboard.php:2184
 msgid "Clear the content cache"
 msgstr ""
 
-#: includes/admin/class-leiho-dashboard.php:2119
+#: includes/admin/class-leiho-dashboard.php:2190
 msgid "Content token"
 msgstr ""
 
-#: includes/admin/class-leiho-dashboard.php:2122
+#: includes/admin/class-leiho-dashboard.php:2193
 msgid "Generate a new token (the current one stops working)"
 msgstr ""
 
-#: includes/admin/class-leiho-dashboard.php:2123
+#: includes/admin/class-leiho-dashboard.php:2194
 msgid "Set it as LEIHO_TOKEN in the front end’s build environment. Sent in the X-Leiho-Token header."
 msgstr ""
 
-#: includes/admin/class-leiho-dashboard.php:2130
+#: includes/admin/class-leiho-dashboard.php:2201
 msgid "WordPress as a back office"
 msgstr ""
 
-#: includes/admin/class-leiho-dashboard.php:2131
+#: includes/admin/class-leiho-dashboard.php:2202
 msgid "Your visitors use the front end. These options keep WordPress out of their way and out of search engines. wp-admin, login, the content API and draft previews are not affected."
 msgstr ""
 
-#: includes/admin/class-leiho-dashboard.php:2134
+#: includes/admin/class-leiho-dashboard.php:2205
 msgid "Protection"
 msgstr ""
 
-#: includes/admin/class-leiho-dashboard.php:2136
+#: includes/admin/class-leiho-dashboard.php:2207
 msgid "Keep WordPress out of search engines (noindex, robots.txt, no sitemap)"
 msgstr ""
 
-#: includes/admin/class-leiho-dashboard.php:2137
+#: includes/admin/class-leiho-dashboard.php:2208
 msgid "Redirect WordPress pages to the same page on the site"
 msgstr ""
 
-#: includes/admin/class-leiho-dashboard.php:2138
+#: includes/admin/class-leiho-dashboard.php:2209
 msgid "Lock down WordPress (XML-RPC off, user list hidden from visitors, version hidden)"
 msgstr ""
 
-#: includes/admin/class-leiho-dashboard.php:2154
+#: includes/admin/class-leiho-dashboard.php:2225
 msgid "Not set"
 msgstr ""
 
-#: includes/admin/class-leiho-dashboard.php:2154
+#: includes/admin/class-leiho-dashboard.php:2225
 msgid "Saved — leave empty to keep it"
 msgstr ""
 
-#: includes/admin/class-leiho-dashboard.php:2156
+#: includes/admin/class-leiho-dashboard.php:2227
 msgid "This secret can’t be read anymore: the WordPress salts have changed (host or security plugin). Enter it again."
 msgstr ""
 
-#: includes/admin/class-leiho-dashboard.php:2158
+#: includes/admin/class-leiho-dashboard.php:2229
 msgid "Delete this secret"
 msgstr ""
 
-#: includes/admin/class-leiho-dashboard.php:2180
+#: includes/admin/class-leiho-dashboard.php:2251
 msgid "Deployment history"
 msgstr ""
 
-#: includes/admin/class-leiho-dashboard.php:2185
+#: includes/admin/class-leiho-dashboard.php:2256
 msgid "No deployments yet"
 msgstr ""
 
-#: includes/admin/class-leiho-dashboard.php:2186
+#: includes/admin/class-leiho-dashboard.php:2257
 msgid "Every click on “Publish” in the editor shows up here with its result."
 msgstr ""
 
-#: includes/admin/class-leiho-dashboard.php:2193
+#: includes/admin/class-leiho-dashboard.php:2264
 msgid "By"
 msgstr ""
 
-#: includes/admin/class-leiho-dashboard.php:2194
+#: includes/admin/class-leiho-dashboard.php:2265
 msgid "Method"
 msgstr ""
 
-#: includes/admin/class-leiho-dashboard.php:2195
+#: includes/admin/class-leiho-dashboard.php:2266
 msgid "Result"
 msgstr ""
 
-#: includes/admin/class-leiho-dashboard.php:2210
+#: includes/admin/class-leiho-dashboard.php:2281
 msgid "View build"
 msgstr ""
 
-#: includes/admin/class-leiho-dashboard.php:2221
+#: includes/admin/class-leiho-dashboard.php:2292
 msgid "Weekly activity"
 msgstr ""
 
-#: includes/admin/class-leiho-dashboard.php:2226
+#: includes/admin/class-leiho-dashboard.php:2297
 msgid "Week"
 msgstr ""
 
-#: includes/admin/class-leiho-dashboard.php:2227
+#: includes/admin/class-leiho-dashboard.php:2298
 msgid "Saves"
 msgstr ""
 
-#: includes/admin/class-leiho-dashboard.php:2228
+#: includes/admin/class-leiho-dashboard.php:2299
 msgid "Deployments"
 msgstr ""
 
-#: includes/admin/class-leiho-dashboard.php:2259
+#: includes/admin/class-leiho-dashboard.php:2330
 msgid "Live content"
 msgstr ""
 
-#: includes/admin/class-leiho-dashboard.php:2260
+#: includes/admin/class-leiho-dashboard.php:2331
 msgid "The site reads WordPress on every visit. Saving is enough, nothing to publish."
 msgstr ""
 
-#: includes/admin/class-leiho-dashboard.php:2263
+#: includes/admin/class-leiho-dashboard.php:2334
 msgid "Build hook"
 msgstr ""
 
-#: includes/admin/class-leiho-dashboard.php:2264
+#: includes/admin/class-leiho-dashboard.php:2335
 msgid "Vercel, Netlify, Cloudflare Pages… Leiho calls the rebuild URL."
 msgstr ""
 
-#: includes/admin/class-leiho-dashboard.php:2267
+#: includes/admin/class-leiho-dashboard.php:2338
 msgid "GitHub Actions"
 msgstr ""
 
-#: includes/admin/class-leiho-dashboard.php:2268
+#: includes/admin/class-leiho-dashboard.php:2339
 msgid "Triggers a workflow and tracks the build live."
 msgstr ""
 
-#: includes/admin/class-leiho-dashboard.php:2271
+#: includes/admin/class-leiho-dashboard.php:2342
 msgid "GitHub commit"
 msgstr ""
 
-#: includes/admin/class-leiho-dashboard.php:2272
+#: includes/admin/class-leiho-dashboard.php:2343
 msgid "For hosts that deploy on every push."
 msgstr ""
 
-#: includes/admin/class-leiho-dashboard.php:2275
+#: includes/admin/class-leiho-dashboard.php:2346
 msgid "Coolify"
 msgstr ""
 
-#: includes/admin/class-leiho-dashboard.php:2276
+#: includes/admin/class-leiho-dashboard.php:2347
 msgid "Coolify deployment webhook."
 msgstr ""
 
-#: includes/admin/class-leiho-dashboard.php:2286
+#: includes/admin/class-leiho-dashboard.php:2357
 msgid "Not set up"
 msgstr ""
 
-#: includes/admin/class-leiho-dashboard.php:2291
+#: includes/admin/class-leiho-dashboard.php:2362
 msgid "Pending"
 msgstr ""
 
-#: includes/admin/class-leiho-dashboard.php:2292
+#: includes/admin/class-leiho-dashboard.php:2363
 msgid "Building"
 msgstr ""
 
-#: includes/admin/class-leiho-dashboard.php:2293
+#: includes/admin/class-leiho-dashboard.php:2364
 msgid "Triggered"
 msgstr ""
 
-#: includes/admin/class-leiho-dashboard.php:2294
+#: includes/admin/class-leiho-dashboard.php:2365
 msgid "Live"
 msgstr ""
 
-#: includes/admin/class-leiho-dashboard.php:2295
+#: includes/admin/class-leiho-dashboard.php:2366
 msgid "Failed"
 msgstr ""
 
