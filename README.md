@@ -113,6 +113,17 @@ Back in wp-admin, **Leiho → Get started → Test the connection** confirms tha
 
 ## Annotations
 
+In a JavaScript framework, let the `leiho` package write the attributes: `field()`, `block()` and `entry()` return an object to spread on the element (JSX, Astro, Svelte; `v-bind` in Vue).
+
+```jsx
+import { field, block } from 'leiho';
+
+<h1 {...field(page, 'hero_title')}>{page.fields.hero_title}</h1>
+<section {...block(page, 'sections', i, 'Hero')}>…</section>
+```
+
+`field(page, 'intro', { html: true })` adds `data-leiho-apply="html"`; `{ refresh: true }` adds `data-leiho-refresh="save"`. In plain HTML or server templates, write the attributes below by hand.
+
 | Attribute | Purpose |
 |---|---|
 | `data-wp-post="12"` | Container: the WordPress post ID for the fields inside |

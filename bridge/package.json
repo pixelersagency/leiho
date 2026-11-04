@@ -31,6 +31,9 @@
 		"./standalone": "./dist/leiho-bridge.js",
 		"./content": {
 			"import": "./src/content.js"
+		},
+		"./attrs": {
+			"import": "./src/attrs.js"
 		}
 	},
 	"scripts": {

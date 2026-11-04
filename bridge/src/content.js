@@ -187,3 +187,6 @@ function sleep( ms ) {
 export const loadOknoContent = loadLeihoContent;
 /** @deprecated Utiliser indexLeihoContent. */
 export const indexOknoContent = indexLeihoContent;
+
+// Attributs d'annotation, à côté du contenu qu'ils décrivent.
+export { field, block, entry } from './attrs.js';

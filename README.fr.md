@@ -107,6 +107,17 @@ Dans wp-admin, **Leiho → Démarrer → Tester la connexion** confirme que le b
 
 ## Annotations
 
+Dans un framework JavaScript, laissez le paquet `leiho` écrire les attributs : `field()`, `block()` et `entry()` renvoient un objet à étaler sur l’élément (JSX, Astro, Svelte ; `v-bind` en Vue).
+
+```jsx
+import { field, block } from 'leiho';
+
+<h1 {...field(page, 'hero_titre')}>{page.fields.hero_titre}</h1>
+<section {...block(page, 'sections', i, 'Hero')}>…</section>
+```
+
+`field(page, 'intro', { html: true })` ajoute `data-leiho-apply="html"` ; `{ refresh: true }` ajoute `data-leiho-refresh="save"`. En HTML ou dans des gabarits serveur, écrivez à la main les attributs ci-dessous.
+
 | Attribut | Rôle |
 |---|---|
 | `data-wp-post="12"` | Conteneur : ID du contenu WordPress des champs qu'il contient |

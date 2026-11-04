@@ -61,6 +61,17 @@ The standalone file starts itself from its `data-wp-origin` attribute.
 
 ## Annotate
 
+In a JavaScript framework, let this package write the attributes: `field()`, `block()` and `entry()` return an object to spread on the element (JSX, Astro, Svelte; `v-bind` in Vue).
+
+```jsx
+import { field, block } from 'leiho';
+
+<h1 {...field(page, 'hero_title')}>{page.fields.hero_title}</h1>
+<section {...block(page, 'sections', i, 'Hero')}>…</section>
+```
+
+`field(page, 'intro', { html: true })` adds `data-leiho-apply="html"`; `{ refresh: true }` adds `data-leiho-refresh="save"`. They are pure functions: use them in server components and at build time. In plain HTML, write the attributes below by hand.
+
 ```html
 <main data-wp-post="12">
   <h1 data-wp-field="_title">About us</h1>

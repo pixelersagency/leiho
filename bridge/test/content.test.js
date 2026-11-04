@@ -148,3 +148,18 @@ test( 'index : par chemin, id, type et slug', () => {
 	assert.equal( content.bySlug( 'page', 'accueil' ).id, 2 );
 	assert.equal( content.byPath( '/inconnu' ), null );
 } );
+
+test( 'field, block, entry : attributs d’annotation', async () => {
+	const { field, block, entry } = await import( '../src/attrs.js' );
+	const page = { id: 12, fields: {} };
+	assert.deepEqual( field( page, 'hero_title' ), { 'data-wp-post': '12', 'data-wp-field': 'hero_title' } );
+	assert.deepEqual( field( 12, 'intro', { html: true, refresh: true } ), { 'data-wp-post': '12', 'data-wp-field': 'intro', 'data-leiho-apply': 'html', 'data-leiho-refresh': 'save' } );
+	assert.deepEqual( field( null, 'cards.0.title' ), { 'data-wp-field': 'cards.0.title' } );
+	assert.deepEqual( block( page, 'sections', 2, 'Hero' ), { 'data-wp-post': '12', 'data-leiho-layout': 'sections.2', 'data-leiho-section': 'Hero' } );
+	assert.deepEqual( entry( page ), { 'data-wp-post': '12' } );
+	assert.deepEqual( entry( 'abc' ), {} );
+	const root = await import( '../src/index.js' );
+	const content = await import( '../src/content.js' );
+	assert.equal( root.field, field );
+	assert.equal( content.field, field );
+} );

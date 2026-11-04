@@ -84,14 +84,44 @@ Ne pose pas `X-Frame-Options: DENY` ou `SAMEORIGIN` : il bloquerait l'éditeur.
 
 ## Annoter les contenus
 
+**Dans un framework JavaScript (React, Next.js, Astro, Vue, Nuxt, Svelte…), utilise les
+fonctions du paquet `leiho`** plutôt que d'écrire les attributs à la main. Elles renvoient
+les attributs sous forme d'objet à étaler sur l'élément : pas de chemin tapé deux fois, pas
+d'attribut oublié.
+
 ```jsx
-<section data-wp-post={page.id} data-leiho-section="Hero">
-  <h1 data-wp-field="hero_titre">{page.acf.hero_titre}</h1>
-  <div data-wp-field="hero_intro" data-leiho-apply="html"
-       dangerouslySetInnerHTML={{ __html: page.acf.hero_intro }} />
-  <img data-wp-field="hero_image" src={page.acf.hero_image.url} alt={page.acf.hero_image.alt} />
+import { field, block, entry } from 'leiho';
+
+<section {...entry(page, 'Hero')}>
+  <h1 {...field(page, 'hero_titre')}>{page.fields.hero_titre}</h1>
+  <div {...field(page, 'hero_intro', { html: true })}
+       dangerouslySetInnerHTML={{ __html: page.fields.hero_intro }} />
+  <img {...field(page, 'hero_image')} src={page.fields.hero_image.url} alt={page.fields.hero_image.alt} />
 </section>
 ```
+
+- `field(entrée, chemin, options?)` → `data-wp-post` + `data-wp-field`. Options : `{ html: true }`
+  (la valeur contient du balisage), `{ refresh: true }` (rechargement après l'enregistrement),
+  `{ style: 'background-color' }` (champ couleur).
+- `block(entrée, 'sections', i, 'Libellé')` → une ligne d'un flexible content
+  (`data-leiho-layout` + `data-leiho-section`) : le client peut l'ajouter, la déplacer, la
+  dupliquer, la supprimer.
+- `entry(entrée, 'Libellé'?)` → un conteneur (`data-wp-post`, et un nom de section si donné).
+- `entrée` est un élément de l'export de contenu Leiho (il a un `id`) ou un ID WordPress.
+- Vue : `v-bind="field(page, 'hero_titre')"`. Svelte et Astro : `{...field(page, 'hero_titre')}`.
+- Ce sont des fonctions pures (aucun accès au DOM) : utilisables dans les composants serveur et au build.
+
+En HTML ou dans des gabarits serveur (PHP, Twig, Liquid…), écris les mêmes attributs à la main :
+
+```html
+<section data-wp-post="12" data-leiho-section="Hero">
+  <h1 data-wp-field="hero_titre">…</h1>
+  <div data-wp-field="hero_intro" data-leiho-apply="html">…</div>
+  <img data-wp-field="hero_image" src="…" alt="…">
+</section>
+```
+
+Les attributs écrits par ces fonctions :
 
 | Attribut | Rôle |
 |---|---|
@@ -116,9 +146,9 @@ Le chemin d'un élément de liste utilise l'**index de rendu** : dans un `map`, 
 avec l'index de la boucle, pas avec un identifiant.
 
 ```jsx
-{page.acf.cartes.map((carte, i) => (
+{page.fields.cartes.map((carte, i) => (
   <article key={i}>
-    <h3 data-wp-field={`cartes.${i}.titre`}>{carte.titre}</h3>
+    <h3 {...field(page, `cartes.${i}.titre`)}>{carte.titre}</h3>
   </article>
 ))}
 ```
@@ -147,8 +177,16 @@ composant. L'éditeur prévient le client quand l'image choisie sera fortement r
 
 Une page que le client doit pouvoir composer (ajouter une FAQ, déplacer un bloc) est un
 champ **flexible content** ACF. Chaque layout du flexible correspond à un composant du front.
-Annote chaque bloc rendu avec `data-leiho-layout="nom_du_champ.index"` et
-`data-leiho-section="Libellé lisible"`.
+Annote chaque bloc rendu avec `block(page, 'nom_du_champ', index, 'Libellé lisible')`
+(ou, à la main, `data-leiho-layout="nom_du_champ.index"` et `data-leiho-section="Libellé lisible"`) :
+
+```jsx
+{page.fields.sections.map((section, i) => (
+  <section key={i} {...block(page, 'sections', i, section._layout)}>
+    <h2 {...field(page, `sections.${i}.titre`)}>{section.titre}</h2>
+  </section>
+))}
+```
 
 ### Contenu géré ailleurs
 

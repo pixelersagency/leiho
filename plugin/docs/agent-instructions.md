@@ -83,14 +83,43 @@ Do not send `X-Frame-Options: DENY` or `SAMEORIGIN`: it would block the editor.
 
 ## Annotate the content
 
+**In a JavaScript framework (React, Next.js, Astro, Vue, Nuxt, Svelte…), use the helpers of
+the `leiho` package** instead of writing the attributes by hand. They return the attributes
+as an object to spread on the element, so a path can't be mistyped twice and no attribute is
+forgotten:
+
 ```jsx
-<section data-wp-post={page.id} data-leiho-section="Hero">
-  <h1 data-wp-field="hero_title">{page.acf.hero_title}</h1>
-  <div data-wp-field="hero_intro" data-leiho-apply="html"
-       dangerouslySetInnerHTML={{ __html: page.acf.hero_intro }} />
-  <img data-wp-field="hero_image" src={page.acf.hero_image.url} alt={page.acf.hero_image.alt} />
+import { field, block, entry } from 'leiho';
+
+<section {...entry(page, 'Hero')}>
+  <h1 {...field(page, 'hero_title')}>{page.fields.hero_title}</h1>
+  <div {...field(page, 'hero_intro', { html: true })}
+       dangerouslySetInnerHTML={{ __html: page.fields.hero_intro }} />
+  <img {...field(page, 'hero_image')} src={page.fields.hero_image.url} alt={page.fields.hero_image.alt} />
 </section>
 ```
+
+- `field(entry, path, options?)` → `data-wp-post` + `data-wp-field`. Options: `{ html: true }`
+  (the value contains markup), `{ refresh: true }` (reload after saving), `{ style: 'background-color' }`
+  (color field).
+- `block(entry, 'sections', i, 'Label')` → a row of a flexible content field
+  (`data-leiho-layout` + `data-leiho-section`): the client can add, move, duplicate, delete it.
+- `entry(entry, 'Label'?)` → a container (`data-wp-post`, and a section name if given).
+- `entry` is an item of Leiho's content export (it has an `id`) or a WordPress ID.
+- Vue: `v-bind="field(page, 'hero_title')"`. Svelte and Astro: `{...field(page, 'hero_title')}`.
+- They are pure functions (no DOM access): use them in server components and at build time.
+
+In plain HTML or server templates (PHP, Twig, Liquid…), write the same attributes by hand:
+
+```html
+<section data-wp-post="12" data-leiho-section="Hero">
+  <h1 data-wp-field="hero_title">…</h1>
+  <div data-wp-field="hero_intro" data-leiho-apply="html">…</div>
+  <img data-wp-field="hero_image" src="…" alt="…">
+</section>
+```
+
+The attributes the helpers write:
 
 | Attribute | Purpose |
 |---|---|
@@ -115,9 +144,9 @@ The path of a list item uses the **render index**: in a `map`, build it from the
 index, not from an identifier.
 
 ```jsx
-{page.acf.cards.map((card, i) => (
+{page.fields.cards.map((card, i) => (
   <article key={i}>
-    <h3 data-wp-field={`cards.${i}.title`}>{card.title}</h3>
+    <h3 {...field(page, `cards.${i}.title`)}>{card.title}</h3>
   </article>
 ))}
 ```
@@ -146,8 +175,16 @@ the component. The editor warns the client when the chosen image will be heavily
 
 A page the client must be able to compose (add an FAQ, move a block) is an ACF
 **flexible content** field. Each layout of the flexible content maps to one front-end
-component. Annotate each rendered block with `data-leiho-layout="field_name.index"` and
-`data-leiho-section="Readable label"`.
+component. Annotate each rendered block with `block(page, 'field_name', index, 'Readable label')`
+(or, by hand, `data-leiho-layout="field_name.index"` and `data-leiho-section="Readable label"`):
+
+```jsx
+{page.fields.sections.map((section, i) => (
+  <section key={i} {...block(page, 'sections', i, section._layout)}>
+    <h2 {...field(page, `sections.${i}.title`)}>{section.title}</h2>
+  </section>
+))}
+```
 
 ### Content managed elsewhere
 

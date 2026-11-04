@@ -576,3 +576,6 @@ export function initLeihoBridge( options ) {
 
 /** @deprecated Nom d'avant le renommage d'Okno en Leiho, gardé jusqu'à la 2.0. */
 export const initOknoBridge = initLeihoBridge;
+
+// Attributs d'annotation (field, block, entry) : aussi importables depuis 'leiho'.
+export { field, block, entry } from './attrs.js';

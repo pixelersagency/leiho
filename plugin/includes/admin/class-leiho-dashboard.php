@@ -968,41 +968,65 @@ GET {{CONTENT}}?path=/about
 CODE;
 			case 'annotate-jsx':
 				return <<<'CODE'
-<section data-wp-post={page.id} data-leiho-section="Hero">
-  <h1 data-wp-field="hero_title">{page.fields.hero_title}</h1>
-  <img data-wp-field="hero_image" src={page.fields.hero_image?.url} alt={page.fields.hero_image?.alt} />
+import { field, entry } from 'leiho';
+// field() writes data-wp-post + data-wp-field, entry() names a section.
+// Flexible content rows: block(page, 'sections', i, 'Label').
+
+<section {...entry(page, 'Hero')}>
+  <h1 {...field(page, 'hero_title')}>{page.fields.hero_title}</h1>
+  <img {...field(page, 'hero_image')} src={page.fields.hero_image?.url} alt={page.fields.hero_image?.alt} />
   {page.fields.cards?.map((card, i) => (
-    <article key={i} data-wp-field={`cards.${i}.title`}>{card.title}</article>
+    <article key={i} {...field(page, `cards.${i}.title`)}>{card.title}</article>
   ))}
 </section>
 CODE;
 			case 'annotate-astro':
 				return <<<'CODE'
-<section data-wp-post={page.id} data-leiho-section="Hero">
-  <h1 data-wp-field="hero_title">{page.fields.hero_title}</h1>
-  <img data-wp-field="hero_image" src={page.fields.hero_image?.url} alt={page.fields.hero_image?.alt} />
+---
+import { field, entry } from 'leiho';
+// field() writes data-wp-post + data-wp-field, entry() names a section.
+// Flexible content rows: block(page, 'sections', i, 'Label').
+---
+<section {...entry(page, 'Hero')}>
+  <h1 {...field(page, 'hero_title')}>{page.fields.hero_title}</h1>
+  <img {...field(page, 'hero_image')} src={page.fields.hero_image?.url} alt={page.fields.hero_image?.alt} />
   {page.fields.cards?.map((card, i) => (
-    <article data-wp-field={`cards.${i}.title`}>{card.title}</article>
+    <article {...field(page, `cards.${i}.title`)}>{card.title}</article>
   ))}
 </section>
 CODE;
 			case 'annotate-vue':
 				return <<<'CODE'
-<section :data-wp-post="page.id" data-leiho-section="Hero">
-  <h1 data-wp-field="hero_title">{{ page.fields.hero_title }}</h1>
-  <img data-wp-field="hero_image" :src="page.fields.hero_image?.url" :alt="page.fields.hero_image?.alt">
-  <article v-for="(card, i) in page.fields.cards" :key="i" :data-wp-field="`cards.${i}.title`">
-    {{ card.title }}
-  </article>
-</section>
+<script setup>
+import { field, entry } from 'leiho';
+// field() writes data-wp-post + data-wp-field, entry() names a section.
+// Flexible content rows: block(page, 'sections', i, 'Label').
+</script>
+
+<template>
+  <section v-bind="entry(page, 'Hero')">
+    <h1 v-bind="field(page, 'hero_title')">{{ page.fields.hero_title }}</h1>
+    <img v-bind="field(page, 'hero_image')" :src="page.fields.hero_image?.url" :alt="page.fields.hero_image?.alt">
+    <article v-for="(card, i) in page.fields.cards" :key="i" v-bind="field(page, `cards.${i}.title`)">
+      {{ card.title }}
+    </article>
+  </section>
+</template>
 CODE;
 			case 'annotate-svelte':
 				return <<<'CODE'
-<section data-wp-post={page.id} data-leiho-section="Hero">
-  <h1 data-wp-field="hero_title">{page.fields.hero_title}</h1>
-  <img data-wp-field="hero_image" src={page.fields.hero_image?.url} alt={page.fields.hero_image?.alt} />
+<script>
+  import { field, entry } from 'leiho';
+  // field() writes data-wp-post + data-wp-field, entry() names a section.
+// Flexible content rows: block(page, 'sections', i, 'Label').
+  let { page } = $props();
+</script>
+
+<section {...entry(page, 'Hero')}>
+  <h1 {...field(page, 'hero_title')}>{page.fields.hero_title}</h1>
+  <img {...field(page, 'hero_image')} src={page.fields.hero_image?.url} alt={page.fields.hero_image?.alt} />
   {#each page.fields.cards ?? [] as card, i}
-    <article data-wp-field="cards.{i}.title">{card.title}</article>
+    <article {...field(page, `cards.${i}.title`)}>{card.title}</article>
   {/each}
 </section>
 CODE;
