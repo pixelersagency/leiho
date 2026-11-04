@@ -28,6 +28,12 @@ class Leiho_Legacy {
 	/** Verrou : deux requêtes simultanées ne migrent pas deux fois. */
 	const LOCK = 'leiho_migration_lock';
 
+	/**
+	 * Tables restées sous leur nom Okno (la base n'a pas su les renommer) :
+	 * suffixe => nom complet. Lu par Leiho_Legacy::table().
+	 */
+	const TABLES = 'leiho_legacy_tables';
+
 	/** Version à partir de laquelle les noms okno_* sont dépréciés. */
 	const SINCE = '1.0.0-beta.12';
 
@@ -90,6 +96,18 @@ class Leiho_Legacy {
 		}
 		$like = $wpdb->esc_like( $wpdb->prefix . 'okno_' ) . '%';
 		return (bool) $wpdb->get_var( $wpdb->prepare( 'SHOW TABLES LIKE %s', $like ) );
+	}
+
+	/**
+	 * Nom réel d'une table Leiho (historique, collection).
+	 *
+	 * @param string $suffix « activity » ou l'identifiant d'une collection.
+	 * @return string
+	 */
+	public static function table( $suffix ) {
+		global $wpdb;
+		$map = get_option( self::TABLES, array() ); // Autochargée : pas de requête.
+		return is_array( $map ) && isset( $map[ $suffix ] ) ? $map[ $suffix ] : $wpdb->prefix . 'leiho_' . $suffix;
 	}
 
 	/**
@@ -170,6 +188,7 @@ class Leiho_Legacy {
 			'meta'      => 0,
 			'user_meta' => 0,
 			'secrets'   => 0,
+			'kept'      => array(),
 		);
 
 		// 1. Options okno_* (les transients commencent par _transient_ : exclus).
@@ -191,10 +210,15 @@ class Leiho_Legacy {
 		}
 
 		// 3. Tables {prefix}okno_* : historique et collections. ALTER TABLE …
-		// RENAME TO garde données et index (MySQL, MariaDB et SQLite).
+		// RENAME TO garde données et index sur MySQL et MariaDB. Le pilote
+		// SQLite de WordPress (Playground) l'accepte sans rien faire : on
+		// vérifie, et une table qui n'a pas bougé est gardée sous son nom Okno
+		// (Leiho_Legacy::table() la retrouve), sans copie ni perte.
+		$kept   = array();
 		$tables = $wpdb->get_col( $wpdb->prepare( 'SHOW TABLES LIKE %s', $wpdb->esc_like( $wpdb->prefix . 'okno_' ) . '%' ) );
 		foreach ( (array) $tables as $old ) {
-			$new = $wpdb->prefix . 'leiho_' . substr( $old, strlen( $wpdb->prefix . 'okno_' ) );
+			$suffix = substr( $old, strlen( $wpdb->prefix . 'okno_' ) );
+			$new    = $wpdb->prefix . 'leiho_' . $suffix;
 			if ( ! preg_match( '/^[A-Za-z0-9_]+$/', $old ) || ! preg_match( '/^[A-Za-z0-9_]+$/', $new ) ) {
 				$report['conflicts'][] = $old;
 				continue;
@@ -208,11 +232,18 @@ class Leiho_Legacy {
 				}
 				$wpdb->query( "DROP TABLE `{$new}`" ); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Identifiant vérifié ci-dessus.
 			}
-			if ( false !== $wpdb->query( "ALTER TABLE `{$old}` RENAME TO `{$new}`" ) ) { // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Identifiant vérifié ci-dessus.
+			$wpdb->query( "ALTER TABLE `{$old}` RENAME TO `{$new}`" ); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Identifiant vérifié ci-dessus.
+			$moved = $wpdb->get_var( $wpdb->prepare( 'SHOW TABLES LIKE %s', $wpdb->esc_like( $new ) ) )
+				&& ! $wpdb->get_var( $wpdb->prepare( 'SHOW TABLES LIKE %s', $wpdb->esc_like( $old ) ) );
+			if ( $moved ) {
 				$report['tables'][] = $new;
 			} else {
-				$report['conflicts'][] = $old;
+				$kept[ $suffix ]   = $old;
+				$report['kept'][] = $old;
 			}
+		}
+		if ( $kept ) {
+			update_option( self::TABLES, $kept );
 		}
 
 		// 4. Métas de contenu (_okno_rev, _okno_path, _okno_fields…) et

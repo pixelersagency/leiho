@@ -22,7 +22,8 @@ class Leiho_Activity {
 
 	public static function table_name() {
 		global $wpdb;
-		return $wpdb->prefix . 'leiho_activity';
+		// Site venu d'Okno dont la base n'a pas pu renommer la table : on garde l'ancienne.
+		return class_exists( 'Leiho_Legacy' ) ? Leiho_Legacy::table( 'activity' ) : $wpdb->prefix . 'leiho_activity';
 	}
 
 	public static function maybe_install() {

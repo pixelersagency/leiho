@@ -639,7 +639,7 @@ msgstr ""
 
 #: assets/admin/app-collections.js:335 assets/admin/app-collections.js:340
 #: assets/admin/app-content.js:268 assets/admin/app-content.js:310
-#: includes/collections/class-leiho-collections.php:568
+#: includes/collections/class-leiho-collections.php:571
 msgid "Fields"
 msgstr ""
 
@@ -2852,7 +2852,7 @@ msgid "Back to the calendar"
 msgstr ""
 
 #: includes/admin/class-leiho-admin.php:95
-#: includes/collections/class-leiho-collections.php:574
+#: includes/collections/class-leiho-collections.php:577
 msgid "Edit with Leiho"
 msgstr ""
 
@@ -4328,11 +4328,11 @@ msgid "This content type isn’t registered."
 msgstr ""
 
 #: includes/collections/class-leiho-acf-import.php:1073
-msgid "An Leiho collection already uses this identifier."
+msgid "A Leiho collection already uses this identifier."
 msgstr ""
 
 #: includes/collections/class-leiho-acf-import.php:1076
-msgid "Its identifier can’t name an Leiho collection (1 to 20 lowercase letters, digits or underscores, not reserved by WordPress)."
+msgid "Its identifier can’t name a Leiho collection (1 to 20 lowercase letters, digits or underscores, not reserved by WordPress)."
 msgstr ""
 
 #: includes/collections/class-leiho-acf-import.php:1079
@@ -4706,11 +4706,11 @@ msgstr ""
 msgid "Another plugin or the theme already registers the content type “%s”."
 msgstr ""
 
-#: includes/collections/class-leiho-collections.php:326
-msgid "This is not an Leiho Collections schema file."
+#: includes/collections/class-leiho-collections.php:329
+msgid "This is not a Leiho Collections schema file."
 msgstr ""
 
-#: includes/collections/class-leiho-collections.php:572
+#: includes/collections/class-leiho-collections.php:575
 msgid "The fields of this entry are edited in Leiho."
 msgstr ""
 

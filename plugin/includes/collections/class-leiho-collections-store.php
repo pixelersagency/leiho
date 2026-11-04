@@ -93,7 +93,8 @@ class Leiho_Collections_Store {
 	 */
 	public static function table( $id ) {
 		global $wpdb;
-		return $wpdb->prefix . 'leiho_' . $id;
+		// Site venu d'Okno dont la base n'a pas pu renommer la table : on garde l'ancienne.
+		return class_exists( 'Leiho_Legacy' ) ? Leiho_Legacy::table( $id ) : $wpdb->prefix . 'leiho_' . $id;
 	}
 
 	/**

@@ -1070,10 +1070,10 @@ class Leiho_ACF_Import {
 			return __( 'This content type isn’t registered.', 'leiho' );
 		}
 		if ( 'leiho' === $origin ) {
-			return __( 'An Leiho collection already uses this identifier.', 'leiho' );
+			return __( 'A Leiho collection already uses this identifier.', 'leiho' );
 		}
 		if ( ! preg_match( Leiho_Collections_Schema::ID_PATTERN, $post_type ) || in_array( $post_type, Leiho_Collections_Schema::RESERVED_IDS, true ) ) {
-			return __( 'Its identifier can’t name an Leiho collection (1 to 20 lowercase letters, digits or underscores, not reserved by WordPress).', 'leiho' );
+			return __( 'Its identifier can’t name a Leiho collection (1 to 20 lowercase letters, digits or underscores, not reserved by WordPress).', 'leiho' );
 		}
 		if ( ! self::groups_for( $post_type ) ) {
 			return __( 'No ACF field group is attached to this content type.', 'leiho' );

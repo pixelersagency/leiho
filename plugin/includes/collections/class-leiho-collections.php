@@ -322,8 +322,11 @@ class Leiho_Collections {
 				return new WP_Error( 'leiho_invalid_schema', __( 'The file is not valid JSON.', 'leiho' ), array( 'status' => 400 ) );
 			}
 		}
-		if ( isset( $data['leiho'] ) && 'collections' !== $data['leiho'] ) {
-			return new WP_Error( 'leiho_invalid_schema', __( 'This is not an Leiho Collections schema file.', 'leiho' ), array( 'status' => 400 ) );
+		// « okno » : clé des fichiers exportés avant le renommage d'Okno en Leiho.
+		$kind = isset( $data['leiho'] ) ? $data['leiho'] : ( isset( $data['okno'] ) ? $data['okno'] : null );
+		unset( $data['okno'] );
+		if ( null !== $kind && 'collections' !== $kind ) {
+			return new WP_Error( 'leiho_invalid_schema', __( 'This is not a Leiho Collections schema file.', 'leiho' ), array( 'status' => 400 ) );
 		}
 		return self::save_schema( $data, $dry_run );
 	}

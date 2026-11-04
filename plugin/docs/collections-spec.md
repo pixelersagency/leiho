@@ -240,7 +240,7 @@ Sanitization mirrors the ACF adapter (required, `max_length`, attachments and re
 
 ## 9. ACF import
 
-`Leiho_ACF_Import` moves the ACF fields of one content type into an Leiho collection. Nothing is deleted from ACF (postmeta, field groups, ACF post types): the import is reversible.
+`Leiho_ACF_Import` moves the ACF fields of one content type into a Leiho collection. Nothing is deleted from ACF (postmeta, field groups, ACF post types): the import is reversible.
 
 ### Preview
 

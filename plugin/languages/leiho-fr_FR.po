@@ -619,7 +619,7 @@ msgstr "Général"
 
 #: assets/admin/app-collections.js:335 assets/admin/app-collections.js:340
 #: assets/admin/app-content.js:268 assets/admin/app-content.js:310
-#: includes/collections/class-leiho-collections.php:568
+#: includes/collections/class-leiho-collections.php:571
 msgid "Fields"
 msgstr "Champs"
 
@@ -2740,7 +2740,7 @@ msgid "Back to the calendar"
 msgstr "Revenir au calendrier"
 
 #: includes/admin/class-leiho-admin.php:95
-#: includes/collections/class-leiho-collections.php:574
+#: includes/collections/class-leiho-collections.php:577
 msgid "Edit with Leiho"
 msgstr "Modifier avec Leiho"
 
@@ -4199,11 +4199,11 @@ msgid "This content type isn’t registered."
 msgstr "Ce type de contenu n’est pas enregistré."
 
 #: includes/collections/class-leiho-acf-import.php:1073
-msgid "An Leiho collection already uses this identifier."
+msgid "A Leiho collection already uses this identifier."
 msgstr "Une collection Leiho utilise déjà cet identifiant."
 
 #: includes/collections/class-leiho-acf-import.php:1076
-msgid "Its identifier can’t name an Leiho collection (1 to 20 lowercase letters, digits or underscores, not reserved by WordPress)."
+msgid "Its identifier can’t name a Leiho collection (1 to 20 lowercase letters, digits or underscores, not reserved by WordPress)."
 msgstr "Son identifiant ne peut pas nommer une collection Leiho (1 à 20 minuscules, chiffres ou tirets bas, non réservé par WordPress)."
 
 #: includes/collections/class-leiho-acf-import.php:1079
@@ -4560,11 +4560,11 @@ msgstr "La table de « %s » aurait trop de colonnes de texte court, colonnes ar
 msgid "Another plugin or the theme already registers the content type “%s”."
 msgstr "Une autre extension ou le thème déclare déjà le type de contenu « %s »."
 
-#: includes/collections/class-leiho-collections.php:326
-msgid "This is not an Leiho Collections schema file."
+#: includes/collections/class-leiho-collections.php:329
+msgid "This is not a Leiho Collections schema file."
 msgstr "Ce n’est pas un fichier de schéma Leiho Collections."
 
-#: includes/collections/class-leiho-collections.php:572
+#: includes/collections/class-leiho-collections.php:575
 msgid "The fields of this entry are edited in Leiho."
 msgstr "Les champs de cette entrée se modifient dans Leiho."
 

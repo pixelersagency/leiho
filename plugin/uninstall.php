@@ -18,7 +18,18 @@ defined( 'WP_UNINSTALL_PLUGIN' ) || exit;
 function leiho_uninstall_site() {
 	global $wpdb;
 
-	foreach ( array( 'leiho_settings', 'leiho_secrets', 'leiho_deploy_history', 'leiho_usage', 'leiho_connection', 'leiho_activity_db_version', 'leiho_update_last_release', 'leiho_export_cache', 'leiho_auto_deploy_attempts', 'leiho_auto_deploy_pending', 'leiho_deploy_lock', 'leiho_ai_brand', 'leiho_migrated_from_okno', 'leiho_migration_lock' ) as $option ) {
+	// Tables gardées sous leur nom Okno quand la base n'a pas su les renommer
+	// (suffixe => nom complet) : lu avant que les options ne soient supprimées.
+	$legacy_tables = get_option( 'leiho_legacy_tables', array() );
+	$legacy_tables = is_array( $legacy_tables ) ? $legacy_tables : array();
+	$drop_legacy   = static function ( $suffix ) use ( $wpdb, $legacy_tables ) {
+		$name = isset( $legacy_tables[ $suffix ] ) ? (string) $legacy_tables[ $suffix ] : '';
+		if ( '' !== $name && preg_match( '/^' . preg_quote( $wpdb->prefix, '/' ) . 'okno_[a-z0-9_]+$/', $name ) ) {
+			$wpdb->query( "DROP TABLE IF EXISTS `{$name}`" ); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Nom vérifié ci-dessus.
+		}
+	};
+
+	foreach ( array( 'leiho_settings', 'leiho_secrets', 'leiho_deploy_history', 'leiho_usage', 'leiho_connection', 'leiho_activity_db_version', 'leiho_update_last_release', 'leiho_export_cache', 'leiho_auto_deploy_attempts', 'leiho_auto_deploy_pending', 'leiho_deploy_lock', 'leiho_ai_brand', 'leiho_migrated_from_okno', 'leiho_migration_lock', 'leiho_legacy_tables' ) as $option ) {
 		delete_option( $option );
 	}
 
@@ -35,6 +46,7 @@ function leiho_uninstall_site() {
 
 	// Journal des modifications.
 	$wpdb->query( "DROP TABLE IF EXISTS {$wpdb->prefix}leiho_activity" );
+	$drop_legacy( 'activity' );
 
 	// Cache objet : changer de génération rend toutes les entrées illisibles,
 	// elles expirent d'elles-mêmes.
@@ -50,6 +62,7 @@ function leiho_uninstall_site() {
 			// Même garde que Leiho_Collections_Schema::ID_PATTERN : jamais d'identifiant arbitraire en SQL.
 			if ( preg_match( '/^[a-z][a-z0-9_]{0,19}$/', (string) $id ) ) {
 				$wpdb->query( "DROP TABLE IF EXISTS `{$wpdb->prefix}leiho_{$id}`" ); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Identifiant vérifié ci-dessus.
+				$drop_legacy( $id );
 			}
 		}
 		delete_option( 'leiho_collections' );

@@ -39,7 +39,12 @@ class Fake_WPDB {
 			$sql
 		);
 	}
+	/** Imite le pilote SQLite de WordPress : ALTER TABLE … RENAME TO accepté sans effet. */
+	public $rename_noop = false;
 	private function run( $sql ) {
+		if ( $this->rename_noop && preg_match( '/^ALTER TABLE .* RENAME TO /', $sql ) ) {
+			return $this->pdo->query( 'SELECT 1' );
+		}
 		// SHOW TABLES LIKE (MySQL) -> sqlite_master ; LIKE avec échappement \.
 		if ( preg_match( "/^SHOW TABLES LIKE (.+)$/", $sql, $m ) ) {
 			$sql = "SELECT name FROM sqlite_master WHERE type = 'table' AND name LIKE {$m[1]} ESCAPE '\\'";
@@ -215,6 +220,24 @@ $report = Leiho_Legacy::maybe_migrate();
 check( 'conflit signalé', array( 'wp_okno_activity' ) === $report['conflicts'], $report );
 check( 'table Leiho remplie gardée', 2 === (int) $wpdb->get_var( 'SELECT COUNT(*) FROM wp_leiho_activity' ) );
 check( 'table Okno laissée en place', 1 === (int) $wpdb->get_var( 'SELECT COUNT(*) FROM wp_okno_activity' ) );
+
+/* --- 3 bis. Base qui ne sait pas renommer (pilote SQLite de WordPress) --- */
+delete_option( Leiho_Legacy::FLAG );
+$wpdb->pdo->exec( 'DROP TABLE wp_okno_activity' );
+$wpdb->pdo->exec( 'CREATE TABLE wp_okno_stock (post_id INTEGER PRIMARY KEY, qte INTEGER)' );
+$wpdb->pdo->exec( 'CREATE INDEX ' . okno_index_name( 'wp_okno_stock', 'qte' ) . ' ON wp_okno_stock (qte)' );
+$wpdb->pdo->exec( 'INSERT INTO wp_okno_stock VALUES (7, 3)' );
+add_option( 'okno_collections', array( 'stock' => array( 'id' => 'stock' ) ) );
+$wpdb->rename_noop = true;
+$report = Leiho_Legacy::maybe_migrate();
+$wpdb->rename_noop = false;
+check( 'renommage sans effet : table gardée, pas annoncée renommée', array( 'wp_okno_stock' ) === $report['kept'] && array() === $report['tables'], $report );
+check( 'table gardée retrouvée par Leiho_Legacy::table()', 'wp_okno_stock' === Leiho_Legacy::table( 'stock' ) );
+check( 'Leiho_Collections_Store::table() suit la correspondance', 'wp_okno_stock' === Leiho_Collections_Store::table( 'stock' ) );
+check( 'les autres tables gardent le nom Leiho', 'wp_leiho_produit' === Leiho_Collections_Store::table( 'produit' ) );
+check( 'données lisibles par le nom gardé', 3 === (int) $wpdb->get_var( 'SELECT qte FROM ' . Leiho_Collections_Store::table( 'stock' ) . ' WHERE post_id = 7' ) );
+$index = Leiho_Collections_Store::index_name( Leiho_Collections_Store::table( 'stock' ), 'qte' );
+check( 'index de la table gardée retrouvé', (bool) $wpdb->get_var( "SELECT name FROM sqlite_master WHERE type = 'index' AND name = '$index'" ), $index );
 
 /* --- 4. Filtres et actions okno_* encore appelés --- */
 Leiho_Legacy::bridge_hooks();
