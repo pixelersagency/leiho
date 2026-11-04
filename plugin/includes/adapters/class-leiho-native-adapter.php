@@ -368,6 +368,10 @@ class Leiho_Native_Adapter extends Leiho_Field_Adapter {
 		if ( ! is_array( $value ) ) {
 			return $value;
 		}
+		if ( 'link' === $type ) {
+			$value['title'] = ''; // Libellé à traduire, adresse gardée.
+			return $value;
+		}
 		if ( 'group' === $type ) {
 			return $this->blank_row( $field['sub_fields'], $value );
 		}

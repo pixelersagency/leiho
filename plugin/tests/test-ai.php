@@ -803,6 +803,7 @@ $tr_schema = function ( $title, $intro, $rows, $code ) {
 				array( 'path' => 'intro', 'type' => 'wysiwyg', 'label' => 'Intro', 'localized' => true, 'value' => $intro ),
 				array( 'path' => 'code', 'type' => 'textarea', 'label' => 'Snippet', 'code' => true, 'localized' => true, 'value' => $code ),
 				array( 'path' => 'price', 'type' => 'text', 'label' => 'Price', 'localized' => false, 'value' => '90 €' ),
+				array( 'path' => 'cta', 'type' => 'link', 'label' => 'Button', 'localized' => true, 'value' => '' === $intro ? null : array( 'url' => '/contact', 'title' => 'Book an audit', 'target' => '' ) ),
 				array( 'path' => 'steps', 'type' => 'repeater', 'label' => 'Steps', 'localized' => true, 'value' => $rows, 'sub_fields' => array(
 					array( 'path' => 'title', 'type' => 'text', 'label' => 'Title', 'max_length' => 20 ),
 					array( 'path' => 'image', 'type' => 'image', 'label' => 'Image' ),
@@ -817,7 +818,7 @@ Leiho_Schema::$by_locale = array(
 );
 $units = Leiho_AI_Translate::units( 90, 'fr' );
 $by    = array_column( $units['units'], null, 'path' );
-check( 'traduction : textes traduisibles seulement (pas de code, pas de champ partagé)', array( '_title', 'intro', 'steps.0.title', 'steps.1.title' ) === array_keys( $by ), array_keys( $by ) );
+check( 'traduction : textes traduisibles seulement (pas de code, pas de champ partagé)', array( '_title', 'intro', 'cta', 'steps.0.title', 'steps.1.title' ) === array_keys( $by ), array_keys( $by ) );
 check( 'traduction : original et traduction actuelle', 'Report' === $by['steps.1.title']['source'] && '' === $by['steps.1.title']['translation'] );
 check( 'traduction : format html et longueur', 'html' === $by['intro']['format'] && 20 === $by['steps.0.title']['max_length'] );
 check( 'traduction : langue par défaut refusée', is_wp_error( Leiho_AI_Translate::units( 90, 'en' ) ) && is_wp_error( Leiho_AI_Translate::units( 90, 'de' ) ) );
@@ -825,9 +826,10 @@ check( 'traduction : type sans langues refusé', is_wp_error( Leiho_AI_Translate
 
 Fake_Builder::$log     = array();
 Fake_Builder::$error   = null;
-Fake_Builder::$answers = array( '{"t1":"<p>Nous <strong>mesurons</strong> l’air.</p><script>x</script>","t2":"Rapport"}' );
+Fake_Builder::$answers = array( '{"t1":"<p>Nous <strong>mesurons</strong> l’air.</p><script>x</script>","t2":"Réserver un audit","t3":"Rapport"}' );
 $res = Leiho_AI_Translate::translate( 90, 'fr' );
-check( 'traduction IA : seulement les textes manquants', ! is_wp_error( $res ) && array( 'intro', 'steps.1.title' ) === array_keys( (array) $res['translations'] ), $res );
+check( 'traduction IA : seulement les textes manquants', ! is_wp_error( $res ) && array( 'intro', 'cta', 'steps.1.title' ) === array_keys( (array) $res['translations'] ), $res );
+check( 'traduction IA : lien complet, adresse d\'origine', array( 'url' => '/contact', 'title' => 'Réserver un audit', 'target' => '' ) === ( (array) $res['values'] )['cta'], $res['values'] );
 $prompt = end( Fake_Builder::$log )['prompt'];
 check( 'traduction IA : langues et règle des balises dans la demande', false !== strpos( $prompt, 'to French (fr)' ) && false !== strpos( $prompt, 'keep every HTML tag' ) && false !== strpos( $prompt, 'We <strong>measure</strong>' ) );
 check( 'traduction IA : HTML nettoyé', false === strpos( $res['translations']->intro, '<script' ) );

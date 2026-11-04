@@ -139,6 +139,22 @@ class Leiho_AI_Translate {
 			);
 			return;
 		}
+		if ( 'link' === $type ) {
+			// Lien : le libellé se traduit, l'adresse reste celle de l'original.
+			if ( ! is_array( $value ) || ! isset( $value['title'] ) || '' === trim( (string) $value['title'] ) ) {
+				return;
+			}
+			$out[] = array(
+				'path'        => $path,
+				'label'       => $label,
+				'format'      => 'link',
+				'max_length'  => 0,
+				'source'      => (string) $value['title'],
+				'translation' => is_array( $current ) && isset( $current['title'] ) ? (string) $current['title'] : '',
+				'link'        => is_array( $current ) && ! empty( $current['url'] ) ? $current : $value,
+			);
+			return;
+		}
 		if ( in_array( $type, array( 'group', 'clone' ), true ) && is_array( $value ) ) {
 			foreach ( isset( $def['sub_fields'] ) ? (array) $def['sub_fields'] : array() as $sub ) {
 				$key = $sub['path'];
@@ -246,6 +262,7 @@ class Leiho_AI_Translate {
 		}
 
 		$translations = array();
+		$values       = array();
 		$warnings     = array();
 		$out_items    = array();
 		foreach ( $batch as $i => $unit ) {
@@ -263,6 +280,7 @@ class Leiho_AI_Translate {
 				$warnings[ $unit['path'] ] = 'forbidden';
 			}
 			$translations[ $unit['path'] ] = $text;
+			$values[ $unit['path'] ]       = self::value_for( $unit, $text );
 			$out_items[]                   = array(
 				'path'   => $unit['path'],
 				'label'  => $unit['label'],
@@ -277,7 +295,7 @@ class Leiho_AI_Translate {
 		return array(
 			'locale'       => $locale,
 			'translations' => (object) $translations,
-			'values'       => (object) self::root_values( $post_id, $locale, $translations ),
+			'values'       => (object) self::root_values( $post_id, $locale, $values ),
 			'items'        => $out_items,
 			'remaining'    => count( $units ) - count( $batch ),
 			'warnings'     => (object) $warnings,
@@ -301,7 +319,7 @@ class Leiho_AI_Translate {
 			'- Translate the meaning for a native ' . $to . ' reader, in the brand tone: natural, not word for word.',
 			'- Keep product names, brand names, code, URLs, file names, numbers and units unchanged.',
 			'- "html" texts: keep every HTML tag and attribute exactly as they are; translate only the text between tags.',
-			'- "multiline" texts: keep the line breaks.',
+			'- "multiline" texts: keep the line breaks. "link" texts are button or link labels: keep them short.',
 			'- Respect max_length (characters, without HTML tags) when given.',
 			'- Translate every text, even short labels. Do not add, drop or explain anything.',
 			'',
@@ -331,12 +349,29 @@ class Leiho_AI_Translate {
 	}
 
 	/**
+	 * Valeur à écrire pour un texte traduit : le texte, ou le lien complet
+	 * avec son libellé traduit.
+	 *
+	 * @param array  $unit Texte traduisible.
+	 * @param string $text Traduction nettoyée.
+	 * @return mixed
+	 */
+	private static function value_for( array $unit, $text ) {
+		if ( 'link' !== $unit['format'] ) {
+			return $text;
+		}
+		$link          = isset( $unit['link'] ) && is_array( $unit['link'] ) ? $unit['link'] : array();
+		$link['title'] = $text;
+		return $link;
+	}
+
+	/**
 	 * Valeurs complètes des champs racine (format éditeur) une fois les
 	 * traductions posées : traduction actuelle, sinon structure d'origine.
 	 *
 	 * @param int    $post_id      Entrée.
 	 * @param string $locale       Langue.
-	 * @param array  $translations { chemin pointé: texte }.
+	 * @param array  $translations { chemin pointé: valeur }.
 	 * @return array<string,mixed>
 	 */
 	public static function root_values( $post_id, $locale, array $translations ) {
@@ -421,7 +456,7 @@ class Leiho_AI_Translate {
 				$errors[ $path ] = 'already_translated';
 				continue;
 			}
-			$clean[ $path ] = self::clean( $text, $units[ $path ]['format'] );
+			$clean[ $path ] = self::value_for( $units[ $path ], self::clean( $text, $units[ $path ]['format'] ) );
 		}
 		$saved = array();
 		if ( $clean ) {
