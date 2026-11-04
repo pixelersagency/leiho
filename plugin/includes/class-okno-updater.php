@@ -31,6 +31,21 @@ class Okno_Updater {
 		add_filter( 'plugins_api', array( __CLASS__, 'details' ), 10, 3 );
 		add_filter( 'upgrader_source_selection', array( __CLASS__, 'fix_folder' ), 10, 4 );
 		add_action( 'upgrader_process_complete', array( __CLASS__, 'flush' ) );
+		// « Vérifier à nouveau » (Tableau de bord → Mises à jour) : sans ça,
+		// la release gardée en cache masquait une version publiée entre-temps.
+		add_action( 'load-update-core.php', array( __CLASS__, 'flush_on_force_check' ) );
+	}
+
+	/**
+	 * Vide le cache de la dernière release quand l'admin force la vérification.
+	 *
+	 * @return void
+	 */
+	public static function flush_on_force_check() {
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Simple drapeau de lecture, comme WordPress.
+		if ( ! empty( $_GET['force-check'] ) && current_user_can( 'update_plugins' ) ) {
+			self::flush();
+		}
 	}
 
 	/**

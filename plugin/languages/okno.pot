@@ -2960,15 +2960,15 @@ msgstr ""
 msgid "Main content"
 msgstr ""
 
-#: includes/class-okno-updater.php:205
+#: includes/class-okno-updater.php:220
 msgid "Visual editing for headless WordPress: edit your ACF fields live on your real front end, from wp-admin."
 msgstr ""
 
-#: includes/class-okno-updater.php:207
+#: includes/class-okno-updater.php:222
 msgid "Release notes on GitHub"
 msgstr ""
 
-#: includes/class-okno-updater.php:277
+#: includes/class-okno-updater.php:292
 msgid "Couldn’t prepare the Okno update folder."
 msgstr ""
 

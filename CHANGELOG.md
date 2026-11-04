@@ -2,6 +2,13 @@
 
 All notable changes to Okno are documented here. The project follows [Semantic Versioning](https://semver.org/). The plugin and the bridge package share one version number.
 
+## [1.0.0-beta.8] — 2026-11-04
+
+### Fixed
+
+- **Check again** (Dashboard → Updates) now clears Okno's cached release, so a version published in the last hours shows up right away instead of after the 6-hour cache.
+- The home screen of the Okno app is centred instead of sticking to the left on wide screens.
+
 ## [1.0.0-beta.7] — 2026-11-04
 
 ### Added
@@ -120,6 +127,7 @@ First public release.
 - Managed regions (`data-okno-managed`) explain where to edit content Okno doesn't own.
 - Explicit sections (`data-okno-section`, `data-okno-layout`) take precedence over auto-detected ones.
 
+[1.0.0-beta.8]: https://github.com/pixelersagency/okno/releases/tag/v1.0.0-beta.8
 [1.0.0-beta.7]: https://github.com/pixelersagency/okno/releases/tag/v1.0.0-beta.7
 [1.0.0-beta.6]: https://github.com/pixelersagency/okno/releases/tag/v1.0.0-beta.6
 [1.0.0-beta.5]: https://github.com/pixelersagency/okno/releases/tag/v1.0.0-beta.5

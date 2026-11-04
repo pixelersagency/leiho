@@ -2862,15 +2862,15 @@ msgstr "Ce contenu a été modifié ailleurs depuis son ouverture. Rechargez pou
 msgid "Main content"
 msgstr "Contenu principal"
 
-#: includes/class-okno-updater.php:205
+#: includes/class-okno-updater.php:220
 msgid "Visual editing for headless WordPress: edit your ACF fields live on your real front end, from wp-admin."
 msgstr "L’édition visuelle pour WordPress headless : modifiez vos champs ACF en direct sur votre vrai site, depuis wp-admin."
 
-#: includes/class-okno-updater.php:207
+#: includes/class-okno-updater.php:222
 msgid "Release notes on GitHub"
 msgstr "Notes de version sur GitHub"
 
-#: includes/class-okno-updater.php:277
+#: includes/class-okno-updater.php:292
 msgid "Couldn’t prepare the Okno update folder."
 msgstr "Impossible de préparer le dossier de mise à jour d’Okno."
 

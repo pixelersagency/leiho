@@ -2344,7 +2344,10 @@ body.okno-app-body #wpbody-content {
 }
 
 .okno-home__main {
+	width: 100%;
+	max-width: 880px;
 	min-width: 0;
+	margin: 0 auto;
 	padding: 20px 24px 60px;
 }
 

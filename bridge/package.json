@@ -1,6 +1,6 @@
 {
 	"name": "@pixelersagency/okno-bridge",
-	"version": "1.0.0-beta.7",
+	"version": "1.0.0-beta.8",
 	"description": "Pont postMessage de l'éditeur visuel Okno : rend n'importe quel site (React, Next.js, Remix, Vite, Nuxt, SvelteKit, Astro, HTML) éditable depuis WordPress. Zéro dépendance, inactif hors de l'éditeur.",
 	"keywords": [
 		"wordpress",
