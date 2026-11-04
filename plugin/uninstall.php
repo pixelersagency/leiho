@@ -3,6 +3,9 @@
  * Désinstallation (suppression du plugin depuis wp-admin, pas la simple
  * désactivation) : retire toutes les données d'Okno. Les champs ACF et les
  * contenus modifiés avec Okno ne sont pas touchés : ils appartiennent au site.
+ * Les valeurs des champs Okno Collections vivent dans les tables d'Okno et
+ * partent avec lui, sauf si OKNO_KEEP_DATA est défini ; les entrées restent
+ * dans wp_posts.
  *
  * @package Okno
  */
@@ -36,6 +39,21 @@ function okno_uninstall_site() {
 	// Cache objet : changer de génération rend toutes les entrées illisibles,
 	// elles expirent d'elles-mêmes.
 	wp_cache_delete( 'generation', 'okno' );
+
+	// Okno Collections : tables des collections, schéma, instantanés des
+	// révisions. OKNO_KEEP_DATA (wp-config.php) les garde pour une réinstallation.
+	if ( ! defined( 'OKNO_KEEP_DATA' ) || ! OKNO_KEEP_DATA ) {
+		$state = get_option( 'okno_collections_state', array() );
+		foreach ( array_keys( isset( $state['collections'] ) && is_array( $state['collections'] ) ? $state['collections'] : array() ) as $id ) {
+			// Même garde que Okno_Collections_Schema::ID_PATTERN : jamais d'identifiant arbitraire en SQL.
+			if ( preg_match( '/^[a-z][a-z0-9_]{0,19}$/', (string) $id ) ) {
+				$wpdb->query( "DROP TABLE IF EXISTS `{$wpdb->prefix}okno_{$id}`" ); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Identifiant vérifié ci-dessus.
+			}
+		}
+		delete_option( 'okno_collections' );
+		delete_option( 'okno_collections_state' );
+		delete_post_meta_by_key( '_okno_fields' );
+	}
 
 	wp_clear_scheduled_hook( 'okno_cleanup_deploys' );
 	wp_clear_scheduled_hook( 'okno_auto_deploy' );

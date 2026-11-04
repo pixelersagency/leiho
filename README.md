@@ -1,6 +1,6 @@
 # Okno
 
-**Visual editing for headless WordPress.** Your editors see the real front end — Next.js, Astro, Remix, Vite, Nuxt, SvelteKit or plain HTML — inside wp-admin. They click a heading, change it, watch it update live, save, and publish. Your existing ACF fields stay the single source of truth: no new content model, no page builder, no lock-in.
+**Visual editing for headless WordPress.** Your editors see the real front end — Next.js, Astro, Remix, Vite, Nuxt, SvelteKit or plain HTML — inside wp-admin. They click a heading, change it, watch it update live, save, and publish. Define your content types in Okno, or keep your existing ACF fields: either way WordPress stays the single source of truth, with no page builder and no lock-in.
 
 > *Okno* means *window* in Polish, Czech and Russian — a window onto the real site.
 
@@ -16,6 +16,7 @@ Headless WordPress gives developers a modern front end, but it takes the "what y
 
 - **Works with any front end.** A ~10 KB, dependency-free bridge talks to wp-admin through `postMessage`. React apps get a one-line component.
 - **Your data model, untouched.** Okno reads and writes the ACF fields you already have — repeaters, groups, flexible content, relationships, images.
+- **Or no field plugin at all.** Okno Collections defines content types and fields in Okno itself, stored in typed tables. WordPress + Okno is enough.
 - **Nothing public.** The bridge never calls the WordPress API and holds no secrets. Every message is origin-checked on both sides.
 - **Publishing that fits your hosting.** Live content, a build hook (Vercel, Netlify, Cloudflare Pages), GitHub Actions with live build status, a publish commit, or Coolify.
 
@@ -193,6 +194,44 @@ Each item carries `id`, `type`, `slug`, `path` (the front-end path from your URL
 
 On a new install, Okno also hardens WordPress for headless use (Settings → *WordPress as a back office*): no indexing of the CMS (noindex header, `robots.txt`, no sitemap), public WordPress pages redirect to the same page on the front end, XML-RPC off, `/wp/v2/users` closed to visitors. wp-admin, login, the REST API and draft previews keep working. Sites updating from an earlier version keep their behavior until you tick the options.
 
+## Collections
+
+Okno Collections is a content model built into Okno: "Strapi or Webflow collections inside WordPress", without ACF. A **collection** has many entries (Services, Articles); a **singleton** has exactly one (Home, Contact, Site settings).
+
+- **Entries are WordPress posts** (one post type per collection): roles, drafts, scheduling, trash, revisions, the media library, SEO and multilingual plugins keep working.
+- **Field values live in one table per collection** (`wp_okno_<collection>`), one row per entry, not in postmeta: typed, indexed columns for scalar fields, JSON for lists, blocks and groups. MySQL 5.7+, MariaDB and the SQLite drop-in.
+- **Field types**: text, rich text, number, boolean, date, date-time, select (single or multiple), slug, email, URL, color, image, file, gallery, link, reference (to another collection, one or many), list, blocks and group, nested freely.
+- **Schema as code**: export the schema to `okno.schema.json`, keep it in your front-end repository, import it on another site.
+- **Safe migrations**: renaming a field is free (fields have a stable `key`), a type change copies values into a new column, and removed or retyped columns are archived, never dropped. `dry_run` shows the plan first.
+- **Revisions** include field values: restoring a revision restores the fields too.
+- **Same editor, same API**: entries are edited in the visual editor with the same dotted paths as ACF (`sections.2.items.1.title`), and served by `/okno/v1/export`, `/content` and `/types` like any other content. ACF keeps working alongside.
+
+```json
+{
+  "okno": "collections",
+  "version": 1,
+  "collections": [
+    { "id": "service", "label": "Services", "singular_label": "Service", "path": "/services/{slug}", "fields": [
+      { "name": "price", "type": "number", "min": 0 },
+      { "name": "faq", "type": "list", "fields": [
+        { "name": "question", "type": "text", "required": true },
+        { "name": "answer", "type": "richtext" }
+      ] },
+      { "name": "related", "type": "reference", "to": ["service"], "multiple": true, "max": 3 }
+    ] }
+  ]
+}
+```
+
+| Endpoint (administrators) | |
+|---|---|
+| `GET /wp-json/okno/v1/collections` | Schema and table state (archived columns included). |
+| `POST /wp-json/okno/v1/collections/import?dry_run=1` | Plan the migration to an `okno.schema.json`; without `dry_run`, apply it. |
+| `GET /wp-json/okno/v1/collections/export` | The current `okno.schema.json`. |
+| `POST`, `PUT`, `DELETE /wp-json/okno/v1/collections/{id}` | Create, replace or remove one collection (data is kept). |
+
+From PHP: `Okno_Collections::import( $json )`, `Okno_Collections::save_entry( $post_id, array( 'price' => 120 ) )`, `Okno_Collections::entry( 'home' )`. The schema builder in wp-admin comes next; the format is documented in [plugin/docs/collections-spec.md](plugin/docs/collections-spec.md).
+
 ## Security
 
 - Editing routes check a nonce and `edit_post` on the content. The content API only serves published items of the Okno content types; it can require a token (compared in constant time, sent in `X-Okno-Token`). Publishing requires `publish_pages` (filter `okno_deploy_capability`), settings require `manage_options`.
@@ -226,6 +265,7 @@ scripts/    Release packaging
 php plugin/tests/test-acf-adapter.php
 php plugin/tests/test-content.php
 php plugin/tests/test-cache.php
+php plugin/tests/test-collections.php
 php plugin/tests/test-activity.php
 php plugin/tests/test-frame-verdict.php
 php plugin/tests/test-updater.php

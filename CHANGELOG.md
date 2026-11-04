@@ -16,6 +16,21 @@ All notable changes to Okno are documented here. The project follows [Semantic V
 - **HTTP caching** on every content endpoint: `ETag`, `Cache-Control: public, max-age=0, must-revalidate` (`private` in restricted mode, for logged-in users and for drafts), `304` on `If-None-Match`.
 - **Page cache purge** when served content changes, once per request: LiteSpeed (by tag), WP Rocket, W3 Total Cache, WP Super Cache, SiteGround, WP Fastest Cache, Cloudflare, Breeze, Nginx Helper, plus the `okno_purge_caches` action and `okno_purge_urls` filter for anything else.
 - `Okno_Content_Adapter_Interface` for adapters that feed the content API, and the `okno_content_item`, `okno_content_post_types`, `okno_content_html` filters and `okno_content_changed` action.
+- **Okno Collections**: content types and fields defined in Okno, without ACF. Collections (many entries) and singletons (one entry, created by Okno) are registered as post types, so roles, drafts, trash, revisions, media and SEO plugins keep working; field values live in one table per collection (`wp_okno_<id>`) with typed, indexed columns for scalar fields and JSON for lists, blocks, groups and multiple values. 19 field types: text, rich text, number, boolean, date, date-time, select, slug, email, URL, color, image, file, gallery, link, reference, list, blocks, group.
+- **Schema as code**: `okno.schema.json` export and import, validated with precise error paths (`fields.3.key`).
+- **Safe migrations**: a stable `key` per field makes renames free; type changes copy and convert values into a new column; removed and retyped columns are archived, never dropped (purge is explicit); `dry_run` returns the plan. Works on MySQL 5.7+, MariaDB and the SQLite drop-in.
+- **Field values in revisions**: each revision of an entry stores its fields, restoring it restores them, and a field-only change creates a revision.
+- Administrator REST routes `/okno/v1/collections` (list, create, replace, delete, export, import, purge) and a PHP API (`Okno_Collections::import()`, `save_entry()`, `entry()`…).
+- Collections are served by `/okno/v1/export`, `/content` and `/types` and edited in the visual editor with the same dotted paths as ACF fields. ACF keeps working alongside.
+- `okno_settings` filter on the effective settings, `okno_collection_post_type_args`, `okno_collections_capability` filters and `okno_collections_saved` action.
+
+### Changed
+
+- The field engine (describe, read, patch dotted paths, sanitize, shape for the front end) is now shared by the ACF and Collections adapters (`Okno_Field_Adapter`).
+
+### Fixed
+
+- A multiple select is read as a list of choices, and edited with a multi-select in the editor, instead of the string "Array".
 
 ## [1.0.0-beta.5] — 2026-09-25
 

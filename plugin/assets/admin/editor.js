@@ -2142,6 +2142,10 @@
 
 			case 'select':
 			case 'post_object':
+				// Select multiple (Okno Collections) : des choix, pas des ids.
+				if ( 'select' === def.type && def.multiple ) {
+					return buildMultiSelect( ctx, options.id );
+				}
 				input = document.createElement( 'select' );
 				if ( ! def.required ) {
 					var empty = document.createElement( 'option' );
@@ -3010,10 +3014,14 @@
 			var ids = [];
 			var items = [];
 			[].forEach.call( select.selectedOptions, function ( opt ) {
+				if ( 'select' === ctx.def.type ) {
+					ids.push( opt.value );
+					return;
+				}
 				ids.push( Number( opt.value ) );
 				items.push( { id: Number( opt.value ), label: opt.textContent } );
 			} );
-			ctx.write( ids, { items: items } );
+			ctx.write( ids, 'select' === ctx.def.type ? undefined : { items: items } );
 		} );
 
 		box.appendChild( select );
@@ -3038,6 +3046,7 @@
 		save_failed: __( 'WordPress refused to save (content is locked or a plugin is blocking it).', 'okno' ),
 		invalid_email: __( 'Invalid email address.', 'okno' ),
 		invalid_number: __( 'Invalid or out-of-range number.', 'okno' ),
+		out_of_range: __( 'Invalid or out-of-range number.', 'okno' ),
 		invalid_choice: __( 'This choice isn’t allowed.', 'okno' ),
 		invalid_attachment: __( 'File not found or not allowed.', 'okno' ),
 		invalid_post: __( 'Linked content not found.', 'okno' ),

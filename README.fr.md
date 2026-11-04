@@ -1,6 +1,6 @@
 # Okno
 
-**L'édition visuelle pour WordPress headless.** Vos rédacteurs voient le vrai site (Next.js, Astro, Remix, Vite, Nuxt, SvelteKit ou HTML simple) directement dans wp-admin. Ils cliquent sur un titre, le modifient, voient le changement en direct, enregistrent et publient. Vos champs ACF restent l'unique source de vérité : pas de nouveau modèle de contenu, pas de constructeur de pages, pas d'enfermement.
+**L'édition visuelle pour WordPress headless.** Vos rédacteurs voient le vrai site (Next.js, Astro, Remix, Vite, Nuxt, SvelteKit ou HTML simple) directement dans wp-admin. Ils cliquent sur un titre, le modifient, voient le changement en direct, enregistrent et publient. Définissez vos types de contenu dans Okno, ou gardez vos champs ACF : dans les deux cas WordPress reste l'unique source de vérité, sans constructeur de pages ni enfermement.
 
 > *Okno* veut dire *fenêtre* en polonais, tchèque et russe : une fenêtre sur le vrai site.
 
@@ -128,6 +128,19 @@ contenu.byPath( '/services/audit' );
 - À la première installation, WordPress est durci pour le headless : pas d'indexation du CMS, pages publiques redirigées vers le front, XML-RPC coupé, liste des utilisateurs fermée aux visiteurs.
 
 Détails dans le [README anglais](README.md#content-api).
+
+## Collections
+
+Okno Collections est un modèle de contenu intégré à Okno, sans ACF : des **collections** (Services, Articles : plusieurs entrées) et des **singletons** (Accueil, Contact, Réglages du site : une seule entrée).
+
+- **Chaque entrée est un contenu WordPress** (un type de contenu par collection) : rôles, brouillons, corbeille, révisions, médiathèque, extensions SEO et multilingues continuent de fonctionner.
+- **Les valeurs des champs vivent dans une table par collection** (`wp_okno_<collection>`), pas dans les métas : colonnes typées et indexées pour les champs simples, JSON pour les listes, blocs et groupes. MySQL 5.7+, MariaDB et SQLite.
+- **Schéma versionné** : export et import d'un fichier `okno.schema.json`, à garder dans le dépôt du front.
+- **Migrations sûres** : renommer un champ ne coûte rien (clé stable), un changement de type copie les valeurs dans une nouvelle colonne, les colonnes retirées sont archivées, jamais supprimées. `dry_run` montre le plan avant.
+- **Révisions** : restaurer une révision restaure aussi les champs.
+- **Même éditeur, même API** que pour ACF : chemins pointés (`sections.2.items.1.title`), `/okno/v1/export`, `/content` et `/types`.
+
+Format et API : [plugin/docs/collections-spec.md](plugin/docs/collections-spec.md) (en anglais).
 
 ## Licence
 
