@@ -272,6 +272,17 @@ Nothing is ever deleted from ACF: no postmeta, no field group, no post type. Val
 
 With WP-CLI: `wp okno acf-import list`, `wp okno acf-import preview ville`, `wp okno acf-import run ville`, `wp okno acf-import rollback ville --yes`.
 
+## AI (WordPress 7.0+)
+
+Okno writes with the AI provider the site configured in **Settings → Connectors**, through WordPress's own AI client (`wp_ai_client_prompt()`). Okno stores no API key and picks no provider; without WordPress 7.0, or without a provider that generates text, the AI tools simply don't show (administrators get a link to the connectors).
+
+- **Brand context** (Settings, administrators): brand name, offer, audience, tone of voice, words to prefer and avoid, **forbidden claims**, mandatory facts, language and up to three sample texts. Export / import as JSON. Each collection can add its purpose and readers.
+- **AI on text fields** (entry form and visual editor): Generate, Rewrite, Shorten, Expand, Fix, Change the tone, Translate, and *Suggest* a search title or description on SEO-like fields and the excerpt. The brand context, the collection's context and the entry's other fields are sent along. The proposal opens as a word-level diff; forbidden claims are highlighted and a too-long text is flagged before you accept. Accepting writes into the field like typing: undo works, nothing is saved until you save.
+- **Alternative text** for image fields and in Media, when the provider reads images.
+- **New entry with AI** in Collections: a brief, structured JSON output matching the type's fields (text, rich text, lists, blocks), a preview, then a draft.
+- **Abilities** for external agents (MCP adapter, WordPress agents), category `okno`: `okno/get-brand-context`, `okno/list-collections`, `okno/get-entry`, `okno/update-entry-fields` (drafts and pending entries only, validated like the editor, never publishes).
+- REST: `okno/v1/ai/status`, `ai/field`, `ai/alt`, `ai/entry`, `ai/entry/create`, `ai/brand`, `ai/collections/{type}` (nonce, capability, size limits, per-user rate limit). Filters: `okno_ai_capability` (default `edit_posts`), `okno_ai_rate_limit` (20 requests a minute), `okno_ai_timeout` (60 s), `okno_ai_status`, `okno_ai_ability_statuses`. Each AI action is logged in the change log (who, field, action), never the prompt.
+
 ## Security
 
 - Editing routes check a nonce and `edit_post` on the content. The content API only serves published items of the Okno content types; it can require a token (compared in constant time, sent in `X-Okno-Token`). Publishing requires `publish_pages` (filter `okno_deploy_capability`), settings require `manage_options`.

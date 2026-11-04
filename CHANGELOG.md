@@ -2,6 +2,25 @@
 
 All notable changes to Okno are documented here. The project follows [Semantic Versioning](https://semver.org/). The plugin and the bridge package share one version number.
 
+## [Unreleased]
+
+### Added
+
+- **AI in Okno, through WordPress's AI client** (WordPress 7.0+): Okno uses `wp_ai_client_prompt()` and whatever provider the site configured in **Settings → Connectors**. It stores no API key and chooses no provider. Without WordPress 7.0, when `wp_supports_ai` is false, or when no configured provider can generate text, the AI tools are hidden; administrators get **Set up an AI provider** (Settings → Connectors) on the Collections AI button and in the settings.
+- **Brand context** (Settings → *Brand context (AI)*, administrators): brand name, activity and offer, audience, tone of voice, words to prefer, words to avoid, **forbidden claims** (one per line, matched without case or accents at the start of a word — “certifié” also flags “certifiée”, “4 h” also flags “4h” and “4 heures”; `/pattern/i` for a regular expression), mandatory facts, language and up to three sample texts. **Export (JSON)** / **Import…**. The settings say which provider state applies (ready, not configured, unavailable) and what is sent to the provider.
+- **Per-collection AI context**: purpose and readers, in the collection's *General* settings (saved on its own, apart from the schema). Sent with the brand context for entries of that type.
+- **AI menu on text fields** — text, textarea and rich text, ACF and Okno collections, native title, excerpt and content — in the Collections form and the visual editor's panel, nested cells of lists and blocks included: **Generate…** (from a short instruction), **Rewrite**, **Shorten**, **Expand**, **Fix spelling and grammar**, **Change the tone…**, **Translate…**, and **Suggest a search title / description** on SEO-like fields (`seo_title`, `meta_description`… detected by name or label) and the excerpt, with the recommended length (60 / 155 characters, or the field's own limit). The prompt carries the brand context, the collection context, the entry's other fields as they are in the editor (unsaved changes included), the field's label, instructions, format (plain text, single line or not, or HTML for rich text) and maximum length.
+- **Preview before anything changes**: the proposal opens with a word-level diff, a character count against the field's limit, the formatted result for rich text, and a warning that highlights forbidden claims and flags a text that's too long (accepting cuts it at the last word that fits). **Accept** / **Regenerate** / **Cancel**. Accepting writes into the field like typing: undo works, the preview updates, nothing is saved until you save.
+- **Alternative text with AI** on image fields (saved on the image) and in Media's details panel, when the provider can read images; hidden otherwise.
+- **New entry with AI** (sparkle button of a collection's entries): a brief, then a structured JSON answer matching the type's fields (text, rich text, choices, yes / no, numbers, lists, groups, blocks with `_layout`), checked against the schema (lengths, choices, layouts, row limits) and previewed field by field with forbidden claims highlighted, then **Create the draft** through the editor's save path.
+- **Abilities API** (category `okno`), for external AI agents such as the MCP adapter: `okno/get-brand-context`, `okno/list-collections` (content types and their fields), `okno/get-entry`, `okno/update-entry-fields` (drafts and pending entries only, validated like the editor, revision check, never changes the status). Registered on WordPress 6.9+, with or without an AI provider.
+- REST: `GET okno/v1/ai/status`, `POST ai/field`, `POST ai/alt`, `POST ai/entry`, `POST ai/entry/create`, `GET|POST ai/brand`, `GET|POST ai/collections/{type}` — nonce, capability (`okno_ai_capability`, default `edit_posts`) and rights on the content, bounded inputs, per-user rate limit (`okno_ai_rate_limit`, 20 requests a minute), generation timeout (`okno_ai_timeout`, 60 s). Provider errors (timeout, refused key, rate limit, token limit) are turned into readable messages.
+- **Change log**: each AI action is a line of its own (who, which field, which action — never the prompt or the text), shown in the entry's history and on the home page. They don't count as content changes.
+
+### Changed
+
+- `Okno_Activity::lookup()` and `Okno_Rest::post_item()` / `can_create_type()` are public; `Okno_Field_Adapter::describe_type()` describes a content type's fields without an entry.
+
 ## [1.0.0-beta.10] — 2026-11-04
 
 ### Fixed
