@@ -131,3 +131,43 @@ echo "instanciations OK\n";
 Okno_Deploy_Manager::cleanup_stale();
 Okno_Deploy_Manager::schedule_cleanup();
 echo "cron OK\n";
+
+// IA : sans le client d'IA de WordPress 7 (WordPress plus ancien), Okno se
+// charge et les outils d'IA sont masqués ; les capacités ne s'enregistrent
+// que si l'Abilities API existe. (Stubs déclarés dans des blocs : une
+// fonction déclarée au niveau du fichier existerait dès la compilation.)
+function add_query_arg( $args, $url ) { return $url . '?' . http_build_query( $args ); }
+function remove_filter( ...$a ) {}
+$smoke_ai_ok = true;
+$ai          = Okno_AI::status( true );
+$smoke_ai_ok = $smoke_ai_ok && ! $ai['client'] && ! $ai['text'] && ! Okno_AI::client_config()['enabled'] && '' === Okno_AI::client_config()['connectorsUrl'];
+echo 'IA sans WordPress 7 : ' . ( $smoke_ai_ok ? 'masquée' : 'ÉCHEC' ) . "\n";
+Okno_AI_Abilities::register_category();
+Okno_AI_Abilities::register();
+echo "capacités sans Abilities API : OK\n";
+$err         = Okno_AI::generate( '', 'x' );
+$smoke_ai_ok = $smoke_ai_ok && $err instanceof WP_Error;
+echo 'génération sans client : ' . ( $err instanceof WP_Error ? 'erreur propre' : 'ÉCHEC' ) . "\n";
+
+// Avec le client d'IA (stubs), mais sans fournisseur configuré : toujours masquée.
+if ( true ) {
+	class Smoke_AI_Builder {
+		public function __call( $name, $args ) {
+			return 'is_supported_for_text_generation' === $name ? false : $this;
+		}
+	}
+	function wp_supports_ai() { return true; }
+	function wp_ai_client_prompt( $prompt = null ) { return new Smoke_AI_Builder(); }
+	function wp_register_ability_category( $slug, $args ) { $GLOBALS['registered'][] = $slug; }
+	function wp_register_ability( $name, $args ) { $GLOBALS['registered'][] = $name; }
+}
+$ai          = Okno_AI::status( true );
+$no_provider = $ai['client'] && ! $ai['text'] && ! Okno_AI::client_config()['enabled'] && '' !== Okno_AI::client_config()['connectorsUrl'];
+$smoke_ai_ok = $smoke_ai_ok && $no_provider;
+echo 'IA sans fournisseur : ' . ( $no_provider ? 'masquée, lien des connecteurs' : 'ÉCHEC' ) . "\n";
+$GLOBALS['registered'] = array();
+Okno_AI_Abilities::register_category();
+Okno_AI_Abilities::register();
+$smoke_ai_ok = $smoke_ai_ok && 5 === count( $GLOBALS['registered'] );
+echo 'capacités : ' . ( 5 === count( $GLOBALS['registered'] ) ? 'enregistrées' : 'ÉCHEC' ) . "\n";
+exit( $smoke_ai_ok ? 0 : 1 );

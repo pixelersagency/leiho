@@ -27,6 +27,7 @@ php plugin/tests/test-acf-import.php
 php plugin/tests/test-activity.php
 php plugin/tests/test-frame-verdict.php
 php plugin/tests/test-updater.php
+php plugin/tests/test-ai.php
 php plugin/tests/smoke-load.php
 
 # After changing bridge/src

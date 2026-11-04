@@ -167,6 +167,27 @@ abstract class Okno_Field_Adapter implements Okno_Adapter_Interface, Okno_Conten
 		return $entry;
 	}
 
+	/**
+	 * Champs d'un type de contenu au format de l'éditeur, sans valeurs
+	 * (nouvelle entrée générée par l'IA, capacités pour les agents).
+	 *
+	 * @param string $post_type Type de contenu.
+	 * @return array
+	 */
+	public function describe_type( $post_type ) {
+		$out = array();
+		foreach ( $this->get_definitions( $post_type ) as $group ) {
+			foreach ( isset( $group['fields'] ) ? (array) $group['fields'] : array() as $field ) {
+				$entry = $this->describe( $field );
+				if ( ! empty( $group['conditional'] ) ) {
+					$entry['conditional'] = true;
+				}
+				$out[] = $entry;
+			}
+		}
+		return $out;
+	}
+
 	protected function describe_all( $fields ) {
 		$out = array();
 		foreach ( (array) $fields as $sub ) {

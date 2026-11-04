@@ -269,7 +269,7 @@ class Okno_Rest {
 		return '' !== $type && $this->can_create_type( $type );
 	}
 
-	private function can_create_type( $post_type ) {
+	public function can_create_type( $post_type ) {
 		$settings = Okno_Plugin::settings();
 		if ( ! in_array( $post_type, $settings['post_types'], true ) ) {
 			return false;
@@ -501,6 +501,10 @@ class Okno_Rest {
 				'user'  => $row->user_name,
 				'when'  => mysql2date( 'c', $row->created_at . ' +0000' ),
 			);
+			// Action d'IA : libellé de l'action, pas de valeur avant / après.
+			if ( Okno_Activity::TYPE_AI === $row->field_type ) {
+				$items[ count( $items ) - 1 ]['action'] = Okno_Activity::ai_label( $row->new_value );
+			}
 		}
 
 		return rest_ensure_response( $items );
@@ -687,7 +691,7 @@ class Okno_Rest {
 		return rest_ensure_response( $this->post_item( get_post( $copy_id ), new Okno_Url_Mapper() ) );
 	}
 
-	private function post_item( $post, Okno_Url_Mapper $mapper ) {
+	public function post_item( $post, Okno_Url_Mapper $mapper ) {
 		return array(
 			'id'          => $post->ID,
 			'title'       => Okno_Plugin::title( $post ),

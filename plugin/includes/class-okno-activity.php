@@ -103,6 +103,72 @@ class Okno_Activity {
 		return false !== $ok;
 	}
 
+	/** Type des lignes « action d'IA » du journal. */
+	const TYPE_AI = 'ai';
+
+	/**
+	 * Enregistre une action d'IA : qui, sur quel champ, quelle action.
+	 * Jamais le prompt ni le texte produit (le texte accepté apparaît dans
+	 * le journal à l'enregistrement, comme toute modification).
+	 *
+	 * @param int    $post_id Contenu (0 : hors contenu, texte alternatif…).
+	 * @param string $path    Chemin du champ.
+	 * @param string $label   Libellé lisible.
+	 * @param string $action  Action (rewrite, shorten, entry…).
+	 * @return bool
+	 */
+	public static function record_ai( $post_id, $path, $label, $action ) {
+		global $wpdb;
+
+		if ( self::DB_VERSION !== get_option( self::OPTION_DB_VERSION ) ) {
+			return false;
+		}
+
+		$user = wp_get_current_user();
+
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery -- Table propre au plugin, insert() prépare les valeurs.
+		$ok = $wpdb->insert(
+			self::table_name(),
+			array(
+				'post_id'     => (int) $post_id,
+				'field_path'  => substr( (string) $path, 0, 191 ),
+				'field_label' => substr( sanitize_text_field( (string) $label ), 0, 191 ),
+				'field_type'  => self::TYPE_AI,
+				'old_value'   => '',
+				'new_value'   => sanitize_key( (string) $action ),
+				'user_id'     => get_current_user_id(),
+				'user_name'   => $user && $user->exists() ? sanitize_text_field( $user->display_name ) : '',
+				'created_at'  => current_time( 'mysql', true ),
+			),
+			array( '%d', '%s', '%s', '%s', '%s', '%s', '%d', '%s', '%s' )
+		);
+
+		return false !== $ok;
+	}
+
+	/**
+	 * Libellé lisible d'une action d'IA du journal.
+	 *
+	 * @param string $action Action.
+	 * @return string
+	 */
+	public static function ai_label( $action ) {
+		$labels = array(
+			'generate'  => __( 'AI · Generate', 'okno' ),
+			'rewrite'   => __( 'AI · Rewrite', 'okno' ),
+			'shorten'   => __( 'AI · Shorten', 'okno' ),
+			'expand'    => __( 'AI · Expand', 'okno' ),
+			'fix'       => __( 'AI · Fix', 'okno' ),
+			'tone'      => __( 'AI · Change the tone', 'okno' ),
+			'translate' => __( 'AI · Translate', 'okno' ),
+			'suggest'   => __( 'AI · Suggest', 'okno' ),
+			'alt'       => __( 'AI · Alternative text', 'okno' ),
+			'entry'     => __( 'AI · New entry', 'okno' ),
+			'ability'   => __( 'AI agent · Fields updated', 'okno' ),
+		);
+		return isset( $labels[ $action ] ) ? $labels[ $action ] : __( 'AI', 'okno' );
+	}
+
 	/**
 	 * Dernières modifications, plus récentes d'abord.
 	 *
@@ -150,7 +216,8 @@ class Okno_Activity {
 
 		$table = self::table_name();
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery, WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Nom de table interne.
-		return (int) $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM {$table} WHERE created_at >= %s", gmdate( 'Y-m-d H:i:s', (int) $since ) ) );
+		// Les actions d'IA ne sont pas des modifications du contenu.
+		return (int) $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM {$table} WHERE created_at >= %s AND field_type <> %s", gmdate( 'Y-m-d H:i:s', (int) $since ), self::TYPE_AI ) );
 	}
 
 	/**
@@ -208,8 +275,12 @@ class Okno_Activity {
 
 	/**
 	 * Trouve un chemin pointé dans un schéma : valeur, libellé composé, type.
+	 *
+	 * @param array  $schema Schéma (format Okno_Schema::get).
+	 * @param string $path   Chemin pointé.
+	 * @return array{field:array|null,value:mixed,label:string,type:string}
 	 */
-	private static function lookup( array $schema, $path ) {
+	public static function lookup( array $schema, $path ) {
 		$parts = explode( '.', (string) $path );
 		$root  = array_shift( $parts );
 		$found = array(

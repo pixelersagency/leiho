@@ -58,6 +58,11 @@ require_once OKNO_DIR . 'includes/class-okno-cache.php';
 require_once OKNO_DIR . 'includes/class-okno-types.php';
 require_once OKNO_DIR . 'includes/class-okno-headless.php';
 require_once OKNO_DIR . 'includes/class-okno-updater.php';
+require_once OKNO_DIR . 'includes/ai/class-okno-ai-prompt.php';
+require_once OKNO_DIR . 'includes/ai/class-okno-ai-brand.php';
+require_once OKNO_DIR . 'includes/ai/class-okno-ai.php';
+require_once OKNO_DIR . 'includes/ai/class-okno-ai-rest.php';
+require_once OKNO_DIR . 'includes/ai/class-okno-ai-abilities.php';
 require_once OKNO_DIR . 'includes/admin/class-okno-icons.php';
 require_once OKNO_DIR . 'includes/admin/class-okno-dashboard.php';
 require_once OKNO_DIR . 'includes/admin/class-okno-app.php';
@@ -119,6 +124,7 @@ final class Okno_Plugin {
 		Okno_Headless::init();
 		Okno_Activity::init();
 		Okno_Updater::init();
+		Okno_AI::init();
 		Okno_App::init();
 
 		if ( is_admin() ) {
