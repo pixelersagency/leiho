@@ -520,9 +520,12 @@ class Leiho_I18n {
 		$collection = $post ? Leiho_Collections::for_post_type( $post->post_type ) : null;
 		if ( $collection ) {
 			$stored = Leiho_Collections_Store::values( $collection['id'], $post_id );
-			foreach ( self::localized_keys( $collection ) as $key ) {
-				$source = isset( $stored[ $key ] ) ? $stored[ $key ] : null;
-				if ( self::missing( isset( $row['data'][ $key ] ) ? $row['data'][ $key ] : null, $source ) ) {
+			foreach ( $collection['fields'] as $field ) {
+				if ( ! self::is_localized( $field ) ) {
+					continue;
+				}
+				$key = $field['key'];
+				if ( self::missing( $field, isset( $row['data'][ $key ] ) ? $row['data'][ $key ] : null, isset( $stored[ $key ] ) ? $stored[ $key ] : null ) ) {
 					return 'partial';
 				}
 			}
@@ -535,26 +538,63 @@ class Leiho_I18n {
 
 	/**
 	 * Un texte de l'original manque-t-il dans la traduction (champ, ligne
-	 * d'une liste, sous-champ) ?
+	 * d'une liste, sous-champ, libellé d'un lien) ? Seuls les textes comptent :
+	 * une liste d'adresses ou d'images n'a rien à traduire.
 	 *
+	 * @param array $field  Champ normalisé.
 	 * @param mixed $value  Valeur stockée de la traduction.
 	 * @param mixed $source Valeur stockée de l'original.
 	 * @return bool
 	 */
-	private static function missing( $value, $source ) {
+	private static function missing( $field, $value, $source ) {
 		$source = self::decode( $source );
-		if ( null === $source || '' === $source || array() === $source ) {
+		$value  = self::decode( $value );
+		$blank  = function ( $v ) {
+			return null === $v || '' === $v || array() === $v;
+		};
+		if ( $blank( $source ) ) {
 			return false;
 		}
-		$value = self::decode( $value );
-		if ( null === $value || '' === $value || array() === $value ) {
-			return true;
-		}
-		if ( is_array( $source ) && is_array( $value ) ) {
-			foreach ( $source as $key => $item ) {
-				if ( self::missing( isset( $value[ $key ] ) ? $value[ $key ] : null, $item ) ) {
-					return true;
+		switch ( $field['type'] ) {
+			case 'text':
+			case 'richtext':
+				return $blank( $value );
+			case 'link':
+				return is_array( $source ) && ! $blank( isset( $source['title'] ) ? $source['title'] : null )
+					&& ( ! is_array( $value ) || $blank( isset( $value['title'] ) ? $value['title'] : null ) );
+			case 'group':
+				return self::missing_row( $field['fields'], is_array( $value ) ? $value : array(), $source );
+			case 'list':
+			case 'blocks':
+				$blocks = array();
+				foreach ( isset( $field['blocks'] ) ? $field['blocks'] : array() as $block ) {
+					$blocks[ $block['key'] ] = $block['fields'];
 				}
+				foreach ( (array) $source as $i => $row ) {
+					if ( ! is_array( $row ) ) {
+						continue;
+					}
+					$subs = 'list' === $field['type'] ? $field['fields'] : ( isset( $row['_block'], $blocks[ $row['_block'] ] ) ? $blocks[ $row['_block'] ] : array() );
+					if ( self::missing_row( $subs, is_array( $value ) && isset( $value[ $i ] ) && is_array( $value[ $i ] ) ? $value[ $i ] : array(), $row ) ) {
+						return true;
+					}
+				}
+				return false;
+		}
+		return false;
+	}
+
+	/**
+	 * @param array $fields Sous-champs.
+	 * @param array $value  Ligne traduite.
+	 * @param array $source Ligne d'origine.
+	 * @return bool
+	 */
+	private static function missing_row( $fields, $value, $source ) {
+		foreach ( $fields as $sub ) {
+			$key = $sub['key'];
+			if ( self::missing( $sub, isset( $value[ $key ] ) ? $value[ $key ] : null, isset( $source[ $key ] ) ? $source[ $key ] : null ) ) {
+				return true;
 			}
 		}
 		return false;
