@@ -349,6 +349,14 @@ body > .screen-reader-text[role="status"] {
 	white-space: normal;
 }
 
+/* Publication automatique programmée : discrète, ce n'est pas encore un statut. */
+.okno-deploy-scheduled {
+	background: var(--okno-surface);
+	color: var(--okno-muted);
+	font-weight: 500;
+	font-variant-numeric: tabular-nums;
+}
+
 /* ── Disposition ───────────────────────────────────────────────────── */
 
 .okno-main {

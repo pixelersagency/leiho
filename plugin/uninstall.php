@@ -15,7 +15,7 @@ defined( 'WP_UNINSTALL_PLUGIN' ) || exit;
 function okno_uninstall_site() {
 	global $wpdb;
 
-	foreach ( array( 'okno_settings', 'okno_secrets', 'okno_deploy_history', 'okno_usage', 'okno_connection', 'okno_activity_db_version', 'okno_update_last_release', 'okno_export_cache', 'okno_auto_deploy_attempts' ) as $option ) {
+	foreach ( array( 'okno_settings', 'okno_secrets', 'okno_deploy_history', 'okno_usage', 'okno_connection', 'okno_activity_db_version', 'okno_update_last_release', 'okno_export_cache', 'okno_auto_deploy_attempts', 'okno_auto_deploy_pending', 'okno_deploy_lock' ) as $option ) {
 		delete_option( $option );
 	}
 

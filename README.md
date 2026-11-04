@@ -153,7 +153,7 @@ Other field types show up read-only, with a link to the classic WordPress editor
 
 Tokens are encrypted in the database with a key derived from your WordPress salts. GitHub settings are checked when saved: repository, branch, workflow and token expiry.
 
-Publishing can also be automatic: tick **Publish on its own after each change** and Okno deploys once the edits stop (60 s by default), changes made in wp-admin included.
+Publishing can also be automatic: tick **Publish on its own after each change** and Okno deploys once the edits stop (60 s by default), changes made in wp-admin included. Nothing to set up on the server: the editor shows a discreet countdown and publishes when it runs out, or right away if the client closes the tab; any open wp-admin tab publishes through the Heartbeat once the delay has passed; WP-Cron is the fallback when nobody is logged in. Whatever fires first, one batch of changes gives one deployment, and a build already running or the minimum delay between deployments only postpones it.
 
 ## Content API
 

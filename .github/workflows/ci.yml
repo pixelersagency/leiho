@@ -31,6 +31,7 @@ jobs:
           php plugin/tests/test-activity.php
           php plugin/tests/test-frame-verdict.php
           php plugin/tests/test-updater.php
+          php plugin/tests/test-autopublish.php
           php plugin/tests/smoke-load.php
 
   bridge:
@@ -61,6 +62,7 @@ jobs:
         run: |
           node --check plugin/assets/admin/editor.js
           node --check plugin/assets/admin/admin.js
+          node --check plugin/assets/admin/autopublish.js
           node --check bridge/bin/okno.js
 
   package:

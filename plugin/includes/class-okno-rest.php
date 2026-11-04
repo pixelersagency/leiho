@@ -139,6 +139,17 @@ class Okno_Rest {
 			)
 		);
 
+		// Avant la route /deploy/{id} : « flush » y correspondrait aussi.
+		register_rest_route(
+			self::NS,
+			'/deploy/flush',
+			array(
+				'methods'             => WP_REST_Server::CREATABLE,
+				'callback'            => array( $this, 'deploy_flush' ),
+				'permission_callback' => array( $this, 'can_deploy' ),
+			)
+		);
+
 		register_rest_route(
 			self::NS,
 			'/deploy/(?P<deploy_id>[A-Za-z0-9_\-.]+)',
@@ -181,13 +192,7 @@ class Okno_Rest {
 	}
 
 	public function can_deploy() {
-		/**
-		 * Capability requise pour publier (déclencher un deploy).
-		 *
-		 * @param string $capability Défaut : publish_pages (éditeur de site vitrine).
-		 */
-		$capability = apply_filters( 'okno_deploy_capability', 'publish_pages' );
-		return current_user_can( $capability );
+		return Okno_Deploy_Manager::user_can_deploy();
 	}
 
 	/**
@@ -576,6 +581,42 @@ class Okno_Rest {
 			return $record;
 		}
 		return rest_ensure_response( $this->public_record( $record ) );
+	}
+
+	/**
+	 * POST /deploy/flush : publie maintenant si une publication automatique
+	 * attend (minuterie de l'éditeur, onglet qui se ferme). Idempotent.
+	 *
+	 * Accepte aussi un envoi navigator.sendBeacon(), qui ne peut pas poser
+	 * l'en-tête X-WP-Nonce : le nonce REST arrive alors en paramètre _wpnonce,
+	 * que l'authentification par cookie de WordPress lit aussi.
+	 */
+	public function deploy_flush() {
+		$outcome = Okno_Deploy_Manager::flush_pending( 0 );
+		if ( 'failed' === $outcome['state'] ) {
+			return $outcome['error'];
+		}
+
+		$body = array(
+			'state'    => $outcome['state'],
+			'retry_in' => isset( $outcome['retry_in'] ) ? (int) $outcome['retry_in'] : 0,
+			'message'  => isset( $outcome['error'] ) ? $outcome['error']->get_error_message() : '',
+			'deploy'   => null,
+		);
+
+		if ( isset( $outcome['record'] ) ) {
+			$body['deploy'] = $this->public_record( $outcome['record'] );
+		} else {
+			// Déjà publié par un autre déclencheur : l'éditeur affiche son statut.
+			$history = Okno_Deploy_Manager::history();
+			$latest  = reset( $history );
+			if ( $latest && ( time() - (int) $latest['started'] ) < 600 ) {
+				$fresh          = Okno_Deploy_Manager::get_status( $latest['id'] );
+				$body['deploy'] = is_wp_error( $fresh ) ? null : $this->public_record( $fresh );
+			}
+		}
+
+		return rest_ensure_response( $body );
 	}
 
 	/**
