@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Builds the installable plugin zip: dist/leiho-<version>.zip, with an leiho/
+# Builds the installable plugin zip: dist/leiho-<version>.zip, with a leiho/
 # folder at its root (a zip without it would install next to an existing copy
 # instead of replacing it).
 set -euo pipefail

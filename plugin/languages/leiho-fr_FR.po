@@ -23,7 +23,7 @@ msgid "Changes"
 msgstr "Modifications"
 
 #: assets/admin/ai.js:418 assets/admin/editor.js:3918
-#: includes/class-leiho-activity.php:169
+#: includes/class-leiho-activity.php:170
 msgid "AI"
 msgstr "IA"
 
@@ -3996,47 +3996,47 @@ msgstr "Le fichier de l’image est illisible sur le serveur."
 msgid "This image is too large to be sent to the AI."
 msgstr "Cette image est trop lourde pour être envoyée à l’IA."
 
-#: includes/class-leiho-activity.php:157
+#: includes/class-leiho-activity.php:158
 msgid "AI · Generate"
 msgstr "IA · Générer"
 
-#: includes/class-leiho-activity.php:158
+#: includes/class-leiho-activity.php:159
 msgid "AI · Rewrite"
 msgstr "IA · Réécrire"
 
-#: includes/class-leiho-activity.php:159
+#: includes/class-leiho-activity.php:160
 msgid "AI · Shorten"
 msgstr "IA · Raccourcir"
 
-#: includes/class-leiho-activity.php:160
+#: includes/class-leiho-activity.php:161
 msgid "AI · Expand"
 msgstr "IA · Développer"
 
-#: includes/class-leiho-activity.php:161
+#: includes/class-leiho-activity.php:162
 msgid "AI · Fix"
 msgstr "IA · Corriger"
 
-#: includes/class-leiho-activity.php:162
+#: includes/class-leiho-activity.php:163
 msgid "AI · Change the tone"
 msgstr "IA · Changer le ton"
 
-#: includes/class-leiho-activity.php:163
+#: includes/class-leiho-activity.php:164
 msgid "AI · Translate"
 msgstr "IA · Traduire"
 
-#: includes/class-leiho-activity.php:164
+#: includes/class-leiho-activity.php:165
 msgid "AI · Suggest"
 msgstr "IA · Proposer"
 
-#: includes/class-leiho-activity.php:165
+#: includes/class-leiho-activity.php:166
 msgid "AI · Alternative text"
 msgstr "IA · Texte alternatif"
 
-#: includes/class-leiho-activity.php:166
+#: includes/class-leiho-activity.php:167
 msgid "AI · New entry"
 msgstr "IA · Nouvelle entrée"
 
-#: includes/class-leiho-activity.php:167
+#: includes/class-leiho-activity.php:168
 msgid "AI agent · Fields updated"
 msgstr "Agent IA · Champs modifiés"
 
@@ -4048,28 +4048,28 @@ msgstr "Un jeton de contenu Leiho valide est requis."
 msgid "This content type is not served by Leiho."
 msgstr "Ce type de contenu n’est pas servi par Leiho."
 
-#: includes/class-leiho-legacy.php:345
+#: includes/class-leiho-legacy.php:376
 msgid "Leiho replaces Okno."
 msgstr "Leiho remplace Okno."
 
-#: includes/class-leiho-legacy.php:346
+#: includes/class-leiho-legacy.php:377
 msgid "Deactivate Okno: Leiho will then take over its settings, content types, history and tokens. Your front end keeps working."
 msgstr "Désactivez Okno : Leiho reprendra alors ses réglages, ses types de contenu, son historique et ses jetons. Votre front continue de fonctionner."
 
-#: includes/class-leiho-legacy.php:348
+#: includes/class-leiho-legacy.php:379
 msgid "Go to Plugins"
 msgstr "Aller aux extensions"
 
-#: includes/class-leiho-legacy.php:366
+#: includes/class-leiho-legacy.php:397
 msgid "Okno is now Leiho."
 msgstr "Okno s’appelle désormais Leiho."
 
-#: includes/class-leiho-legacy.php:367
+#: includes/class-leiho-legacy.php:398
 msgid "Settings, content types, history and tokens were carried over. You can delete the Okno plugin: its uninstall leaves Leiho’s data alone."
 msgstr "Les réglages, les types de contenu, l’historique et les jetons ont été repris. Vous pouvez supprimer l’extension Okno : sa désinstallation ne touche pas aux données de Leiho."
 
 #. translators: %s: comma-separated database table names.
-#: includes/class-leiho-legacy.php:372
+#: includes/class-leiho-legacy.php:403
 msgid "These tables were left as they were, because a Leiho table with the same name already holds data: %s"
 msgstr "Ces tables ont été laissées telles quelles, car une table Leiho du même nom contient déjà des données : %s"
 
@@ -4537,12 +4537,12 @@ msgid "The block type “%s” is declared twice."
 msgstr "Le type de bloc « %s » est déclaré deux fois."
 
 #. translators: 1: number of entries, 2: field key, 3: archived column name.
-#: includes/collections/class-leiho-collections-store.php:330
+#: includes/collections/class-leiho-collections-store.php:331
 msgid "%1$d value(s) of “%2$s” could not be converted; they are kept in the archived column %3$s."
 msgstr "%1$d valeur(s) de « %2$s » n’ont pas pu être converties ; elles restent dans la colonne archivée %3$s."
 
 #. translators: 1: operation, 2: database error.
-#: includes/collections/class-leiho-collections-store.php:359
+#: includes/collections/class-leiho-collections-store.php:360
 msgid "Migration stopped at “%1$s”: %2$s"
 msgstr "Migration interrompue à « %1$s » : %2$s"
 

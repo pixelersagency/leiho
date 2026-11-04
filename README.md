@@ -1,8 +1,16 @@
-# Leiho
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset=".github/assets/leiho-logo-dark.svg">
+    <img src=".github/assets/leiho-logo.svg" alt="Leiho" width="260">
+  </picture>
+</p>
+
+<h1 align="center">Edit the real site.</h1>
+
 
 **Visual editing for headless WordPress.** Your editors see the real front end — Next.js, Astro, Remix, Vite, Nuxt, SvelteKit or plain HTML — inside wp-admin. They click a heading, change it, watch it update live, save, and publish. Define your content types in Leiho, or keep your existing ACF fields: either way WordPress stays the single source of truth, with no page builder and no lock-in.
 
-> *Leiho* means *window* in Polish, Czech and Russian — a window onto the real site.
+> *Leiho* means *window* in Basque — a window onto the real site. Leiho was called **Okno** until 1.0.0-beta.11: see [Coming from Okno](#coming-from-okno).
 
 [Français](README.fr.md) · [Changelog](CHANGELOG.md) · [Bridge package](bridge/) · [Framework examples](examples/)
 
@@ -282,6 +290,26 @@ Leiho writes with the AI provider the site configured in **Settings → Connecto
 - **New entry with AI** in Collections: a brief, structured JSON output matching the type's fields (text, rich text, lists, blocks), a preview, then a draft.
 - **Abilities** for external agents (MCP adapter, WordPress agents), category `leiho`: `leiho/get-brand-context`, `leiho/list-collections`, `leiho/get-entry`, `leiho/update-entry-fields` (drafts and pending entries only, validated like the editor, never publishes).
 - REST: `leiho/v1/ai/status`, `ai/field`, `ai/alt`, `ai/entry`, `ai/entry/create`, `ai/brand`, `ai/collections/{type}` (nonce, capability, size limits, per-user rate limit). Filters: `leiho_ai_capability` (default `edit_posts`), `leiho_ai_rate_limit` (20 requests a minute), `leiho_ai_timeout` (60 s), `leiho_ai_status`, `leiho_ai_ability_statuses`. Each AI action is logged in the change log (who, field, action), never the prompt.
+
+## Coming from Okno
+
+Okno was renamed **Leiho** in 1.0.0-beta.12, because another project already used the name. Your content, settings and front end are carried over.
+
+1. Back up the database.
+2. Upload `leiho.zip` in **Plugins → Add New → Upload Plugin**, deactivate Okno, then activate Leiho. If both are active, Leiho waits and asks you to deactivate Okno.
+3. Leiho takes over Okno's settings, tokens, content types and their values, change history and per-user preferences, then confirms it in wp-admin. You can then delete Okno: its uninstall leaves Leiho's data alone.
+
+Update the CMS first. Your front end keeps working unchanged until Leiho 2.0: the `okno/v1` REST routes, the `X-Okno-Token` header, `data-okno-*` attributes, the Okno bridge, `OKNO_URL` / `OKNO_TOKEN` and the `.okno/` snapshot are still understood, and `okno_*` hooks still run (with a deprecation notice under `WP_DEBUG`). Switch when convenient:
+
+| Okno | Leiho |
+|---|---|
+| `npm i @pixelersagency/okno-bridge` | `npm i leiho` |
+| `initOknoBridge`, `OknoBridge`, `loadOknoContent` | `initLeihoBridge`, `LeihoBridge`, `loadLeihoContent` |
+| `okno-bridge.js` | `leiho-bridge.js` |
+| `data-okno-section`, `data-okno-layout`… | `data-leiho-section`, `data-leiho-layout`… |
+| `/wp-json/okno/v1/…`, `X-Okno-Token` | `/wp-json/leiho/v1/…`, `X-Leiho-Token` |
+| `npx okno pull`, `OKNO_URL`, `OKNO_TOKEN`, `.okno/` | `npx leiho pull`, `LEIHO_URL`, `LEIHO_TOKEN`, `.leiho/` |
+| `okno.schema.json`, `okno_*` hooks, `OKNO_KEEP_DATA` | `leiho.schema.json`, `leiho_*` hooks, `LEIHO_KEEP_DATA` |
 
 ## Security
 

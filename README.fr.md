@@ -1,8 +1,16 @@
-# Leiho
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset=".github/assets/leiho-logo-dark.svg">
+    <img src=".github/assets/leiho-logo.svg" alt="Leiho" width="260">
+  </picture>
+</p>
+
+<h1 align="center">Modifiez le vrai site.</h1>
+
 
 **L'édition visuelle pour WordPress headless.** Vos rédacteurs voient le vrai site (Next.js, Astro, Remix, Vite, Nuxt, SvelteKit ou HTML simple) directement dans wp-admin. Ils cliquent sur un titre, le modifient, voient le changement en direct, enregistrent et publient. Définissez vos types de contenu dans Leiho, ou gardez vos champs ACF : dans les deux cas WordPress reste l'unique source de vérité, sans constructeur de pages ni enfermement.
 
-> *Leiho* veut dire *fenêtre* en polonais, tchèque et russe : une fenêtre sur le vrai site.
+> *Leiho* veut dire *fenêtre* en basque : une fenêtre sur le vrai site. Leiho s’appelait **Okno** jusqu’à la 1.0.0-beta.11 : voir [Vous veniez d’Okno](#vous-veniez-dokno).
 
 [English](README.md) · [Changelog](CHANGELOG.md) · [Paquet bridge](bridge/) · [Exemples par framework](examples/)
 
@@ -182,6 +190,16 @@ Leiho écrit avec le fournisseur d’IA configuré dans **Réglages → Connecte
 - **Texte alternatif** des images (champs image, Médias), si le fournisseur lit les images.
 - **Nouvelle entrée avec l’IA** dans Collections : un brief, une réponse JSON structurée selon les champs du type (texte, texte riche, listes, sections), un aperçu, puis un brouillon.
 - **Capacités** pour les agents externes (adaptateur MCP, agents WordPress), catégorie `leiho` : `leiho/get-brand-context`, `leiho/list-collections`, `leiho/get-entry`, `leiho/update-entry-fields` (brouillons et entrées en attente seulement, validées comme dans l’éditeur, ne publie jamais).
+
+## Vous veniez d’Okno
+
+Okno s’appelle **Leiho** depuis la 1.0.0-beta.12, parce qu’un autre projet portait déjà ce nom. Contenus, réglages et front sont repris.
+
+1. Sauvegardez la base de données.
+2. Téléversez `leiho.zip` dans **Extensions → Ajouter → Téléverser**, désactivez Okno, puis activez Leiho. Si les deux sont actifs, Leiho attend et vous demande de désactiver Okno.
+3. Leiho reprend les réglages, les jetons, les types de contenu et leurs valeurs, l’historique et les préférences de chaque utilisateur, puis le confirme dans wp-admin. Vous pouvez ensuite supprimer Okno : sa désinstallation ne touche pas aux données de Leiho.
+
+Mettez d’abord le CMS à jour. Le front continue de fonctionner sans changement jusqu’à Leiho 2.0 : les routes `okno/v1`, l’en-tête `X-Okno-Token`, les attributs `data-okno-*`, le bridge d’Okno, `OKNO_URL` / `OKNO_TOKEN` et l’instantané `.okno/` sont encore compris. Le tableau de correspondance des noms est dans le [README anglais](README.md#coming-from-okno).
 
 ## Licence
 

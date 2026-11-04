@@ -1,6 +1,21 @@
 # Changelog
 
-All notable changes to Okno are documented here. The project follows [Semantic Versioning](https://semver.org/). The plugin and the bridge package share one version number.
+All notable changes to Leiho (called Okno until 1.0.0-beta.11) are documented here. The project follows [Semantic Versioning](https://semver.org/). The plugin and the bridge package share one version number.
+
+## [1.0.0-beta.12] — 2026-11-04
+
+### Changed
+
+- **Okno is now Leiho** (Basque for *window*). Another headless CMS already used the name Okno. Plugin `leiho/leiho.php`, repository `pixelersagency/leiho`, npm package `leiho` (was `@pixelersagency/okno-bridge`), CLI `npx leiho`, REST namespace `leiho/v1`, attributes `data-leiho-*`, hooks `leiho_*`, classes `Leiho_*`, text domain `leiho`, new logo.
+
+### Added
+
+- **Migration from Okno.** Activated after Okno is deactivated, Leiho takes over Okno's options (values and autoload kept), tables, post and user meta, and re-encrypts its tokens; it runs once, before the headless defaults, so an Okno site is never treated as a fresh install. While Okno is active, Leiho waits and asks to deactivate it. A notice confirms the migration; deleting Okno afterwards leaves Leiho's data alone.
+- **Compatibility with Okno until 2.0**: `okno/v1` REST routes, `X-Okno-Token`, `okno_*` filters and actions (deprecated notices under `WP_DEBUG`), public `Okno_*` classes, `wp okno`, `admin.php?page=okno…`, `okno.schema.json` files; in the editor, the bridge of Okno (`ns: 'okno'`); in the bridge, `data-okno-*` attributes, `initOknoBridge` and `OknoBridge`; in the content client, `loadOknoContent`, `OKNO_URL`, `OKNO_TOKEN` and the `.okno/` snapshot.
+
+### Fixed
+
+- On databases that cannot rename a table (the WordPress SQLite driver, used by Playground, accepts `ALTER TABLE … RENAME TO` without doing it), Okno's tables are kept under their name and found by Leiho, instead of being reported as renamed.
 
 ## [1.0.0-beta.11] — 2026-11-04
 
@@ -200,14 +215,15 @@ First public release.
 - Managed regions (`data-okno-managed`) explain where to edit content Okno doesn't own.
 - Explicit sections (`data-okno-section`, `data-okno-layout`) take precedence over auto-detected ones.
 
-[1.0.0-beta.11]: https://github.com/pixelersagency/okno/releases/tag/v1.0.0-beta.11
-[1.0.0-beta.10]: https://github.com/pixelersagency/okno/releases/tag/v1.0.0-beta.10
-[1.0.0-beta.9]: https://github.com/pixelersagency/okno/releases/tag/v1.0.0-beta.9
-[1.0.0-beta.8]: https://github.com/pixelersagency/okno/releases/tag/v1.0.0-beta.8
-[1.0.0-beta.7]: https://github.com/pixelersagency/okno/releases/tag/v1.0.0-beta.7
-[1.0.0-beta.6]: https://github.com/pixelersagency/okno/releases/tag/v1.0.0-beta.6
-[1.0.0-beta.5]: https://github.com/pixelersagency/okno/releases/tag/v1.0.0-beta.5
-[1.0.0-beta.4]: https://github.com/pixelersagency/okno/releases/tag/v1.0.0-beta.4
-[1.0.0-beta.3]: https://github.com/pixelersagency/okno/releases/tag/v1.0.0-beta.3
-[1.0.0-beta.2]: https://github.com/pixelersagency/okno/releases/tag/v1.0.0-beta.2
-[1.0.0-beta.1]: https://github.com/pixelersagency/okno/releases/tag/v1.0.0-beta.1
+[1.0.0-beta.12]: https://github.com/pixelersagency/leiho/releases/tag/v1.0.0-beta.12
+[1.0.0-beta.11]: https://github.com/pixelersagency/leiho/releases/tag/v1.0.0-beta.11
+[1.0.0-beta.10]: https://github.com/pixelersagency/leiho/releases/tag/v1.0.0-beta.10
+[1.0.0-beta.9]: https://github.com/pixelersagency/leiho/releases/tag/v1.0.0-beta.9
+[1.0.0-beta.8]: https://github.com/pixelersagency/leiho/releases/tag/v1.0.0-beta.8
+[1.0.0-beta.7]: https://github.com/pixelersagency/leiho/releases/tag/v1.0.0-beta.7
+[1.0.0-beta.6]: https://github.com/pixelersagency/leiho/releases/tag/v1.0.0-beta.6
+[1.0.0-beta.5]: https://github.com/pixelersagency/leiho/releases/tag/v1.0.0-beta.5
+[1.0.0-beta.4]: https://github.com/pixelersagency/leiho/releases/tag/v1.0.0-beta.4
+[1.0.0-beta.3]: https://github.com/pixelersagency/leiho/releases/tag/v1.0.0-beta.3
+[1.0.0-beta.2]: https://github.com/pixelersagency/leiho/releases/tag/v1.0.0-beta.2
+[1.0.0-beta.1]: https://github.com/pixelersagency/leiho/releases/tag/v1.0.0-beta.1
