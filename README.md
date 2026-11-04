@@ -139,8 +139,7 @@ Click **Okno** in wp-admin and it opens full screen: the WordPress menu, admin b
 |---|---|
 | **Home** | Recent changes with before / after values, connection and publishing status, quick links. |
 | **Visual editor** | The site as visitors see it, editable in place. |
-| **Content** | Every editable entry (pages, posts, ACF post types, collections) with search, filters by type and status, create, duplicate, publish or unpublish, trash and restore. Opens in the visual editor, or in a **form** with every field and no preview, for content that has no page on the site (legal pages, testimonials, settings). |
-| **Collections** | The schema builder (administrators): see below. |
+| **Collections** | All your content in three panes, whatever its engine: content types on the left (WordPress pages and posts, ACF or theme post types, Okno collections and single pages, with their entry counts), the entries of the selected type in the middle (search, status filter, sort, create, duplicate, publish or unpublish, trash and restore), and the selected entry edited in place on the right with every field (undo / redo, local drafts, conflict protection, history), its status, **Save**, and a link to the visual editor or the live page when it has one. The **Fields** tab of an Okno collection opens the schema builder (administrators, see below); ACF types point to ACF. |
 | **Media** | The media library: grid, search, upload (button or drag and drop), alternative text. |
 | **Publishing** | Deployment history. The **Publish** button in the top bar shows when changes aren't published yet. |
 | **Settings** | Everything Okno needs (administrators). |
@@ -248,7 +247,7 @@ Okno Collections is a content model built into Okno: "Strapi or Webflow collecti
 
 From PHP: `Okno_Collections::import( $json )`, `Okno_Collections::save_entry( $post_id, array( 'price' => 120 ) )`, `Okno_Collections::entry( 'home' )`. The format is documented in [plugin/docs/collections-spec.md](plugin/docs/collections-spec.md).
 
-**Schema builder.** Okno → **Collections** builds the same schema without writing JSON: collections and single pages, labels, URL pattern, built-in features, and a field editor with all 19 types and their options (choices, min / max, reference targets, sub-fields of lists and groups, block types of a blocks field), reordered by drag and drop or with the keyboard. Field keys are generated from the name and fixed once applied; only the name and the label change afterwards. **Review** runs the migration as a dry run and lists what will happen (new columns, conversions, archived columns) before anything is applied; validation errors point at the field concerned. Archived columns are listed with a purge button (type the collection id to confirm), and `okno.schema.json` is one click away for import and export. Entries are then edited in the visual editor, or in the form when the collection has no URL.
+**Schema builder.** Okno → **Collections** builds the same schema without writing JSON: collections and single pages, labels, URL pattern, built-in features, and a field editor with all 19 types and their options (choices, min / max, reference targets, sub-fields of lists and groups, block types of a blocks field), reordered by drag and drop or with the keyboard. Field keys are generated from the name and fixed once applied; only the name and the label change afterwards. **Review** runs the migration as a dry run and lists what will happen (new columns, conversions, archived columns) before anything is applied; validation errors point at the field concerned. Archived columns are listed with a purge button (type the collection id to confirm), and `okno.schema.json` is one click away for import and export. Entries are then edited in Okno → **Collections** (and in the visual editor when the collection has a URL). **+ New collection** at the bottom of the list of types starts a new one.
 
 ## Security
 
@@ -309,4 +308,4 @@ See [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ## Credits / third-party
 
-The layout and styles of the Okno app (three-pane Content and Collections views, list rows, field settings, dialogs) are partly derived from [Stacki](https://github.com/flowtricks/stacki), Copyright (c) 2026 Timothy Ricks, under the MIT License: see [plugin/licenses/stacki-MIT.txt](plugin/licenses/stacki-MIT.txt). Files with derived portions say so in their header.
+The layout and styles of the Okno app (three-pane Collections view, list rows, field settings, dialogs) are partly derived from [Stacki](https://github.com/flowtricks/stacki), Copyright (c) 2026 Timothy Ricks, under the MIT License: see [plugin/licenses/stacki-MIT.txt](plugin/licenses/stacki-MIT.txt). Files with derived portions say so in their header.

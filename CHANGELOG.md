@@ -4,6 +4,12 @@ All notable changes to Okno are documented here. The project follows [Semantic V
 
 ## [1.0.0-beta.8] — 2026-11-04
 
+### Changed
+
+- **Content and Collections are one view: Collections.** Types on the left, whatever their engine (WordPress pages and posts, ACF or theme post types, Okno collections and single pages), grouped and with their entry counts, plus **New collection** for administrators; the entries of the selected type in the middle (search, status filter, sort by last modified, date or title, create, duplicate, publish / back to draft, trash and restore); the selected entry edited in place on the right with the editor's form (same widgets, undo / redo, local drafts, conflict protection, history), its status, **Save**, and **Visual editor** / **View on the site** for entries that have a page. Leaving an entry with unsaved changes asks first. Deep links: `view=collections&type=<post_type>&id=<post_id>`. The **Fields** tab of an Okno collection opens the schema builder (administrators); ACF types say their fields are managed in ACF. Editors without `manage_options` get the view too, without the builder.
+- The former `view=content` and `view=form` addresses redirect to Collections with their filters or their entry, and every link that pointed to them (change log, the editor's page list, **Edit with Okno** on the edit screen, home shortcuts) now opens the entry in Collections.
+- REST: `GET /okno/v1/posts` also sorts by `orderby=date`.
+
 ### Fixed
 
 - **Check again** (Dashboard → Updates) now clears Okno's cached release, so a version published in the last hours shows up right away instead of after the 6-hour cache.
