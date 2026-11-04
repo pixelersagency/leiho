@@ -128,7 +128,7 @@ class Okno_Collections_Values {
 		}
 		switch ( $field['type'] ) {
 			case 'number':
-				return is_numeric( $value ) ? 0 + $value : null;
+				return is_numeric( $value ) ? self::number( $value ) : null;
 			case 'boolean':
 				return (bool) $value ? 1 : 0;
 			case 'image':
@@ -139,6 +139,21 @@ class Okno_Collections_Values {
 			default:
 				return (string) $value;
 		}
+	}
+
+	/**
+	 * Nombre lu en base. DECIMAL rend « 5.000000 » : un entier reste un
+	 * entier (5 et non 5.0 dans le JSON servi), comme ACF qui rend 0 + "5".
+	 *
+	 * @param string|int|float $value Valeur numérique.
+	 * @return int|float
+	 */
+	public static function number( $value ) {
+		$number = 0 + $value;
+		if ( is_float( $number ) && floor( $number ) === $number && abs( $number ) <= Okno_Collections_Schema::INTEGER_LIMIT ) {
+			return (int) $number;
+		}
+		return $number;
 	}
 
 	private static function ids( $value ) {

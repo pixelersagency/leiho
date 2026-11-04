@@ -79,6 +79,15 @@ class Okno_Collections_Schema {
 	const KEY_PATTERN  = '/^[a-z][a-z0-9_]{0,47}$/';
 	const NAME_PATTERN = '/^[a-z][a-z0-9_]{0,63}$/';
 
+	/**
+	 * Nom d'API d'un champ importé d'ACF : celui d'ACF est gardé tel quel
+	 * (camelCase, tirets) pour que le front reçoive le même JSON.
+	 */
+	const ACF_NAME_PATTERN = '/^[A-Za-z_][A-Za-z0-9_\-]{0,63}$/';
+
+	/** Origines possibles d'une collection (source). */
+	const SOURCES = array( 'acf' );
+
 	const MAX_FIELDS  = 200;
 	const MAX_DEPTH   = 8;
 	const MAX_VARCHAR = 60;
@@ -181,6 +190,16 @@ class Okno_Collections_Schema {
 			$kind = 'collection';
 		}
 
+		// Type de contenu déclaré ailleurs (thème, extension, ACF) : Okno ne
+		// possède que les champs, jamais l'enregistrement du type.
+		$external = ! empty( $input['external'] );
+		if ( $external && 'singleton' === $kind ) {
+			self::error( $errors, self::join( $path, 'kind' ), __( 'A content type registered outside Okno can only be a collection.', 'okno' ) );
+			$kind = 'collection';
+		}
+		$source = isset( $input['source'] ) && in_array( $input['source'], self::SOURCES, true ) ? $input['source'] : '';
+		$legacy = 'acf' === $source;
+
 		$label    = self::text( isset( $input['label'] ) ? $input['label'] : '', $id );
 		$singular = self::text( isset( $input['singular_label'] ) ? $input['singular_label'] : '', $label );
 
@@ -207,7 +226,8 @@ class Okno_Collections_Schema {
 			self::join( $path, 'fields' ),
 			$errors,
 			array_unique( array_merge( $ids, array( $id ) ) ),
-			1
+			1,
+			$legacy
 		);
 
 		if ( count( $fields ) > self::MAX_FIELDS ) {
@@ -234,6 +254,8 @@ class Okno_Collections_Schema {
 			'path'           => $url_path,
 			'supports'       => array_values( array_unique( $supports ) ),
 			'icon'           => $icon,
+			'external'       => $external,
+			'source'         => $source,
 			'fields'         => $fields,
 		);
 	}
@@ -246,9 +268,10 @@ class Okno_Collections_Schema {
 	 * @param array    $errors Erreurs (sortie).
 	 * @param string[] $ids    Collections connues.
 	 * @param int      $depth  Profondeur courante.
+	 * @param bool     $legacy Noms d'API repris d'ACF (ACF_NAME_PATTERN).
 	 * @return array[]
 	 */
-	public static function normalize_fields( $list, $path, &$errors, $ids, $depth ) {
+	public static function normalize_fields( $list, $path, &$errors, $ids, $depth, $legacy = false ) {
 		if ( ! is_array( $list ) ) {
 			self::error( $errors, $path, __( 'Must be a list.', 'okno' ) );
 			return array();
@@ -263,7 +286,7 @@ class Okno_Collections_Schema {
 		$keys  = array();
 		$names = array();
 		foreach ( array_values( $list ) as $i => $field ) {
-			$normalized = self::normalize_field( $field, self::join( $path, (string) $i ), $errors, $ids, $depth );
+			$normalized = self::normalize_field( $field, self::join( $path, (string) $i ), $errors, $ids, $depth, $legacy );
 			if ( null === $normalized ) {
 				continue;
 			}
@@ -292,16 +315,17 @@ class Okno_Collections_Schema {
 	 * @param array    $errors Erreurs (sortie).
 	 * @param string[] $ids    Collections connues.
 	 * @param int      $depth  Profondeur courante.
+	 * @param bool     $legacy Noms d'API repris d'ACF.
 	 * @return array|null
 	 */
-	public static function normalize_field( $input, $path, &$errors, $ids, $depth ) {
+	public static function normalize_field( $input, $path, &$errors, $ids, $depth, $legacy = false ) {
 		if ( ! is_array( $input ) ) {
 			self::error( $errors, $path, __( 'A field must be an object.', 'okno' ) );
 			return null;
 		}
 
 		$name = isset( $input['name'] ) && is_string( $input['name'] ) ? $input['name'] : '';
-		if ( ! preg_match( self::NAME_PATTERN, $name ) ) {
+		if ( ! preg_match( $legacy ? self::ACF_NAME_PATTERN : self::NAME_PATTERN, $name ) ) {
 			self::error( $errors, self::join( $path, 'name' ), __( 'Use snake_case: lowercase letters, digits and underscores, starting with a letter (64 characters max).', 'okno' ) );
 			return null;
 		}
@@ -385,7 +409,7 @@ class Okno_Collections_Schema {
 				break;
 
 			case 'list':
-				$field['fields'] = self::normalize_fields( isset( $input['fields'] ) ? $input['fields'] : array(), self::join( $path, 'fields' ), $errors, $ids, $depth + 1 );
+				$field['fields'] = self::normalize_fields( isset( $input['fields'] ) ? $input['fields'] : array(), self::join( $path, 'fields' ), $errors, $ids, $depth + 1, $legacy );
 				$field['min']    = isset( $input['min'] ) ? max( 0, (int) $input['min'] ) : 0;
 				$field['max']    = isset( $input['max'] ) ? max( 0, (int) $input['max'] ) : 0;
 				if ( ! $field['fields'] ) {
@@ -394,14 +418,14 @@ class Okno_Collections_Schema {
 				break;
 
 			case 'group':
-				$field['fields'] = self::normalize_fields( isset( $input['fields'] ) ? $input['fields'] : array(), self::join( $path, 'fields' ), $errors, $ids, $depth + 1 );
+				$field['fields'] = self::normalize_fields( isset( $input['fields'] ) ? $input['fields'] : array(), self::join( $path, 'fields' ), $errors, $ids, $depth + 1, $legacy );
 				if ( ! $field['fields'] ) {
 					self::error( $errors, self::join( $path, 'fields' ), __( 'A group needs at least one field.', 'okno' ) );
 				}
 				break;
 
 			case 'blocks':
-				$field['blocks'] = self::normalize_blocks( isset( $input['blocks'] ) ? $input['blocks'] : array(), self::join( $path, 'blocks' ), $errors, $ids, $depth );
+				$field['blocks'] = self::normalize_blocks( isset( $input['blocks'] ) ? $input['blocks'] : array(), self::join( $path, 'blocks' ), $errors, $ids, $depth, $legacy );
 				$field['min']    = isset( $input['min'] ) ? max( 0, (int) $input['min'] ) : 0;
 				$field['max']    = isset( $input['max'] ) ? max( 0, (int) $input['max'] ) : 0;
 				break;
@@ -459,7 +483,7 @@ class Okno_Collections_Schema {
 	/**
 	 * Types de blocs d'un champ blocks.
 	 */
-	private static function normalize_blocks( $input, $path, &$errors, $ids, $depth ) {
+	private static function normalize_blocks( $input, $path, &$errors, $ids, $depth, $legacy = false ) {
 		$out   = array();
 		$keys  = array();
 		$names = array();
@@ -470,7 +494,7 @@ class Okno_Collections_Schema {
 		foreach ( array_values( $input ) as $i => $block ) {
 			$block_path = self::join( $path, (string) $i );
 			$name       = is_array( $block ) && isset( $block['name'] ) && is_string( $block['name'] ) ? $block['name'] : '';
-			if ( ! preg_match( self::NAME_PATTERN, $name ) ) {
+			if ( ! preg_match( $legacy ? self::ACF_NAME_PATTERN : self::NAME_PATTERN, $name ) ) {
 				self::error( $errors, self::join( $block_path, 'name' ), __( 'Use snake_case: lowercase letters, digits and underscores, starting with a letter (64 characters max).', 'okno' ) );
 				continue;
 			}
@@ -492,7 +516,7 @@ class Okno_Collections_Schema {
 				'label'  => self::text( isset( $block['label'] ) ? $block['label'] : '', $name ),
 				'min'    => isset( $block['min'] ) ? max( 0, (int) $block['min'] ) : 0,
 				'max'    => isset( $block['max'] ) ? max( 0, (int) $block['max'] ) : 0,
-				'fields' => self::normalize_fields( isset( $block['fields'] ) ? $block['fields'] : array(), self::join( $block_path, 'fields' ), $errors, $ids, $depth + 1 ),
+				'fields' => self::normalize_fields( isset( $block['fields'] ) ? $block['fields'] : array(), self::join( $block_path, 'fields' ), $errors, $ids, $depth + 1, $legacy ),
 			);
 		}
 		return $out;
@@ -723,6 +747,12 @@ class Okno_Collections_Schema {
 			}
 			if ( $collection['supports'] ) {
 				$item['supports'] = $collection['supports'];
+			}
+			if ( ! empty( $collection['external'] ) ) {
+				$item['external'] = true;
+			}
+			if ( ! empty( $collection['source'] ) ) {
+				$item['source'] = $collection['source'];
 			}
 			$item['fields']         = self::compact_fields( $collection['fields'] );
 			$out['collections'][] = $item;
