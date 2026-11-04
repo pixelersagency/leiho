@@ -177,6 +177,18 @@ Leiho Collections est un modèle de contenu intégré à Leiho, sans ACF : des *
 - **Même éditeur, même API** que pour ACF : chemins pointés (`sections.2.items.1.title`), `/leiho/v1/export`, `/content` et `/types`.
 - **Constructeur de schéma** dans Leiho → **Collections** : collections et pages uniques, libellés, modèle d'URL, fonctionnalités, et un éditeur de champs avec les 20 types et leurs options (choix, min / max, cibles des références, sous-champs des listes et groupes, types de blocs), réordonnés par glisser-déposer ou au clavier. La clé d'un champ est générée à partir de son nom et figée une fois appliquée : seuls le nom et le libellé changent ensuite. **Vérifier** lance la migration à blanc et liste ce qui va se passer (nouvelles colonnes, conversions, colonnes archivées) avant de rien appliquer ; les erreurs pointent le champ concerné. Colonnes archivées listées avec un bouton de purge (confirmée en tapant l'identifiant), import et export d'`leiho.schema.json` en un clic. Les entrées s'éditent ensuite dans Leiho → **Collections** (et dans l'éditeur visuel quand la collection a une URL). **+ Nouvelle collection**, en bas de la liste des types, en crée une.
 
+### Langues
+
+Un site multilingue n'a pas besoin d'une entrée par langue. Déclarez les langues une fois, dans Leiho → **Collections** → *Langues* ou dans le schéma (`"i18n": { "default": "en", "locales": ["en", "fr"] }`).
+
+- **Champ par champ** : chaque champ racine est traduisible ou partagé. Texte, texte riche, lien, liste, blocs et groupe sont traduisibles par défaut ; nombres, images, dates, choix et références sont partagés. `"localized": false` (ou `true`) sur un champ, ou l'interrupteur *Traduisible* du constructeur.
+- **La langue par défaut ne bouge pas** : ses valeurs restent dans la table de la collection ; les traductions sont dans une seule table `wp_leiho_l10n`, une ligne par entrée et par langue.
+- **Chemins préfixés** : `/services/audit` devient `/fr/services/audit` (`/fr` pour l'accueil).
+- **Repli** : ce qui n'est pas encore traduit, jusqu'à une ligne de liste ou un sous-champ, est servi dans la langue par défaut.
+- **Édition** : sélecteur de langue dans l'éditeur visuel et le formulaire, avec l'état de chaque langue ; l'original s'affiche en indication dans les champs vides ; **Traduire avec l'IA** remplit les textes manquants, à relire avant d'enregistrer.
+- **Agents** : `leiho/list-translations`, `leiho/get-translation`, `leiho/update-translation` (sur une entrée publiée, ne remplit que les traductions vides), `leiho/translate-entry`.
+- **Front** : `?locale=fr` sur l'API de contenu, ou `loadLeihoContent( { url, locale: 'fr' } )` ; chaque élément traduit porte `locale` et `translations` (chemin dans chaque langue) pour le sélecteur de langue et `hreflang`.
+
 ### Importer depuis ACF
 
 Un site ACF passe à Leiho Collections un type de contenu à la fois. Dans Leiho → **Collections**, un type ACF propose **Importer dans Leiho** (administrateurs) :

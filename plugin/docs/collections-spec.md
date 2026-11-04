@@ -92,6 +92,7 @@ The schema lives in the `leiho_collections` option and can be exported to / impo
 | `required` | bool | A required field can't be emptied (checked on every write, by any client). |
 | `max_length` | int | Text-like fields. Enforced on write. |
 | `help` | string | Instructions shown to editors. |
+| `localized` | bool | Root fields only, when the schema declares languages: one value per language (`true`) or one shared value (`false`). Defaults to `true` for `text`, `richtext`, `link`, `list`, `blocks` and `group`. Written to the file only when it differs from the default. |
 
 | `type` | Options | Value served by the content API | Column |
 |---|---|---|---|
@@ -238,6 +239,25 @@ Sanitization mirrors the ACF adapter (required, `max_length`, attachments and re
 - Per-request cache only; the export reads one row per entry (primary key lookups).
 - `datetime` values are stored as entered (site time), like ACF.
 - Uninstalling Leiho drops the collection tables and options (define `LEIHO_KEEP_DATA` to keep them); entries stay in `wp_posts`.
+
+## 10. Languages
+
+A schema may declare languages at the top level:
+
+```json
+"i18n": { "default": "en", "locales": [ { "code": "en" }, { "code": "fr", "label": "Français" } ] }
+```
+
+`locales` also accepts plain codes (`["en", "fr"]`); codes match `^[a-z]{2,3}(-[A-Za-z0-9]{2,8})?$`. When `default` is missing or not listed, the first language is the default. One language or none means no localization.
+
+- **Storage.** The default language lives in the collection table as before. Translations of translatable root fields, and the translated title, live in `{prefix}leiho_l10n` (`post_id`, `locale`, `title`, `data` JSON keyed by field key with the same stored format as the table, `source_hash`, `modified`; primary key `post_id, locale`). Shared fields are written to the collection table from any language.
+- **Request language.** `?locale=<code>` on any `leiho/v1` route sets the language of the request: reads and writes (`/schema`, `/save`, `/posts`, `/export`, `/content`) then use that language. `Leiho_I18n::in_locale( 'fr', $callback )` does the same in PHP.
+- **Paths.** Entries of a collection with a path get `/<code>` before their path in other languages (`/fr` for `/`). `/content?path=/fr/…` finds the language from the prefix.
+- **Partial translation.** Writing one sub-path (`points.1.title`) of a root field not translated yet starts from the original value with its text fields emptied (`text`, `richtext`, never `code`), so images, links and choices are kept and no original text is copied as a translation.
+- **Fallback.** The content API fills every blank value of a translation (field, list row, sub-field) with the original value.
+- **State.** `Leiho_I18n::status( $post_id, $locale )`: `missing` (nothing translated), `partial` (a text of the original has no translation, at any depth), `outdated` (the original changed since the translation was last written) or `complete`.
+- **Served items** in another language carry `locale` and `translations` (`{ code: path }`).
+- **Deleting** an entry permanently deletes its translations.
 
 ## 9. ACF import
 

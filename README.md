@@ -270,6 +270,26 @@ From PHP: `Leiho_Collections::import( $json )`, `Leiho_Collections::save_entry( 
 
 **Schema builder.** Leiho → **Collections** builds the same schema without writing JSON: collections and single pages, labels, URL pattern, built-in features, and a field editor with all 20 types and their options (choices, min / max, reference targets, sub-fields of lists and groups, block types of a blocks field), reordered by drag and drop or with the keyboard. Field keys are generated from the name and fixed once applied; only the name and the label change afterwards. **Review** runs the migration as a dry run and lists what will happen (new columns, conversions, archived columns) before anything is applied; validation errors point at the field concerned. Archived columns are listed with a purge button (type the collection id to confirm), and `leiho.schema.json` is one click away for import and export. Entries are then edited in Leiho → **Collections** (and in the visual editor when the collection has a URL). **+ New collection** at the bottom of the list of types starts a new one.
 
+### Languages
+
+A multilingual site doesn't need one entry per language. Declare the languages once, in Leiho → **Collections** → *Languages* or in the schema:
+
+```json
+{ "leiho": "collections", "version": 1, "i18n": { "default": "en", "locales": ["en", "fr", "de"] }, "collections": [ … ] }
+```
+
+- **Field by field.** Each root field is translatable or shared. Text, rich text, link, list, blocks and group are translatable by default; numbers, images, dates, choices and references are shared. Set `"localized": false` (or `true`) on a field, or use the *Translatable* switch in the builder.
+- **The default language doesn't move.** Its values stay in the collection's table; translations are stored in one `wp_leiho_l10n` table, one row per entry and language. Removing a language keeps what was written.
+- **Paths are prefixed**: `/services/audit` in English is `/fr/services/audit` in French (`/fr` for the home page).
+- **Fallback**: anything not translated yet, down to one row of a list or one sub-field, is served in the default language.
+- **Editing**: a language switch in the visual editor and the entry form, with each language's state (*not translated*, *partly translated*, *original changed*). The original shows as a hint in empty fields. **Translate with AI** fills the missing texts as edits to review.
+- **Agents**: `leiho/list-translations`, `leiho/get-translation`, `leiho/update-translation`, `leiho/translate-entry` (see AI below).
+- **Front end**: `?locale=fr` on the content API, or `loadLeihoContent( { url, locale: 'fr' } )`. Translated items carry `locale` and `translations` (`{ en: '/services/audit', fr: '/fr/services/audit' }`) for language switchers and `hreflang`.
+
+```ts
+const [ en, fr ] = await Promise.all( [ 'en', 'fr' ].map( ( locale ) => loadLeihoContent( { url, locale } ) ) );
+```
+
 ### Import from ACF
 
 An existing ACF site can move to Leiho Collections one content type at a time. In Leiho → **Collections**, an ACF type has **Import into Leiho** (administrators):
@@ -300,6 +320,7 @@ Leiho writes with the AI provider the site configured in **Settings → Connecto
 - **Alternative text** for image fields and in Media, when the provider reads images.
 - **New entry with AI** in Collections: a brief, structured JSON output matching the type's fields (text, rich text, lists, blocks), a preview, then a draft.
 - **Abilities** for external agents (MCP adapter, WordPress agents), category `leiho`: `leiho/get-brand-context`, `leiho/list-collections`, `leiho/get-entry`, `leiho/update-entry-fields` (drafts and pending entries only, validated like the editor, never publishes).
+- **Translation**: *Translate with AI* in the editor (missing texts, as edits to review), and for agents `leiho/list-translations`, `leiho/get-translation`, `leiho/update-translation` (fills empty translations of published entries, never replaces existing ones; anything on drafts) and `leiho/translate-entry` (the site's AI, `save` optional). REST: `POST leiho/v1/ai/translate` (`post_id`, `locale`, `mode`: `missing` or `all`).
 - REST: `leiho/v1/ai/status`, `ai/field`, `ai/alt`, `ai/entry`, `ai/entry/create`, `ai/brand`, `ai/collections/{type}` (nonce, capability, size limits, per-user rate limit). Filters: `leiho_ai_capability` (default `edit_posts`), `leiho_ai_rate_limit` (20 requests a minute), `leiho_ai_timeout` (60 s), `leiho_ai_status`, `leiho_ai_ability_statuses`. Each AI action is logged in the change log (who, field, action), never the prompt.
 
 ## Coming from Okno
