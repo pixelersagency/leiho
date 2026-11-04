@@ -8,6 +8,11 @@
  * Plusieurs posts peuvent cohabiter sur une page (la page elle-même + les
  * globaux type « Réglages du site » portés par le header/footer).
  *
+ * Mode formulaire (vue Collections) : tous les champs de l'entrée ouverte,
+ * sans aperçu, dans le volet de droite. app-content.js choisit l'entrée et
+ * passe par window.OknoEditor (open, close, isDirty, discard) ; l'éditeur
+ * annonce ses enregistrements par l'événement okno:entry-changed.
+ *
  * Vanilla JS + apis WordPress (wp.apiFetch, wp.media, wp.editor).
  */
 ( function () {
@@ -32,8 +37,8 @@
 		}
 	} )();
 
-	// Mode formulaire : tous les champs d'un contenu, sans aperçu du site
-	// (contenus sans page : pages légales, témoignages, réglages…).
+	// Mode formulaire (vue Collections) : tous les champs d'une entrée, sans
+	// aperçu du site, quel que soit son type.
 	var FORM = 'form' === cfg.mode;
 
 	var PER_PAGE = 50;
@@ -107,6 +112,10 @@
 		historyList: document.getElementById( 'okno-history-list' ),
 		saveState: document.getElementById( 'okno-save-state' ),
 		status: document.getElementById( 'okno-status' ),
+		openVisual: document.getElementById( 'okno-open-visual' ),
+		openSite: document.getElementById( 'okno-open-site' ),
+		historyToggle: document.getElementById( 'okno-history-toggle' ),
+		entryBack: document.getElementById( 'okno-entry-back' ),
 	};
 
 	/* ------------------------------------------------------------------ *
@@ -1319,6 +1328,8 @@
 					post.status = fresh.status;
 					/* translators: %s: content status (e.g. Published). */
 					toast( sprintf( __( 'Status: %s.', 'okno' ), STATUS_LABELS[ fresh.status ] || fresh.status ) );
+					renderEntryLinks();
+					emitChanged( post );
 				} )
 				.catch( function ( err ) {
 					toast( ( err && err.message ) || __( 'Couldn’t change the status.', 'okno' ), true );
@@ -1342,6 +1353,7 @@
 		state.selection = 'page';
 		els.title.textContent = '';
 		renderStatus();
+		renderEntryLinks();
 		els.tabStructure.disabled = true;
 		els.frame.hidden = true;
 		els.framePlaceholder.hidden = false;
@@ -1351,12 +1363,75 @@
 		switchTab( 'pages' );
 	}
 
+	/** URL de l'entrée dans la vue Collections. */
+	function collectionsUrl( post ) {
+		return cfg.collectionsUrl + '&type=' + encodeURIComponent( post.type ) + '&id=' + post.id;
+	}
+
+	function isFormType( type ) {
+		return ( cfg.formTypes || [] ).indexOf( type ) !== -1;
+	}
+
+	/**
+	 * Collections : « Éditeur visuel » (entrée avec une page sur le site) et
+	 * « Voir sur le site » (entrée publiée).
+	 */
+	function renderEntryLinks() {
+		if ( FORM && els.root ) {
+			els.root.classList.toggle( 'has-entry', !! state.post );
+		}
+		if ( els.historyToggle ) {
+			els.historyToggle.disabled = ! state.post;
+			if ( ! state.post ) {
+				toggleHistory( false );
+			}
+		}
+		var post = state.post;
+		var pages = !! post && ! isFormType( post.type );
+		if ( els.openVisual ) {
+			var visual = pages && !! post.preview_url && !! cfg.frontOrigin && !! cfg.editorUrl;
+			els.openVisual.hidden = ! visual;
+			if ( visual ) {
+				els.openVisual.href = cfg.editorUrl + '&post=' + post.id;
+				/* translators: %s: content title. */
+				els.openVisual.title = sprintf( __( 'Open “%s” in the visual editor', 'okno' ), post.title || '' );
+			}
+		}
+		if ( els.openSite ) {
+			var live = pages && !! post.front_url && 'publish' === post.status;
+			els.openSite.hidden = ! live;
+			if ( live ) {
+				els.openSite.href = post.front_url;
+			}
+		}
+	}
+
+	/** Collections : l'historique de l'entrée, à droite des champs. */
+	function toggleHistory( open ) {
+		if ( ! FORM || ! els.historyToggle ) {
+			return;
+		}
+		els.root.classList.toggle( 'is-history-open', open );
+		els.historyToggle.setAttribute( 'aria-pressed', open ? 'true' : 'false' );
+		if ( open ) {
+			switchTab( 'history' );
+		}
+	}
+
+	/** Prévient la vue Collections (liste des entrées) d'un changement. */
+	function emitChanged( post ) {
+		if ( ! FORM || ! post ) {
+			return;
+		}
+		document.dispatchEvent( new CustomEvent( 'okno:entry-changed', { detail: { id: post.id, type: post.type, status: post.status } } ) );
+	}
+
 	function openPost( post, options ) {
 		options = options || {};
-		// Contenu sans page sur le site (collection sans chemin) : formulaire.
-		if ( ! FORM && cfg.formUrl && ( cfg.formTypes || [] ).indexOf( post.type ) !== -1 ) {
+		// Contenu sans page sur le site (collection sans chemin) : sa collection.
+		if ( ! FORM && cfg.collectionsUrl && isFormType( post.type ) ) {
 			if ( confirmLoseChanges() ) {
-				window.location.href = cfg.formUrl + '&post=' + post.id;
+				window.location.href = collectionsUrl( post );
 			}
 			return;
 		}
@@ -1376,6 +1451,7 @@
 
 		els.title.textContent = post.title || '';
 		renderStatus();
+		renderEntryLinks();
 		els.tabStructure.disabled = false;
 		if ( els.tabHistory ) {
 			els.tabHistory.disabled = false;
@@ -1399,11 +1475,17 @@
 				clearDraft( post.id );
 			}
 
+			if ( state.post !== post ) {
+				return; // Une autre entrée a été ouverte entre-temps.
+			}
 			resetHistory();
 			renderStructure();
 			renderInspector();
 			if ( FORM ) {
 				document.title = ( post.title || __( 'Edit entry', 'okno' ) ) + ' ‹ Okno';
+				if ( els.historyList && ! els.historyList.hidden ) {
+					renderHistory();
+				}
 				if ( state.pendingField ) {
 					var target = state.pendingField;
 					state.pendingField = '';
@@ -1968,14 +2050,16 @@
 		if ( ! state.post ) {
 			var empty = document.createElement( 'div' );
 			empty.className = 'okno-panel-empty';
-			empty.textContent = FORM ? __( 'Pick a content in Content.', 'okno' ) : __( 'Pick a page in the Pages panel.', 'okno' );
-			if ( FORM && cfg.contentUrl ) {
-				var back = document.createElement( 'a' );
-				back.className = 'okno-btn okno-btn--quiet';
-				back.href = cfg.contentUrl;
-				back.textContent = __( 'Go to Content', 'okno' );
-				empty.appendChild( document.createElement( 'br' ) );
-				empty.appendChild( back );
+			if ( FORM ) {
+				empty.classList.add( 'okno-panel-empty--entry' );
+				var heading = document.createElement( 'strong' );
+				heading.textContent = __( 'Select an entry', 'okno' );
+				var hint = document.createElement( 'span' );
+				hint.textContent = __( 'Pick an entry in the list to edit its fields here.', 'okno' );
+				empty.appendChild( heading );
+				empty.appendChild( hint );
+			} else {
+				empty.textContent = __( 'Pick a page in the Pages panel.', 'okno' );
 			}
 			els.panel.appendChild( empty );
 			return;
@@ -3321,6 +3405,9 @@
 				if ( ! isDirty() ) {
 					clearDraft( state.post.id );
 				}
+				if ( totalSaved > 0 ) {
+					emitChanged( state.post );
+				}
 
 				if ( FORM ) {
 					state.structureStale = false;
@@ -3809,6 +3896,10 @@
 		if ( ! mod ) {
 			return;
 		}
+		// Collections : raccourcis inactifs pendant l'édition des champs du schéma.
+		if ( FORM && els.root.classList.contains( 'is-fields' ) ) {
+			return;
+		}
 		var key = event.key.toLowerCase();
 		if ( 's' === key ) {
 			event.preventDefault();
@@ -3901,19 +3992,67 @@
 		} );
 	}
 
+	if ( els.historyToggle ) {
+		els.historyToggle.addEventListener( 'click', function () {
+			toggleHistory( ! els.root.classList.contains( 'is-history-open' ) );
+		} );
+	}
+
 	setButtons();
 	renderInspector();
+	renderEntryLinks();
 	if ( FORM ) {
-		if ( cfg.initialPost ) {
-			apiFetch( { path: '/okno/v1/posts/' + cfg.initialPost } )
-				.then( openPost )
-				.catch( function () {
-					els.title.textContent = '';
-					toast( __( 'This content no longer exists or you’re not allowed to edit it.', 'okno' ), true );
+		// L'entrée est ouverte par la vue Collections (app-content.js).
+		els.title.textContent = '';
+		window.OknoEditor = {
+			/** Ouvre une entrée (objet de /posts) ; les changements non enregistrés sont perdus. */
+			open: function ( post ) {
+				return openPost( post ) || Promise.resolve();
+			},
+			/** Ouvre une entrée par son id. */
+			openId: function ( id ) {
+				return apiFetch( { path: '/okno/v1/posts/' + id } ).then( function ( post ) {
+					return openPost( post ).then( function () {
+						return post;
+					} );
 				} );
-		} else {
-			els.title.textContent = '';
-		}
+			},
+			close: closePost,
+			current: function () {
+				return state.post;
+			},
+			isDirty: isDirty,
+			/** Abandonne les changements de l'entrée ouverte (brouillon local compris). */
+			discard: function () {
+				if ( state.post ) {
+					clearTimeout( state.draftTimer );
+					clearDraft( state.post.id );
+				}
+				state.dirtyByPost = {};
+				state.structuralDirty = {};
+				setButtons();
+			},
+			/** Titre et statut frais de l'entrée ouverte (liste rechargée). */
+			refresh: function ( fresh ) {
+				if ( ! state.post || ! fresh || fresh.id !== state.post.id ) {
+					return;
+				}
+				[ 'title', 'status', 'preview_url', 'front_url', 'modified' ].forEach( function ( key ) {
+					if ( undefined !== fresh[ key ] ) {
+						state.post[ key ] = fresh[ key ];
+					}
+				} );
+				els.title.textContent = state.post.title || '';
+				if ( ! els.status.disabled ) {
+					renderStatus();
+				}
+				renderEntryLinks();
+			},
+			/** Recharge l'entrée ouverte (schéma modifié dans le constructeur). */
+			reload: function () {
+				return state.post ? openPost( state.post ) : Promise.resolve();
+			},
+		};
 	} else {
 		loadPosts();
 	}

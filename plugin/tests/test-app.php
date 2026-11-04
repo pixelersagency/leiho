@@ -67,6 +67,11 @@ function add_submenu_page( $parent, $title, $menu, $cap, $slug ) {
 	return 'admin_page_' . $slug;
 }
 function plugin_basename( $f ) { return 'okno/okno.php'; }
+function get_post_type( $id ) { return isset( $GLOBALS['post_types'][ $id ] ) ? $GLOBALS['post_types'][ $id ] : false; }
+final class Okno_Collections {
+	public static function post_types() { return array( 'temoignage', 'service' ); }
+}
+$GLOBALS['post_types'] = array( 12 => 'temoignage', 30 => 'service', 40 => 'page' );
 
 require OKNO_DIR . 'includes/admin/class-okno-icons.php';
 require OKNO_DIR . 'includes/admin/class-okno-app.php';
@@ -84,12 +89,13 @@ function check( $label, $cond, $dump = null ) {
 /* --- URLs et vues --- */
 
 check( 'accueil : admin.php?page=okno', 'https://wp.test/wp-admin/admin.php?page=okno' === Okno_App::url() );
-check( 'vue : &view=', 'https://wp.test/wp-admin/admin.php?page=okno&view=content' === Okno_App::url( 'content' ) );
-check( 'vue + paramètres', 'https://wp.test/wp-admin/admin.php?page=okno&view=form&post=12' === Okno_App::url( 'form', array( 'post' => 12 ) ) );
+check( 'vue : &view=', 'https://wp.test/wp-admin/admin.php?page=okno&view=collections' === Okno_App::url( 'collections' ) );
+check( 'vue + paramètres', 'https://wp.test/wp-admin/admin.php?page=okno&view=collections&type=service&id=12' === Okno_App::url( 'collections', array( 'type' => 'service', 'id' => 12 ) ) );
 
 check( 'vue inconnue : accueil', 'home' === Okno_App::current_view( 'nope' ) );
-check( 'contenus : edit_posts suffit', 'content' === Okno_App::current_view( 'content' ) );
-check( 'collections sans manage_options : accueil', 'home' === Okno_App::current_view( 'collections' ) );
+check( 'collections : edit_posts suffit (contenus de tous les types)', 'collections' === Okno_App::current_view( 'collections' ) );
+check( 'ancienne vue Contenus : plus une vue', 'home' === Okno_App::current_view( 'content' ) );
+check( 'ancienne vue Formulaire : plus une vue', 'home' === Okno_App::current_view( 'form' ) );
 check( 'réglages sans manage_options : accueil', 'home' === Okno_App::current_view( 'settings' ) );
 check( 'médias sans upload_files : accueil', 'home' === Okno_App::current_view( 'media' ) );
 $GLOBALS['caps'] = array( 'edit_posts' => true, 'manage_options' => true, 'upload_files' => true );
@@ -105,7 +111,27 @@ $nav = array_keys(
 		}
 	)
 );
-check( 'navigation : les sept vues demandées', array( 'home', 'editor', 'content', 'collections', 'media', 'deploys', 'settings' ) === $nav, $nav );
+check( 'navigation : six vues, plus d\'onglet Contenus', array( 'home', 'editor', 'collections', 'media', 'deploys', 'settings' ) === $nav, $nav );
+
+/* --- Contenus et Formulaire fondus dans Collections --- */
+
+$base = 'https://wp.test/wp-admin/admin.php?page=okno&view=collections';
+check( 'view=content → collections', $base === Okno_App::merged_url( 'content', array( 'page' => 'okno', 'view' => 'content' ) ) );
+check( 'view=content, filtres gardés', $base . '&type=service&status=draft&s=plombier' === Okno_App::merged_url( 'content', array( 'type' => 'service', 'status' => 'draft', 's' => 'plombier' ) ), Okno_App::merged_url( 'content', array( 'type' => 'service', 'status' => 'draft', 's' => 'plombier' ) ) );
+check( 'view=content&new=1 → création', $base . '&new=1' === Okno_App::merged_url( 'content', array( 'new' => '1' ) ) );
+check( 'view=form&post=12 → type et entrée', $base . '&type=temoignage&id=12' === Okno_App::merged_url( 'form', array( 'post' => '12' ), 'temoignage' ) );
+check( 'view=form, champ du journal gardé', $base . '&type=temoignage&id=12&field=sections.0.title' === Okno_App::merged_url( 'form', array( 'post' => '12', 'field' => 'sections.0.title' ), 'temoignage' ), Okno_App::merged_url( 'form', array( 'post' => '12', 'field' => 'sections.0.title' ), 'temoignage' ) );
+check( 'view=form sans contenu → collections', $base === Okno_App::merged_url( 'form', array() ) );
+check( 'paramètres bizarres ignorés', $base === Okno_App::merged_url( 'content', array( 'type' => array( 'x' ), 'post' => 'abc' ) ) );
+check( 'autre vue : rien', null === Okno_App::merged_url( 'media', array() ) );
+
+/* --- Où éditer un contenu --- */
+
+$GLOBALS['settings']['url_patterns'] = array( 'service' => '/services/{slug}' );
+check( 'collection sans URL : son entrée dans Collections', $base . '&type=temoignage&id=12' === Okno_Admin::edit_url( 12 ), Okno_Admin::edit_url( 12 ) );
+check( 'collection avec URL : éditeur visuel', 'https://wp.test/wp-admin/admin.php?page=okno&view=editor&post=30' === Okno_Admin::edit_url( 30 ) );
+check( 'page : éditeur visuel', 'https://wp.test/wp-admin/admin.php?page=okno&view=editor&post=40' === Okno_Admin::edit_url( 40 ) );
+$GLOBALS['settings']['url_patterns'] = array();
 
 /* --- Anciennes pages --- */
 

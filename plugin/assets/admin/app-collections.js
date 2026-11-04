@@ -1,5 +1,10 @@
 /**
- * Okno — vue Collections : constructeur de schéma.
+ * Okno — vue Collections : constructeur de schéma (onglet « Champs » d'une
+ * collection Okno, administrateurs seulement).
+ *
+ * Monté dans #okno-builder par app-content.js, qui le pilote par
+ * window.OknoBuilder (show, showNew, confirmLeave, import / export) : la
+ * liste des collections est celle du volet de gauche de la vue.
  *
  * Interface posée sur l'API REST okno/v1/collections (voir
  * docs/collections-spec.md) : liste des collections et singletons, édition
@@ -18,7 +23,8 @@
 	var App = window.OknoApp;
 	var __ = wp.i18n.__, _n = wp.i18n._n, sprintf = wp.i18n.sprintf;
 
-	if ( ! App || ! App.view || 'collections' !== App.view.dataset.view ) {
+	var host = document.getElementById( 'okno-builder' );
+	if ( ! App || ! host ) {
 		return;
 	}
 
@@ -71,9 +77,18 @@
 
 	var state = {
 		items: [], // Réponses GET /collections : { collection, table, columns, archived, entry }.
+		loaded: null, // Promesse du premier chargement.
 		current: null, // { isNew, item, draft, errors: [] }.
 		dirty: false,
 		busy: false,
+	};
+
+	// Branchements de la vue Collections (app-content.js).
+	var hooks = {
+		headTools: function () {
+			return null;
+		},
+		onSaved: function () {},
 	};
 
 	var uidCount = 0;
@@ -140,39 +155,16 @@
 	}
 
 	/* ------------------------------------------------------------------ *
-	 * Squelette de la vue : trois volets
+	 * Squelette : champs (milieu) et réglages (droite)
 	 * ------------------------------------------------------------------ */
 
 	var importInput = h( 'input', { type: 'file', accept: 'application/json,.json', hidden: true } );
-	var listBody = h( 'div', { class: 'okno-pane__body' } );
-	var listEl = h( 'nav', { class: 'okno-pane okno-pane--nav okno-builder__list', 'aria-label': __( 'Collections', 'okno' ) }, [
-		h( 'div', { class: 'okno-pane__head' }, [
-			h( 'h1', { class: 'okno-pane__title', text: __( 'Collections', 'okno' ) } ),
-			h( 'div', { class: 'okno-pane__tools' }, [
-				h( 'button', { type: 'button', class: 'okno-icon-btn', title: __( 'Export', 'okno' ), 'aria-label': __( 'Export', 'okno' ), onClick: exportSchema }, icon( 'download' ) ),
-				h( 'button', { type: 'button', class: 'okno-icon-btn', title: __( 'Import', 'okno' ), 'aria-label': __( 'Import', 'okno' ), onClick: function () {
-					if ( confirmLeave() ) {
-						importInput.click();
-					}
-				} }, icon( 'upload' ) ),
-				h( 'button', { type: 'button', class: 'okno-icon-btn', title: __( 'New collection', 'okno' ), 'aria-label': __( 'New collection', 'okno' ), onClick: function () {
-					if ( confirmLeave() ) {
-						openNew();
-					}
-				} }, icon( 'plus' ) ),
-				importInput,
-			] ),
-		] ),
-		listBody,
-	] );
 	// Volets du milieu (champs) et de droite (réglages), refaits à chaque rendu.
 	var editorEl = h( 'div', { class: 'okno-builder__editor', 'aria-live': 'off' } );
 	var applyBtn = null;
 	var dirtyNote = null;
 
-	App.view.classList.add( 'okno-panes' );
-	App.clear( App.view );
-	App.append( App.view, [ listEl, editorEl ] );
+	App.append( App.clear( host ), [ editorEl, importInput ] );
 
 	importInput.addEventListener( 'change', function () {
 		var file = importInput.files && importInput.files[ 0 ];
@@ -183,104 +175,50 @@
 	} );
 
 	/* ------------------------------------------------------------------ *
-	 * Chargement et liste
+	 * Chargement
 	 * ------------------------------------------------------------------ */
 
-	function load( selectId ) {
-		return App.api( { path: '/okno/v1/collections' } )
+	function load() {
+		state.loaded = App.api( { path: '/okno/v1/collections' } )
 			.then( function ( body ) {
 				state.items = body.collections || [];
-				renderList();
-				var wanted = selectId || new URLSearchParams( window.location.search ).get( 'collection' );
-				var item = state.items.find( function ( i ) {
-					return i.collection.id === wanted;
-				} );
-				if ( item ) {
-					open( item );
-				} else if ( ! state.current ) {
-					renderWelcome();
-				}
+				return state.items;
 			} )
 			.catch( function ( err ) {
+				state.loaded = null;
 				App.clear( editorEl ).appendChild( h( 'p', { class: 'okno-list-empty', text: App.errorMessage( err, __( 'Couldn’t load the collections.', 'okno' ) ) } ) );
+				throw err;
 			} );
+		return state.loaded;
 	}
 
-	function renderList() {
-		App.clear( listBody );
-		var groups = [
-			{ kind: 'collection', title: __( 'Collections', 'okno' ) },
-			{ kind: 'singleton', title: __( 'Single pages', 'okno' ) },
-		];
-
-		groups.forEach( function ( group ) {
-			var items = state.items.filter( function ( i ) {
-				return group.kind === i.collection.kind;
+	/** Collection id ouverte dans le constructeur (true si elle existe). */
+	function show( id ) {
+		return ( state.loaded || load() ).then( function () {
+			var item = state.items.find( function ( i ) {
+				return i.collection.id === id;
 			} );
-			listBody.appendChild( h( 'h2', { class: 'okno-group-label', text: group.title } ) );
-			if ( ! items.length ) {
-				listBody.appendChild( h( 'p', { class: 'okno-group-label okno-builder__none', text: __( 'None yet.', 'okno' ) } ) );
-				return;
+			if ( ! item ) {
+				renderMissing();
+				return false;
 			}
-			listBody.appendChild(
-				h(
-					'ul',
-					{ class: 'okno-rows' },
-					items.map( function ( item ) {
-						var c = item.collection;
-						var active = state.current && ! state.current.isNew && state.current.item.collection.id === c.id;
-						return h( 'li', {}, h( 'a', {
-							href: cfg.urls.collections + '&collection=' + c.id,
-							class: 'okno-coll' + ( active ? ' is-active' : '' ),
-							'aria-current': active ? 'page' : null,
-							/* translators: 1: collection label, 2: number of fields. */
-							'aria-label': sprintf( __( '%1$s, %2$s', 'okno' ), c.label, sprintf( _n( '%d field', '%d fields', c.fields.length, 'okno' ), c.fields.length ) ),
-							onClick: function ( event ) {
-								event.preventDefault();
-								if ( confirmLeave() ) {
-									open( item );
-								}
-							},
-						}, [
-							h( 'span', { class: 'okno-coll__icon okno-coll__icon--' + c.kind }, icon( 'singleton' === c.kind ? 'page' : 'database', 15 ) ),
-							h( 'span', { class: 'okno-coll__name', text: c.label } ),
-							item.archived && item.archived.length ? h( 'span', { class: 'okno-pill okno-pill--warn', title: __( 'Archived columns', 'okno' ), text: String( item.archived.length ) } ) : null,
-							h( 'span', { class: 'okno-coll__count', 'aria-hidden': 'true', text: String( c.fields.length ) } ),
-						] ) );
-					} )
-				)
-			);
+			if ( ! state.current || state.current.isNew || state.current.item.collection.id !== id ) {
+				open( item );
+			}
+			return true;
 		} );
-
-		if ( state.current && state.current.isNew ) {
-			listBody.appendChild( h( 'ul', { class: 'okno-rows' }, h( 'li', {}, h( 'span', { class: 'okno-coll is-active', 'aria-current': 'true' }, [
-				h( 'span', { class: 'okno-coll__icon okno-coll__icon--collection' }, icon( 'plus', 15 ) ),
-				h( 'span', { class: 'okno-coll__name', text: state.current.draft.label || __( 'New collection', 'okno' ) } ),
-			] ) ) ) );
-		}
 	}
 
-	function renderWelcome() {
+	function renderMissing() {
 		state.current = null;
 		state.dirty = false;
 		App.clear( editorEl ).appendChild(
 			h( 'section', { class: 'okno-pane okno-pane--detail' }, h( 'div', { class: 'okno-detail__body' }, h( 'div', { class: 'okno-empty-state' }, [
 				h( 'span', { class: 'okno-empty-state__icon' }, icon( 'database', 22 ) ),
-				h( 'h3', { text: state.items.length ? __( 'Pick a collection on the left', 'okno' ) : __( 'Define your first collection', 'okno' ) } ),
-				h( 'p', { text: __( 'A collection is a content type with many entries (services, testimonials, team members). A single page has exactly one entry (home, contact, legal notice, site settings).', 'okno' ) } ),
-				h( 'button', { type: 'button', class: 'okno-btn', onClick: openNew }, [ icon( 'plus' ), __( 'New collection', 'okno' ) ] ),
+				h( 'h3', { text: __( 'This collection doesn’t exist anymore', 'okno' ) } ),
+				h( 'p', { text: __( 'It may have been removed or renamed. Reload the page to see the current collections.', 'okno' ) } ),
 			] ) ) )
 		);
-	}
-
-	function setUrl( id ) {
-		var url = new URL( window.location.href );
-		if ( id ) {
-			url.searchParams.set( 'collection', id );
-		} else {
-			url.searchParams.delete( 'collection' );
-		}
-		window.history.replaceState( null, '', url.toString() );
 	}
 
 	function open( item ) {
@@ -288,8 +226,6 @@
 		prepare( draft.fields );
 		state.current = { isNew: false, item: item, draft: draft, errors: [], selected: 'general' };
 		state.dirty = false;
-		setUrl( item.collection.id );
-		renderList();
 		renderEditor();
 	}
 
@@ -303,14 +239,43 @@
 			selected: 'general',
 		};
 		state.dirty = false;
-		setUrl( '' );
-		renderList();
 		renderEditor();
 		var first = editorEl.querySelector( '.okno-pane--detail input' );
 		if ( first ) {
 			first.focus();
 		}
 	}
+
+	/** Après création, application, suppression ou import : la vue se recharge. */
+	function done( id ) {
+		state.dirty = false;
+		hooks.onSaved( id || '' );
+	}
+
+	window.OknoBuilder = {
+		setHooks: function ( next ) {
+			Object.keys( next || {} ).forEach( function ( k ) {
+				hooks[ k ] = next[ k ];
+			} );
+		},
+		show: show,
+		showNew: openNew,
+		isDirty: function () {
+			return state.dirty;
+		},
+		confirmLeave: confirmLeave,
+		/** Oublie les changements non appliqués (sortie confirmée). */
+		discard: function () {
+			state.dirty = false;
+			state.current = null;
+		},
+		exportSchema: exportSchema,
+		importSchema: function () {
+			if ( confirmLeave() ) {
+				importInput.click();
+			}
+		},
+	};
 
 	/* ------------------------------------------------------------------ *
 	 * Éditeur d'une collection : champs (milieu) et réglages (droite)
@@ -375,28 +340,22 @@
 		var fieldsPane = h( 'section', { class: 'okno-pane okno-pane--list okno-builder__fields', 'aria-label': __( 'Fields', 'okno' ) }, [
 			h( 'div', { class: 'okno-pane__head' }, [
 				h( 'h2', { class: 'okno-pane__title', text: title } ),
-				h( 'div', { class: 'okno-pane__tools' }, h( 'button', { type: 'button', class: 'okno-icon-btn', title: __( 'Add a field', 'okno' ), 'aria-label': __( 'Add a field', 'okno' ), onClick: function ( event ) {
-					pickType( event.currentTarget ).then( function ( type ) {
-						if ( type ) {
-							addField( d.fields, type );
-						}
-					} );
-				} }, icon( 'plus' ) ) ),
+				h( 'div', { class: 'okno-pane__tools' }, [
+					cur.isNew ? null : hooks.headTools(),
+					h( 'button', { type: 'button', class: 'okno-icon-btn', title: __( 'Add a field', 'okno' ), 'aria-label': __( 'Add a field', 'okno' ), onClick: function ( event ) {
+						pickType( event.currentTarget ).then( function ( type ) {
+							if ( type ) {
+								addField( d.fields, type );
+							}
+						} );
+					} }, icon( 'plus' ) ),
+				] ),
 			] ),
 			fieldsBody,
 		] );
 
 		/* Volet de droite : réglages de la sélection. */
-		var headActions = [ dirtyNote ];
-		if ( ! cur.isNew ) {
-			var entryLink = entryUrl( cur.item );
-			if ( entryLink ) {
-				headActions.push( h( 'a', { class: 'okno-btn okno-btn--quiet', href: entryLink }, [ icon( 'form' ), __( 'Edit the content', 'okno' ) ] ) );
-			} else {
-				headActions.push( h( 'a', { class: 'okno-btn okno-btn--quiet', href: cfg.urls.content + '&type=' + d.id }, [ icon( 'page' ), __( 'Entries', 'okno' ) ] ) );
-			}
-		}
-		headActions.push( applyBtn );
+		var headActions = [ dirtyNote, applyBtn ];
 
 		var detailTitle = sel ? sel.field.label || sel.field.name : __( 'General', 'okno' );
 		var head = h( 'div', { class: 'okno-detail__head' }, [
@@ -451,14 +410,6 @@
 	function typeAbbr( type ) {
 		var label = ( TYPE_INDEX[ type ] || { label: type } ).label;
 		return label.slice( 0, 2 );
-	}
-
-	function entryUrl( item ) {
-		if ( ! item || ! item.entry ) {
-			return '';
-		}
-		var hasPath = '' !== ( item.collection.path || '' );
-		return ( hasPath && cfg.frontUrl ? cfg.urls.editor : cfg.urls.form ) + '&post=' + item.entry;
 	}
 
 	function field( labelText, control, help, id ) {
@@ -552,7 +503,7 @@
 				h( 'div', { class: 'okno-setting' + ( pathErrors.length ? ' has-error' : '' ) }, [
 					h( 'label', { class: 'okno-label', for: pathId, text: __( 'URL on the site', 'okno' ) } ),
 					path,
-					h( 'p', { class: 'okno-help', text: __( 'Where an entry is shown on the site, with {slug} or {id}. Leave empty for content without a page (testimonials, settings): it is then edited in a form.', 'okno' ) } ),
+					h( 'p', { class: 'okno-help', text: __( 'Where an entry is shown on the site, with {slug} or {id}. Leave empty for content without a page (testimonials, settings): its entries are then edited in Collections only, without the visual editor.', 'okno' ) } ),
 					pathErrors.map( errorLine ),
 				] ),
 				kinds,
@@ -1477,7 +1428,10 @@
 					var count = ( body.dropped || [] ).length;
 					/* translators: %d: number of columns. */
 					App.toast( sprintf( _n( '%d column purged.', '%d columns purged.', count, 'okno' ), count ) );
-					return load( id );
+					state.current = null;
+					return load().then( function () {
+						return show( id );
+					} );
 				} )
 				.catch( function ( err ) {
 					App.toast( App.errorMessage( err ), true );
@@ -1707,8 +1661,7 @@
 				} );
 				App.toast( cur.isNew ? __( 'Collection created.', 'okno' ) : __( 'Changes applied.', 'okno' ) );
 				App.notifyChanged();
-				state.current = null;
-				return load( id );
+				done( id );
 			} )
 			.catch( function ( err ) {
 				showErrors( err );
@@ -1732,11 +1685,9 @@
 			App.api( { path: '/okno/v1/collections/' + encodeURIComponent( c.id ), method: 'DELETE' } )
 				.then( function () {
 					App.toast( __( 'Collection removed. Its data is kept.', 'okno' ) );
-					state.dirty = false;
 					state.current = null;
-					setUrl( '' );
 					App.notifyChanged();
-					return load();
+					done( '' );
 				} )
 				.catch( function ( err ) {
 					App.toast( App.errorMessage( err ), true );
@@ -1803,10 +1754,9 @@
 										.then( function () {
 											close();
 											App.toast( __( 'Schema imported.', 'okno' ) );
-											state.dirty = false;
 											state.current = null;
 											App.notifyChanged();
-											return load();
+											done( '' );
 										} )
 										.catch( function ( err ) {
 											btn.disabled = false;
@@ -1862,5 +1812,4 @@
 		} );
 	}
 
-	load();
 } )();

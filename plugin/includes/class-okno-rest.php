@@ -39,7 +39,7 @@ class Okno_Rest {
 							'type'    => 'string',
 							'default' => '',
 						),
-						// Filtres de la vue Contenus (facultatifs : l'éditeur ne les envoie pas).
+						// Filtres de la vue Collections (facultatifs : l'éditeur ne les envoie pas).
 						'type'     => array(
 							'type'    => 'string',
 							'default' => '',
@@ -50,7 +50,7 @@ class Okno_Rest {
 						),
 						'orderby'  => array(
 							'type'    => 'string',
-							'enum'    => array( 'title', 'modified' ),
+							'enum'    => array( 'title', 'modified', 'date' ),
 							'default' => 'title',
 						),
 					),
@@ -269,7 +269,8 @@ class Okno_Rest {
 		}
 
 		$statuses = self::query_statuses( (string) $request->get_param( 'status' ) );
-		$by_date  = 'modified' === $request->get_param( 'orderby' );
+		$orderby  = (string) $request->get_param( 'orderby' );
+		$orderby  = in_array( $orderby, array( 'modified', 'date' ), true ) ? $orderby : 'title';
 
 		$query = new WP_Query(
 			array(
@@ -278,8 +279,8 @@ class Okno_Rest {
 				'posts_per_page' => $per_page,
 				'paged'          => $page,
 				's'              => $search,
-				'orderby'        => $by_date ? 'modified' : 'title',
-				'order'          => $by_date ? 'DESC' : 'ASC',
+				'orderby'        => $orderby,
+				'order'          => 'title' === $orderby ? 'ASC' : 'DESC',
 			)
 		);
 

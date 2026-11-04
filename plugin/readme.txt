@@ -45,12 +45,13 @@ Okno removes its own settings, tokens, history table and internal post meta, and
 
 == Credits ==
 
-Parts of the Okno app's layout and styles (three-pane Content and Collections views, list rows, field settings, dialogs) are derived from Stacki (https://github.com/flowtricks/stacki), Copyright (c) 2026 Timothy Ricks, MIT License. The full license text ships in licenses/stacki-MIT.txt.
+Parts of the Okno app's layout and styles (three-pane Collections view, list rows, field settings, dialogs) are derived from Stacki (https://github.com/flowtricks/stacki), Copyright (c) 2026 Timothy Ricks, MIT License. The full license text ships in licenses/stacki-MIT.txt.
 
 == Changelog ==
 
 = 1.0.0-beta.8 =
 * "Check again" shows a newly published Okno version right away. The home screen is centred.
+* Content and Collections are merged into one Collections view: content types on the left, entries in the middle, the selected entry edited in place on the right (Fields tab for the schema of Okno collections). Old Content and form links redirect there.
 
 = 1.0.0-beta.7 =
 * Okno opens full screen and becomes the back office: its own navigation, Content, Media, Collections builder and entry form, in a dense desktop-style interface (dark by default).

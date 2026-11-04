@@ -150,10 +150,9 @@ class Okno_Dashboard {
 					<ul class="okno-rows">
 						<?php
 						$links = array(
-							array( 'content', array( 'new' => '1' ), 'plus', __( 'New content', 'okno' ), __( 'A page, an article or a collection entry.', 'okno' ), 'edit_posts' ),
-							array( 'content', array(), 'list', __( 'All content', 'okno' ), __( 'Search, filter, duplicate, restore.', 'okno' ), 'edit_posts' ),
+							array( 'collections', array( 'new' => '1' ), 'plus', __( 'New content', 'okno' ), __( 'A page, an article or a collection entry.', 'okno' ), 'edit_posts' ),
+							array( 'collections', array(), 'database', __( 'Collections', 'okno' ), __( 'All your content, by type: search, edit, duplicate, restore.', 'okno' ), 'edit_posts' ),
 							array( 'editor', array(), 'edit', __( 'Visual editor', 'okno' ), __( 'Edit your pages as visitors see them.', 'okno' ), 'edit_posts' ),
-							array( 'collections', array(), 'database', __( 'Collections', 'okno' ), __( 'Define your content types and their fields.', 'okno' ), Okno_App::views()['collections']['cap'] ),
 							array( 'media', array(), 'image', __( 'Media', 'okno' ), __( 'Images and files of the site.', 'okno' ), 'upload_files' ),
 						);
 						foreach ( $links as $link ) :

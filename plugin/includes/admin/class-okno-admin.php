@@ -117,15 +117,23 @@ class Okno_Admin {
 
 	/**
 	 * Où éditer un contenu dans Okno : l'éditeur visuel s'il a une page sur
-	 * le site, sinon le formulaire.
+	 * le site, sinon sa collection (entrée ouverte à droite).
 	 *
 	 * @param int $post_id Contenu.
 	 * @return string
 	 */
 	public static function edit_url( $post_id ) {
-		$type = get_post_type( $post_id );
-		$view = $type && in_array( $type, self::form_types(), true ) ? 'form' : 'editor';
-		return Okno_App::url( $view, array( 'post' => (int) $post_id ) );
+		$type = (string) get_post_type( $post_id );
+		if ( '' !== $type && in_array( $type, self::form_types(), true ) ) {
+			return Okno_App::url(
+				'collections',
+				array(
+					'type' => $type,
+					'id'   => (int) $post_id,
+				)
+			);
+		}
+		return Okno_App::url( 'editor', array( 'post' => (int) $post_id ) );
 	}
 
 	public function enqueue( $hook ) {
@@ -137,13 +145,20 @@ class Okno_Admin {
 		$view = Okno_App::current_view();
 		wp_enqueue_style( 'okno-app', OKNO_URL . 'assets/admin/app.css', array(), self::asset_version( 'assets/admin/app.css' ) );
 
-		if ( 'editor' === $view || 'form' === $view ) {
+		if ( 'editor' === $view || 'collections' === $view ) {
 			// L'éditeur gère lui-même la publication automatique.
-			$this->enqueue_editor( 'form' === $view ? 'form' : 'visual' );
+			$this->enqueue_editor( 'collections' === $view ? 'form' : 'visual' );
 			$this->enqueue_shell( $view );
-			if ( 'form' === $view ) {
-				// Volets types / entrées à gauche du formulaire.
-				wp_enqueue_script( 'okno-app-content', OKNO_URL . 'assets/admin/app-content.js', array( 'okno-app', 'wp-api-fetch', 'wp-i18n' ), self::asset_version( 'assets/admin/app-content.js' ), true );
+			if ( 'collections' === $view ) {
+				// Constructeur de champs des collections Okno (administrateurs).
+				$deps = array( 'okno-app', 'okno-editor', 'wp-api-fetch', 'wp-i18n' );
+				if ( Okno_Collections_Rest::can_manage() ) {
+					wp_enqueue_script( 'okno-app-collections', OKNO_URL . 'assets/admin/app-collections.js', array( 'okno-app', 'wp-api-fetch', 'wp-i18n' ), self::asset_version( 'assets/admin/app-collections.js' ), true );
+					wp_set_script_translations( 'okno-app-collections', 'okno', OKNO_DIR . 'languages' );
+					$deps[] = 'okno-app-collections';
+				}
+				// Volets types / entrées, entrée éditée à droite.
+				wp_enqueue_script( 'okno-app-content', OKNO_URL . 'assets/admin/app-content.js', $deps, self::asset_version( 'assets/admin/app-content.js' ), true );
 				wp_set_script_translations( 'okno-app-content', 'okno', OKNO_DIR . 'languages' );
 			}
 			return;
@@ -273,12 +288,11 @@ class Okno_Admin {
 			'postTypes'            => $post_types,
 			'frontOrigin'          => $mapper->preview_origin(),
 			'wpOrigin'             => self::wp_origin(),
-			'initialPost'          => isset( $_GET['post'] ) ? absint( $_GET['post'] ) : 0,
+			'initialPost'          => isset( $_GET['post'] ) ? absint( $_GET['post'] ) : 0, // Collections : app-content.js ouvre l'entrée (id).
 			'initialField'         => isset( $_GET['field'] ) ? sanitize_text_field( wp_unslash( $_GET['field'] ) ) : '',
 			'mode'                 => $mode,
 			'homeUrl'              => Okno_App::url(),
-			'contentUrl'           => Okno_App::url( 'content' ),
-			'formUrl'              => Okno_App::url( 'form' ),
+			'collectionsUrl'       => Okno_App::url( 'collections' ),
 			'editorUrl'            => Okno_App::url( 'editor' ),
 			'startUrl'             => Okno_App::url( 'start' ),
 			'settingsUrl'          => Okno_App::url( 'settings' ),
@@ -329,16 +343,17 @@ class Okno_Admin {
 	 * ------------------------------------------------------------------- */
 
 	/**
-	 * Éditeur : « visual » (aperçu du site + panneau) ou « form » (tous les
-	 * champs d'un contenu, sans aperçu : contenus sans page sur le site).
+	 * Éditeur : « visual » (aperçu du site + panneau) ou « collections »
+	 * (vue Collections : types et entrées à gauche, tous les champs de
+	 * l'entrée ouverte à droite, sans aperçu, et le constructeur de champs).
 	 *
-	 * @param string $mode visual | form.
+	 * @param string $mode visual | collections.
 	 * @return void
 	 */
 	public function render_editor_page( $mode = 'visual' ) {
 		$settings   = Okno_Plugin::settings();
 		$configured = '' !== $settings['front_url'];
-		$form       = 'form' === $mode;
+		$form       = 'collections' === $mode;
 
 		if ( ! $configured && ! $form ) {
 			?>
@@ -355,30 +370,81 @@ class Okno_Admin {
 			<?php
 			return;
 		}
+
+		if ( ! $form ) {
+			?>
+			<div id="okno-editor" class="okno-editor" data-mode="visual">
+				<?php $this->render_toolbar( false ); ?>
+				<div class="okno-main">
+					<?php $this->render_sidebar(); ?>
+					<?php $this->render_stage(); ?>
+					<aside class="okno-panel" id="okno-panel" aria-label="<?php esc_attr_e( 'Selection fields', 'okno' ); ?>"></aside>
+				</div>
+			</div>
+			<?php
+			return;
+		}
+
+		// phpcs:disable WordPress.Security.NonceVerification.Recommended -- Navigation.
+		$okno_type = isset( $_GET['type'] ) ? sanitize_key( wp_unslash( $_GET['type'] ) ) : '';
+		$okno_id   = isset( $_GET['id'] ) ? absint( $_GET['id'] ) : 0;
+		// phpcs:enable
+		if ( $okno_id && '' === $okno_type ) {
+			$okno_type = (string) get_post_type( $okno_id );
+		}
 		?>
-		<div id="okno-editor" class="okno-editor" data-mode="<?php echo esc_attr( $form ? 'form' : 'visual' ); ?>">
-			<header class="okno-toolbar" role="toolbar" aria-label="<?php esc_attr_e( 'Editor actions', 'okno' ); ?>">
-				<div class="okno-toolbar-start">
-					<?php if ( $form ) : ?>
-						<a class="okno-exit" href="<?php echo esc_url( Okno_App::url( 'content' ) ); ?>" title="<?php esc_attr_e( 'Back to content', 'okno' ); ?>" aria-label="<?php esc_attr_e( 'Back to content', 'okno' ); ?>">
-							<?php Okno_Icons::render( 'back', 16 ); ?>
-						</a>
-					<?php else : ?>
+		<div id="okno-editor" class="okno-editor okno-editor--collections" data-mode="form">
+			<div class="okno-main">
+				<?php // Types et entrées (app-content.js). ?>
+				<div id="okno-form-browser" class="okno-form-browser" data-type="<?php echo esc_attr( $okno_type ); ?>" data-post="<?php echo esc_attr( $okno_id ); ?>"></div>
+				<section class="okno-entry" id="okno-entry" aria-label="<?php esc_attr_e( 'Entry', 'okno' ); ?>">
+					<?php $this->render_toolbar( true ); ?>
+					<div class="okno-entry__body">
+						<aside class="okno-panel" id="okno-panel" aria-label="<?php esc_attr_e( 'Entry fields', 'okno' ); ?>"></aside>
+						<?php $this->render_sidebar(); ?>
+					</div>
+					<?php $this->render_stage(); ?>
+				</section>
+				<?php // Champs d'une collection Okno (app-collections.js). ?>
+				<div id="okno-builder" class="okno-builder-host" hidden></div>
+			</div>
+		</div>
+		<?php
+	}
+
+	/**
+	 * Barre d'outils de l'éditeur. Dans Collections, elle coiffe le volet de
+	 * l'entrée : titre, statut, historique, ouverture dans l'éditeur visuel
+	 * ou sur le site, enregistrement.
+	 *
+	 * @param bool $form Vue Collections.
+	 * @return void
+	 */
+	private function render_toolbar( $form ) {
+		?>
+		<header class="okno-toolbar" role="toolbar" aria-label="<?php esc_attr_e( 'Editor actions', 'okno' ); ?>">
+			<div class="okno-toolbar-start">
+				<?php if ( $form ) : ?>
+					<button type="button" id="okno-entry-back" class="okno-icon-btn okno-entry-back" title="<?php esc_attr_e( 'Back to the entries', 'okno' ); ?>" aria-label="<?php esc_attr_e( 'Back to the entries', 'okno' ); ?>">
+						<?php Okno_Icons::render( 'back', 16 ); ?>
+					</button>
+				<?php else : ?>
 					<a class="okno-exit" href="<?php echo esc_url( Okno_App::url() ); ?>" title="<?php esc_attr_e( 'Back to Okno home', 'okno' ); ?>" aria-label="<?php esc_attr_e( 'Back to Okno home', 'okno' ); ?>">
 						<?php Okno_Icons::render( 'back', 16 ); ?>
 					</a>
-					<?php endif; ?>
 					<img class="okno-mark" src="<?php echo esc_url( OKNO_URL . 'assets/img/okno-mark.svg' ); ?>" alt="Okno" width="22" height="22">
-					<div class="okno-doc">
-						<span class="okno-doc-row">
-							<span id="okno-current-title" class="okno-current-title"><?php echo esc_html( $form ? __( 'Loading…', 'okno' ) : __( 'No page open', 'okno' ) ); ?></span>
-							<label class="screen-reader-text" for="okno-status"><?php esc_html_e( 'Status', 'okno' ); ?></label>
-							<select id="okno-status" class="okno-status-select" hidden></select>
-						</span>
-						<span id="okno-save-state" class="okno-save-state" aria-live="polite"></span>
-					</div>
+				<?php endif; ?>
+				<div class="okno-doc">
+					<span class="okno-doc-row">
+						<span id="okno-current-title" class="okno-current-title"><?php echo esc_html( $form ? '' : __( 'No page open', 'okno' ) ); ?></span>
+						<label class="screen-reader-text" for="okno-status"><?php esc_html_e( 'Status', 'okno' ); ?></label>
+						<select id="okno-status" class="okno-status-select" hidden></select>
+					</span>
+					<span id="okno-save-state" class="okno-save-state" aria-live="polite"></span>
 				</div>
+			</div>
 
+			<?php if ( ! $form ) : ?>
 				<div class="okno-toolbar-center">
 					<span class="okno-viewport-toggle" role="group" aria-label="<?php esc_attr_e( 'Preview width', 'okno' ); ?>">
 						<button type="button" class="okno-vw active" data-width="" title="<?php esc_attr_e( 'Desktop', 'okno' ); ?>" aria-label="<?php esc_attr_e( 'Desktop preview', 'okno' ); ?>"><?php Okno_Icons::render( 'desktop', 16 ); ?></button>
@@ -386,68 +452,87 @@ class Okno_Admin {
 						<button type="button" class="okno-vw" data-width="390" title="<?php esc_attr_e( 'Mobile', 'okno' ); ?>" aria-label="<?php esc_attr_e( 'Mobile preview', 'okno' ); ?>"><?php Okno_Icons::render( 'mobile', 16 ); ?></button>
 					</span>
 				</div>
+			<?php endif; ?>
 
-				<div class="okno-toolbar-end">
-					<span class="okno-history" role="group" aria-label="<?php esc_attr_e( 'Undo and redo', 'okno' ); ?>">
-						<button type="button" id="okno-undo" class="okno-icon-btn" title="<?php esc_attr_e( 'Undo (Ctrl+Z)', 'okno' ); ?>" aria-label="<?php esc_attr_e( 'Undo the last change', 'okno' ); ?>" disabled><?php Okno_Icons::render( 'undo', 16 ); ?></button>
-						<button type="button" id="okno-redo" class="okno-icon-btn" title="<?php esc_attr_e( 'Redo (Ctrl+Shift+Z)', 'okno' ); ?>" aria-label="<?php esc_attr_e( 'Redo the undone change', 'okno' ); ?>" disabled><?php Okno_Icons::render( 'redo', 16 ); ?></button>
-					</span>
-					<button type="button" id="okno-theme" class="okno-icon-btn" title="<?php esc_attr_e( 'Light or dark theme', 'okno' ); ?>" aria-label="<?php esc_attr_e( 'Switch to dark theme', 'okno' ); ?>" aria-pressed="false"><?php Okno_Icons::render( 'moon', 16 ); ?></button>
-					<span id="okno-deploy-banner" class="okno-deploy-banner" hidden></span>
-					<button type="button" id="okno-save" class="okno-btn okno-btn--quiet" disabled><?php esc_html_e( 'Save', 'okno' ); ?></button>
-					<button type="button" id="okno-publish" class="okno-btn" disabled><?php esc_html_e( 'Publish', 'okno' ); ?></button>
-				</div>
-			</header>
-
-			<div class="okno-main">
-				<?php
-				if ( $form ) :
-					// Types et entrées à gauche du formulaire (app-content.js).
-					// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Navigation.
-					$okno_post = isset( $_GET['post'] ) ? absint( $_GET['post'] ) : 0;
-					?>
-					<div id="okno-form-browser" class="okno-form-browser" data-post="<?php echo esc_attr( $okno_post ); ?>" data-type="<?php echo esc_attr( $okno_post ? (string) get_post_type( $okno_post ) : '' ); ?>"></div>
+			<div class="okno-toolbar-end">
+				<?php if ( $form ) : ?>
+					<a id="okno-open-visual" class="okno-btn okno-btn--quiet" href="#" hidden>
+						<?php Okno_Icons::render( 'edit', 14 ); ?>
+						<span><?php esc_html_e( 'Visual editor', 'okno' ); ?></span>
+					</a>
+					<a id="okno-open-site" class="okno-icon-btn" href="#" target="_blank" rel="noopener" title="<?php esc_attr_e( 'View on the site', 'okno' ); ?>" aria-label="<?php esc_attr_e( 'View on the site (new tab)', 'okno' ); ?>" hidden>
+						<?php Okno_Icons::render( 'external', 15 ); ?>
+					</a>
+					<button type="button" id="okno-history-toggle" class="okno-icon-btn" title="<?php esc_attr_e( 'History', 'okno' ); ?>" aria-label="<?php esc_attr_e( 'Show the history of this entry', 'okno' ); ?>" aria-pressed="false" aria-controls="okno-history-list" disabled>
+						<?php Okno_Icons::render( 'history', 16 ); ?>
+					</button>
 				<?php endif; ?>
-				<aside class="okno-sidebar" aria-label="<?php esc_attr_e( 'Site navigation', 'okno' ); ?>">
-					<div class="okno-sidebar-tabs">
-						<button type="button" id="okno-tab-pages" class="okno-sidebar-tab active">
-							<span><?php esc_html_e( 'Pages', 'okno' ); ?></span>
-						</button>
-						<button type="button" id="okno-tab-structure" class="okno-sidebar-tab" disabled>
-							<span><?php esc_html_e( 'Structure', 'okno' ); ?></span>
-						</button>
-						<button type="button" id="okno-tab-history" class="okno-sidebar-tab" disabled>
-							<span><?php esc_html_e( 'History', 'okno' ); ?></span>
-						</button>
-					</div>
-					<div id="okno-pages-list" class="okno-sidebar-body"></div>
-					<div id="okno-structure-tree" class="okno-sidebar-body" hidden></div>
-					<div id="okno-history-list" class="okno-sidebar-body" hidden></div>
-				</aside>
+				<span class="okno-history" role="group" aria-label="<?php esc_attr_e( 'Undo and redo', 'okno' ); ?>">
+					<button type="button" id="okno-undo" class="okno-icon-btn" title="<?php esc_attr_e( 'Undo (Ctrl+Z)', 'okno' ); ?>" aria-label="<?php esc_attr_e( 'Undo the last change', 'okno' ); ?>" disabled><?php Okno_Icons::render( 'undo', 16 ); ?></button>
+					<button type="button" id="okno-redo" class="okno-icon-btn" title="<?php esc_attr_e( 'Redo (Ctrl+Shift+Z)', 'okno' ); ?>" aria-label="<?php esc_attr_e( 'Redo the undone change', 'okno' ); ?>" disabled><?php Okno_Icons::render( 'redo', 16 ); ?></button>
+				</span>
+				<button type="button" id="okno-theme" class="okno-icon-btn" title="<?php esc_attr_e( 'Light or dark theme', 'okno' ); ?>" aria-label="<?php esc_attr_e( 'Switch to dark theme', 'okno' ); ?>" aria-pressed="false"><?php Okno_Icons::render( 'moon', 16 ); ?></button>
+				<span id="okno-deploy-banner" class="okno-deploy-banner" hidden></span>
+				<button type="button" id="okno-save" class="okno-btn okno-btn--quiet" disabled><?php esc_html_e( 'Save', 'okno' ); ?></button>
+				<button type="button" id="okno-publish" class="okno-btn" disabled><?php esc_html_e( 'Publish', 'okno' ); ?></button>
+			</div>
+		</header>
+		<?php
+	}
 
-				<div class="okno-stage">
-					<div class="okno-frame-wrap" id="okno-frame-wrap">
-						<div class="okno-frame-placeholder" id="okno-frame-placeholder">
-							<img src="<?php echo esc_url( OKNO_URL . 'assets/img/okno-mark.svg' ); ?>" alt="" width="36" height="36">
-							<p><?php esc_html_e( 'Pick a page on the left to show it here.', 'okno' ); ?></p>
-						</div>
-						<iframe id="okno-frame" title="<?php esc_attr_e( 'Site preview', 'okno' ); ?>" hidden></iframe>
+	/**
+	 * Barre latérale : pages, structure, historique (Collections : l'historique
+	 * seul, affiché à la demande à droite des champs).
+	 *
+	 * @return void
+	 */
+	private function render_sidebar() {
+		?>
+		<aside class="okno-sidebar" aria-label="<?php esc_attr_e( 'Site navigation', 'okno' ); ?>">
+			<div class="okno-sidebar-tabs">
+				<button type="button" id="okno-tab-pages" class="okno-sidebar-tab active">
+					<span><?php esc_html_e( 'Pages', 'okno' ); ?></span>
+				</button>
+				<button type="button" id="okno-tab-structure" class="okno-sidebar-tab" disabled>
+					<span><?php esc_html_e( 'Structure', 'okno' ); ?></span>
+				</button>
+				<button type="button" id="okno-tab-history" class="okno-sidebar-tab" disabled>
+					<span><?php esc_html_e( 'History', 'okno' ); ?></span>
+				</button>
+			</div>
+			<div id="okno-pages-list" class="okno-sidebar-body"></div>
+			<div id="okno-structure-tree" class="okno-sidebar-body" hidden></div>
+			<div id="okno-history-list" class="okno-sidebar-body" hidden></div>
+		</aside>
+		<?php
+	}
 
-						<div id="okno-frame-help" class="okno-frame-help" hidden>
-							<h2><?php esc_html_e( 'The site isn’t responding', 'okno' ); ?></h2>
-							<p><?php esc_html_e( 'The preview loaded, but the Okno bridge didn’t check in. Two possible causes:', 'okno' ); ?></p>
-							<ol>
-								<li><strong><?php esc_html_e( 'The site refuses to be displayed in wp-admin.', 'okno' ); ?></strong> <?php esc_html_e( 'Its frame-ancestors header must allow this address.', 'okno' ); ?></li>
-								<li><strong><?php esc_html_e( 'The bridge isn’t loaded on this page.', 'okno' ); ?></strong> <?php esc_html_e( 'Check the installation.', 'okno' ); ?></li>
-							</ol>
-							<?php if ( current_user_can( 'manage_options' ) ) : ?>
-								<a class="okno-btn" href="<?php echo esc_url( Okno_App::url( 'start' ) ); ?>"><?php esc_html_e( 'Test the connection', 'okno' ); ?></a>
-							<?php endif; ?>
-						</div>
-					</div>
+	/**
+	 * Aperçu du site (iframe) et ses messages d'aide.
+	 *
+	 * @return void
+	 */
+	private function render_stage() {
+		?>
+		<div class="okno-stage">
+			<div class="okno-frame-wrap" id="okno-frame-wrap">
+				<div class="okno-frame-placeholder" id="okno-frame-placeholder">
+					<img src="<?php echo esc_url( OKNO_URL . 'assets/img/okno-mark.svg' ); ?>" alt="" width="36" height="36">
+					<p><?php esc_html_e( 'Pick a page on the left to show it here.', 'okno' ); ?></p>
 				</div>
+				<iframe id="okno-frame" title="<?php esc_attr_e( 'Site preview', 'okno' ); ?>" hidden></iframe>
 
-				<aside class="okno-panel" id="okno-panel" aria-label="<?php esc_attr_e( 'Selection fields', 'okno' ); ?>"></aside>
+				<div id="okno-frame-help" class="okno-frame-help" hidden>
+					<h2><?php esc_html_e( 'The site isn’t responding', 'okno' ); ?></h2>
+					<p><?php esc_html_e( 'The preview loaded, but the Okno bridge didn’t check in. Two possible causes:', 'okno' ); ?></p>
+					<ol>
+						<li><strong><?php esc_html_e( 'The site refuses to be displayed in wp-admin.', 'okno' ); ?></strong> <?php esc_html_e( 'Its frame-ancestors header must allow this address.', 'okno' ); ?></li>
+						<li><strong><?php esc_html_e( 'The bridge isn’t loaded on this page.', 'okno' ); ?></strong> <?php esc_html_e( 'Check the installation.', 'okno' ); ?></li>
+					</ol>
+					<?php if ( current_user_can( 'manage_options' ) ) : ?>
+						<a class="okno-btn" href="<?php echo esc_url( Okno_App::url( 'start' ) ); ?>"><?php esc_html_e( 'Test the connection', 'okno' ); ?></a>
+					<?php endif; ?>
+				</div>
 			</div>
 		</div>
 		<?php

@@ -5,12 +5,16 @@ defined( 'ABSPATH' ) || exit;
  * Okno en application plein écran : une seule page wp-admin
  * (admin.php?page=okno) qui masque toute l'interface WordPress (menu, barre
  * d'admin, pied de page, notices des autres extensions) et affiche sa propre
- * navigation. Chaque écran est une « vue » : admin.php?page=okno&view=content.
+ * navigation. Chaque écran est une « vue » : admin.php?page=okno&view=media.
  *
  * Les vues Accueil, Démarrer, Réglages et Publications sont rendues en PHP
- * (Okno_Dashboard) ; Éditeur visuel et Formulaire réutilisent l'éditeur
- * (editor.js) ; Contenus, Collections et Médias sont des vues JavaScript
- * (assets/admin/app*.js) posées sur l'API REST.
+ * (Okno_Dashboard) ; Éditeur visuel et Collections réutilisent l'éditeur
+ * (editor.js, en mode formulaire pour Collections, avec les volets de
+ * app-content.js et le constructeur de app-collections.js) ; Médias est une
+ * vue JavaScript (assets/admin/app-media.js) posée sur l'API REST.
+ *
+ * Les anciennes vues Contenus (view=content) et Formulaire (view=form)
+ * redirigent vers Collections (voir merged_url()).
  */
 class Okno_App {
 
@@ -23,6 +27,9 @@ class Okno_App {
 		'okno-settings' => 'settings',
 		'okno-deploys'  => 'deploys',
 	);
+
+	/** Anciennes vues fondues dans Collections (liens, favoris, journal). */
+	const MERGED = array( 'content', 'form' );
 
 	/**
 	 * Crochets valables partout (wp-login.php compris, hors wp-admin).
@@ -53,22 +60,13 @@ class Okno_App {
 				'icon'  => 'edit',
 				'nav'   => true,
 			),
-			'content'     => array(
-				'label' => __( 'Content', 'okno' ),
-				'cap'   => 'edit_posts',
-				'icon'  => 'list',
-				'nav'   => true,
-			),
-			'form'        => array(
-				'label' => __( 'Edit entry', 'okno' ),
-				'cap'   => 'edit_posts',
-				'icon'  => 'list',
-				'nav'   => false,
-			),
+			// Une seule vue pour tous les contenus, quel que soit leur moteur
+			// (pages, articles, types ACF, collections Okno) : types à gauche,
+			// entrées au milieu, entrée éditée à droite. Le constructeur de
+			// champs, lui, reste réservé à okno_collections_capability.
 			'collections' => array(
 				'label' => __( 'Collections', 'okno' ),
-				/** This filter is documented in includes/collections/class-okno-collections-rest.php */
-				'cap'   => apply_filters( 'okno_collections_capability', 'manage_options' ),
+				'cap'   => 'edit_posts',
 				'icon'  => 'database',
 				'nav'   => true,
 			),
@@ -131,6 +129,45 @@ class Okno_App {
 			$query['view'] = $view;
 		}
 		return add_query_arg( array_merge( $query, $args ), admin_url( 'admin.php' ) );
+	}
+
+	/**
+	 * URL dans Collections d'une ancienne vue Contenus ou Formulaire, avec ses
+	 * filtres (type, statut, recherche, création) ou son entrée (post, champ).
+	 * Fonction pure : le type du contenu est passé par l'appelant.
+	 *
+	 * @param string $view      Ancienne vue (content, form).
+	 * @param array  $query     Paramètres de la requête.
+	 * @param string $post_type Type du contenu demandé (vue form), '' sinon.
+	 * @return string|null null si ce n'est pas une ancienne vue.
+	 */
+	public static function merged_url( $view, $query, $post_type = '' ) {
+		if ( ! in_array( $view, self::MERGED, true ) ) {
+			return null;
+		}
+		$query = (array) $query;
+		$args  = array();
+		foreach ( array( 'type', 'status', 's', 'new', 'field' ) as $key ) {
+			if ( isset( $query[ $key ] ) && is_scalar( $query[ $key ] ) && '' !== (string) $query[ $key ] ) {
+				// Recherche et chemin de champ (sections.0.title) : texte ; le reste : clés.
+				$args[ $key ] = in_array( $key, array( 's', 'field' ), true ) ? sanitize_text_field( (string) $query[ $key ] ) : sanitize_key( (string) $query[ $key ] );
+			}
+		}
+		$post = isset( $query['post'] ) && is_scalar( $query['post'] ) ? (int) $query['post'] : 0;
+		if ( $post > 0 ) {
+			if ( '' !== $post_type ) {
+				$args['type'] = sanitize_key( $post_type );
+			}
+			$args['id'] = $post;
+		}
+		// Ordre stable : type, puis id, puis le reste.
+		$ordered = array();
+		foreach ( array( 'type', 'id', 'status', 's', 'new', 'field' ) as $key ) {
+			if ( isset( $args[ $key ] ) ) {
+				$ordered[ $key ] = $args[ $key ];
+			}
+		}
+		return self::url( 'collections', $ordered );
 	}
 
 	/**
@@ -217,6 +254,15 @@ class Okno_App {
 			wp_safe_redirect( self::url( 'editor', array( 'post' => absint( $_GET['post'] ) ) ) );
 			exit;
 		}
+		// Contenus et Formulaire sont devenus Collections.
+		$requested = isset( $_GET['view'] ) ? sanitize_key( wp_unslash( $_GET['view'] ) ) : '';
+		if ( in_array( $requested, self::MERGED, true ) ) {
+			$query = wp_unslash( $_GET );
+			$post  = isset( $query['post'] ) ? absint( $query['post'] ) : 0;
+			$type  = $post ? (string) get_post_type( $post ) : '';
+			wp_safe_redirect( self::merged_url( $requested, $query, $type ) );
+			exit;
+		}
 		// phpcs:enable
 
 		// La barre d'admin n'est pas rendue (et non seulement masquée).
@@ -262,7 +308,7 @@ class Okno_App {
 	public static function render( Okno_Admin $admin ) {
 		$view     = self::current_view();
 		$views    = self::views();
-		$embedded = in_array( $view, array( 'editor', 'form' ), true );
+		$embedded = in_array( $view, array( 'editor', 'collections' ), true );
 		$user     = wp_get_current_user();
 		?>
 		<div id="okno-app" class="okno-app okno-app--collapsed<?php echo $embedded ? ' okno-app--embedded' : ''; ?>" data-view="<?php echo esc_attr( $view ); ?>" data-theme="dark">
@@ -279,7 +325,7 @@ class Okno_App {
 						if ( ! $item['nav'] || ! current_user_can( $item['cap'] ) ) {
 							continue;
 						}
-						$current = $slug === $view || ( 'form' === $view && 'content' === $slug ) || ( 'start' === $view && 'settings' === $slug );
+						$current = $slug === $view || ( 'start' === $view && 'settings' === $slug );
 						?>
 						<li>
 							<a class="okno-nav__link" href="<?php echo esc_url( self::url( $slug ) ); ?>" <?php echo $current ? 'aria-current="page"' : ''; ?> title="<?php echo esc_attr( $item['label'] ); ?>">
@@ -385,12 +431,13 @@ class Okno_App {
 	private static function render_view( $view, Okno_Admin $admin ) {
 		switch ( $view ) {
 			case 'editor':
-			case 'form':
-				$admin->render_editor_page( 'form' === $view ? 'form' : 'visual' );
+				$admin->render_editor_page( 'visual' );
 				return;
 
-			case 'content':
 			case 'collections':
+				$admin->render_editor_page( 'collections' );
+				return;
+
 			case 'media':
 				// Vue JavaScript (app-*.js) : un conteneur et un état de chargement.
 				printf(
@@ -415,7 +462,7 @@ class Okno_App {
 	 * ------------------------------------------------------------------- */
 
 	/**
-	 * Types de contenu éditables, pour Contenus et le formulaire.
+	 * Types de contenu éditables, pour la vue Collections.
 	 *
 	 * @return array[]
 	 */
@@ -484,6 +531,9 @@ class Okno_App {
 			'userId'         => (int) $user->ID,
 			'canDeploy'      => Okno_Deploy_Manager::user_can_deploy(),
 			'canCollections' => Okno_Collections_Rest::can_manage(),
+			// Champs des types qui ne sont pas des collections Okno : ACF (ou le thème).
+			'acf'            => function_exists( 'acf_get_field_groups' ),
+			'acfUrl'         => function_exists( 'acf_get_field_groups' ) && current_user_can( 'manage_options' ) ? admin_url( 'edit.php?post_type=acf-field-group' ) : '',
 			'canUpload'      => current_user_can( 'upload_files' ),
 			'publish'        => array(
 				'available' => (bool) $driver && 'live' !== $settings['deploy_driver'],

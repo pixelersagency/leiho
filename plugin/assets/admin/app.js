@@ -3,7 +3,7 @@
  *
  * Navigation latérale (repliable, au clavier), barre du haut (publication,
  * thème, menu utilisateur) et utilitaires partagés par les vues JavaScript
- * (Contenus, Collections, Médias) : window.OknoApp.
+ * (Collections, Médias) : window.OknoApp.
  *
  * Vanilla JS + apis WordPress (wp.apiFetch, wp.i18n). Aucun build.
  */
