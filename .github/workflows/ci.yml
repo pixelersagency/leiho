@@ -32,6 +32,7 @@ jobs:
           php plugin/tests/test-cache.php
           php plugin/tests/test-collections.php
           php plugin/tests/test-acf-import.php
+          php plugin/tests/test-native-fields.php
           php plugin/tests/test-activity.php
           php plugin/tests/test-frame-verdict.php
           php plugin/tests/test-updater.php
@@ -73,6 +74,7 @@ jobs:
           node --check plugin/assets/admin/app-content.js
           node --check plugin/assets/admin/app-collections.js
           node --check plugin/assets/admin/app-media.js
+          node --check plugin/assets/admin/ui.js
           node --check bridge/bin/okno.js
 
   package:

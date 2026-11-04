@@ -2021,18 +2021,18 @@ body.okno-app-body #wpbody-content {
 	width: 560px;
 }
 
-/* Import ACF → Okno : aperçu, progression, résultat. */
+/* Import ACF → Okno : aperçu, progression, résultat (échelle de l'app). */
 .okno-dialog--import {
-	width: 780px;
+	width: 880px;
 }
 
 .okno-acf-group .okno-group-label {
 	display: flex;
 	align-items: center;
-	gap: 8px;
-	padding: 0 0 6px;
+	gap: 10px;
+	padding: 0 0 8px;
 	color: var(--okno-ink);
-	font-size: 11.5px;
+	font-size: var(--okno-text-sm, 13px);
 	font-weight: 600;
 }
 
@@ -2052,11 +2052,12 @@ body.okno-app-body #wpbody-content {
 .okno-acf-map__row {
 	display: grid;
 	grid-template-columns: minmax( 0, 1.2fr ) minmax( 0, 1fr ) minmax( 0, 1.3fr );
-	gap: 10px;
+	gap: 12px;
 	align-items: center;
-	padding: 5px 10px;
+	min-height: var(--okno-control, 36px);
+	padding: 7px 12px;
 	border-bottom: 1px solid var(--okno-line);
-	font-size: 11.5px;
+	font-size: var(--okno-text-sm, 13px);
 }
 
 .okno-acf-map__row:last-child {
@@ -2072,12 +2073,12 @@ body.okno-app-body #wpbody-content {
 .okno-acf-map__status {
 	display: flex;
 	align-items: center;
-	gap: 6px;
+	gap: 8px;
 	min-width: 0;
 }
 
 .okno-acf-map__name {
-	padding-left: calc( var(--depth, 0) * 16px );
+	padding-left: calc( var(--depth, 0) * 18px );
 }
 
 .okno-acf-map__name code {
@@ -2096,40 +2097,40 @@ body.okno-app-body #wpbody-content {
 
 .okno-acf-map__notes {
 	color: var(--okno-muted);
-	font-size: 10.5px;
-	line-height: 1.35;
+	font-size: var(--okno-text-xs, 12px);
+	line-height: 1.4;
 }
 
 .okno-acf-lost li,
 .okno-acf-issues li {
-	padding: 4px 0;
-	line-height: 1.5;
+	padding: 5px 0;
+	line-height: 1.55;
 }
 
 .okno-acf-lost li::before {
 	content: "–";
-	margin-right: 6px;
+	margin-right: 8px;
 	color: var(--okno-faint);
 }
 
 .okno-acf-result {
 	display: flex;
 	flex-wrap: wrap;
-	gap: 6px;
+	gap: 8px;
 }
 
 .okno-acf-diff {
 	display: flex;
 	flex-direction: column;
-	margin-top: 2px;
+	margin-top: 3px;
 	color: var(--okno-muted);
-	font-size: 10.5px;
+	font-size: var(--okno-text-xs, 12px);
 	word-break: break-all;
 }
 
 .okno-app .okno-progress {
 	width: 100%;
-	height: 8px;
+	height: 10px;
 	overflow: hidden;
 	border: 0;
 	border-radius: 99px;
@@ -2158,7 +2159,7 @@ body.okno-app-body #wpbody-content {
 	display: flex;
 	flex-wrap: wrap;
 	justify-content: center;
-	gap: 8px;
+	gap: 10px;
 }
 
 @media ( max-width: 700px ) {
