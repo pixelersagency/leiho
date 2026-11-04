@@ -52,6 +52,9 @@
 		trash: __( 'Trash', 'okno' ),
 	};
 
+	// Couleur du point de chaque statut dans les menus (OknoUI.select).
+	var STATUS_DOTS = { publish: 'ok', future: 'accent', draft: 'warn', pending: 'pending', private: 'purple', trash: 'error' };
+
 	var SORTS = {
 		modified: __( 'Last modified', 'okno' ),
 		date: __( 'Newest first', 'okno' ),
@@ -227,7 +230,7 @@
 		{ id: statusId, class: 'okno-input', title: __( 'Status', 'okno' ) },
 		[ h( 'option', { value: '', text: __( 'All statuses', 'okno' ) } ) ].concat(
 			Object.keys( STATUSES ).map( function ( key ) {
-				return h( 'option', { value: key, text: STATUSES[ key ], selected: key === state.status } );
+				return h( 'option', { value: key, text: STATUSES[ key ], selected: key === state.status, dataset: { dot: STATUS_DOTS[ key ] || 'neutral' } } );
 			} )
 		)
 	);

@@ -96,8 +96,28 @@ body.okno-app-body #wpbody-content {
 	--okno-radius: 8px;
 	--okno-font: -apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", system-ui, sans-serif;
 	--okno-mono: "SF Mono", ui-monospace, "Cascadia Code", Menlo, Consolas, monospace;
-	--okno-nav: 200px;
-	--okno-nav-collapsed: 48px;
+	--okno-nav: 224px;
+	--okno-nav-collapsed: 56px;
+	/* Échelle (1.0.0-beta.9) : texte de base 14 px, contrôles de 36 px. */
+	--okno-text-2xs: 11px;
+	--okno-text-xs: 12px;
+	--okno-text-sm: 13px;
+	--okno-text-base: 14px;
+	--okno-text-md: 15px;
+	--okno-text-lg: 16px;
+	--okno-text-xl: 17px;
+	--okno-text-2xl: 20px;
+	--okno-control-xs: 28px;
+	--okno-control-sm: 30px;
+	--okno-control: 36px;
+	--okno-row: 38px;
+	--okno-bar: 48px;
+	--okno-icon: 18px;
+	--okno-pane-nav: 264px;
+	--okno-pane-list: 300px;
+	--okno-pane-entries: 360px;
+	--okno-pane-aside: 340px;
+	--okno-form-width: 720px;
 	color-scheme: light;
 }
 
@@ -148,7 +168,7 @@ body.okno-app-body #wpbody-content {
 	background: var(--okno-panel);
 	color: var(--okno-body);
 	font-family: var(--okno-font);
-	font-size: 12px;
+	font-size: var(--okno-text-base, 14px);
 	line-height: 1.5;
 	-webkit-font-smoothing: antialiased;
 }
@@ -203,7 +223,7 @@ body.okno-app-body #wpbody-content {
 	top: -100px;
 	left: 12px;
 	z-index: 10;
-	padding: 6px 12px;
+	padding: 7px 14px;
 	border-radius: 6px;
 	background: var(--okno-accent);
 	color: var(--okno-on-accent) !important;
@@ -240,7 +260,7 @@ body.okno-app-body #wpbody-content {
 	flex-direction: column;
 	flex: 0 0 var(--okno-nav);
 	width: var(--okno-nav);
-	padding: 0 6px 8px;
+	padding: 0 7px 10px;
 	background: var(--okno-panel);
 	border-right: 1px solid var(--okno-line);
 	transition: flex-basis 0.16s ease, width 0.16s ease;
@@ -250,25 +270,25 @@ body.okno-app-body #wpbody-content {
 .okno-nav__brand {
 	display: flex;
 	align-items: center;
-	gap: 8px;
-	flex: 0 0 40px;
-	height: 40px;
-	padding: 0 7px;
-	margin: 0 -6px 6px;
+	gap: 10px;
+	flex: 0 0 var(--okno-bar, 48px);
+	height: var(--okno-bar, 48px);
+	padding: 0 8px;
+	margin: 0 -7px 7px;
 	border-bottom: 1px solid var(--okno-line);
 }
 
 .okno-nav__brand img {
 	display: block;
 	flex: 0 0 auto;
-	width: 22px;
-	height: 22px;
-	margin-left: 6px;
+	width: var(--okno-control-xs, 28px);
+	height: var(--okno-control-xs, 28px);
+	margin-left: 7px;
 }
 
 .okno-nav__name {
 	color: var(--okno-ink);
-	font-size: 13px;
+	font-size: var(--okno-text-md, 15px);
 	font-weight: 600;
 }
 
@@ -288,15 +308,15 @@ body.okno-app-body #wpbody-content {
 .okno-nav__link {
 	display: flex;
 	align-items: center;
-	gap: 10px;
+	gap: 12px;
 	width: 100%;
-	height: 32px;
-	padding: 0 10px;
+	height: var(--okno-row, 38px);
+	padding: 0 12px;
 	border: 0;
 	border-radius: 6px;
 	background: transparent;
 	color: var(--okno-muted) !important;
-	font-size: 12px;
+	font-size: var(--okno-text-base, 14px);
 	font-weight: 500;
 	text-align: left;
 	text-decoration: none;
@@ -306,8 +326,8 @@ body.okno-app-body #wpbody-content {
 }
 
 .okno-nav__link .okno-icon {
-	width: 16px;
-	height: 16px;
+	width: 18px;
+	height: 18px;
 }
 
 .okno-nav__link:hover {
@@ -337,7 +357,7 @@ body.okno-app-body #wpbody-content {
 	flex-direction: column;
 	gap: 1px;
 	margin-top: auto;
-	padding-top: 6px;
+	padding-top: 7px;
 	border-top: 1px solid var(--okno-line);
 }
 
@@ -374,10 +394,10 @@ body.okno-app-body #wpbody-content {
 .okno-topbar {
 	display: flex;
 	align-items: center;
-	gap: 12px;
-	flex: 0 0 40px;
-	height: 40px;
-	padding: 0 8px 0 14px;
+	gap: 14px;
+	flex: 0 0 var(--okno-bar, 48px);
+	height: var(--okno-bar, 48px);
+	padding: 0 10px 0 17px;
 	background: var(--okno-panel);
 	border-bottom: 1px solid var(--okno-line);
 }
@@ -389,14 +409,14 @@ body.okno-app-body #wpbody-content {
 .okno-topbar__site {
 	display: flex;
 	align-items: center;
-	gap: 8px;
+	gap: 10px;
 	min-width: 0;
 }
 
 .okno-topbar__site strong {
 	overflow: hidden;
 	color: var(--okno-ink);
-	font-size: 12px;
+	font-size: var(--okno-text-base, 14px);
 	font-weight: 600;
 	white-space: nowrap;
 	text-overflow: ellipsis;
@@ -405,13 +425,13 @@ body.okno-app-body #wpbody-content {
 .okno-topbar__visit {
 	display: inline-flex;
 	align-items: center;
-	gap: 4px;
-	height: 22px;
-	padding: 0 8px;
+	gap: 5px;
+	height: var(--okno-control-xs, 28px);
+	padding: 0 10px;
 	border-radius: 6px;
 	background: var(--okno-input);
 	color: var(--okno-muted) !important;
-	font-size: 11px;
+	font-size: var(--okno-text-sm, 13px);
 	text-decoration: none;
 	white-space: nowrap;
 }
@@ -424,14 +444,14 @@ body.okno-app-body #wpbody-content {
 .okno-topbar__end {
 	display: flex;
 	align-items: center;
-	gap: 4px;
+	gap: 5px;
 	margin-left: auto;
 }
 
 .okno-topbar__status {
-	margin-right: 6px;
+	margin-right: 7px;
 	color: var(--okno-muted);
-	font-size: 11px;
+	font-size: var(--okno-text-sm, 13px);
 	white-space: nowrap;
 }
 
@@ -448,7 +468,7 @@ body.okno-app-body #wpbody-content {
 	display: inline-block;
 	width: 7px;
 	height: 7px;
-	margin-right: 6px;
+	margin-right: 7px;
 	border-radius: 50%;
 	background: var(--okno-accent);
 	animation: okno-pulse 1.2s ease-in-out infinite;
@@ -462,7 +482,7 @@ body.okno-app-body #wpbody-content {
 
 .okno-app .okno-topbar__publish {
 	position: relative;
-	margin-right: 4px;
+	margin-right: 5px;
 }
 
 .okno-pending-dot {
@@ -480,14 +500,14 @@ body.okno-app-body #wpbody-content {
 .okno-user__button {
 	display: flex;
 	align-items: center;
-	gap: 7px;
-	height: 28px;
-	padding: 0 8px 0 3px;
+	gap: 8px;
+	height: var(--okno-control, 36px);
+	padding: 0 10px 0 4px;
 	border: 0;
 	border-radius: 8px;
 	background: transparent;
 	color: var(--okno-ink);
-	font-size: 12px;
+	font-size: var(--okno-text-base, 14px);
 	font-weight: 500;
 	cursor: pointer;
 }
@@ -501,12 +521,12 @@ body.okno-app-body #wpbody-content {
 	display: inline-flex;
 	align-items: center;
 	justify-content: center;
-	width: 22px;
-	height: 22px;
+	width: var(--okno-control-xs, 28px);
+	height: var(--okno-control-xs, 28px);
 	border-radius: 50%;
 	background: var(--okno-active);
 	color: var(--okno-ink);
-	font-size: 10px;
+	font-size: var(--okno-text-xs, 12px);
 	font-weight: 600;
 }
 
@@ -518,7 +538,7 @@ body.okno-app-body #wpbody-content {
 	display: grid;
 	gap: 2px;
 	min-width: 180px;
-	padding: 6px;
+	padding: 7px;
 	border: 1px solid var(--okno-line-strong);
 	border-radius: 8px;
 	background: var(--okno-elevated);
@@ -528,12 +548,12 @@ body.okno-app-body #wpbody-content {
 .okno-user__menu a {
 	display: flex;
 	align-items: center;
-	gap: 8px;
-	height: 28px;
-	padding: 0 8px;
+	gap: 10px;
+	height: var(--okno-control, 36px);
+	padding: 0 10px;
 	border-radius: 6px;
 	color: var(--okno-ink) !important;
-	font-size: 12px;
+	font-size: var(--okno-text-base, 14px);
 	text-decoration: none;
 }
 
@@ -548,15 +568,15 @@ body.okno-app-body #wpbody-content {
 	display: inline-flex;
 	align-items: center;
 	justify-content: center;
-	gap: 6px;
-	height: 28px;
+	gap: 7px;
+	height: var(--okno-control, 36px);
 	min-height: 0;
-	padding: 0 12px;
+	padding: 0 14px;
 	border: 1px solid transparent;
 	border-radius: 8px;
 	background: var(--okno-accent);
 	color: var(--okno-on-accent);
-	font-size: 12px;
+	font-size: var(--okno-text-base, 14px);
 	font-weight: 600;
 	line-height: 1;
 	text-decoration: none;
@@ -566,8 +586,8 @@ body.okno-app-body #wpbody-content {
 }
 
 .okno-app .okno-btn .okno-icon {
-	width: 14px;
-	height: 14px;
+	width: 16px;
+	height: 16px;
 }
 
 .okno-app .okno-btn:hover {
@@ -619,10 +639,10 @@ body.okno-app-body #wpbody-content {
 }
 
 .okno-app .okno-btn--small {
-	height: 24px;
-	padding: 0 9px;
+	height: var(--okno-control-sm, 30px);
+	padding: 0 11px;
 	border-radius: 6px;
-	font-size: 11.5px;
+	font-size: var(--okno-text-sm, 13px);
 }
 
 /* Bouton fantôme (icône seule) : 28 × 28, discret jusqu'au survol. */
@@ -631,8 +651,8 @@ body.okno-app-body #wpbody-content {
 	align-items: center;
 	justify-content: center;
 	flex: 0 0 auto;
-	width: 28px;
-	height: 28px;
+	width: var(--okno-control, 36px);
+	height: var(--okno-control, 36px);
 	padding: 0;
 	border: 0;
 	border-radius: 6px;
@@ -643,8 +663,8 @@ body.okno-app-body #wpbody-content {
 }
 
 .okno-app .okno-icon-btn .okno-icon {
-	width: 15px;
-	height: 15px;
+	width: 17px;
+	height: 17px;
 }
 
 .okno-app .okno-icon-btn:hover {
@@ -667,14 +687,14 @@ body.okno-app-body #wpbody-content {
 }
 
 .okno-app .okno-icon-btn--small {
-	width: 22px;
-	height: 22px;
+	width: var(--okno-control-xs, 28px);
+	height: var(--okno-control-xs, 28px);
 	border-radius: 5px;
 }
 
 .okno-app .okno-icon-btn--small .okno-icon {
-	width: 13px;
-	height: 13px;
+	width: 15px;
+	height: 15px;
 }
 
 /* ── Champs ────────────────────────────────────────────────────────── */
@@ -682,13 +702,13 @@ body.okno-app-body #wpbody-content {
 .okno-app .okno-input {
 	width: 100%;
 	min-height: 0;
-	height: 30px;
-	padding: 5px 9px;
+	height: var(--okno-control, 36px);
+	padding: 6px 11px;
 	border: 1px solid transparent;
 	border-radius: 6px;
 	background: var(--okno-input);
 	color: var(--okno-ink);
-	font-size: 12.5px;
+	font-size: var(--okno-text-base, 14px);
 	line-height: 1.4;
 	box-shadow: none;
 	transition: border-color 0.1s ease, background 0.1s ease;
@@ -700,7 +720,7 @@ body.okno-app-body #wpbody-content {
 }
 
 .okno-app select.okno-input {
-	padding-right: 26px;
+	padding-right: 31px;
 	-webkit-appearance: none;
 	appearance: none;
 	background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 24 24' fill='none' stroke='%23999' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
@@ -717,7 +737,7 @@ body.okno-app-body #wpbody-content {
 .okno-app textarea.okno-input {
 	height: auto;
 	min-height: 72px;
-	padding: 7px 9px;
+	padding: 8px 11px;
 	line-height: 1.5;
 	resize: vertical;
 }
@@ -749,38 +769,38 @@ body.okno-app-body #wpbody-content {
 .okno-app .okno-mono,
 .okno-app-view .okno-input.okno-mono {
 	font-family: var(--okno-mono);
-	font-size: 11.5px;
+	font-size: var(--okno-text-sm, 13px);
 }
 
 .okno-app code {
-	padding: 1px 5px;
+	padding: 1px 6px;
 	border-radius: 4px;
 	background: var(--okno-input);
 	color: var(--okno-ink);
 	font-family: var(--okno-mono);
-	font-size: 10.5px;
+	font-size: var(--okno-text-xs, 12px);
 }
 
 .okno-app .okno-label {
 	display: block;
-	margin: 0 0 5px;
+	margin: 0 0 6px;
 	color: var(--okno-muted);
-	font-size: 11.5px;
+	font-size: var(--okno-text-sm, 13px);
 	font-weight: 500;
 }
 
 .okno-app .okno-help {
 	display: block;
-	margin: 5px 0 0;
+	margin: 6px 0 0;
 	color: var(--okno-faint);
-	font-size: 11.5px;
+	font-size: var(--okno-text-sm, 13px);
 	line-height: 1.45;
 }
 
 .okno-app .okno-error {
-	margin: 5px 0 0;
+	margin: 6px 0 0;
 	color: var(--okno-error);
-	font-size: 11.5px;
+	font-size: var(--okno-text-sm, 13px);
 	font-weight: 500;
 }
 
@@ -792,12 +812,12 @@ body.okno-app-body #wpbody-content {
 .okno-app .okno-pill {
 	display: inline-flex;
 	align-items: center;
-	height: 18px;
-	padding: 0 7px;
+	height: 20px;
+	padding: 0 8px;
 	border-radius: 99px;
 	background: var(--okno-input);
 	color: var(--okno-muted);
-	font-size: 10px;
+	font-size: var(--okno-text-xs, 12px);
 	font-weight: 600;
 	white-space: nowrap;
 }
@@ -849,10 +869,10 @@ body.okno-app-body #wpbody-content {
 }
 
 .okno-app .okno-notice {
-	margin: 0 0 14px;
-	padding: 9px 12px;
+	margin: 0 0 17px;
+	padding: 11px 14px;
 	border-radius: 8px;
-	font-size: 12px;
+	font-size: var(--okno-text-base, 14px);
 }
 
 .okno-app .okno-notice p {
@@ -860,7 +880,7 @@ body.okno-app-body #wpbody-content {
 }
 
 .okno-app .okno-notice p + p {
-	margin-top: 4px;
+	margin-top: 5px;
 }
 
 .okno-app .okno-notice--error {
@@ -878,17 +898,17 @@ body.okno-app-body #wpbody-content {
 	position: relative;
 	display: inline-flex;
 	align-items: center;
-	gap: 8px;
+	gap: 10px;
 	color: var(--okno-ink);
-	font-size: 12.5px;
+	font-size: var(--okno-text-base, 14px);
 	cursor: pointer;
 }
 
 .okno-switch input {
 	position: relative;
 	flex: 0 0 auto;
-	width: 26px;
-	height: 16px;
+	width: 32px;
+	height: 18px;
 	margin: 0;
 	border-radius: 99px;
 	background: var(--okno-active);
@@ -903,8 +923,8 @@ body.okno-app-body #wpbody-content {
 	position: absolute;
 	top: 2px;
 	left: 2px;
-	width: 12px;
-	height: 12px;
+	width: 14px;
+	height: 14px;
 	border-radius: 50%;
 	background: #ffffff;
 	box-shadow: 0 1px 2px rgba( 0, 0, 0, 0.3 );
@@ -930,13 +950,13 @@ body.okno-app-body #wpbody-content {
 }
 
 .okno-segment button {
-	height: 22px;
-	padding: 0 9px;
+	height: var(--okno-control-xs, 28px);
+	padding: 0 11px;
 	border: 0;
 	border-radius: 6px;
 	background: transparent;
 	color: var(--okno-muted);
-	font-size: 11.5px;
+	font-size: var(--okno-text-sm, 13px);
 	font-weight: 500;
 	cursor: pointer;
 }
@@ -959,7 +979,7 @@ body.okno-app-body #wpbody-content {
 .okno-app-view {
 	max-width: 1240px;
 	margin: 0 auto;
-	padding: 24px 28px 64px;
+	padding: 29px 34px 77px;
 }
 
 .okno-app-view.okno-panes {
@@ -971,7 +991,7 @@ body.okno-app-body #wpbody-content {
 }
 
 .okno-app-loading {
-	padding: 16px;
+	padding: 19px;
 	color: var(--okno-muted);
 }
 
@@ -986,13 +1006,13 @@ body.okno-app-body #wpbody-content {
 }
 
 .okno-pane--nav {
-	flex: 0 0 240px;
-	width: 240px;
+	flex: 0 0 var(--okno-pane-nav, 264px);
+	width: var(--okno-pane-nav, 264px);
 }
 
 .okno-pane--list {
-	flex: 0 0 260px;
-	width: 260px;
+	flex: 0 0 var(--okno-pane-list, 300px);
+	width: var(--okno-pane-list, 300px);
 }
 
 .okno-pane--detail {
@@ -1001,8 +1021,8 @@ body.okno-app-body #wpbody-content {
 }
 
 .okno-pane--aside {
-	flex: 0 0 300px;
-	width: 300px;
+	flex: 0 0 var(--okno-pane-aside, 340px);
+	width: var(--okno-pane-aside, 340px);
 	border-right: 0;
 	border-left: 1px solid var(--okno-line);
 }
@@ -1011,10 +1031,10 @@ body.okno-app-body #wpbody-content {
 	display: flex;
 	align-items: center;
 	justify-content: space-between;
-	gap: 6px;
+	gap: 7px;
 	flex: 0 0 auto;
-	min-height: 40px;
-	padding: 12px 8px 8px 12px;
+	min-height: var(--okno-bar, 48px);
+	padding: 14px 10px 10px 14px;
 }
 
 .okno-pane__title {
@@ -1022,7 +1042,7 @@ body.okno-app-body #wpbody-content {
 	margin: 0;
 	overflow: hidden;
 	color: var(--okno-ink);
-	font-size: 12px;
+	font-size: var(--okno-text-base, 14px);
 	font-weight: 600;
 	letter-spacing: 0.01em;
 	white-space: nowrap;
@@ -1030,7 +1050,7 @@ body.okno-app-body #wpbody-content {
 }
 
 .okno-pane--list .okno-pane__title {
-	font-size: 13px;
+	font-size: var(--okno-text-md, 15px);
 }
 
 .okno-pane__tools {
@@ -1043,21 +1063,21 @@ body.okno-app-body #wpbody-content {
 .okno-pane__search {
 	position: relative;
 	display: flex;
-	gap: 6px;
+	gap: 7px;
 	flex: 0 0 auto;
-	padding: 0 12px 8px;
+	padding: 0 14px 10px;
 }
 
 .okno-pane__search .okno-input {
-	height: 28px;
-	padding: 4px 8px 4px 27px;
-	font-size: 12px;
+	height: var(--okno-control, 36px);
+	padding: 5px 10px 5px 32px;
+	font-size: var(--okno-text-base, 14px);
 }
 
 .okno-pane__search select.okno-input {
 	flex: 0 0 104px;
 	width: 104px;
-	padding-left: 8px;
+	padding-left: 10px;
 }
 
 .okno-pane__search .okno-input-icon {
@@ -1071,17 +1091,17 @@ body.okno-app-body #wpbody-content {
 .okno-pane__body {
 	flex: 1 1 auto;
 	min-height: 0;
-	padding: 2px 8px 12px;
+	padding: 2px 10px 14px;
 	overflow-y: auto;
 	scrollbar-gutter: stable;
 }
 
 .okno-pane__foot {
 	flex: 0 0 auto;
-	padding: 8px 12px;
+	padding: 10px 14px;
 	border-top: 1px solid var(--okno-line);
 	color: var(--okno-faint);
-	font-size: 11px;
+	font-size: var(--okno-text-sm, 13px);
 }
 
 .okno-pane__foot .okno-pager {
@@ -1091,9 +1111,9 @@ body.okno-app-body #wpbody-content {
 
 .okno-group-label {
 	margin: 0;
-	padding: 10px 8px 4px;
+	padding: 12px 10px 5px;
 	color: var(--okno-faint);
-	font-size: 10.5px;
+	font-size: var(--okno-text-xs, 12px);
 	font-weight: 500;
 	letter-spacing: 0.02em;
 }
@@ -1119,15 +1139,15 @@ body.okno-app-body #wpbody-content {
 .okno-coll {
 	display: flex;
 	align-items: center;
-	gap: 8px;
+	gap: 10px;
 	width: 100%;
-	height: 34px;
-	padding: 0 8px;
+	height: 40px;
+	padding: 0 10px;
 	border: 0;
 	border-radius: 6px;
 	background: transparent;
 	color: var(--okno-muted) !important;
-	font-size: 12px;
+	font-size: var(--okno-text-base, 14px);
 	text-align: left;
 	text-decoration: none;
 	cursor: pointer;
@@ -1150,7 +1170,7 @@ body.okno-app-body #wpbody-content {
 	align-items: center;
 	justify-content: center;
 	flex: 0 0 auto;
-	width: 16px;
+	width: 18px;
 	color: var(--okno-faint);
 }
 
@@ -1171,14 +1191,14 @@ body.okno-app-body #wpbody-content {
 .okno-coll__count {
 	flex: 0 0 auto;
 	color: var(--okno-faint);
-	font-size: 10.5px;
+	font-size: var(--okno-text-xs, 12px);
 	font-variant-numeric: tabular-nums;
 }
 
 .okno-coll .okno-pill {
-	height: 16px;
-	padding: 0 6px;
-	font-size: 9.5px;
+	height: 18px;
+	padding: 0 7px;
+	font-size: var(--okno-text-2xs, 11px);
 }
 
 /* Ligne d'entrée (32 px). */
@@ -1186,14 +1206,14 @@ body.okno-app-body #wpbody-content {
 	position: relative;
 	display: flex;
 	align-items: center;
-	gap: 6px;
-	height: 32px;
-	padding: 0 4px 0 8px;
+	gap: 7px;
+	height: var(--okno-row, 38px);
+	padding: 0 5px 0 10px;
 	border-top: 1px solid transparent;
 	border-bottom: 1px solid transparent;
 	border-radius: 6px;
 	color: var(--okno-muted);
-	font-size: 12px;
+	font-size: var(--okno-text-base, 14px);
 	cursor: pointer;
 }
 
@@ -1227,7 +1247,7 @@ body.okno-app-body #wpbody-content {
 .okno-item__link {
 	display: flex;
 	align-items: center;
-	gap: 8px;
+	gap: 10px;
 	flex: 1 1 auto;
 	min-width: 0;
 	height: 100%;
@@ -1261,7 +1281,7 @@ body.okno-app-body #wpbody-content {
 .okno-item__meta {
 	flex: 0 0 auto;
 	color: var(--okno-faint);
-	font-size: 10.5px;
+	font-size: var(--okno-text-xs, 12px);
 	white-space: nowrap;
 }
 
@@ -1282,8 +1302,8 @@ body.okno-app-body #wpbody-content {
 }
 
 .okno-item__actions .okno-icon-btn {
-	width: 22px;
-	height: 22px;
+	width: var(--okno-control-xs, 28px);
+	height: var(--okno-control-xs, 28px);
 	border-radius: 5px;
 	color: var(--okno-faint);
 }
@@ -1294,8 +1314,8 @@ body.okno-app-body #wpbody-content {
 }
 
 .okno-item__actions .okno-icon-btn .okno-icon {
-	width: 13px;
-	height: 13px;
+	width: 15px;
+	height: 15px;
 }
 
 .okno-grip {
@@ -1323,36 +1343,36 @@ body.okno-app-body #wpbody-content {
 	align-items: center;
 	justify-content: center;
 	flex: 0 0 auto;
-	width: 18px;
-	height: 18px;
+	width: 20px;
+	height: 20px;
 	border-radius: 4px;
 	background: var(--okno-input);
 	color: var(--okno-muted);
 	font-family: var(--okno-mono);
-	font-size: 9px;
+	font-size: var(--okno-text-2xs, 11px);
 	font-weight: 600;
 }
 
 .okno-list-empty {
-	padding: 24px 16px;
+	padding: 29px 19px;
 	color: var(--okno-faint);
-	font-size: 11.5px;
+	font-size: var(--okno-text-sm, 13px);
 	line-height: 1.5;
 	text-align: center;
 }
 
 .okno-list-empty .okno-btn {
-	margin-top: 10px;
+	margin-top: 12px;
 }
 
 /* Détail : en-tête 10 / 14 px et colonne de 640 px. */
 .okno-detail__head {
 	display: flex;
 	align-items: center;
-	gap: 8px;
+	gap: 10px;
 	flex: 0 0 auto;
-	min-height: 41px;
-	padding: 6px 10px 6px 14px;
+	min-height: 49px;
+	padding: 7px 12px 7px 17px;
 	border-bottom: 1px solid var(--okno-line);
 }
 
@@ -1370,7 +1390,7 @@ body.okno-app-body #wpbody-content {
 	margin: 0;
 	overflow: hidden;
 	color: var(--okno-ink);
-	font-size: 13px;
+	font-size: var(--okno-text-md, 15px);
 	font-weight: 600;
 	white-space: nowrap;
 	text-overflow: ellipsis;
@@ -1382,7 +1402,7 @@ body.okno-app-body #wpbody-content {
 	overflow: hidden;
 	color: var(--okno-faint);
 	font-family: var(--okno-mono);
-	font-size: 10.5px;
+	font-size: var(--okno-text-xs, 12px);
 	white-space: nowrap;
 	text-overflow: ellipsis;
 }
@@ -1390,7 +1410,7 @@ body.okno-app-body #wpbody-content {
 .okno-detail__actions {
 	display: flex;
 	align-items: center;
-	gap: 6px;
+	gap: 7px;
 	flex: 0 0 auto;
 	margin-left: auto;
 }
@@ -1398,39 +1418,39 @@ body.okno-app-body #wpbody-content {
 .okno-detail__body {
 	flex: 1 1 auto;
 	min-height: 0;
-	padding: 20px 24px 60px;
+	padding: 24px 29px 72px;
 	overflow-y: auto;
 }
 
 .okno-detail__card {
-	max-width: 640px;
+	max-width: var(--okno-form-width, 720px);
 }
 
 .okno-detail__card + .okno-detail__card {
-	margin-top: 28px;
-	padding-top: 22px;
+	margin-top: 34px;
+	padding-top: 26px;
 	border-top: 1px solid var(--okno-line);
 }
 
 .okno-detail__card > h3,
 .okno-section-title {
-	margin: 0 0 14px;
+	margin: 0 0 17px;
 	color: var(--okno-ink);
-	font-size: 15px;
+	font-size: var(--okno-text-xl, 17px);
 	font-weight: 600;
 }
 
 .okno-detail__card > p.okno-muted {
-	margin: -8px 0 14px;
-	font-size: 12px;
+	margin: -10px 0 17px;
+	font-size: var(--okno-text-base, 14px);
 }
 
 .okno-dirty-note {
 	display: inline-flex;
 	align-items: center;
-	gap: 5px;
+	gap: 6px;
 	color: var(--okno-warn);
-	font-size: 11px;
+	font-size: var(--okno-text-sm, 13px);
 	font-weight: 500;
 	white-space: nowrap;
 }
@@ -1452,9 +1472,9 @@ body.okno-app-body #wpbody-content {
 	max-width: 360px;
 	min-height: 60%;
 	margin: 0 auto;
-	padding: 40px 16px;
+	padding: 48px 19px;
 	color: var(--okno-faint);
-	font-size: 12px;
+	font-size: var(--okno-text-base, 14px);
 	line-height: 1.5;
 	text-align: center;
 }
@@ -1464,17 +1484,17 @@ body.okno-app-body #wpbody-content {
 	align-items: center;
 	justify-content: center;
 	width: 48px;
-	height: 48px;
-	margin: 0 auto 20px;
+	height: 56px;
+	margin: 0 auto 24px;
 	border-radius: 12px;
 	background: var(--okno-active);
 	color: var(--okno-muted);
 }
 
 .okno-empty-state h3 {
-	margin: 0 0 4px;
+	margin: 0 0 5px;
 	color: var(--okno-ink);
-	font-size: 14px;
+	font-size: var(--okno-text-lg, 16px);
 	font-weight: 600;
 }
 
@@ -1483,7 +1503,7 @@ body.okno-app-body #wpbody-content {
 }
 
 .okno-empty-state .okno-btn {
-	margin-top: 16px;
+	margin-top: 19px;
 }
 
 /* Propriétés (définition) dans un détail. */
@@ -1492,13 +1512,13 @@ body.okno-app-body #wpbody-content {
 	grid-template-columns: 120px minmax( 0, 1fr );
 	gap: 0;
 	margin: 0;
-	font-size: 12px;
+	font-size: var(--okno-text-base, 14px);
 }
 
 .okno-props dt,
 .okno-props dd {
 	margin: 0;
-	padding: 7px 0;
+	padding: 8px 0;
 	border-bottom: 1px solid var(--okno-line);
 }
 
@@ -1518,7 +1538,7 @@ body.okno-app-body #wpbody-content {
 .okno-settings-grid {
 	display: grid;
 	grid-template-columns: repeat( 2, minmax( 0, 1fr ) );
-	gap: 14px 16px;
+	gap: 17px 19px;
 }
 
 .okno-setting {
@@ -1530,7 +1550,7 @@ body.okno-app-body #wpbody-content {
 
 .okno-setting > .okno-input,
 .okno-setting > textarea.okno-input {
-	font-size: 13px;
+	font-size: var(--okno-text-md, 15px);
 }
 
 .okno-setting--wide,
@@ -1546,19 +1566,19 @@ body.okno-app-body #wpbody-content {
 .okno-radios {
 	display: grid;
 	grid-template-columns: repeat( 2, minmax( 0, 1fr ) );
-	gap: 8px;
+	gap: 10px;
 }
 
 .okno-radios legend {
-	margin-bottom: 5px;
+	margin-bottom: 6px;
 	padding: 0;
 }
 
 .okno-radio {
 	display: flex;
 	align-items: flex-start;
-	gap: 9px;
-	padding: 10px;
+	gap: 11px;
+	padding: 12px;
 	border: 1px solid transparent;
 	border-radius: 8px;
 	background: var(--okno-input);
@@ -1581,7 +1601,7 @@ body.okno-app-body #wpbody-content {
 .okno-radio strong {
 	display: block;
 	color: var(--okno-ink);
-	font-size: 12px;
+	font-size: var(--okno-text-base, 14px);
 	font-weight: 500;
 }
 
@@ -1592,21 +1612,21 @@ body.okno-app-body #wpbody-content {
 .okno-checks-inline {
 	display: flex;
 	flex-wrap: wrap;
-	gap: 10px 22px;
+	gap: 12px 26px;
 }
 
 .okno-checks-inline legend {
 	width: 100%;
-	margin-bottom: 5px;
+	margin-bottom: 6px;
 	padding: 0;
 }
 
 .okno-check {
 	display: inline-flex;
 	align-items: center;
-	gap: 8px;
+	gap: 10px;
 	color: var(--okno-ink);
-	font-size: 12.5px;
+	font-size: var(--okno-text-base, 14px);
 	cursor: pointer;
 }
 
@@ -1615,27 +1635,27 @@ body.okno-app-body #wpbody-content {
 }
 
 .okno-check code {
-	font-size: 10px;
+	font-size: var(--okno-text-xs, 12px);
 }
 
 /* Réglages d'un champ : options avancées repliées. */
 .okno-field-settings {
 	display: grid;
-	gap: 18px;
+	gap: 22px;
 }
 
 .okno-disclosure {
 	display: grid;
-	gap: 12px;
+	gap: 14px;
 }
 
 .okno-disclosure > summary {
 	display: inline-flex;
 	align-items: center;
-	gap: 6px;
+	gap: 7px;
 	justify-self: start;
 	color: var(--okno-muted);
-	font-size: 12px;
+	font-size: var(--okno-text-base, 14px);
 	font-weight: 500;
 	list-style: none;
 	cursor: pointer;
@@ -1660,9 +1680,9 @@ body.okno-app-body #wpbody-content {
 .okno-disclosure__body {
 	display: grid;
 	grid-template-columns: repeat( 2, minmax( 0, 1fr ) );
-	gap: 14px 16px;
+	gap: 17px 19px;
 	align-items: start;
-	padding: 16px;
+	padding: 19px;
 	border-radius: 8px;
 	background: var(--okno-canvas);
 }
@@ -1672,7 +1692,7 @@ body.okno-app-body #wpbody-content {
 }
 
 .okno-field-settings__required {
-	padding-top: 14px;
+	padding-top: 17px;
 	border-top: 1px solid var(--okno-line);
 }
 
@@ -1682,11 +1702,11 @@ body.okno-app-body #wpbody-content {
 
 .okno-type-badge {
 	flex: 0 0 auto;
-	padding: 1px 6px;
+	padding: 1px 7px;
 	border-radius: 4px;
 	background: var(--okno-input);
 	color: var(--okno-muted);
-	font-size: 10.5px;
+	font-size: var(--okno-text-xs, 12px);
 	font-weight: 500;
 	white-space: nowrap;
 }
@@ -1700,9 +1720,9 @@ body.okno-app-body #wpbody-content {
 }
 
 .okno-list-field__empty {
-	padding: 7px 10px;
+	padding: 8px 12px;
 	color: var(--okno-faint);
-	font-size: 12px;
+	font-size: var(--okno-text-base, 14px);
 }
 
 .okno-fields {
@@ -1738,11 +1758,11 @@ body.okno-app-body #wpbody-content {
 .okno-fieldrow__head {
 	display: flex;
 	align-items: center;
-	gap: 4px;
+	gap: 5px;
 	min-width: 0;
-	height: 30px;
-	padding: 0 6px 0 4px;
-	font-size: 12px;
+	height: var(--okno-control, 36px);
+	padding: 0 7px 0 5px;
+	font-size: var(--okno-text-base, 14px);
 }
 
 .okno-fieldrow__head:hover,
@@ -1762,15 +1782,15 @@ body.okno-app-body #wpbody-content {
 .okno-fieldrow__toggle {
 	display: flex;
 	align-items: center;
-	gap: 8px;
+	gap: 10px;
 	flex: 1 1 auto;
 	min-width: 0;
 	height: 100%;
-	padding: 0 4px;
+	padding: 0 5px;
 	border: 0;
 	background: transparent;
 	color: var(--okno-ink);
-	font-size: 12px;
+	font-size: var(--okno-text-base, 14px);
 	text-align: left;
 	cursor: pointer;
 }
@@ -1815,15 +1835,15 @@ body.okno-app-body #wpbody-content {
 }
 
 .okno-fieldrow__actions .okno-icon-btn {
-	width: 22px;
-	height: 22px;
+	width: var(--okno-control-xs, 28px);
+	height: var(--okno-control-xs, 28px);
 	border-radius: 4px;
 	color: var(--okno-faint);
 }
 
 .okno-fieldrow__actions .okno-icon-btn .okno-icon {
-	width: 12px;
-	height: 12px;
+	width: 14px;
+	height: 14px;
 }
 
 .okno-fieldrow__actions .okno-icon-btn--danger:hover {
@@ -1833,8 +1853,8 @@ body.okno-app-body #wpbody-content {
 
 .okno-fieldrow__body {
 	display: grid;
-	gap: 14px;
-	padding: 14px 14px 16px;
+	gap: 17px;
+	padding: 17px 17px 19px;
 	border-top: 1px solid var(--okno-line);
 	background: var(--okno-hover);
 }
@@ -1844,16 +1864,16 @@ body.okno-app-body #wpbody-content {
 	display: flex;
 	align-items: center;
 	justify-content: flex-start;
-	gap: 6px;
+	gap: 7px;
 	width: 100%;
-	height: 30px;
-	padding: 0 10px;
+	height: var(--okno-control, 36px);
+	padding: 0 12px;
 	border: 0;
 	border-top: 1px solid var(--okno-line);
 	border-radius: 0;
 	background: transparent;
 	color: var(--okno-muted);
-	font-size: 12px;
+	font-size: var(--okno-text-base, 14px);
 	font-weight: 500;
 	text-align: left;
 	cursor: pointer;
@@ -1861,8 +1881,8 @@ body.okno-app-body #wpbody-content {
 
 .okno-list-field__add .okno-icon,
 .okno-app .okno-add-field .okno-icon {
-	width: 13px;
-	height: 13px;
+	width: 15px;
+	height: 15px;
 }
 
 .okno-list-field__add:hover,
@@ -1873,24 +1893,24 @@ body.okno-app-body #wpbody-content {
 
 .okno-subfields {
 	display: grid;
-	gap: 5px;
+	gap: 6px;
 }
 
 .okno-subfields h4 {
 	margin: 0;
 	color: var(--okno-muted);
-	font-size: 11.5px;
+	font-size: var(--okno-text-sm, 13px);
 	font-weight: 500;
 }
 
 .okno-blocktype {
-	padding: 12px;
+	padding: 14px;
 	border: 1px solid var(--okno-line-strong);
 	border-radius: 10px;
 }
 
 .okno-blocktype + .okno-blocktype {
-	margin-top: 6px;
+	margin-top: 7px;
 }
 
 .okno-blocktype.has-error {
@@ -1901,10 +1921,10 @@ body.okno-app-body #wpbody-content {
 	display: flex;
 	align-items: center;
 	justify-content: space-between;
-	gap: 8px;
-	margin-bottom: 10px;
+	gap: 10px;
+	margin-bottom: 12px;
 	color: var(--okno-ink);
-	font-size: 12px;
+	font-size: var(--okno-text-base, 14px);
 }
 
 .okno-blocktype__head strong {
@@ -1916,15 +1936,15 @@ body.okno-app-body #wpbody-content {
 }
 
 .okno-blocktype .okno-subfields {
-	margin-top: 12px;
+	margin-top: 14px;
 }
 
 .okno-danger-zone {
 	display: flex;
 	align-items: center;
 	justify-content: space-between;
-	gap: 16px;
-	padding: 12px 14px;
+	gap: 19px;
+	padding: 14px 17px;
 	border: 1px solid var(--okno-error-soft);
 	border-radius: 8px;
 }
@@ -1932,13 +1952,13 @@ body.okno-app-body #wpbody-content {
 .okno-danger-zone h3 {
 	margin: 0 0 2px;
 	color: var(--okno-ink);
-	font-size: 12.5px;
+	font-size: var(--okno-text-base, 14px);
 	font-weight: 600;
 }
 
 .okno-danger-zone p {
 	margin: 0;
-	font-size: 11.5px;
+	font-size: var(--okno-text-sm, 13px);
 }
 
 /* ── Tableaux ──────────────────────────────────────────────────────── */
@@ -1946,21 +1966,21 @@ body.okno-app-body #wpbody-content {
 .okno-app-view .okno-table {
 	width: 100%;
 	border-collapse: collapse;
-	font-size: 12px;
+	font-size: var(--okno-text-base, 14px);
 }
 
 .okno-app-view .okno-table th {
-	padding: 6px 10px;
+	padding: 7px 12px;
 	border-bottom: 1px solid var(--okno-line);
 	color: var(--okno-faint);
-	font-size: 10.5px;
+	font-size: var(--okno-text-xs, 12px);
 	font-weight: 500;
 	text-align: left;
 	white-space: nowrap;
 }
 
 .okno-app-view .okno-table td {
-	padding: 7px 10px;
+	padding: 8px 12px;
 	border-bottom: 1px solid var(--okno-line);
 	color: var(--okno-body);
 	vertical-align: middle;
@@ -1979,7 +1999,7 @@ body.okno-app-body #wpbody-content {
 	display: flex;
 	align-items: center;
 	justify-content: center;
-	padding: 16px;
+	padding: 19px;
 	background: var(--okno-backdrop);
 }
 
@@ -1994,7 +2014,7 @@ body.okno-app-body #wpbody-content {
 	border-radius: 12px;
 	background: var(--okno-elevated);
 	box-shadow: var(--okno-shadow-modal);
-	font-size: 12.5px;
+	font-size: var(--okno-text-base, 14px);
 }
 
 .okno-dialog--wide {
@@ -2005,22 +2025,22 @@ body.okno-app-body #wpbody-content {
 	display: flex;
 	align-items: center;
 	justify-content: space-between;
-	gap: 12px;
-	padding: 12px 10px 0 16px;
+	gap: 14px;
+	padding: 14px 12px 0 19px;
 }
 
 .okno-dialog__head h2 {
 	margin: 0;
 	color: var(--okno-ink);
-	font-size: 13px;
+	font-size: var(--okno-text-md, 15px);
 	font-weight: 600;
 }
 
 .okno-dialog__body {
 	display: flex;
 	flex-direction: column;
-	gap: 12px;
-	padding: 12px 16px 14px;
+	gap: 14px;
+	padding: 14px 19px 17px;
 	overflow-y: auto;
 	color: var(--okno-body);
 }
@@ -2031,15 +2051,15 @@ body.okno-app-body #wpbody-content {
 }
 
 .okno-dialog__body .okno-label {
-	margin-bottom: 5px;
-	font-size: 11px;
+	margin-bottom: 6px;
+	font-size: var(--okno-text-sm, 13px);
 }
 
 .okno-dialog__actions {
 	display: flex;
 	justify-content: flex-end;
-	gap: 8px;
-	padding: 12px 16px;
+	gap: 10px;
+	padding: 14px 19px;
 	border-top: 1px solid var(--okno-line);
 }
 
@@ -2049,7 +2069,7 @@ body.okno-app-body #wpbody-content {
 }
 
 .okno-form-grid .okno-label:not( :first-child ) {
-	margin-top: 12px;
+	margin-top: 14px;
 }
 
 .okno-toasts {
@@ -2060,19 +2080,19 @@ body.okno-app-body #wpbody-content {
 	display: flex;
 	flex-direction: column;
 	align-items: flex-end;
-	gap: 8px;
+	gap: 10px;
 	pointer-events: none;
 }
 
 .okno-toast {
 	max-width: 400px;
-	padding: 9px 13px;
+	padding: 11px 16px;
 	border: 1px solid var(--okno-line-strong);
 	border-radius: 8px;
 	background: var(--okno-elevated);
 	color: var(--okno-ink);
 	box-shadow: var(--okno-shadow);
-	font-size: 12px;
+	font-size: var(--okno-text-base, 14px);
 	pointer-events: auto;
 	animation: okno-toast-in 0.18s ease-out;
 	transition: opacity 0.3s ease, transform 0.3s ease;
@@ -2104,8 +2124,8 @@ body.okno-app-body #wpbody-content {
 .okno-plan li {
 	display: flex;
 	align-items: flex-start;
-	gap: 8px;
-	padding: 7px 0;
+	gap: 10px;
+	padding: 8px 0;
 	border-bottom: 1px solid var(--okno-line);
 }
 
@@ -2122,7 +2142,7 @@ body.okno-app-body #wpbody-content {
 .okno-type-grid {
 	display: grid;
 	grid-template-columns: repeat( 4, minmax( 0, 1fr ) );
-	gap: 8px;
+	gap: 10px;
 	margin: 0;
 	padding: 0;
 	list-style: none;
@@ -2137,9 +2157,9 @@ body.okno-app-body #wpbody-content {
 	display: flex;
 	flex-direction: column;
 	align-items: flex-start;
-	gap: 3px;
+	gap: 4px;
 	width: 100%;
-	padding: 10px;
+	padding: 12px;
 	border: 1px solid transparent;
 	border-radius: 8px;
 	background: var(--okno-input);
@@ -2150,13 +2170,13 @@ body.okno-app-body #wpbody-content {
 
 .okno-type-card strong {
 	color: var(--okno-ink);
-	font-size: 12px;
+	font-size: var(--okno-text-base, 14px);
 	font-weight: 500;
 }
 
 .okno-type-card span {
 	color: var(--okno-faint);
-	font-size: 10.5px;
+	font-size: var(--okno-text-xs, 12px);
 	line-height: 1.4;
 }
 
@@ -2172,10 +2192,10 @@ body.okno-app-body #wpbody-content {
 	display: flex;
 	align-items: center;
 	justify-content: center;
-	gap: 10px;
-	margin-top: 12px;
+	gap: 12px;
+	margin-top: 14px;
 	color: var(--okno-faint);
-	font-size: 11px;
+	font-size: var(--okno-text-sm, 13px);
 }
 
 /* ── Médias ────────────────────────────────────────────────────────── */
@@ -2188,9 +2208,9 @@ body.okno-app-body #wpbody-content {
 .okno-media-grid {
 	display: grid;
 	grid-template-columns: repeat( auto-fill, minmax( 120px, 1fr ) );
-	gap: 12px;
+	gap: 14px;
 	margin: 0;
-	padding: 4px 4px 0;
+	padding: 5px 5px 0;
 	list-style: none;
 }
 
@@ -2201,7 +2221,7 @@ body.okno-app-body #wpbody-content {
 .okno-media-tile {
 	display: flex;
 	flex-direction: column;
-	gap: 5px;
+	gap: 6px;
 	width: 100%;
 	padding: 0;
 	border: 0;
@@ -2216,14 +2236,14 @@ body.okno-app-body #wpbody-content {
 	flex-direction: column;
 	align-items: center;
 	justify-content: center;
-	gap: 4px;
+	gap: 5px;
 	width: 100%;
 	aspect-ratio: 4 / 3;
 	object-fit: cover;
 	border-radius: 6px;
 	background: var(--okno-input);
 	color: var(--okno-faint);
-	font-size: 10px;
+	font-size: var(--okno-text-xs, 12px);
 	text-transform: uppercase;
 	box-shadow: 0 0 0 1px var(--okno-line);
 }
@@ -2231,7 +2251,7 @@ body.okno-app-body #wpbody-content {
 .okno-media-tile__name {
 	overflow: hidden;
 	padding: 0 2px;
-	font-size: 11px;
+	font-size: var(--okno-text-sm, 13px);
 	white-space: nowrap;
 	text-overflow: ellipsis;
 	text-align: left;
@@ -2262,20 +2282,20 @@ body.okno-app-body #wpbody-content {
 
 .okno-media-empty {
 	grid-column: 1 / -1;
-	padding: 48px;
+	padding: 58px;
 	color: var(--okno-faint);
 	text-align: center;
 }
 
 .okno-media-empty .okno-icon {
-	margin: 0 auto 8px;
+	margin: 0 auto 10px;
 }
 
 .okno-media-details__body {
 	display: grid;
-	gap: 14px;
+	gap: 17px;
 	align-content: start;
-	padding: 4px 14px 24px;
+	padding: 5px 17px 29px;
 	overflow-y: auto;
 }
 
@@ -2289,18 +2309,18 @@ body.okno-app-body #wpbody-content {
 }
 
 .okno-media-details__meta {
-	margin: -6px 0 0;
+	margin: -7px 0 0;
 	color: var(--okno-faint);
-	font-size: 11px;
+	font-size: var(--okno-text-sm, 13px);
 }
 
 .okno-media-details .okno-setting .okno-btn {
-	margin-top: 6px;
+	margin-top: 7px;
 }
 
 .okno-media-details .okno-actions {
 	display: flex;
-	gap: 6px;
+	gap: 7px;
 	flex-wrap: wrap;
 }
 
@@ -2310,9 +2330,9 @@ body.okno-app-body #wpbody-content {
 
 .okno-media-progress {
 	margin: 0;
-	padding: 0 12px 8px;
+	padding: 0 14px 10px;
 	color: var(--okno-muted);
-	font-size: 11px;
+	font-size: var(--okno-text-sm, 13px);
 }
 
 .okno-media-drop {
@@ -2323,12 +2343,12 @@ body.okno-app-body #wpbody-content {
 	flex-direction: column;
 	align-items: center;
 	justify-content: center;
-	gap: 8px;
+	gap: 10px;
 	border: 1px dashed var(--okno-accent-line);
 	border-radius: 12px;
 	background: rgba( 197, 255, 62, 0.08 );
 	color: var(--okno-ink);
-	font-size: 14px;
+	font-size: var(--okno-text-lg, 16px);
 	font-weight: 600;
 	pointer-events: none;
 }
@@ -2346,11 +2366,11 @@ body.okno-app-body #wpbody-content {
 	max-width: 880px;
 	min-width: 0;
 	margin: 0 auto;
-	padding: 20px 24px 60px;
+	padding: 24px 29px 72px;
 }
 
 .okno-home__side {
-	padding: 20px 16px 40px;
+	padding: 24px 19px 48px;
 	border-left: 1px solid var(--okno-line);
 }
 
@@ -2358,23 +2378,23 @@ body.okno-app-body #wpbody-content {
 	display: flex;
 	align-items: center;
 	justify-content: space-between;
-	gap: 16px;
+	gap: 19px;
 	flex-wrap: wrap;
 	max-width: 760px;
-	margin-bottom: 22px;
+	margin-bottom: 26px;
 }
 
 .okno-home__intro h2 {
 	margin: 0 0 2px;
 	color: var(--okno-ink);
-	font-size: 15px;
+	font-size: var(--okno-text-xl, 17px);
 	font-weight: 600;
 }
 
 .okno-home__intro p {
 	margin: 0;
 	color: var(--okno-muted);
-	font-size: 12px;
+	font-size: var(--okno-text-base, 14px);
 }
 
 .okno-home__section {
@@ -2382,27 +2402,27 @@ body.okno-app-body #wpbody-content {
 }
 
 .okno-home__section + .okno-home__section {
-	margin-top: 24px;
+	margin-top: 29px;
 }
 
 .okno-home__label {
 	display: flex;
 	align-items: center;
 	justify-content: space-between;
-	margin: 0 0 6px;
+	margin: 0 0 7px;
 	padding: 0 2px;
 	color: var(--okno-faint);
-	font-size: 10.5px;
+	font-size: var(--okno-text-xs, 12px);
 	font-weight: 500;
 	letter-spacing: 0.02em;
 }
 
 .okno-home__side .okno-home__label {
-	padding: 0 8px;
+	padding: 0 10px;
 }
 
 .okno-home__side .okno-home__section + .okno-home__section {
-	margin-top: 20px;
+	margin-top: 24px;
 }
 
 .okno-status-list {
@@ -2416,14 +2436,14 @@ body.okno-app-body #wpbody-content {
 .okno-status-list li {
 	display: flex;
 	align-items: flex-start;
-	gap: 9px;
+	gap: 11px;
 	margin: 0;
-	padding: 7px 8px;
+	padding: 8px 10px;
 	border-radius: 6px;
 }
 
 .okno-status-list .okno-dot {
-	margin-top: 5px;
+	margin-top: 6px;
 }
 
 .okno-status-list__text {
@@ -2433,13 +2453,13 @@ body.okno-app-body #wpbody-content {
 
 .okno-status-list__text strong {
 	color: var(--okno-ink);
-	font-size: 12px;
+	font-size: var(--okno-text-base, 14px);
 	font-weight: 500;
 }
 
 .okno-status-list__text span {
 	color: var(--okno-faint);
-	font-size: 11px;
+	font-size: var(--okno-text-sm, 13px);
 }
 
 /* ── Vues PHP (Accueil, Réglages, Publications, Démarrer) ──────────── */
@@ -2450,14 +2470,14 @@ body.okno-app-body #wpbody-content {
 	background: var(--okno-panel);
 	color: var(--okno-body);
 	font-family: var(--okno-font);
-	font-size: 12.5px;
+	font-size: var(--okno-text-base, 14px);
 	line-height: 1.55;
 }
 
 .okno-app .okno-admin--app .okno-page {
 	max-width: 880px;
 	margin-top: 0;
-	padding: 0 28px 64px;
+	padding: 0 34px 77px;
 }
 
 .okno-app .okno-admin--app .okno-page--narrow {
@@ -2467,9 +2487,9 @@ body.okno-app-body #wpbody-content {
 .okno-app .okno-admin--app .okno-page--head {
 	display: flex;
 	align-items: center;
-	min-height: 41px;
-	margin: 0 0 20px;
-	padding: 6px 14px;
+	min-height: 49px;
+	margin: 0 0 24px;
+	padding: 7px 17px;
 	max-width: none;
 	border-bottom: 1px solid var(--okno-line);
 }
@@ -2477,7 +2497,7 @@ body.okno-app-body #wpbody-content {
 .okno-app .okno-admin--app .okno-view-title {
 	margin: 0;
 	color: var(--okno-ink);
-	font-size: 13px;
+	font-size: var(--okno-text-md, 15px);
 	font-weight: 600;
 	letter-spacing: 0;
 }
@@ -2487,7 +2507,7 @@ body.okno-app-body #wpbody-content {
 }
 
 .okno-app .okno-admin--app .okno-card {
-	padding: 16px 18px;
+	padding: 19px 22px;
 	border: 1px solid var(--okno-line);
 	border-radius: 10px;
 	background: var(--okno-surface);
@@ -2499,12 +2519,12 @@ body.okno-app-body #wpbody-content {
 }
 
 .okno-app .okno-admin--app .okno-card h2 {
-	font-size: 14px;
+	font-size: var(--okno-text-lg, 16px);
 }
 
 .okno-app .okno-admin--app .okno-heading {
 	color: var(--okno-faint);
-	font-size: 10.5px;
+	font-size: var(--okno-text-xs, 12px);
 	font-weight: 500;
 	letter-spacing: 0.02em;
 	text-transform: none;
@@ -2512,27 +2532,27 @@ body.okno-app-body #wpbody-content {
 
 .okno-app .okno-admin--app .okno-eyebrow {
 	color: var(--okno-faint);
-	font-size: 10.5px;
+	font-size: var(--okno-text-xs, 12px);
 	letter-spacing: 0.02em;
 }
 
 .okno-app .okno-admin--app h1:not( .okno-view-title ) {
 	color: var(--okno-ink);
-	font-size: 18px;
+	font-size: var(--okno-text-2xl, 20px);
 	font-weight: 600;
 }
 
 .okno-app .okno-admin--app .okno-lead {
 	color: var(--okno-muted);
-	font-size: 13px;
+	font-size: var(--okno-text-md, 15px);
 }
 
 .okno-app .okno-admin--app .okno-btn {
-	height: 28px;
+	height: var(--okno-control, 36px);
 	min-height: 0;
-	padding: 0 12px;
+	padding: 0 14px;
 	border-radius: 8px;
-	font-size: 12px;
+	font-size: var(--okno-text-base, 14px);
 }
 
 .okno-app .okno-admin--app .okno-btn--quiet {
@@ -2546,9 +2566,9 @@ body.okno-app-body #wpbody-content {
 }
 
 .okno-app .okno-admin--app .okno-btn--small {
-	height: 24px;
-	padding: 0 9px;
-	font-size: 11.5px;
+	height: var(--okno-control-sm, 30px);
+	padding: 0 11px;
+	font-size: var(--okno-text-sm, 13px);
 }
 
 .okno-app .okno-admin--app input[type="text"],
@@ -2558,13 +2578,13 @@ body.okno-app-body #wpbody-content {
 .okno-app .okno-admin--app input[type="email"],
 .okno-app .okno-admin--app select,
 .okno-app .okno-admin--app textarea {
-	min-height: 30px;
-	padding: 5px 9px;
+	min-height: var(--okno-control, 36px);
+	padding: 6px 11px;
 	border: 1px solid transparent;
 	border-radius: 6px;
 	background-color: var(--okno-input);
 	color: var(--okno-ink);
-	font-size: 12.5px;
+	font-size: var(--okno-text-base, 14px);
 	box-shadow: none;
 }
 
@@ -2582,7 +2602,7 @@ body.okno-app-body #wpbody-content {
 }
 
 .okno-app .okno-admin--app .okno-form-section > h2 {
-	font-size: 15px;
+	font-size: var(--okno-text-xl, 17px);
 	font-weight: 600;
 }
 
@@ -2592,13 +2612,13 @@ body.okno-app-body #wpbody-content {
 
 .okno-app .okno-admin--app .okno-row__label {
 	color: var(--okno-muted);
-	font-size: 12px;
+	font-size: var(--okno-text-base, 14px);
 	font-weight: 500;
 }
 
 .okno-app .okno-admin--app .okno-help {
 	color: var(--okno-faint);
-	font-size: 11.5px;
+	font-size: var(--okno-text-sm, 13px);
 }
 
 .okno-app .okno-admin--app .okno-choice,
@@ -2625,7 +2645,7 @@ body.okno-app-body #wpbody-content {
 	background: var(--okno-canvas);
 	color: var(--okno-ink);
 	font-family: var(--okno-mono);
-	font-size: 11.5px;
+	font-size: var(--okno-text-sm, 13px);
 }
 
 .okno-app .okno-admin--app .okno-segmented {
@@ -2642,7 +2662,7 @@ body.okno-app-body #wpbody-content {
 .okno-app .okno-admin--app .okno-table th {
 	background: transparent;
 	color: var(--okno-faint);
-	font-size: 10.5px;
+	font-size: var(--okno-text-xs, 12px);
 	font-weight: 500;
 }
 
@@ -2673,7 +2693,7 @@ body.okno-app-body #wpbody-content {
 }
 
 .okno-app .okno-home .okno-log__item {
-	padding: 10px 12px;
+	padding: 12px 14px;
 	border-top: 1px solid var(--okno-line);
 }
 
@@ -2682,32 +2702,32 @@ body.okno-app-body #wpbody-content {
 }
 
 .okno-app .okno-home .okno-log__field {
-	font-size: 12px;
+	font-size: var(--okno-text-base, 14px);
 	font-weight: 600;
 }
 
 .okno-app .okno-home .okno-log__meta {
-	font-size: 11px;
+	font-size: var(--okno-text-sm, 13px);
 }
 
 .okno-app .okno-home .okno-diff {
-	margin-top: 8px;
-	gap: 8px;
+	margin-top: 10px;
+	gap: 10px;
 }
 
 .okno-app .okno-home .okno-diff__value {
-	padding: 6px 9px;
+	padding: 7px 11px;
 	border-radius: 6px;
-	font-size: 11.5px;
+	font-size: var(--okno-text-sm, 13px);
 }
 
 .okno-app .okno-home .okno-empty {
-	padding: 32px 16px;
-	font-size: 12px;
+	padding: 38px 19px;
+	font-size: var(--okno-text-base, 14px);
 }
 
 .okno-app .okno-home .okno-empty h3 {
-	font-size: 13px;
+	font-size: var(--okno-text-md, 15px);
 }
 
 /* ── Éditeur dans l'application ────────────────────────────────────── */
@@ -2752,11 +2772,11 @@ body.okno-app-body #wpbody-content {
 	overflow-y: auto;
 	border: 0;
 	background: var(--okno-panel);
-	font-size: 12px;
+	font-size: var(--okno-text-base, 14px);
 }
 
 .okno-editor[data-mode="form"] .okno-panel > * {
-	max-width: 688px; /* 640 px de champs + les marges du volet. */
+	max-width: calc( var(--okno-form-width, 720px) + 56px ); /* Colonne de champs + les marges du volet. */
 }
 
 .okno-editor[data-mode="form"] .okno-panel > .okno-inspector-head {
@@ -2796,8 +2816,8 @@ body.okno-app-body #wpbody-content {
 }
 
 .okno-editor--collections #okno-open-visual .okno-icon {
-	width: 13px;
-	height: 13px;
+	width: 15px;
+	height: 15px;
 }
 
 .okno-editor--collections[data-mode="form"].is-history-open .okno-sidebar {
@@ -2817,47 +2837,48 @@ body.okno-app-body #wpbody-content {
 	display: flex;
 	flex-direction: column;
 	align-items: center;
-	gap: 4px;
+	gap: 5px;
 	max-width: none;
-	margin: 18vh 24px 0;
+	margin: 18vh 29px 0;
 }
 
 .okno-panel-empty--entry strong {
 	color: var(--okno-ink);
-	font-size: 13px;
+	font-size: var(--okno-text-md, 15px);
 	font-weight: 600;
 }
 
 /* Filtres de la liste des entrées : statut et tri. */
 .okno-pane__filters {
 	display: flex;
-	gap: 6px;
+	gap: 7px;
 	flex: 0 0 auto;
-	padding: 0 12px 8px;
+	padding: 0 14px 10px;
 }
 
 .okno-pane__filters .okno-input {
 	flex: 1 1 auto;
 	width: auto;
 	min-width: 0;
-	height: 26px;
-	padding: 2px 6px;
-	font-size: 11.5px;
+	height: var(--okno-control-sm, 32px);
+	padding: 2px 8px 2px 10px;
+	font-size: var(--okno-text-sm, 13px);
 }
 
+.okno-pane__filters .okno-input,
 .okno-pane__filters .okno-input:first-of-type {
-	flex: 0 1 118px;
-	width: 118px;
+	flex: 1 1 0;
+	width: auto;
 }
 
 .okno-app .okno-pane__filters select.okno-input {
-	padding-right: 20px;
+	padding-right: 24px;
 	background-position: right 3px top 50%;
 }
 
 .okno-form-browser .okno-pane--list {
-	flex-basis: 300px;
-	width: 300px;
+	flex-basis: var(--okno-pane-entries, 360px);
+	width: var(--okno-pane-entries, 360px);
 }
 
 .okno-pane__search .okno-input:only-of-type {
@@ -2919,6 +2940,21 @@ body.okno-app-body #wpbody-content {
 }
 
 /* ── Écrans moyens et étroits ──────────────────────────────────────── */
+
+/* Écrans de portable (1440 px) : volets un peu plus étroits, l'entrée garde la place. */
+@media ( max-width: 1600px ) {
+	.okno-app,
+	.okno-app .okno-admin,
+	.okno-app .okno-editor {
+		--okno-pane-nav: 232px;
+		--okno-pane-entries: 312px;
+		--okno-pane-aside: 310px;
+	}
+
+	.okno-app .okno-editor--collections #okno-open-visual span {
+		display: none;
+	}
+}
 
 @media ( max-width: 1280px ) {
 	.okno-pane--nav {
@@ -3035,7 +3071,7 @@ body.okno-app-body #wpbody-content {
 	.okno-app--collapsed .okno-nav__link,
 	.okno-app--collapsed .okno-nav__brand {
 		justify-content: flex-start;
-		padding: 0 10px;
+		padding: 0 12px;
 	}
 
 	.okno-nav__collapse {
@@ -3063,8 +3099,8 @@ body.okno-app-body #wpbody-content {
 	}
 
 	.okno-topbar {
-		gap: 6px;
-		padding: 0 6px;
+		gap: 7px;
+		padding: 0 7px;
 	}
 
 	.okno-topbar__menu {
@@ -3078,7 +3114,7 @@ body.okno-app-body #wpbody-content {
 	}
 
 	.okno-app-view {
-		padding: 16px 16px 48px;
+		padding: 19px 19px 58px;
 	}
 
 	/* Volets empilés : chacun garde sa hauteur naturelle. */
@@ -3117,7 +3153,7 @@ body.okno-app-body #wpbody-content {
 	}
 
 	.okno-detail__body {
-		padding: 16px 16px 48px;
+		padding: 19px 19px 58px;
 	}
 
 	.okno-type-grid {
@@ -3150,7 +3186,7 @@ body.okno-app-body #wpbody-content {
 
 .okno-pane__hint {
 	margin: 0;
-	padding: 10px 8px 0;
+	padding: 12px 10px 0;
 }
 
 .okno-item--add {
@@ -3163,8 +3199,8 @@ body.okno-app-body #wpbody-content {
 }
 
 .okno-app .okno-item--add.okno-add-field {
-	height: 32px;
-	padding: 0 8px;
+	height: var(--okno-row, 38px);
+	padding: 0 10px;
 	border-top: 0;
 	border-radius: 6px;
 }
@@ -3183,7 +3219,7 @@ body.okno-app-body #wpbody-content {
 }
 
 .okno-archived-actions {
-	margin-top: 12px;
+	margin-top: 14px;
 }
 
 .okno-builder__none {
@@ -3207,70 +3243,586 @@ body.okno-app-body #wpbody-content {
 	color: var(--okno-faint);
 }
 
-/* Cases à cocher et boutons radio dessinés (ceux de wp-admin sont clairs). */
-.okno-app .okno-app-view input[type="checkbox"]:not( .okno-switch input ),
-.okno-app .okno-dialog input[type="checkbox"],
-.okno-app .okno-app-view input[type="radio"],
-.okno-app .okno-admin--app input[type="checkbox"],
-.okno-app .okno-admin--app input[type="radio"],
-.okno-app .okno-panel input[type="checkbox"],
-.okno-app .okno-panel input[type="radio"] {
+/* ── Focus ─────────────────────────────────────────────────────────── */
+
+/*
+ * Anneau au clavier seulement (:focus-visible), à la couleur d'encre de
+ * l'accent. wp-admin pose son propre cadre bleu au clic (a:focus,
+ * .button:focus, input:focus : box-shadow #2271b1) : retiré dans l'app.
+ */
+.okno-app a:focus,
+.okno-app button:focus,
+.okno-app .button:focus,
+.okno-app [role="button"]:focus,
+.okno-app [role="option"]:focus,
+.okno-app [role="listbox"]:focus,
+.okno-app summary:focus,
+.okno-app input[type="checkbox"]:focus,
+.okno-app input[type="radio"]:focus,
+.okno-app input[type="range"]:focus,
+.okno-app input[type="color"]:focus,
+.okno-app input[type="file"]:focus {
+	box-shadow: none;
+}
+
+.okno-app :focus:not( :focus-visible ),
+.okno-app .button:focus:not( :focus-visible ) {
+	outline: none;
+}
+
+.okno-app a:focus-visible,
+.okno-app button:focus-visible,
+.okno-app .button:focus-visible,
+.okno-app summary:focus-visible,
+.okno-app [tabindex]:focus-visible,
+.okno-app input[type="checkbox"]:focus-visible,
+.okno-app input[type="radio"]:focus-visible,
+.okno-app input[type="range"]:focus-visible,
+.okno-app input[type="file"]:focus-visible {
+	outline: 2px solid var(--okno-accent-ink);
+	outline-offset: 2px;
+	box-shadow: none;
+}
+
+/* ── Cases à cocher, boutons radio, interrupteurs ──────────────────── */
+
+/*
+ * Une seule apparence partout dans l'application (vues, boîtes de dialogue,
+ * éditeur, réglages PHP) : carré arrondi avec coche sur fond lime, cercle
+ * avec point lime. Les interrupteurs (.okno-switch, .okno-toggle--switch)
+ * ont leurs propres règles.
+ */
+.okno-app input[type="checkbox"]:not( .okno-switch input ):not( .okno-toggle--switch input ),
+.okno-app input[type="radio"] {
 	position: relative;
 	flex: 0 0 auto;
-	width: 14px;
-	min-width: 14px;
-	height: 14px;
+	width: 18px;
+	min-width: 18px;
+	height: 18px;
 	margin: 0;
 	padding: 0;
-	border: 1px solid var(--okno-line-strong);
-	border-radius: 4px;
+	border: 1.5px solid var(--okno-line-strong);
+	border-radius: 5px;
 	background: var(--okno-input);
 	box-shadow: none;
+	color: var(--okno-on-accent);
 	-webkit-appearance: none;
 	appearance: none;
 	cursor: pointer;
 	vertical-align: middle;
+	transition: background-color 0.12s ease, border-color 0.12s ease, box-shadow 0.12s ease;
 }
 
-.okno-app .okno-app-view input[type="radio"],
-.okno-app .okno-admin--app input[type="radio"],
-.okno-app .okno-panel input[type="radio"] {
+.okno-app input[type="radio"] {
 	border-radius: 50%;
 }
 
-.okno-app .okno-app-view input[type="checkbox"]::before,
-.okno-app .okno-dialog input[type="checkbox"]::before,
-.okno-app .okno-admin--app input[type="checkbox"]::before,
-.okno-app .okno-panel input[type="checkbox"]::before,
-.okno-app .okno-app-view input[type="radio"]::before,
-.okno-app .okno-admin--app input[type="radio"]::before,
-.okno-app .okno-panel input[type="radio"]::before {
+.okno-app input[type="checkbox"]::before,
+.okno-app input[type="radio"]::before {
 	content: none;
 }
 
-.okno-app .okno-app-view input[type="checkbox"]:checked:not( .okno-switch input ),
-.okno-app .okno-dialog input[type="checkbox"]:checked,
-.okno-app .okno-admin--app input[type="checkbox"]:checked,
-.okno-app .okno-panel input[type="checkbox"]:checked {
-	border-color: var(--okno-accent);
-	background: var(--okno-accent) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%230a0a0a' stroke-width='3.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 12.5l4.5 4.5L19 7.5'/%3E%3C/svg%3E") no-repeat center / 10px;
+.okno-app input[type="checkbox"]:not( .okno-switch input ):not( .okno-toggle--switch input ):hover:not( :disabled ),
+.okno-app input[type="radio"]:hover:not( :disabled ) {
+	border-color: var(--okno-muted);
 }
 
-.okno-app .okno-app-view input[type="radio"]:checked,
-.okno-app .okno-admin--app input[type="radio"]:checked,
-.okno-app .okno-panel input[type="radio"]:checked {
-	border: 4px solid var(--okno-accent);
+.okno-app input[type="checkbox"]:not( .okno-switch input ):not( .okno-toggle--switch input ):checked,
+.okno-app input[type="checkbox"]:not( .okno-switch input ):not( .okno-toggle--switch input ):indeterminate {
+	border-color: var(--okno-accent-line);
+	background: var(--okno-accent) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%230a0a0a' stroke-width='3.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 12.5l4.5 4.5L19 7.5'/%3E%3C/svg%3E") no-repeat center / 12px;
+}
+
+.okno-app input[type="checkbox"]:not( .okno-switch input ):not( .okno-toggle--switch input ):indeterminate {
+	background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%230a0a0a' stroke-width='3.2' stroke-linecap='round'%3E%3Cpath d='M6 12h12'/%3E%3C/svg%3E");
+}
+
+.okno-app input[type="radio"]:checked {
+	border-color: var(--okno-accent-line);
+	background: radial-gradient( circle, var(--okno-accent) 0 4.5px, transparent 5px ), var(--okno-input);
+}
+
+.okno-app[data-theme="light"] input[type="radio"]:checked {
+	background: radial-gradient( circle, var(--okno-accent-ink) 0 4.5px, transparent 5px ), var(--okno-surface);
+}
+
+.okno-app input[type="checkbox"]:disabled,
+.okno-app input[type="radio"]:disabled {
+	opacity: 0.4;
+	cursor: not-allowed;
+}
+
+/* Interrupteur : booléens (vrai / faux) et options qui s'activent. */
+.okno-app .okno-toggle--switch input[type="checkbox"],
+.okno-app .okno-switch input[type="checkbox"] {
+	position: relative;
+	flex: 0 0 auto;
+	width: 34px;
+	min-width: 34px;
+	height: 20px;
+	margin: 0;
+	padding: 0;
+	border: 0;
+	border-radius: 99px;
+	background: var(--okno-active);
+	box-shadow: inset 0 0 0 1px var(--okno-line-strong);
+	-webkit-appearance: none;
+	appearance: none;
+	cursor: pointer;
+	transition: background-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.okno-app .okno-toggle--switch input[type="checkbox"]::before,
+.okno-app .okno-switch input[type="checkbox"]::before {
+	content: none;
+}
+
+.okno-app .okno-toggle--switch input[type="checkbox"]::after,
+.okno-app .okno-switch input[type="checkbox"]::after {
+	content: "";
+	position: absolute;
+	top: 3px;
+	left: 3px;
+	width: 14px;
+	height: 14px;
+	border-radius: 50%;
+	background: #ffffff;
+	box-shadow: 0 1px 2px rgba( 0, 0, 0, 0.3 );
+	transition: transform 0.15s ease, background-color 0.15s ease;
+}
+
+.okno-app .okno-toggle--switch input[type="checkbox"]:checked,
+.okno-app .okno-switch input[type="checkbox"]:checked {
+	background: var(--okno-accent);
+	box-shadow: inset 0 0 0 1px var(--okno-accent-line);
+}
+
+.okno-app .okno-toggle--switch input[type="checkbox"]:checked::after,
+.okno-app .okno-switch input[type="checkbox"]:checked::after {
 	background: #0a0a0a;
+	transform: translateX( 14px );
 }
 
-.okno-app .okno-app-view input[type="checkbox"]:focus-visible,
-.okno-app .okno-dialog input[type="checkbox"]:focus-visible,
-.okno-app .okno-app-view input[type="radio"]:focus-visible,
-.okno-app .okno-admin--app input:focus-visible,
-.okno-app .okno-panel input[type="checkbox"]:focus-visible,
-.okno-app .okno-panel input[type="radio"]:focus-visible {
+.okno-app .okno-toggle--switch input[type="checkbox"]:disabled,
+.okno-app .okno-switch input[type="checkbox"]:disabled {
+	opacity: 0.4;
+	cursor: not-allowed;
+}
+
+@media ( prefers-reduced-motion: reduce ) {
+	.okno-app input[type="checkbox"],
+	.okno-app input[type="checkbox"]::after,
+	.okno-app input[type="radio"] {
+		transition: none !important;
+	}
+}
+
+/* Cartes radio et cases en carte : état choisi net (bord, teinte, point). */
+.okno-app .okno-radio,
+.okno-app .okno-admin--app .okno-choice,
+.okno-app .okno-admin--app .okno-checks label {
+	border: 1px solid var(--okno-line);
+	transition: border-color 0.12s ease, background-color 0.12s ease;
+}
+
+.okno-app .okno-radio:hover,
+.okno-app .okno-admin--app .okno-choice:hover,
+.okno-app .okno-admin--app .okno-checks label:hover {
+	border-color: var(--okno-line-strong);
+}
+
+.okno-app .okno-radio:has( input:checked ),
+.okno-app .okno-admin--app .okno-choice:has( input:checked ),
+.okno-app .okno-admin--app .okno-checks label:has( input:checked ) {
+	border-color: var(--okno-accent-line);
+	background: var(--okno-accent-soft);
+	box-shadow: inset 0 0 0 1px var(--okno-accent-line);
+}
+
+.okno-app .okno-radio:has( input:focus-visible ),
+.okno-app .okno-admin--app .okno-choice:has( input:focus-visible ),
+.okno-app .okno-admin--app .okno-checks label:has( input:focus-visible ) {
 	outline: 2px solid var(--okno-accent-ink);
 	outline-offset: 2px;
+}
+
+.okno-app .okno-radio:has( input:focus-visible ) input,
+.okno-app .okno-admin--app .okno-choice:has( input:focus-visible ) input,
+.okno-app .okno-admin--app .okno-checks label:has( input:focus-visible ) input {
+	outline: none;
+}
+
+.okno-app .okno-radio:has( input:disabled ) {
+	opacity: 0.5;
+	cursor: not-allowed;
+}
+
+/* ── Listes déroulantes (OknoUI.select) ────────────────────────────── */
+
+/*
+ * Bouton + liste (role listbox) à la place du <select> natif, qui reste
+ * dans la page, masqué, pour la valeur et les formulaires.
+ */
+.okno-select-native {
+	display: none !important;
+}
+
+.okno-select {
+	display: inline-flex;
+	align-items: center;
+	gap: 8px;
+	width: 100%;
+	min-width: 0;
+	height: var(--okno-control, 36px);
+	min-height: 0;
+	margin: 0;
+	padding: 0 10px 0 12px;
+	border: 1px solid transparent;
+	border-radius: 6px;
+	background: var(--okno-input);
+	background-image: none !important;
+	color: var(--okno-ink);
+	font: inherit;
+	font-size: var(--okno-text-base, 14px);
+	line-height: 1.2;
+	text-align: left;
+	box-shadow: none;
+	cursor: pointer;
+	transition: border-color 0.1s ease, background-color 0.1s ease;
+}
+
+.okno-select:hover:not( :disabled ) {
+	background-color: var(--okno-active);
+}
+
+.okno-select[aria-expanded="true"],
+.okno-select:focus-visible {
+	border-color: var(--okno-accent-ink);
+	outline: none !important;
+}
+
+.okno-select:disabled {
+	opacity: 0.5;
+	cursor: not-allowed;
+}
+
+.okno-select__label {
+	flex: 1 1 auto;
+	min-width: 0;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+.okno-select__label.is-placeholder {
+	color: var(--okno-faint);
+}
+
+.okno-select__chevron {
+	flex: 0 0 auto;
+	width: 14px;
+	height: 14px;
+	color: var(--okno-faint);
+	transition: transform 0.12s ease;
+}
+
+.okno-select[aria-expanded="true"] .okno-select__chevron {
+	transform: rotate( 180deg );
+}
+
+.okno-select__dot,
+.okno-listbox__dot {
+	flex: 0 0 auto;
+	width: 8px;
+	height: 8px;
+	border-radius: 50%;
+	background: var(--okno-faint);
+}
+
+[data-dot="ok"] > .okno-select__dot,
+[data-dot="ok"] > .okno-listbox__dot {
+	background: var(--okno-ok);
+}
+
+[data-dot="warn"] > .okno-select__dot,
+[data-dot="warn"] > .okno-listbox__dot {
+	background: var(--okno-warn);
+}
+
+[data-dot="pending"] > .okno-select__dot,
+[data-dot="pending"] > .okno-listbox__dot {
+	background: var(--okno-pending, #ff9f0a);
+}
+
+[data-dot="error"] > .okno-select__dot,
+[data-dot="error"] > .okno-listbox__dot {
+	background: var(--okno-error);
+}
+
+[data-dot="purple"] > .okno-select__dot,
+[data-dot="purple"] > .okno-listbox__dot {
+	background: var(--okno-purple);
+}
+
+[data-dot="accent"] > .okno-select__dot,
+[data-dot="accent"] > .okno-listbox__dot {
+	background: var(--okno-accent);
+}
+
+/* Variante compacte : barre d'outils, filtres. */
+.okno-select--compact {
+	height: var(--okno-control-sm, 30px);
+	padding: 0 8px 0 10px;
+	font-size: var(--okno-text-sm, 13px);
+}
+
+.okno-listbox {
+	position: fixed;
+	z-index: 160000;
+	min-width: 160px;
+	max-width: min( 420px, calc( 100vw - 16px ) );
+	margin: 0;
+	padding: 5px;
+	overflow-y: auto;
+	overscroll-behavior: contain;
+	border: 1px solid var(--okno-line-strong);
+	border-radius: 9px;
+	background: var(--okno-elevated, #1d1d1d);
+	box-shadow: var(--okno-shadow);
+	color: var(--okno-ink);
+	font-family: var(--okno-font);
+	font-size: var(--okno-text-base, 14px);
+	list-style: none;
+	outline: none;
+	animation: okno-listbox-in 0.1s ease-out;
+}
+
+@keyframes okno-listbox-in {
+	from {
+		opacity: 0;
+		transform: translateY( -3px );
+	}
+}
+
+@media ( prefers-reduced-motion: reduce ) {
+	.okno-listbox {
+		animation: none;
+	}
+}
+
+.okno-app .okno-listbox:focus-visible,
+.okno-listbox:focus {
+	outline: none;
+}
+
+.okno-listbox__option {
+	display: flex;
+	align-items: center;
+	gap: 9px;
+	min-height: 34px;
+	margin: 0;
+	padding: 6px 10px 6px 8px;
+	border-radius: 6px;
+	color: var(--okno-ink);
+	line-height: 1.3;
+	cursor: pointer;
+	user-select: none;
+}
+
+.okno-listbox__option.is-active {
+	background: var(--okno-active);
+}
+
+.okno-listbox__option[aria-disabled="true"] {
+	color: var(--okno-faint);
+	cursor: not-allowed;
+}
+
+.okno-listbox__check {
+	flex: 0 0 auto;
+	width: 16px;
+	height: 16px;
+	color: var(--okno-accent-ink);
+	visibility: hidden;
+}
+
+.okno-listbox__option[aria-selected="true"] .okno-listbox__check {
+	visibility: visible;
+}
+
+.okno-listbox__option[aria-selected="true"] {
+	font-weight: 600;
+}
+
+.okno-listbox__text {
+	flex: 1 1 auto;
+	min-width: 0;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+.okno-listbox__group {
+	padding: 8px 10px 4px 33px;
+	color: var(--okno-faint);
+	font-size: var(--okno-text-xs, 12px);
+	font-weight: 600;
+	letter-spacing: 0.02em;
+	text-transform: uppercase;
+}
+
+.okno-listbox__empty {
+	padding: 8px 10px;
+	color: var(--okno-faint);
+	font-size: var(--okno-text-sm, 13px);
+}
+
+.okno-listbox__option--create {
+	border-top: 1px solid var(--okno-line);
+	border-radius: 0 0 6px 6px;
+	color: var(--okno-accent-ink);
+	font-weight: 500;
+}
+
+/* ── Choix multiples en pastilles (OknoUI.chips) ───────────────────── */
+
+.okno-chips {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 6px;
+	min-height: var(--okno-control, 36px);
+	padding: 4px 6px;
+	border: 1px solid transparent;
+	border-radius: 6px;
+	background: var(--okno-input);
+	cursor: text;
+}
+
+.okno-chips:focus-within {
+	border-color: var(--okno-accent-ink);
+}
+
+.okno-chips__chip {
+	display: inline-flex;
+	align-items: center;
+	gap: 2px;
+	max-width: 100%;
+	height: 26px;
+	padding: 0 2px 0 9px;
+	border-radius: 99px;
+	background: var(--okno-active);
+	color: var(--okno-ink);
+	font-size: var(--okno-text-sm, 13px);
+	font-weight: 500;
+}
+
+.okno-chips__chip.is-new {
+	background: var(--okno-accent-soft);
+	color: var(--okno-accent-ink);
+}
+
+.okno-chips__chip span {
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+.okno-chips__remove {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 22px;
+	height: 22px;
+	padding: 0;
+	border: 0;
+	border-radius: 50%;
+	background: transparent;
+	color: var(--okno-muted);
+	cursor: pointer;
+}
+
+.okno-chips__remove:hover {
+	background: var(--okno-hover);
+	color: var(--okno-ink);
+}
+
+.okno-chips__remove svg {
+	width: 12px;
+	height: 12px;
+}
+
+.okno-app .okno-chips input.okno-chips__input {
+	flex: 1 1 120px;
+	min-width: 120px;
+	height: 26px;
+	min-height: 0;
+	margin: 0;
+	padding: 0 4px;
+	border: 0 !important;
+	background: transparent !important;
+	color: var(--okno-ink);
+	font-size: var(--okno-text-base, 14px);
+	box-shadow: none !important;
+	outline: none !important;
+}
+
+/* ── Champs natifs de l'entrée (contenu, extrait, adresse) ─────────── */
+
+.okno-slug-preview {
+	display: block;
+	margin-top: 6px;
+	overflow: hidden;
+	color: var(--okno-faint);
+	font-size: var(--okno-text-sm, 13px);
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+.okno-slug-preview strong {
+	color: var(--okno-ink);
+	font-weight: 500;
+}
+
+.okno-blocks-notice {
+	display: grid;
+	gap: 10px;
+	padding: 14px 16px;
+	border: 1px solid var(--okno-line);
+	border-radius: 8px;
+	background: var(--okno-input);
+	color: var(--okno-body);
+	font-size: var(--okno-text-base, 14px);
+}
+
+.okno-blocks-notice p {
+	margin: 0;
+}
+
+.okno-blocks-notice__excerpt {
+	max-height: 120px;
+	overflow: hidden;
+	color: var(--okno-muted);
+	font-size: var(--okno-text-sm, 13px);
+	-webkit-mask-image: linear-gradient( to bottom, #000 60%, transparent );
+	mask-image: linear-gradient( to bottom, #000 60%, transparent );
+}
+
+.okno-blocks-notice .okno-btn {
+	justify-self: start;
+}
+
+.okno-app .okno-field-help {
+	margin: 6px 0 0;
+	color: var(--okno-faint);
+	font-size: var(--okno-text-sm, 13px);
+	line-height: 1.45;
+}
+
+.okno-field-row {
+	display: grid;
+	grid-template-columns: repeat( 2, minmax( 0, 1fr ) );
+	gap: 14px;
 }
 
 .okno-subfields > .okno-btn {
@@ -3283,7 +3835,7 @@ body.okno-app-body #wpbody-content {
 }
 
 .okno-media__main {
-	padding: 4px 12px 16px;
+	padding: 5px 14px 19px;
 }
 
 .okno-app .okno-dot--accent {
@@ -3294,6 +3846,595 @@ body.okno-app-body #wpbody-content {
 	border-top: 0;
 }
 
-.okno-app .okno-editor .okno-status-select {
+.okno-app .okno-editor select.okno-status-select {
 	max-width: 120px;
+}
+
+/* ── Médiathèque, liens et éditeur de texte WordPress dans l'app ───── */
+
+/*
+ * La fenêtre de la médiathèque (wp.media), celle des liens (wpLink) et les
+ * fenêtres de TinyMCE sont ajoutées au <body>, hors de la coque : elles
+ * reçoivent ici les couleurs d'Okno (clair et sombre, d'après le thème posé
+ * sur <html>), le bouton principal lime et l'anneau de sélection d'accent.
+ */
+html[data-okno-theme] body.okno-app-body {
+	--okno-m-bg: #ffffff;
+	--okno-m-panel: #f7f7f7;
+	--okno-m-input: rgba( 0, 0, 0, 0.05 );
+	--okno-m-hover: rgba( 0, 0, 0, 0.06 );
+	--okno-m-line: rgba( 0, 0, 0, 0.1 );
+	--okno-m-ink: #171717;
+	--okno-m-muted: #555555;
+	--okno-m-accent: #c5ff3e;
+	--okno-m-accent-hover: #b4f01f;
+	--okno-m-accent-ink: #3d6b00;
+	--okno-m-on-accent: #0a0a0a;
+}
+
+html[data-okno-theme="dark"] body.okno-app-body {
+	--okno-m-bg: #1a1a1a;
+	--okno-m-panel: #141414;
+	--okno-m-input: rgba( 255, 255, 255, 0.07 );
+	--okno-m-hover: rgba( 255, 255, 255, 0.08 );
+	--okno-m-line: rgba( 255, 255, 255, 0.1 );
+	--okno-m-ink: #f5f5f5;
+	--okno-m-muted: #a3a3a3;
+	--okno-m-accent-hover: #d4ff6b;
+	--okno-m-accent-ink: #c5ff3e;
+}
+
+body.okno-app-body .media-modal-backdrop,
+body.okno-app-body #wp-link-backdrop,
+body.okno-app-body #mce-modal-block.mce-in {
+	background: #000000;
+	opacity: 0.55;
+}
+
+body.okno-app-body .media-modal {
+	z-index: 1000000;
+}
+
+body.okno-app-body .media-modal-backdrop {
+	z-index: 999990;
+}
+
+body.okno-app-body .media-modal-content,
+body.okno-app-body .media-frame,
+body.okno-app-body .media-frame-content,
+body.okno-app-body .media-frame-router,
+body.okno-app-body .media-frame-title,
+body.okno-app-body .media-frame-toolbar .media-toolbar,
+body.okno-app-body .attachments-browser .media-toolbar,
+body.okno-app-body #wp-link-wrap,
+body.okno-app-body #wp-link .query-results,
+body.okno-app-body #wp-link-wrap #link-modal-title,
+body.okno-app-body #wp-link-wrap .submitbox {
+	border-color: var(--okno-m-line);
+	background: var(--okno-m-bg);
+	color: var(--okno-m-ink);
+}
+
+body.okno-app-body .media-modal-content {
+	border-radius: 12px;
+	overflow: hidden;
+}
+
+body.okno-app-body .media-frame-menu,
+body.okno-app-body .media-menu,
+body.okno-app-body .media-sidebar,
+body.okno-app-body .attachment-details,
+body.okno-app-body .media-frame .media-frame-menu-heading {
+	border-color: var(--okno-m-line);
+	background: var(--okno-m-panel);
+	color: var(--okno-m-ink);
+}
+
+body.okno-app-body .media-frame h1,
+body.okno-app-body .media-frame h2,
+body.okno-app-body .media-frame h3,
+body.okno-app-body .media-modal .media-sidebar h2,
+body.okno-app-body .media-frame .filename,
+body.okno-app-body #wp-link-wrap #link-modal-title,
+body.okno-app-body #wp-link label span {
+	color: var(--okno-m-ink);
+}
+
+body.okno-app-body .media-frame .description,
+body.okno-app-body .media-frame .media-uploader-status,
+body.okno-app-body .media-modal .attachment-info,
+body.okno-app-body .media-modal .attachment-info .uploaded,
+body.okno-app-body .media-modal .attachment-info .file-size,
+body.okno-app-body .media-modal .attachment-info .dimensions,
+body.okno-app-body .media-modal .setting .name,
+body.okno-app-body .media-modal .attachment-details .setting span,
+body.okno-app-body .media-frame .media-views-heading,
+body.okno-app-body #wp-link .howto,
+body.okno-app-body #wp-link .query-notice-default {
+	color: var(--okno-m-muted);
+}
+
+/* Onglets (Téléverser / Médiathèque) et menu de gauche. */
+body.okno-app-body .media-router .media-menu-item,
+body.okno-app-body .media-menu .media-menu-item {
+	border: 0;
+	background: transparent;
+	color: var(--okno-m-muted);
+	font-weight: 500;
+}
+
+body.okno-app-body .media-router .media-menu-item:hover,
+body.okno-app-body .media-menu .media-menu-item:hover {
+	color: var(--okno-m-ink);
+}
+
+body.okno-app-body .media-router .media-menu-item.active,
+body.okno-app-body .media-router .media-menu-item[aria-selected="true"],
+body.okno-app-body .media-router .media-menu-item:focus {
+	background: transparent !important;
+	color: var(--okno-m-ink);
+	box-shadow: none;
+}
+
+body.okno-app-body .attachment .filename {
+	background: var(--okno-m-panel);
+	color: var(--okno-m-ink);
+	box-shadow: inset 0 0 0 1px var(--okno-m-line);
+}
+
+body.okno-app-body .media-router .media-menu-item.active::after,
+body.okno-app-body .media-router .media-menu-item[aria-selected="true"]::after {
+	background: var(--okno-m-accent);
+}
+
+body.okno-app-body .media-menu .media-menu-item.active {
+	background: var(--okno-m-hover);
+	color: var(--okno-m-ink);
+}
+
+body.okno-app-body .media-modal-close,
+body.okno-app-body #wp-link-close {
+	color: var(--okno-m-muted);
+}
+
+body.okno-app-body .media-modal-close:hover,
+body.okno-app-body #wp-link-close:hover {
+	color: var(--okno-m-ink);
+}
+
+body.okno-app-body .media-modal-close .media-modal-icon::before,
+body.okno-app-body #wp-link-close::before {
+	color: inherit;
+}
+
+/* Champs : filtres, recherche, détails de la pièce jointe, lien. */
+body.okno-app-body .media-modal input[type="text"],
+body.okno-app-body .media-modal input[type="search"],
+body.okno-app-body .media-modal input[type="url"],
+body.okno-app-body .media-modal input[type="number"],
+body.okno-app-body .media-modal textarea,
+body.okno-app-body .media-modal select,
+body.okno-app-body #wp-link-wrap input[type="text"],
+body.okno-app-body #wp-link-wrap input[type="search"] {
+	min-height: 34px;
+	border: 1px solid transparent;
+	border-radius: 6px;
+	background-color: var(--okno-m-input);
+	color: var(--okno-m-ink);
+	box-shadow: none;
+}
+
+body.okno-app-body .media-modal select {
+	padding-right: 28px;
+	background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23999' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+	background-position: right 9px center;
+	background-size: 12px;
+}
+
+body.okno-app-body .media-modal select option {
+	background: var(--okno-m-bg);
+	color: var(--okno-m-ink);
+}
+
+body.okno-app-body .media-modal input:focus,
+body.okno-app-body .media-modal textarea:focus,
+body.okno-app-body .media-modal select:focus,
+body.okno-app-body #wp-link-wrap input:focus {
+	border-color: var(--okno-m-accent-ink);
+	box-shadow: none;
+	outline: none;
+}
+
+body.okno-app-body .media-modal input[readonly],
+body.okno-app-body .media-modal textarea[readonly] {
+	color: var(--okno-m-muted);
+}
+
+/* Boutons : principal lime, secondaires neutres (plus de bleu wp-admin). */
+body.okno-app-body .media-modal .button,
+body.okno-app-body #wp-link-wrap .button,
+body.okno-app-body .mce-window .mce-btn {
+	min-height: 34px;
+	border: 1px solid transparent;
+	border-radius: 7px;
+	background: var(--okno-m-input);
+	color: var(--okno-m-ink);
+	box-shadow: none;
+	font-weight: 500;
+}
+
+body.okno-app-body .media-modal .button:hover,
+body.okno-app-body #wp-link-wrap .button:hover {
+	border-color: transparent;
+	background: var(--okno-m-hover);
+	color: var(--okno-m-ink);
+}
+
+body.okno-app-body .media-modal .button-primary,
+body.okno-app-body .media-modal .button.media-button-select,
+body.okno-app-body .media-modal .button.media-button-insert,
+body.okno-app-body .media-modal .button.media-button-gallery,
+body.okno-app-body #wp-link-wrap .button-primary,
+body.okno-app-body .mce-window .mce-btn.mce-primary {
+	border-color: transparent;
+	background: var(--okno-m-accent);
+	color: var(--okno-m-on-accent);
+	font-weight: 600;
+}
+
+body.okno-app-body .media-modal .button-primary:hover,
+body.okno-app-body .media-modal .button.media-button-select:hover,
+body.okno-app-body #wp-link-wrap .button-primary:hover {
+	background: var(--okno-m-accent-hover);
+	color: var(--okno-m-on-accent);
+}
+
+body.okno-app-body .media-modal .button-primary[disabled],
+body.okno-app-body .media-modal .button-primary:disabled,
+body.okno-app-body .media-modal .button.media-button-select[disabled] {
+	border-color: transparent !important;
+	background: var(--okno-m-accent) !important;
+	color: var(--okno-m-on-accent) !important;
+	opacity: 0.4;
+}
+
+body.okno-app-body .media-modal .button:focus,
+body.okno-app-body .media-modal .media-menu-item:focus,
+body.okno-app-body .media-modal .media-modal-close:focus,
+body.okno-app-body .media-modal .attachment:focus,
+body.okno-app-body #wp-link-wrap .button:focus {
+	box-shadow: none;
+	outline: none;
+}
+
+body.okno-app-body .media-modal .button:focus-visible,
+body.okno-app-body .media-modal .media-menu-item:focus-visible,
+body.okno-app-body .media-modal .media-modal-close:focus-visible,
+body.okno-app-body #wp-link-wrap .button:focus-visible {
+	outline: 2px solid var(--okno-m-accent-ink);
+	outline-offset: 2px;
+}
+
+body.okno-app-body .media-modal a,
+body.okno-app-body .media-modal .button-link,
+body.okno-app-body #wp-link-wrap a {
+	color: var(--okno-m-accent-ink);
+}
+
+body.okno-app-body .media-modal .button-link.delete-attachment {
+	color: #ff6259;
+}
+
+/* Grille : vignettes, sélection et coche à l'accent. */
+body.okno-app-body .attachment .thumbnail,
+body.okno-app-body .attachment-preview {
+	background: var(--okno-m-input);
+}
+
+body.okno-app-body .attachment .thumbnail::after {
+	box-shadow: inset 0 0 0 1px var(--okno-m-line);
+}
+
+body.okno-app-body .attachment.details,
+body.okno-app-body .attachment.selected,
+body.okno-app-body .attachment:focus,
+body.okno-app-body .selected.attachment:focus,
+body.okno-app-body .attachment.details:focus {
+	box-shadow: inset 0 0 2px 3px var(--okno-m-bg), inset 0 0 0 7px var(--okno-m-accent);
+}
+
+body.okno-app-body .attachment .check,
+body.okno-app-body .attachment.details .check,
+body.okno-app-body .attachment.selected .check:focus,
+body.okno-app-body .media-frame.mode-grid .attachment.selected .check {
+	background-color: var(--okno-m-accent);
+	box-shadow: 0 0 0 1px var(--okno-m-bg), 0 0 0 2px var(--okno-m-accent);
+}
+
+body.okno-app-body .attachment .check .media-modal-icon,
+body.okno-app-body .attachment.details .check .media-modal-icon {
+	filter: invert( 1 );
+}
+
+body.okno-app-body .attachment.details .check .media-modal-icon {
+	background-position: -21px 0;
+}
+
+/* Zone de dépôt. */
+body.okno-app-body .media-frame .uploader-inline,
+body.okno-app-body .uploader-window-content {
+	border-color: var(--okno-m-line);
+	background: var(--okno-m-bg);
+	color: var(--okno-m-ink);
+}
+
+body.okno-app-body .uploader-inline .has-upload-message .upload-instructions,
+body.okno-app-body .uploader-inline-content .upload-instructions {
+	color: var(--okno-m-ink);
+}
+
+body.okno-app-body .uploader-window {
+	background: rgba( 0, 0, 0, 0.6 );
+}
+
+body.okno-app-body .uploader-window-content {
+	border: 2px dashed var(--okno-m-accent);
+	border-radius: 12px;
+}
+
+body.okno-app-body .media-progress-bar div {
+	background: var(--okno-m-accent);
+}
+
+/* Fenêtre des liens (wpLink). */
+body.okno-app-body #wp-link-wrap {
+	border-radius: 12px;
+	box-shadow: 0 24px 64px rgba( 0, 0, 0, 0.45 );
+}
+
+body.okno-app-body #wp-link li,
+body.okno-app-body #wp-link .query-results li.alternate {
+	border-color: var(--okno-m-line);
+	background: transparent;
+	color: var(--okno-m-ink);
+}
+
+body.okno-app-body #wp-link li:hover,
+body.okno-app-body #wp-link li.selected {
+	background: var(--okno-m-hover);
+}
+
+body.okno-app-body #wp-link .item-title,
+body.okno-app-body #wp-link .item-info {
+	color: inherit;
+}
+
+/* Fenêtres et menus de TinyMCE (liste des formats). */
+body.okno-app-body .mce-window,
+body.okno-app-body .mce-window .mce-container-body,
+body.okno-app-body .mce-window .mce-foot,
+body.okno-app-body .mce-floatpanel.mce-menu {
+	border-color: var(--okno-m-line);
+	background: var(--okno-m-bg);
+	color: var(--okno-m-ink);
+}
+
+body.okno-app-body .mce-menu .mce-menu-item .mce-text,
+body.okno-app-body .mce-window .mce-title,
+body.okno-app-body .mce-window .mce-label {
+	color: var(--okno-m-ink);
+}
+
+body.okno-app-body .mce-menu .mce-menu-item:hover,
+body.okno-app-body .mce-menu .mce-menu-item.mce-active,
+body.okno-app-body .mce-menu .mce-menu-item:focus {
+	background: var(--okno-m-hover);
+}
+
+/* L'éditeur de texte riche (TinyMCE) dans le formulaire. */
+.okno-app .wp-editor-wrap {
+	border-radius: 8px;
+}
+
+/* wp.editor.initialize() place le conteneur dans .wp-editor-tools. */
+.okno-app .wp-editor-tools {
+	display: flow-root;
+	padding: 0;
+}
+
+.okno-app .wp-media-buttons {
+	float: left;
+	margin: 0 0 6px;
+}
+
+.okno-app .wp-editor-tools .wp-editor-tabs {
+	float: right;
+	margin: 0 0 6px;
+}
+
+.okno-app .wp-editor-tools .wp-editor-container {
+	clear: both;
+}
+
+.okno-app .wp-media-buttons .button.insert-media {
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+	height: var(--okno-control-sm, 30px);
+	min-height: 0;
+	margin: 0;
+	padding: 0 11px;
+	border: 0;
+	border-radius: 6px;
+	background: var(--okno-input);
+	color: var(--okno-ink);
+	font-size: var(--okno-text-sm, 13px);
+	font-weight: 500;
+	box-shadow: none;
+}
+
+.okno-app .wp-media-buttons .button.insert-media:hover {
+	background: var(--okno-active);
+	color: var(--okno-ink);
+}
+
+.okno-app .wp-media-buttons .wp-media-buttons-icon::before {
+	color: var(--okno-muted);
+}
+
+.okno-app .wp-editor-tabs {
+	display: inline-flex;
+	gap: 2px;
+	float: none;
+	padding: 2px;
+	border-radius: 8px;
+	background: var(--okno-input);
+}
+
+.okno-app .wp-switch-editor {
+	float: none;
+	height: 26px;
+	margin: 0;
+	padding: 0 10px;
+	border: 0;
+	border-radius: 6px;
+	background: transparent;
+	color: var(--okno-muted);
+	font-size: var(--okno-text-sm, 13px);
+	line-height: 26px;
+}
+
+.okno-app .html-active .switch-html,
+.okno-app .tmce-active .switch-tmce {
+	background: var(--okno-active);
+	color: var(--okno-ink);
+}
+
+.okno-app .wp-editor-container,
+.okno-app .wp-editor-container .mce-panel,
+.okno-app div.mce-toolbar-grp,
+.okno-app .quicktags-toolbar {
+	border-color: var(--okno-line) !important;
+	background: var(--okno-surface);
+}
+
+.okno-app .wp-editor-container {
+	overflow: hidden;
+	border: 1px solid var(--okno-line);
+	border-radius: 8px;
+}
+
+.okno-app div.mce-toolbar-grp > div {
+	padding: 4px 6px;
+}
+
+.okno-app .mce-toolbar .mce-btn-group .mce-btn,
+.okno-app .qt-dfw {
+	border-color: transparent;
+	background: transparent;
+	box-shadow: none;
+}
+
+.okno-app .mce-toolbar .mce-btn-group .mce-btn:hover,
+.okno-app .mce-toolbar .mce-btn-group .mce-btn.mce-active {
+	border-color: transparent;
+	background: var(--okno-hover);
+	box-shadow: none;
+}
+
+.okno-app .mce-toolbar .mce-ico,
+.okno-app .mce-toolbar .mce-btn .mce-txt,
+.okno-app .mce-toolbar .mce-listbox button {
+	color: var(--okno-ink);
+}
+
+.okno-app .mce-toolbar .mce-listbox {
+	border-color: transparent;
+	background: var(--okno-input);
+	border-radius: 6px;
+}
+
+.okno-app .quicktags-toolbar input.button {
+	min-height: 26px;
+	border: 0;
+	border-radius: 5px;
+	background: var(--okno-input);
+	color: var(--okno-ink);
+}
+
+.okno-app textarea.wp-editor-area {
+	border: 0;
+	background: var(--okno-surface);
+	color: var(--okno-ink);
+	font-family: var(--okno-mono);
+	font-size: var(--okno-text-sm, 13px);
+}
+
+/* Barre de lien en ligne de TinyMCE (wplink). */
+body.okno-app-body .mce-inline-toolbar-grp,
+body.okno-app-body div.wp-link-preview,
+body.okno-app-body .mce-inline-toolbar-grp .mce-container-body {
+	border-color: var(--okno-m-line);
+	background: var(--okno-m-bg);
+	color: var(--okno-m-ink);
+}
+
+body.okno-app-body .mce-inline-toolbar-grp {
+	border-radius: 8px;
+	box-shadow: 0 8px 24px rgba( 0, 0, 0, 0.35 );
+}
+
+body.okno-app-body .mce-inline-toolbar-grp.mce-arrow-up::after,
+body.okno-app-body .mce-inline-toolbar-grp.mce-arrow-up::before {
+	border-bottom-color: var(--okno-m-bg);
+}
+
+body.okno-app-body .mce-inline-toolbar-grp.mce-arrow-down::after,
+body.okno-app-body .mce-inline-toolbar-grp.mce-arrow-down::before {
+	border-top-color: var(--okno-m-bg);
+}
+
+body.okno-app-body div.wp-link-input input,
+body.okno-app-body .wp-link-input input {
+	border: 1px solid transparent;
+	border-radius: 6px;
+	background: var(--okno-m-input);
+	color: var(--okno-m-ink);
+	box-shadow: none;
+}
+
+body.okno-app-body div.wp-link-input input:focus {
+	border-color: var(--okno-m-accent-ink);
+	box-shadow: none;
+}
+
+body.okno-app-body .mce-inline-toolbar-grp .mce-btn,
+body.okno-app-body .mce-inline-toolbar-grp .mce-ico,
+body.okno-app-body .wp-link-preview a {
+	color: var(--okno-m-ink);
+}
+
+body.okno-app-body .mce-inline-toolbar-grp .mce-btn.mce-primary,
+body.okno-app-body .mce-inline-toolbar-grp .mce-btn.mce-primary .mce-ico {
+	border-color: transparent;
+	background: var(--okno-m-accent);
+	color: var(--okno-m-on-accent);
+}
+
+body.okno-app-body .ui-autocomplete.wplink-autocomplete {
+	z-index: 1000001;
+	border-color: var(--okno-m-line);
+	background: var(--okno-m-bg);
+	color: var(--okno-m-ink);
+}
+
+body.okno-app-body .wplink-autocomplete .ui-state-focus {
+	background: var(--okno-m-hover);
+}
+
+/* Médias : filtre par type (liste déroulante Okno) à sa largeur. */
+.okno-media-filters .okno-select {
+	flex: 0 0 200px;
+	width: 200px;
+	padding-left: 12px;
 }

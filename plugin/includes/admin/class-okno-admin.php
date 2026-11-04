@@ -144,6 +144,9 @@ class Okno_Admin {
 
 		$view = Okno_App::current_view();
 		wp_enqueue_style( 'okno-app', OKNO_URL . 'assets/admin/app.css', array(), self::asset_version( 'assets/admin/app.css' ) );
+		// Composants partagés (listes déroulantes, pastilles, thème).
+		wp_register_script( 'okno-ui', OKNO_URL . 'assets/admin/ui.js', array( 'wp-api-fetch', 'wp-i18n' ), self::asset_version( 'assets/admin/ui.js' ), true );
+		wp_set_script_translations( 'okno-ui', 'okno', OKNO_DIR . 'languages' );
 
 		if ( 'editor' === $view || 'collections' === $view ) {
 			// L'éditeur gère lui-même la publication automatique.
@@ -183,7 +186,7 @@ class Okno_Admin {
 	 * @return void
 	 */
 	private function enqueue_shell( $view ) {
-		wp_enqueue_script( 'okno-app', OKNO_URL . 'assets/admin/app.js', array( 'wp-api-fetch', 'wp-i18n' ), self::asset_version( 'assets/admin/app.js' ), true );
+		wp_enqueue_script( 'okno-app', OKNO_URL . 'assets/admin/app.js', array( 'okno-ui', 'wp-api-fetch', 'wp-i18n' ), self::asset_version( 'assets/admin/app.js' ), true );
 		wp_set_script_translations( 'okno-app', 'okno', OKNO_DIR . 'languages' );
 		wp_add_inline_script( 'okno-app', 'window.OknoAppConfig = ' . wp_json_encode( Okno_App::config( $view ) ) . ';', 'before' );
 	}
@@ -261,7 +264,7 @@ class Okno_Admin {
 		}
 
 		wp_enqueue_style( 'okno-editor', OKNO_URL . 'assets/admin/editor.css', array(), self::asset_version( 'assets/admin/editor.css' ) );
-		wp_enqueue_script( 'okno-editor', OKNO_URL . 'assets/admin/editor.js', array( 'wp-api-fetch', 'wp-i18n' ), self::asset_version( 'assets/admin/editor.js' ), true );
+		wp_enqueue_script( 'okno-editor', OKNO_URL . 'assets/admin/editor.js', array( 'okno-ui', 'wp-api-fetch', 'wp-i18n' ), self::asset_version( 'assets/admin/editor.js' ), true );
 		wp_set_script_translations( 'okno-editor', 'okno', OKNO_DIR . 'languages' );
 
 		$mapper = new Okno_Url_Mapper();
@@ -373,7 +376,8 @@ class Okno_Admin {
 
 		if ( ! $form ) {
 			?>
-			<div id="okno-editor" class="okno-editor" data-mode="visual">
+			<div id="okno-editor" class="okno-editor" data-mode="visual" data-theme="<?php echo esc_attr( Okno_App::theme() ); ?>">
+				<?php Okno_App::print_theme_sync( 'okno-editor' ); ?>
 				<?php $this->render_toolbar( false ); ?>
 				<div class="okno-main">
 					<?php $this->render_sidebar(); ?>
@@ -393,7 +397,8 @@ class Okno_Admin {
 			$okno_type = (string) get_post_type( $okno_id );
 		}
 		?>
-		<div id="okno-editor" class="okno-editor okno-editor--collections" data-mode="form">
+		<div id="okno-editor" class="okno-editor okno-editor--collections" data-mode="form" data-theme="<?php echo esc_attr( Okno_App::theme() ); ?>">
+			<?php Okno_App::print_theme_sync( 'okno-editor' ); ?>
 			<div class="okno-main">
 				<?php // Types et entrées (app-content.js). ?>
 				<div id="okno-form-browser" class="okno-form-browser" data-type="<?php echo esc_attr( $okno_type ); ?>" data-post="<?php echo esc_attr( $okno_id ); ?>"></div>
@@ -456,7 +461,7 @@ class Okno_Admin {
 
 			<div class="okno-toolbar-end">
 				<?php if ( $form ) : ?>
-					<a id="okno-open-visual" class="okno-btn okno-btn--quiet" href="#" hidden>
+					<a id="okno-open-visual" class="okno-btn okno-btn--quiet" href="#" title="<?php esc_attr_e( 'Visual editor', 'okno' ); ?>" aria-label="<?php esc_attr_e( 'Visual editor', 'okno' ); ?>" hidden>
 						<?php Okno_Icons::render( 'edit', 14 ); ?>
 						<span><?php esc_html_e( 'Visual editor', 'okno' ); ?></span>
 					</a>

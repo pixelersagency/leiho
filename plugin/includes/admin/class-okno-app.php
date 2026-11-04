@@ -268,6 +268,7 @@ class Okno_App {
 		// La barre d'admin n'est pas rendue (et non seulement masquée).
 		remove_action( 'in_admin_header', 'wp_admin_bar_render', 0 );
 		add_filter( 'admin_body_class', array( __CLASS__, 'body_class' ) );
+		add_action( 'admin_head', array( __CLASS__, 'print_theme_head' ), 0 );
 		add_filter( 'admin_footer_text', '__return_empty_string', 99 );
 		add_filter( 'update_footer', '__return_empty_string', 99 );
 		// Notices des autres extensions : retirées juste avant leur affichage
@@ -292,7 +293,99 @@ class Okno_App {
 	 * @return string
 	 */
 	public static function body_class( $classes ) {
-		return $classes . ' okno-app-body okno-app-view-' . self::current_view();
+		return $classes . ' okno-app-body okno-app-view-' . self::current_view() . ' okno-theme-' . self::theme();
+	}
+
+	/* ---------------------------------------------------------------------
+	 * Thème clair / sombre
+	 * ------------------------------------------------------------------- */
+
+	const THEME_META   = 'okno_theme';
+	const THEME_COOKIE = 'okno_theme';
+
+	/**
+	 * Thème choisi par l'utilisateur, '' s'il n'en a pas encore choisi :
+	 * méta utilisateur (enregistrée par l'interrupteur), sinon cookie.
+	 *
+	 * @return string light | dark | ''
+	 */
+	public static function stored_theme() {
+		$theme = (string) get_user_meta( get_current_user_id(), self::THEME_META, true );
+		if ( '' === $theme && isset( $_COOKIE[ self::THEME_COOKIE ] ) ) {
+			$theme = sanitize_key( wp_unslash( $_COOKIE[ self::THEME_COOKIE ] ) );
+		}
+		return in_array( $theme, array( 'light', 'dark' ), true ) ? $theme : '';
+	}
+
+	/**
+	 * Thème à imprimer au premier rendu : sombre par défaut.
+	 *
+	 * @return string light | dark
+	 */
+	public static function theme() {
+		$theme = self::stored_theme();
+		return '' === $theme ? 'dark' : $theme;
+	}
+
+	/**
+	 * Enregistre le choix de l'utilisateur.
+	 *
+	 * @param string $theme light | dark.
+	 * @return string|false Thème enregistré, false s'il est invalide.
+	 */
+	public static function save_theme( $theme ) {
+		$theme = sanitize_key( (string) $theme );
+		if ( ! in_array( $theme, array( 'light', 'dark' ), true ) || ! get_current_user_id() ) {
+			return false;
+		}
+		update_user_meta( get_current_user_id(), self::THEME_META, $theme );
+		return $theme;
+	}
+
+	/**
+	 * Premier rendu dans le bon thème : le thème est posé sur <html> avant
+	 * que le navigateur peigne quoi que ce soit (sinon wp-admin peint son
+	 * fond clair, puis le JavaScript bascule). Sans choix enregistré côté
+	 * serveur, le choix gardé dans le navigateur est repris.
+	 *
+	 * @return void
+	 */
+	public static function print_theme_head() {
+		$stored = self::stored_theme();
+		$light  = '#f7f7f7';
+		$dark   = '#111111';
+		?>
+		<script id="okno-theme-boot">
+		( function () {
+			var t = <?php echo wp_json_encode( $stored ); ?>;
+			if ( ! t ) {
+				try { t = window.localStorage.getItem( 'okno-theme' ); } catch ( e ) {}
+			}
+			t = 'light' === t ? 'light' : 'dark';
+			document.documentElement.setAttribute( 'data-okno-theme', t );
+			document.documentElement.classList.add( 'okno-app-html' );
+			window.OknoTheme = { saved: <?php echo wp_json_encode( $stored ); ?>, theme: t };
+		} )();
+		</script>
+		<style id="okno-theme-paint">
+			html[data-okno-theme="dark"], html[data-okno-theme="dark"] body.okno-app-body { background: <?php echo esc_html( $dark ); ?>; color-scheme: dark; }
+			html[data-okno-theme="light"], html[data-okno-theme="light"] body.okno-app-body { background: <?php echo esc_html( $light ); ?>; color-scheme: light; }
+		</style>
+		<?php
+	}
+
+	/**
+	 * Aligne une racine (coque, éditeur) sur le thème de <html> dès son
+	 * ouverture, avant que la suite de la page soit peinte.
+	 *
+	 * @param string $id Id de l'élément.
+	 * @return void
+	 */
+	public static function print_theme_sync( $id ) {
+		printf(
+			'<script>( function () { var r = document.getElementById( %1$s ), t = document.documentElement.getAttribute( \'data-okno-theme\' ); if ( r && t ) { r.setAttribute( \'data-theme\', t ); } } )();</script>',
+			wp_json_encode( (string) $id )
+		);
 	}
 
 	/* ---------------------------------------------------------------------
@@ -311,7 +404,8 @@ class Okno_App {
 		$embedded = in_array( $view, array( 'editor', 'collections' ), true );
 		$user     = wp_get_current_user();
 		?>
-		<div id="okno-app" class="okno-app okno-app--collapsed<?php echo $embedded ? ' okno-app--embedded' : ''; ?>" data-view="<?php echo esc_attr( $view ); ?>" data-theme="dark">
+		<div id="okno-app" class="okno-app okno-app--collapsed<?php echo $embedded ? ' okno-app--embedded' : ''; ?>" data-view="<?php echo esc_attr( $view ); ?>" data-theme="<?php echo esc_attr( self::theme() ); ?>">
+			<?php self::print_theme_sync( 'okno-app' ); ?>
 			<a class="okno-skip" href="#okno-view"><?php esc_html_e( 'Skip to content', 'okno' ); ?></a>
 
 			<nav id="okno-nav" class="okno-nav" aria-label="<?php esc_attr_e( 'Okno navigation', 'okno' ); ?>">

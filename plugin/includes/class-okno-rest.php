@@ -212,6 +212,40 @@ class Okno_Rest {
 				'permission_callback' => array( $this, 'can_deploy' ),
 			)
 		);
+		// Préférences d'interface de l'utilisateur (thème clair / sombre).
+		register_rest_route(
+			self::NS,
+			'/preferences',
+			array(
+				'methods'             => WP_REST_Server::CREATABLE,
+				'callback'            => array( $this, 'save_preferences' ),
+				'permission_callback' => static function () {
+					return is_user_logged_in() && current_user_can( 'edit_posts' );
+				},
+				'args'                => array(
+					'theme' => array(
+						'type' => 'string',
+						'enum' => array( 'light', 'dark' ),
+					),
+				),
+			)
+		);
+	}
+
+	/**
+	 * POST /preferences : { theme: light|dark }, gardé en méta utilisateur
+	 * pour que la page s'affiche directement dans le bon thème.
+	 */
+	public function save_preferences( WP_REST_Request $request ) {
+		$out = array();
+		if ( null !== $request->get_param( 'theme' ) ) {
+			$theme = Okno_App::save_theme( $request->get_param( 'theme' ) );
+			if ( false === $theme ) {
+				return new WP_Error( 'okno_bad_request', __( 'Unknown theme.', 'okno' ), array( 'status' => 400 ) );
+			}
+			$out['theme'] = $theme;
+		}
+		return rest_ensure_response( $out );
 	}
 
 	public function can_edit_post( WP_REST_Request $request ) {

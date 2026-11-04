@@ -48,6 +48,19 @@ function untrailingslashit( $v ) { return rtrim( $v, '/' ); }
 function sanitize_key( $v ) { return strtolower( preg_replace( '/[^a-z0-9_\-]/i', '', (string) $v ) ); }
 function sanitize_text_field( $v ) { return trim( strip_tags( (string) $v ) ); }
 function wp_unslash( $v ) { return $v; }
+$GLOBALS['user_meta'] = array();
+$GLOBALS['user_id']   = 1;
+if ( ! function_exists( 'get_current_user_id' ) ) {
+	function get_current_user_id() { return $GLOBALS['user_id']; }
+}
+if ( ! function_exists( 'wp_json_encode' ) ) {
+	function wp_json_encode( $v, $o = 0 ) { return json_encode( $v, $o ); }
+}
+if ( ! function_exists( 'esc_html' ) ) {
+	function esc_html( $v ) { return htmlspecialchars( (string) $v, ENT_QUOTES ); }
+}
+function get_user_meta( $id, $key, $single = false ) { return $GLOBALS['user_meta'][ $id ][ $key ] ?? ''; }
+function update_user_meta( $id, $key, $value ) { $GLOBALS['user_meta'][ $id ][ $key ] = $value; return true; }
 function is_admin() { return true; }
 function add_query_arg( $args, $url ) {
 	$parts = explode( '?', $url, 2 );
@@ -209,6 +222,29 @@ check( 'publier sans le droit : relecture', 'pending' === Okno_Rest::allowed_sta
 check( 'privé sans le droit : refusé', null === Okno_Rest::allowed_status( 'private', false ) );
 check( 'brouillon toujours permis', 'draft' === Okno_Rest::allowed_status( 'draft', false ) );
 check( 'statut inconnu : refusé', null === Okno_Rest::allowed_status( 'trash', true ) );
+
+check( 'route des préférences (thème)', in_array( '/preferences', $routes, true ) );
+
+/* --- Thème clair / sombre gardé côté serveur --- */
+
+check( 'sans choix : sombre par défaut', 'dark' === Okno_App::theme() && '' === Okno_App::stored_theme() );
+$_COOKIE['okno_theme'] = 'light';
+check( 'sans méta : cookie', 'light' === Okno_App::theme() );
+$_COOKIE['okno_theme'] = '<script>';
+check( 'cookie invalide ignoré', 'dark' === Okno_App::theme() );
+unset( $_COOKIE['okno_theme'] );
+check( 'thème enregistré', 'light' === Okno_App::save_theme( 'light' ) && 'light' === Okno_App::theme() );
+$_COOKIE['okno_theme'] = 'dark';
+check( 'la méta passe avant le cookie', 'light' === Okno_App::theme() );
+unset( $_COOKIE['okno_theme'] );
+check( 'thème inconnu refusé', false === Okno_App::save_theme( 'sepia' ) && 'light' === Okno_App::theme() );
+$GLOBALS['user_id'] = 0;
+check( 'déconnecté : rien enregistré', false === Okno_App::save_theme( 'dark' ) );
+$GLOBALS['user_id'] = 1;
+ob_start();
+Okno_App::print_theme_head();
+$head = ob_get_clean();
+check( 'tête : thème posé sur <html> avant le rendu', false !== strpos( $head, "setAttribute( 'data-okno-theme'" ) && false !== strpos( $head, '"light"' ), $head );
 
 echo empty( $GLOBALS['failed'] ) ? "\nTout est vert.\n" : "\nÉCHECS.\n";
 exit( empty( $GLOBALS['failed'] ) ? 0 : 1 );

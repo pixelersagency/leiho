@@ -425,13 +425,20 @@
 		}
 	}
 
-	// Sombre par défaut, comme une application de bureau ; le choix est gardé.
-	applyTheme( 'light' === storage( 'okno-theme' ) ? 'light' : 'dark' );
+	// Sombre par défaut, comme une application de bureau. Le thème est déjà
+	// posé par PHP au premier rendu (méta utilisateur) ; le choix est gardé
+	// côté serveur, en cookie et dans le navigateur (OknoUI.theme).
+	var themeApi = window.OknoUI && window.OknoUI.theme;
+	applyTheme( themeApi ? themeApi.current() : 'light' === storage( 'okno-theme' ) ? 'light' : 'dark' );
 
 	if ( themeBtn ) {
 		themeBtn.addEventListener( 'click', function () {
 			var next = 'dark' === root.dataset.theme ? 'light' : 'dark';
-			storage( 'okno-theme', next );
+			if ( themeApi ) {
+				themeApi.save( next );
+			} else {
+				storage( 'okno-theme', next );
+			}
 			applyTheme( next );
 		} );
 	}

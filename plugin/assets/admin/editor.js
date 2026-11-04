@@ -1286,6 +1286,9 @@
 		future: __( 'Scheduled', 'okno' ),
 	};
 
+	// Point de couleur de chaque statut dans le menu (OknoUI.select).
+	var STATUS_DOTS = { publish: 'ok', future: 'accent', draft: 'warn', pending: 'pending', private: 'purple' };
+
 	function renderStatus() {
 		var select = els.status;
 		if ( ! select ) {
@@ -1309,6 +1312,7 @@
 			var opt = document.createElement( 'option' );
 			opt.value = status;
 			opt.textContent = STATUS_LABELS[ status ] || status;
+			opt.dataset.dot = STATUS_DOTS[ status ] || 'neutral';
 			opt.selected = status === current;
 			select.appendChild( opt );
 		} );
@@ -1996,6 +2000,11 @@
 			if ( main ) {
 				main.groups.forEach( function ( group ) {
 					group.fields.forEach( function ( f ) {
+						// Contenu, extrait, taxonomies, adresse… : formulaire de
+						// Collections seulement, l'aperçu ne les montre pas.
+						if ( f.form_only && ! FORM ) {
+							return;
+						}
 						if ( ! covered[ fieldKey( f._post, f.path ) ] ) {
 							push( group.title, f );
 						}
@@ -2261,6 +2270,18 @@
 			wrap.appendChild( control );
 		}
 
+		if ( field.help ) {
+			var help = document.createElement( 'p' );
+			help.className = 'okno-field-help';
+			help.id = controlId + '-help';
+			help.textContent = field.help;
+			wrap.appendChild( help );
+			var described = wrap.querySelector( '#' + controlId );
+			if ( described ) {
+				described.setAttribute( 'aria-describedby', help.id );
+			}
+		}
+
 		var error = document.createElement( 'p' );
 		error.className = 'okno-field-error';
 		error.setAttribute( 'role', 'alert' );
@@ -2300,7 +2321,13 @@
 				return buildGroup( ctx );
 
 			case 'wysiwyg':
+				if ( def.blocks ) {
+					return buildBlocksNotice( ctx );
+				}
 				return buildWysiwyg( ctx, options.id );
+
+			case 'slug':
+				return buildSlug( ctx, options.id );
 
 			case 'image':
 			case 'file':
@@ -2314,11 +2341,14 @@
 
 			case 'relationship':
 			case 'taxonomy':
+				if ( def.readonly ) {
+					return buildReadonlyList( ctx );
+				}
 				return buildMultiSelect( ctx, options.id );
 
 			case 'textarea':
 				input = document.createElement( 'textarea' );
-				input.rows = 4;
+				input.rows = def.rows || 4;
 				input.value = value || '';
 				input.addEventListener( 'input', function () {
 					commit( input.value );
@@ -2355,7 +2385,7 @@
 
 			case 'true_false':
 				var toggleLabel = document.createElement( 'label' );
-				toggleLabel.className = 'okno-toggle';
+				toggleLabel.className = 'okno-toggle okno-toggle--switch';
 				input = document.createElement( 'input' );
 				input.type = 'checkbox';
 				input.id = options.id || uid( 'check' );
@@ -2445,11 +2475,20 @@
 		}
 
 		// Limite de caractères posée dans ACF : on l'applique et on l'affiche.
-		if ( def.max_length && ( 'INPUT' === input.tagName || 'TEXTAREA' === input.tagName ) ) {
-			input.maxLength = def.max_length;
+		// Sans limite (extrait), le compteur indique seulement la longueur.
+		if ( ( def.max_length || def.counter ) && ( 'INPUT' === input.tagName || 'TEXTAREA' === input.tagName ) ) {
+			if ( def.max_length ) {
+				input.maxLength = def.max_length;
+			}
 			var counter = document.createElement( 'span' );
 			counter.className = 'okno-counter';
+			counter.setAttribute( 'aria-live', 'polite' );
 			var syncCounter = function () {
+				if ( ! def.max_length ) {
+					/* translators: %d: number of characters typed. */
+					counter.textContent = sprintf( _n( '%d character', '%d characters', input.value.length, 'okno' ), input.value.length );
+					return;
+				}
 				var left = def.max_length - input.value.length;
 				counter.textContent = input.value.length + ' / ' + def.max_length;
 				counter.classList.toggle( 'is-near', left <= Math.max( 5, def.max_length * 0.1 ) );
@@ -2793,6 +2832,23 @@
 	 * Contrôles spécialisés
 	 * ------------------------------------------------------------------ */
 
+	/** Styles de la zone éditable de TinyMCE (iframe) : jetons d'Okno. */
+	function editorContentStyle() {
+		var host = els.panel || document.body;
+		var css = window.getComputedStyle( host );
+		function token( name, fallback ) {
+			var v = css.getPropertyValue( name ).trim();
+			return v || fallback;
+		}
+		return (
+			'html,body{background:' + token( '--okno-surface', '#ffffff' ) + ';color:' + token( '--okno-ink', '#171717' ) + ';}' +
+			'body{font-family:-apple-system,BlinkMacSystemFont,"Inter","Segoe UI",system-ui,sans-serif;font-size:15px;line-height:1.6;margin:12px 16px;}' +
+			'a{color:' + token( '--okno-accent-ink', '#3d6b00' ) + ';}' +
+			'blockquote{margin:0 0 1em;padding-left:14px;border-left:3px solid ' + token( '--okno-line-strong', '#cccccc' ) + ';color:' + token( '--okno-muted', '#555555' ) + ';}' +
+			'::selection{background:' + token( '--okno-accent-soft', 'rgba(197,255,62,.3)' ) + ';}'
+		);
+	}
+
 	function buildWysiwyg( ctx, id ) {
 		var container = document.createElement( 'div' );
 		var textarea = document.createElement( 'textarea' );
@@ -2802,30 +2858,56 @@
 		textarea.value = ctx.read() || '';
 		container.appendChild( textarea );
 
+		// Contenu principal d'un article (champ natif _content) : barre plus
+		// complète, médiathèque, et enregistrement au format de l'éditeur
+		// classique (paragraphes implicites, wpautop).
+		var full = 'full' === ctx.def.toolbar;
+		var editorApi = window.wp && window.wp.editor;
+		var last = null;
+		function normalizeHtml( html ) {
+			return full && editorApi && editorApi.removep ? editorApi.removep( html ) : html;
+		}
 		var sync = debounce( function ( content ) {
+			content = normalizeHtml( content );
+			// Rien n'a changé (simple déplacement du curseur) : rien à enregistrer.
+			if ( content === last ) {
+				return;
+			}
+			last = content;
 			// L'aperçu reçoit le HTML brut ; le bridge le filtre comme
 			// wp_kses_post() le fera à l'enregistrement (E3).
 			ctx.write( content, { rendered: content } );
 		}, 200 );
 
-		if ( window.wp && window.wp.editor && window.wp.editor.initialize ) {
+		if ( editorApi && editorApi.initialize ) {
 			setTimeout( function () {
-				window.wp.editor.initialize( editorId, {
+				editorApi.initialize( editorId, {
 					tinymce: {
-						toolbar1: 'bold,italic,bullist,numlist,link,unlink,undo,redo',
+						toolbar1: full
+							? 'formatselect,bold,italic,link,unlink,bullist,numlist,blockquote,alignleft,aligncenter,undo,redo'
+							: 'bold,italic,bullist,numlist,link,unlink,undo,redo',
+						block_formats: full
+							? __( 'Paragraph', 'okno' ) + '=p;' + __( 'Heading 2', 'okno' ) + '=h2;' + __( 'Heading 3', 'okno' ) + '=h3;' + __( 'Heading 4', 'okno' ) + '=h4'
+							: undefined,
 						// Coller depuis Word ou un autre site ne doit pas importer sa mise en forme.
 						paste_as_text: true,
 						menubar: false,
 						statusbar: false,
-						height: 180,
+						wpautop: full ? true : undefined,
+						// Le texte édité prend les couleurs d'Okno (thème clair ou sombre).
+						content_style: editorContentStyle(),
+						height: full ? 360 : 180,
 						setup: function ( ed ) {
-							ed.on( 'change keyup input', function () {
+							ed.on( 'init', function () {
+								last = normalizeHtml( ed.getContent() );
+							} );
+							ed.on( 'change keyup input undo redo', function () {
 								sync( ed.getContent() );
 							} );
 						},
 					},
-					quicktags: { buttons: 'strong,em,link,ul,ol,li' },
-					mediaButtons: false,
+					quicktags: { buttons: full ? 'strong,em,link,block,ul,ol,li,code' : 'strong,em,link,ul,ol,li' },
+					mediaButtons: !! ( full && ctx.def.media ),
 				} );
 				state.tinymceIds.push( editorId );
 			}, 0 );
@@ -2836,6 +2918,107 @@
 		}
 
 		return container;
+	}
+
+	/**
+	 * Contenu écrit avec l'éditeur de blocs : pas réécrit ici (les
+	 * commentaires de blocs ne survivraient pas forcément à un éditeur
+	 * classique). Aperçu en texte et lien vers l'éditeur WordPress.
+	 */
+	function buildBlocksNotice( ctx ) {
+		var box = document.createElement( 'div' );
+		box.className = 'okno-blocks-notice';
+		var p = document.createElement( 'p' );
+		p.textContent = __( 'This content was written with the WordPress block editor. To keep its blocks intact, edit it in WordPress.', 'okno' );
+		box.appendChild( p );
+		if ( ctx.def.preview ) {
+			var excerpt = document.createElement( 'p' );
+			excerpt.className = 'okno-blocks-notice__excerpt';
+			excerpt.textContent = ctx.def.preview;
+			box.appendChild( excerpt );
+		}
+		if ( ctx.def.edit_url ) {
+			var link = document.createElement( 'a' );
+			link.className = 'okno-btn okno-btn--quiet';
+			link.href = ctx.def.edit_url;
+			link.textContent = __( 'Open in the WordPress editor', 'okno' );
+			box.appendChild( link );
+		}
+		return box;
+	}
+
+	/** Valeurs d'un champ que l'utilisateur ne peut pas modifier (droits). */
+	function buildReadonlyList( ctx ) {
+		var p = document.createElement( 'p' );
+		p.className = 'okno-field-note';
+		var meta = ctx.readMeta() || {};
+		var labels = ( meta.items || [] ).map( function ( item ) {
+			return item.label;
+		} );
+		p.textContent = labels.length ? labels.join( ', ' ) : '—';
+		return p;
+	}
+
+	function slugify( text ) {
+		return String( text || '' )
+			.toLowerCase()
+			.normalize( 'NFD' )
+			.replace( /[\u0300-\u036f]/g, '' )
+			.replace( /[^a-z0-9]+/g, '-' )
+			.replace( /^-+|-+$/g, '' );
+	}
+
+	/** Adresse (slug) avec l'aperçu de l'URL complète. */
+	function buildSlug( ctx, id ) {
+		var box = document.createElement( 'div' );
+		var input = document.createElement( 'input' );
+		input.type = 'text';
+		input.id = id || uid( 'slug' );
+		input.value = ctx.read() || '';
+		input.spellcheck = false;
+		input.autocomplete = 'off';
+		var original = input.value;
+		var url = ( ctx.readMeta() || {} ).url || '';
+		var preview = document.createElement( 'span' );
+		preview.className = 'okno-slug-preview';
+
+		function base() {
+			var trimmed = url.replace( /\/+$/, '' );
+			var cut = trimmed.lastIndexOf( '/' );
+			if ( original && cut !== -1 && trimmed.slice( cut + 1 ) === original ) {
+				return trimmed.slice( 0, cut + 1 );
+			}
+			return trimmed ? trimmed + '/' : '/';
+		}
+		function render() {
+			preview.textContent = '';
+			if ( ! url ) {
+				preview.hidden = true;
+				return;
+			}
+			preview.hidden = false;
+			preview.appendChild( document.createTextNode( base() ) );
+			var strong = document.createElement( 'strong' );
+			strong.textContent = slugify( input.value ) || '…';
+			preview.appendChild( strong );
+			preview.appendChild( document.createTextNode( /\/$/.test( url ) ? '/' : '' ) );
+		}
+		input.addEventListener( 'input', function () {
+			ctx.write( input.value );
+			render();
+		} );
+		input.addEventListener( 'blur', function () {
+			var clean = slugify( input.value );
+			if ( clean !== input.value ) {
+				input.value = clean;
+				ctx.write( clean );
+				render();
+			}
+		} );
+		box.appendChild( input );
+		box.appendChild( preview );
+		render();
+		return box;
 	}
 
 	function pickMedia( options ) {
@@ -3177,6 +3360,51 @@
 	}
 
 	function buildMultiSelect( ctx, id ) {
+		// Pastilles avec recherche (et création pour les étiquettes) ; le
+		// <select multiple> natif reste en secours si OknoUI manque.
+		if ( window.OknoUI && window.OknoUI.chips ) {
+			var isChoice = 'select' === ctx.def.type;
+			var opts = ctx.def.options || {};
+			// Ordre des choix : celui du schéma (options_order), sinon celui des clés.
+			var keys = Array.isArray( ctx.def.options_order ) ? ctx.def.options_order.map( String ) : Object.keys( opts );
+			var wrapChips = document.createElement( 'div' );
+			wrapChips.className = 'okno-multi-field';
+			wrapChips.appendChild(
+				window.OknoUI.chips( {
+					id: id || uid( 'multi' ),
+					label: ctx.def.label,
+					create: !! ctx.def.create,
+					placeholder: ctx.def.create ? __( 'Search or add…', 'okno' ) : __( 'Search…', 'okno' ),
+					options: keys.map( function ( key ) {
+						return { value: isChoice ? key : Number( key ), label: opts[ key ] };
+					} ),
+					value: Array.isArray( ctx.read() )
+						? ctx.read().map( function ( v ) {
+							return isChoice || 'string' === typeof v && ! /^\d+$/.test( v ) ? v : Number( v );
+						} )
+						: [],
+					onChange: function ( values, items ) {
+						if ( isChoice ) {
+							ctx.write( values.map( String ) );
+							return;
+						}
+						ctx.write( values, {
+							items: items.map( function ( item ) {
+								return { id: item.value, label: item.label };
+							} ),
+						} );
+					},
+				} )
+			);
+			if ( ! keys.length && ! ctx.def.create ) {
+				var none = document.createElement( 'p' );
+				none.className = 'okno-field-note';
+				none.textContent = __( 'No items available.', 'okno' );
+				wrapChips.appendChild( none );
+			}
+			return wrapChips;
+		}
+
 		var box = document.createElement( 'div' );
 		box.className = 'okno-multi-field';
 
@@ -3239,6 +3467,11 @@
 		invalid_color: __( 'Invalid color.', 'okno' ),
 		invalid_link: __( 'Invalid link.', 'okno' ),
 		invalid_date: __( 'Invalid date.', 'okno' ),
+		invalid_user: __( 'This person can’t write this type of content.', 'okno' ),
+		invalid_parent: __( 'This parent isn’t allowed (same type only, and not one of its own sub-entries).', 'okno' ),
+		blocks_protected: __( 'This content uses blocks: edit it in the WordPress editor.', 'okno' ),
+		forbidden: __( 'You aren’t allowed to change this field.', 'okno' ),
+		invalid: __( 'Invalid value.', 'okno' ),
 		invalid_reference: __( 'Linked item not found.', 'okno' ),
 		invalid_group: __( 'Malformed field group: reload the page.', 'okno' ),
 		invalid_rows: __( 'Malformed rows: reload the page.', 'okno' ),
@@ -3975,19 +4208,27 @@
 		}
 	}
 
-	var storedTheme = null;
-	try {
-		storedTheme = window.localStorage.getItem( 'okno-theme' );
-	} catch ( e ) { /* stockage indisponible : thème sombre. */ }
+	// Sombre par défaut ; PHP a déjà posé le thème enregistré au premier rendu.
+	var themeApi = window.OknoUI && window.OknoUI.theme;
+	var storedTheme = themeApi ? themeApi.current() : null;
+	if ( ! themeApi ) {
+		try {
+			storedTheme = window.localStorage.getItem( 'okno-theme' );
+		} catch ( e ) { /* stockage indisponible : thème sombre. */ }
+	}
 
-	applyTheme( 'light' === storedTheme ? 'light' : 'dark' ); // Sombre par défaut.
+	applyTheme( 'light' === storedTheme ? 'light' : 'dark' );
 
 	if ( els.theme ) {
 		els.theme.addEventListener( 'click', function () {
 			var next = 'dark' === els.root.dataset.theme ? 'light' : 'dark';
-			try {
-				window.localStorage.setItem( 'okno-theme', next );
-			} catch ( e ) { /* tant pis, non persisté. */ }
+			if ( themeApi ) {
+				themeApi.save( next );
+			} else {
+				try {
+					window.localStorage.setItem( 'okno-theme', next );
+				} catch ( e ) { /* tant pis, non persisté. */ }
+			}
 			applyTheme( next );
 		} );
 	}

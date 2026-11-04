@@ -52,7 +52,7 @@
 }
 
 .okno-admin code {
-	font-size: 12.5px;
+	font-size: var(--okno-text-base, 14px);
 	padding: 1px 5px;
 	border-radius: 4px;
 	background: var(--okno-subtle);
@@ -97,7 +97,7 @@
 	border-radius: 999px;
 	background: var(--okno-subtle);
 	color: var(--okno-muted);
-	font-size: 12px;
+	font-size: var(--okno-text-base, 14px);
 }
 
 .okno-tabs {
@@ -148,7 +148,7 @@
 	display: block;
 	margin: 0 0 6px;
 	color: var(--okno-muted);
-	font-size: 11px;
+	font-size: var(--okno-text-sm, 13px);
 	font-weight: 650;
 	letter-spacing: 0.08em;
 	text-transform: uppercase;
@@ -157,7 +157,7 @@
 .okno-heading {
 	margin: 36px 0 12px;
 	color: var(--okno-muted);
-	font-size: 11px;
+	font-size: var(--okno-text-sm, 13px);
 	font-weight: 650;
 	letter-spacing: 0.08em;
 	text-transform: uppercase;
@@ -266,7 +266,7 @@
 .okno-admin .okno-btn--small {
 	min-height: 30px;
 	padding: 0 12px;
-	font-size: 12.5px;
+	font-size: var(--okno-text-base, 14px);
 }
 
 .okno-admin .okno-btn[disabled],
@@ -317,7 +317,7 @@
 	display: block;
 	margin-bottom: 6px;
 	color: var(--okno-muted);
-	font-size: 12px;
+	font-size: var(--okno-text-base, 14px);
 }
 
 .okno-stat__value {
@@ -333,7 +333,7 @@
 	display: block;
 	margin-top: 4px;
 	color: var(--okno-faint);
-	font-size: 12px;
+	font-size: var(--okno-text-base, 14px);
 }
 
 .okno-dot {
@@ -367,7 +367,7 @@
 	border-radius: 999px;
 	background: var(--okno-subtle);
 	color: var(--okno-muted);
-	font-size: 12px;
+	font-size: var(--okno-text-base, 14px);
 	font-weight: 550;
 	white-space: nowrap;
 }
@@ -431,7 +431,7 @@
 	gap: 6px;
 	margin-top: 3px;
 	color: var(--okno-muted);
-	font-size: 12.5px;
+	font-size: var(--okno-text-base, 14px);
 }
 
 .okno-avatar {
@@ -442,7 +442,7 @@
 	border-radius: 50%;
 	background: var(--okno-accent-soft);
 	color: var(--okno-accent-ink);
-	font-size: 10px;
+	font-size: var(--okno-text-xs, 12px);
 	font-weight: 700;
 	overflow: hidden;
 }
@@ -487,7 +487,7 @@
 	display: block;
 	margin-bottom: 2px;
 	color: var(--okno-faint);
-	font-size: 11px;
+	font-size: var(--okno-text-sm, 13px);
 	font-weight: 650;
 	letter-spacing: 0.06em;
 	text-transform: uppercase;
@@ -650,7 +650,7 @@
 	background: #0a0a0a;
 	color: #ededed;
 	font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-	font-size: 12.5px;
+	font-size: var(--okno-text-base, 14px);
 	line-height: 1.6;
 	/* Une ligne CSP ou une URL longue revient à la ligne au lieu de passer
 	   sous le bouton Copier. */
@@ -668,7 +668,7 @@
 	border-radius: 6px;
 	background: rgba( 255, 255, 255, 0.06 );
 	color: #ededed;
-	font-size: 12px;
+	font-size: var(--okno-text-base, 14px);
 	cursor: pointer;
 }
 
@@ -693,7 +693,7 @@
 	border-radius: 6px;
 	background: transparent;
 	color: var(--okno-muted);
-	font-size: 12.5px;
+	font-size: var(--okno-text-base, 14px);
 	font-weight: 550;
 	cursor: pointer;
 }
@@ -745,7 +745,7 @@
 	gap: 6px;
 	margin: 12px 0 0;
 	color: var(--okno-muted);
-	font-size: 12.5px;
+	font-size: var(--okno-text-base, 14px);
 }
 
 .okno-copy-source {
@@ -767,7 +767,7 @@
 	background: var(--okno-subtle);
 	color: var(--okno-ink);
 	font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-	font-size: 12.5px;
+	font-size: var(--okno-text-base, 14px);
 	line-height: 1.6;
 	resize: vertical;
 }
@@ -821,7 +821,7 @@
 	display: block;
 	margin-top: 6px;
 	color: var(--okno-muted);
-	font-size: 12.5px;
+	font-size: var(--okno-text-base, 14px);
 	line-height: 1.55;
 }
 
@@ -935,7 +935,7 @@
 	display: block;
 	margin-top: 2px;
 	color: var(--okno-muted);
-	font-size: 12.5px;
+	font-size: var(--okno-text-base, 14px);
 	line-height: 1.45;
 }
 
@@ -977,7 +977,7 @@
 	align-items: center;
 	gap: 6px;
 	margin-top: 8px;
-	font-size: 12.5px;
+	font-size: var(--okno-text-base, 14px);
 	color: var(--okno-muted);
 }
 
@@ -1057,7 +1057,7 @@
 	padding: 12px 24px;
 	border-bottom: 1px solid var(--okno-line);
 	color: var(--okno-muted);
-	font-size: 11px;
+	font-size: var(--okno-text-sm, 13px);
 	font-weight: 650;
 	letter-spacing: 0.06em;
 	text-align: left;
@@ -1076,7 +1076,7 @@
 
 .okno-table__message {
 	color: var(--okno-muted);
-	font-size: 12.5px;
+	font-size: var(--okno-text-base, 14px);
 }
 
 /* ── Utilitaires ───────────────────────────────────────────────────── */
