@@ -98,6 +98,7 @@ final class Okno_Plugin {
 		add_action( Okno_Deploy_Manager::CRON_HOOK, array( 'Okno_Deploy_Manager', 'cleanup_stale' ) );
 		add_action( Okno_Deploy_Manager::AUTO_HOOK, array( 'Okno_Deploy_Manager', 'run_auto' ) );
 		add_action( 'okno_content_changed', array( 'Okno_Deploy_Manager', 'queue_auto' ) );
+		add_filter( 'heartbeat_received', array( 'Okno_Deploy_Manager', 'heartbeat' ) );
 		Okno_Content::init();
 		Okno_Headless::init();
 		Okno_Activity::init();

@@ -106,13 +106,48 @@ class Okno_Admin {
 	}
 
 	public function enqueue( $hook ) {
-		if ( in_array( $hook, $this->dashboard_hooks, true ) ) {
-			$this->enqueue_dashboard();
+		if ( $hook === $this->editor_hook ) {
+			// L'éditeur gère lui-même la publication automatique.
+			$this->enqueue_editor();
 			return;
 		}
-		if ( $hook === $this->editor_hook ) {
-			$this->enqueue_editor();
+		if ( in_array( $hook, $this->dashboard_hooks, true ) ) {
+			$this->enqueue_dashboard();
 		}
+		$this->enqueue_autopublish();
+	}
+
+	/**
+	 * Publication automatique hors de l'éditeur Okno (liste des pages, écran
+	 * de modification classique ou éditeur de blocs) : publie quand le délai
+	 * de calme est écoulé, et tout de suite si l'utilisateur quitte wp-admin
+	 * avec une publication en attente.
+	 */
+	private function enqueue_autopublish() {
+		if ( ! Okno_Deploy_Manager::user_can_deploy() || ! Okno_Deploy_Manager::auto_enabled() ) {
+			return;
+		}
+
+		wp_enqueue_script( 'okno-autopublish', OKNO_URL . 'assets/admin/autopublish.js', array(), self::asset_version( 'assets/admin/autopublish.js' ), true );
+		wp_add_inline_script( 'okno-autopublish', 'window.OknoAutoPublish = ' . wp_json_encode( self::autopublish_config() ) . ';', 'before' );
+	}
+
+	/**
+	 * État de la publication automatique pour le navigateur.
+	 *
+	 * @return array
+	 */
+	private static function autopublish_config() {
+		$delay = Okno_Deploy_Manager::auto_delay();
+		$since = Okno_Deploy_Manager::pending_since();
+		return array(
+			'pending'  => (bool) $since,
+			'dueIn'    => $since ? max( 0, $delay - ( time() - $since ) ) : 0,
+			'delay'    => $delay,
+			'flushUrl' => esc_url_raw( rest_url( Okno_Rest::NS . '/deploy/flush' ) ),
+			'nonce'    => wp_create_nonce( 'wp_rest' ),
+			'adminUrl' => admin_url(),
+		);
 	}
 
 	private function enqueue_dashboard() {
@@ -191,7 +226,8 @@ class Okno_Admin {
 			'driverSupportsStatus' => $driver ? $driver->supports_status() : false,
 			'activeDeploy'         => $active ? $active['id'] : '',
 			'handshakeTimeout'     => 8000,
-			'canDeploy'            => current_user_can( apply_filters( 'okno_deploy_capability', 'publish_pages' ) ),
+			'canDeploy'            => Okno_Deploy_Manager::user_can_deploy(),
+			'autoDeploy'           => Okno_Deploy_Manager::auto_enabled() ? self::autopublish_config() : null,
 		);
 		// phpcs:enable
 

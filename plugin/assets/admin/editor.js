@@ -67,7 +67,19 @@
 		pendingField: cfg.initialField || '', // Lien profond : champ à ouvrir au premier handshake.
 		saving: false,
 		fieldErrors: {}, // "postId:path" -> code d'erreur renvoyé par le dernier enregistrement.
+		publishing: false, // Clic sur « Publier » en cours (son save n'arme pas la minuterie).
+		auto: {
+			pending: false, // Changements enregistrés, pas encore publiés.
+			dueAt: 0, // Échéance de la publication automatique (ms).
+			armedAt: 0,
+			timer: null,
+			ticker: null, // Compte à rebours affiché.
+			beaconSent: false, // Publication envoyée en quittant l'onglet.
+		},
 	};
+
+	// Publication automatique : réglage coché, mode qui publie, droit de publier.
+	var AUTO = cfg.autoDeploy && cfg.canDeploy && cfg.driverConfigured && ! cfg.liveMode ? cfg.autoDeploy : null;
 
 	var els = {
 		root: document.getElementById( 'okno-editor' ),
@@ -3127,6 +3139,7 @@
 			} );
 
 		var totalErrors = 0;
+		var totalSaved = 0;
 		var errorLabels = [];
 		var conflicted = false;
 
@@ -3145,6 +3158,7 @@
 						var errors = response.errors || {};
 						var errorPaths = Object.keys( errors );
 						totalErrors += errorPaths.length;
+						totalSaved += ( response.saved || [] ).length;
 
 						( response.saved || [] ).forEach( function ( path ) {
 							delete state.dirtyByPost[ postId ][ path ];
@@ -3220,11 +3234,18 @@
 					);
 				} else if ( cfg.liveMode ) {
 					toast( __( 'Saved: it’s live.', 'okno' ) );
+				} else if ( AUTO ) {
+					toast( __( 'Saved. It will be published automatically.', 'okno' ) );
 				} else {
 					toast( __( 'Saved. Click “Publish” to put it live.', 'okno' ) );
 				}
 				if ( els.historyList && ! els.historyList.hidden ) {
 					renderHistory();
+				}
+				// Chaque enregistrement repousse la publication automatique : le
+				// client qui enchaîne les retouches n'en déclenche qu'une.
+				if ( AUTO && totalSaved > 0 && ! state.publishing ) {
+					armAutoPublish( AUTO.delay );
 				}
 				return true;
 			} )
@@ -3375,6 +3396,9 @@
 
 	function publish() {
 		els.publish.disabled = true;
+		state.publishing = true;
+		// Publication manuelle : elle emporte aussi les changements en attente.
+		disarmAutoPublish();
 
 		var maybeSave = isDirty() ? save() : Promise.resolve( true );
 
@@ -3387,6 +3411,10 @@
 			} )
 			.then( function ( record ) {
 				if ( ! record ) {
+					// Conflit au save : la publication automatique reste en attente.
+					if ( AUTO ) {
+						armAutoPublish( AUTO.delay );
+					}
 					return;
 				}
 				state.deployId = record.deploy_id;
@@ -3397,8 +3425,16 @@
 			} )
 			.catch( function ( err ) {
 				toast( ( err && err.message ) || __( 'Couldn’t start the deployment.', 'okno' ), true );
+				// Rien n'est parti : la publication automatique reprend la main
+				// (le serveur répond « rien à publier » s'il n'y a rien en attente).
+				if ( AUTO ) {
+					armAutoPublish( AUTO.delay );
+				}
 			} )
-			.finally( setButtons );
+			.finally( function () {
+				state.publishing = false;
+				setButtons();
+			} );
 	}
 
 	function showDeployBanner( record ) {
@@ -3406,6 +3442,7 @@
 		banner.hidden = false;
 		banner.className = 'okno-deploy-banner okno-deploy-' + record.status;
 		banner.setAttribute( 'aria-live', 'polite' );
+		banner.removeAttribute( 'title' );
 
 		var text;
 		switch ( record.status ) {
@@ -3450,7 +3487,174 @@
 	}
 
 	function hideBanner() {
+		// Un compte à rebours a pris la place d'un ancien statut : on le garde.
+		if ( state.auto.pending && els.banner.classList.contains( 'okno-deploy-scheduled' ) ) {
+			return;
+		}
 		els.banner.hidden = true;
+	}
+
+	/* ------------------------------------------------------------------ *
+	 * Publication automatique
+	 *
+	 * Le serveur publie seul (heartbeat, cron) ; l'éditeur, qui sait quand le
+	 * client arrête de modifier, publie plus tôt et plus sûrement : minuterie
+	 * relancée à chaque enregistrement, et envoi immédiat quand l'onglet se
+	 * ferme ou passe en arrière-plan. Le serveur ne publie qu'une fois.
+	 * ------------------------------------------------------------------ */
+
+	function armAutoPublish( seconds ) {
+		var auto = state.auto;
+		clearTimeout( auto.timer );
+		auto.pending = true;
+		auto.beaconSent = false;
+		auto.armedAt = Date.now();
+		auto.dueAt = Date.now() + Math.max( 1, seconds ) * 1000;
+		auto.timer = setTimeout( autoPublishNow, Math.max( 1, seconds ) * 1000 );
+		if ( ! auto.ticker ) {
+			auto.ticker = setInterval( renderCountdown, 1000 );
+		}
+		renderCountdown();
+	}
+
+	function disarmAutoPublish() {
+		var auto = state.auto;
+		clearTimeout( auto.timer );
+		clearInterval( auto.ticker );
+		auto.timer = null;
+		auto.ticker = null;
+		auto.pending = false;
+		if ( els.banner.classList.contains( 'okno-deploy-scheduled' ) ) {
+			els.banner.hidden = true;
+		}
+	}
+
+	function renderCountdown() {
+		var banner = els.banner;
+		// Un build suivi en direct garde la bannière : son statut compte plus.
+		if (
+			! state.auto.pending ||
+			banner.classList.contains( 'okno-deploy-pending' ) ||
+			banner.classList.contains( 'okno-deploy-building' )
+		) {
+			return;
+		}
+		var seconds = Math.max( 0, Math.ceil( ( state.auto.dueAt - Date.now() ) / 1000 ) );
+		banner.hidden = false;
+		banner.className = 'okno-deploy-banner okno-deploy-scheduled';
+		banner.removeAttribute( 'aria-live' ); // Pas d'annonce à chaque seconde.
+		banner.textContent = seconds > 0
+			? /* translators: %d: number of seconds before automatic publishing. */
+			  sprintf( __( 'Publishing in %d s', 'okno' ), seconds )
+			: __( 'Publishing…', 'okno' );
+		banner.title = __( 'Your saved changes go live automatically. Click “Publish” to do it now.', 'okno' );
+	}
+
+	function autoPublishNow() {
+		state.auto.timer = null;
+		if ( ! state.auto.pending ) {
+			return;
+		}
+		// Le client modifie encore : on attend qu'il ait fini.
+		if ( state.saving || state.publishing || isDirty() ) {
+			armAutoPublish( AUTO.delay );
+			return;
+		}
+		state.auto.dueAt = Date.now();
+		renderCountdown();
+		flushRequest();
+	}
+
+	/**
+	 * Demande au serveur de publier ce qui attend (ou, si un autre
+	 * déclencheur l'a déjà fait, le statut de ce déploiement).
+	 */
+	function flushRequest() {
+		return apiFetch( { path: '/okno/v1/deploy/flush', method: 'POST' } )
+			.then( onFlushResult )
+			.catch( function ( err ) {
+				disarmAutoPublish();
+				showDeployBanner( {
+					status: 'error',
+					message: ( err && err.message ) || __( 'Couldn’t start the deployment.', 'okno' ),
+				} );
+			} );
+	}
+
+	function onFlushResult( body ) {
+		if ( 'pending' === body.state ) {
+			// Save en cours, build déjà lancé, délai entre deux déploiements :
+			// on retente plus tard, le serveur garde la publication en attente.
+			armAutoPublish( body.retry_in || 15 );
+			return;
+		}
+		disarmAutoPublish();
+		var record = body.deploy;
+		if ( ! record ) {
+			return;
+		}
+		state.deployId = record.deploy_id;
+		showDeployBanner( record );
+		if ( cfg.driverSupportsStatus && ( 'pending' === record.status || 'building' === record.status ) ) {
+			pollDeploy();
+		}
+	}
+
+	/**
+	 * L'onglet se ferme ou passe en arrière-plan avec une publication en
+	 * attente : on l'envoie tout de suite. sendBeacon survit à la fermeture
+	 * de la page mais ne pose pas d'en-tête : le nonce REST part dans le corps
+	 * (_wpnonce), que WordPress accepte aussi.
+	 */
+	function flushOnLeave() {
+		if ( ! state.auto.pending || state.saving ) {
+			return;
+		}
+		var nonce = ( apiFetch.nonceMiddleware && apiFetch.nonceMiddleware.nonce ) || AUTO.nonce;
+		var body = new URLSearchParams( { _wpnonce: nonce } );
+		var sent = false;
+		try {
+			sent = !! ( navigator.sendBeacon && navigator.sendBeacon( AUTO.flushUrl, body ) );
+		} catch ( e ) {
+			sent = false;
+		}
+		if ( ! sent && window.fetch ) {
+			window.fetch( AUTO.flushUrl, { method: 'POST', body: body, credentials: 'same-origin', keepalive: true } ).catch( function () {} );
+		}
+		disarmAutoPublish();
+		state.auto.beaconSent = true;
+	}
+
+	if ( AUTO ) {
+		window.addEventListener( 'pagehide', flushOnLeave );
+		document.addEventListener( 'visibilitychange', function () {
+			if ( 'hidden' === document.visibilityState ) {
+				flushOnLeave();
+			} else if ( state.auto.beaconSent ) {
+				// De retour : on affiche le statut de la publication partie en notre absence.
+				state.auto.beaconSent = false;
+				flushRequest();
+			}
+		} );
+
+		// Heartbeat de wp-admin : le serveur a peut-être publié sans nous
+		// (heartbeat, cron, autre onglet). Il renouvelle aussi le nonce REST.
+		if ( window.jQuery ) {
+			window.jQuery( document ).on( 'heartbeat-tick', function ( event, data ) {
+				if ( data && data.rest_nonce ) {
+					AUTO.nonce = data.rest_nonce;
+				}
+				var info = data && data.okno_autopublish;
+				if ( ! info ) {
+					return;
+				}
+				if ( ! info.pending && state.auto.pending && Date.now() - state.auto.armedAt > 10000 ) {
+					flushRequest();
+				} else if ( info.pending && ! state.auto.pending && ! state.publishing ) {
+					armAutoPublish( info.due_in || AUTO.delay );
+				}
+			} );
+		}
 	}
 
 	function pollDeploy() {
@@ -3590,5 +3794,11 @@
 
 	if ( state.deployId && cfg.driverSupportsStatus ) {
 		pollDeploy();
+	}
+
+	// Changements enregistrés avant l'ouverture (autre onglet, wp-admin) :
+	// la publication automatique reprend où elle en était.
+	if ( AUTO && AUTO.pending ) {
+		armAutoPublish( AUTO.dueIn );
 	}
 } )();
