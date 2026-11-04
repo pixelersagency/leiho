@@ -59,7 +59,7 @@
 		}
 	},
 	"bin": {
-		"leiho": "./bin/leiho.js"
+		"leiho": "bin/leiho.js"
 	},
 	"engines": {
 		"node": ">=18"
