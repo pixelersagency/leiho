@@ -24,7 +24,7 @@ jobs:
 
       - name: Tag matches plugin version
         run: |
-          VERSION="$(sed -n "s/^define( 'OKNO_VERSION', '\(.*\)' );/\1/p" plugin/okno.php)"
+          VERSION="$(sed -n "s/^define( 'LEIHO_VERSION', '\(.*\)' );/\1/p" plugin/leiho.php)"
           if [ "v$VERSION" != "$GITHUB_REF_NAME" ]; then
             echo "Tag $GITHUB_REF_NAME does not match plugin version $VERSION" >&2
             exit 1
@@ -48,17 +48,17 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          # Deux fichiers identiques : okno-<version>.zip pour l'archive, et
-          # okno.zip pour un lien de téléchargement stable :
-          # https://github.com/<repo>/releases/latest/download/okno.zip
-          cp "dist/okno-$VERSION.zip" dist/okno.zip
+          # Deux fichiers identiques : leiho-<version>.zip pour l'archive, et
+          # leiho.zip pour un lien de téléchargement stable :
+          # https://github.com/<repo>/releases/latest/download/leiho.zip
+          cp "dist/leiho-$VERSION.zip" dist/leiho.zip
           # Toute version est marquée « latest » (bêta comprise) : une
           # pré-release est exclue de /releases/latest, le lien casserait.
           if gh release view "$GITHUB_REF_NAME" > /dev/null 2>&1; then
-            gh release upload "$GITHUB_REF_NAME" "dist/okno-$VERSION.zip" dist/okno.zip --clobber
+            gh release upload "$GITHUB_REF_NAME" "dist/leiho-$VERSION.zip" dist/leiho.zip --clobber
           else
-            gh release create "$GITHUB_REF_NAME" "dist/okno-$VERSION.zip" dist/okno.zip \
-              --title "Okno $VERSION" --notes-file notes.md --latest
+            gh release create "$GITHUB_REF_NAME" "dist/leiho-$VERSION.zip" dist/leiho.zip \
+              --title "Leiho $VERSION" --notes-file notes.md --latest
           fi
 
       - name: Publish bridge to npm

@@ -1,9 +1,9 @@
-# @pixelersagency/okno-bridge
+# leiho
 
-The front-end half of [Okno](https://github.com/pixelersagency/okno), visual editing for headless WordPress. Add it to your site, annotate your markup, and editors can click and edit your pages live from wp-admin.
+The front-end half of [Leiho](https://github.com/pixelersagency/leiho), visual editing for headless WordPress. Add it to your site, annotate your markup, and editors can click and edit your pages live from wp-admin.
 
 - **Any front end**: React, Next.js, Remix, Vite, Astro, Nuxt, SvelteKit or plain HTML.
-- **Inert for visitors**: it only runs inside Okno's editor iframe, and the loaders below don't even download it otherwise.
+- **Inert for visitors**: it only runs inside Leiho's editor iframe, and the loaders below don't even download it otherwise.
 - **Zero dependencies**, about 10 KB.
 - **No network requests, no secrets**: values arrive from wp-admin by `postMessage`, and every message's origin is checked on both sides.
 - **React-safe**: survives re-renders, remounts, Strict Mode and client-side navigation.
@@ -13,15 +13,15 @@ The front-end half of [Okno](https://github.com/pixelersagency/okno), visual edi
 ### React
 
 ```bash
-npm install @pixelersagency/okno-bridge
+npm install leiho
 ```
 
 Once, in the root layout (Next.js `app/layout.tsx`, Remix `root.tsx`, Vite `App.tsx`):
 
 ```jsx
-import { OknoBridge } from '@pixelersagency/okno-bridge/react';
+import { LeihoBridge } from 'leiho/react';
 
-<OknoBridge wpOrigin="https://your-wordpress.example" />
+<LeihoBridge wpOrigin="https://your-wordpress.example" />
 ```
 
 The component renders nothing and imports the bridge dynamically, only inside the editor. It's a client component (`'use client'`), so it can sit in a Next.js server layout.
@@ -30,20 +30,20 @@ The component renders nothing and imports the bridge dynamically, only inside th
 
 ```js
 if (window.self !== window.top) {
-  const { initOknoBridge } = await import('@pixelersagency/okno-bridge');
-  initOknoBridge({ wpOrigin: 'https://your-wordpress.example' });
+  const { initLeihoBridge } = await import('leiho');
+  initLeihoBridge({ wpOrigin: 'https://your-wordpress.example' });
 }
 ```
 
 ### Script tag
 
-Copy `dist/okno-bridge.js` to your public folder (the plugin also offers it for download in **Okno → Démarrer**), then in `<head>`:
+Copy `dist/leiho-bridge.js` to your public folder (the plugin also offers it for download in **Leiho → Démarrer**), then in `<head>`:
 
 ```html
 <script>
   if (window.self !== window.top) {
     var s = document.createElement('script');
-    s.src = '/okno-bridge.js';
+    s.src = '/leiho-bridge.js';
     s.setAttribute('data-wp-origin', 'https://your-wordpress.example');
     document.head.appendChild(s);
   }
@@ -74,17 +74,17 @@ The standalone file starts itself from its `data-wp-origin` attribute.
 |---|---|
 | `data-wp-post="{id}"` | Container: WordPress post ID of the fields inside |
 | `data-wp-field="{path}"` | Editable element: ACF field name, `_title` or `_thumbnail`; dotted paths (`cards.0.title`, `contact.address`) reach into repeaters, flexible content and groups |
-| `data-okno-apply="html"` | The value contains markup: inject filtered HTML instead of text |
-| `data-okno-refresh="save"` | No live preview; the editor reloads the page after saving |
-| `data-okno-section="Label"` | Names a section in the editor's Structure tree |
-| `data-okno-layout="sections.2"` | Binds a section to a flexible content row, so editors can add, move, duplicate and remove it |
-| `data-okno-managed="menu"` | Content managed elsewhere: clicking it explains where to edit it |
-| `data-okno-managed-label="…"` | Label for that region (default: "Géré dans {provider}") |
-| `data-okno-edit-url="…"` | wp-admin screen where it's edited (ignored unless it's on the wp-admin origin) |
+| `data-leiho-apply="html"` | The value contains markup: inject filtered HTML instead of text |
+| `data-leiho-refresh="save"` | No live preview; the editor reloads the page after saving |
+| `data-leiho-section="Label"` | Names a section in the editor's Structure tree |
+| `data-leiho-layout="sections.2"` | Binds a section to a flexible content row, so editors can add, move, duplicate and remove it |
+| `data-leiho-managed="menu"` | Content managed elsewhere: clicking it explains where to edit it |
+| `data-leiho-managed-label="…"` | Label for that region (default: "Géré dans {provider}") |
+| `data-leiho-edit-url="…"` | wp-admin screen where it's edited (ignored unless it's on the wp-admin origin) |
 
 **Always render annotated elements, even when their value is empty.** An element that isn't in the page can't be filled in live.
 
-Header, footer and `<section>` elements are detected as sections automatically; explicit `data-okno-section` / `data-okno-layout` annotations take precedence.
+Header, footer and `<section>` elements are detected as sections automatically; explicit `data-leiho-section` / `data-leiho-layout` annotations take precedence.
 
 ## Allow framing
 
@@ -98,7 +98,7 @@ and must not send `X-Frame-Options: DENY` or `SAMEORIGIN`.
 
 ## Protocol
 
-Messages are `{ ns: 'okno', type, … }`, sent with an explicit `targetOrigin` and checked against `event.origin`.
+Messages are `{ ns: 'leiho', type, … }`, sent with an explicit `targetOrigin` and checked against `event.origin`.
 
 | Direction | Type | Meaning |
 |---|---|---|
@@ -114,7 +114,7 @@ Messages are `{ ns: 'okno', type, … }`, sent with an explicit `targetOrigin` a
 
 ## Build
 
-`npm run build` writes `dist/okno-bridge.js` (standalone, self-starting) from `src/index.js` and copies it into the plugin. Don't edit `dist/` by hand.
+`npm run build` writes `dist/leiho-bridge.js` (standalone, self-starting) from `src/index.js` and copies it into the plugin. Don't edit `dist/` by hand.
 
 ## License
 

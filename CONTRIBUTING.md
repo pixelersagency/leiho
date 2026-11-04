@@ -1,4 +1,4 @@
-# Contributing to Okno
+# Contributing to Leiho
 
 Thanks for helping. Bug reports, framework recipes and pull requests are all welcome.
 
@@ -37,11 +37,11 @@ cd bridge && npm run build
 ./scripts/build-zip.sh
 ```
 
-To try the editor, symlink `plugin/` into `wp-content/plugins/okno` on a local WordPress with ACF, and run one of the `examples/` next to it.
+To try the editor, symlink `plugin/` into `wp-content/plugins/leiho` on a local WordPress with ACF, and run one of the `examples/` next to it.
 
 ## Translations
 
-User-facing strings are written in English and wrapped in WordPress i18n functions (`__()`, `esc_html_e()`… in PHP, `wp.i18n.__()` in JavaScript, text domain `okno`). The French translation lives in `plugin/languages/okno-fr_FR.po`.
+User-facing strings are written in English and wrapped in WordPress i18n functions (`__()`, `esc_html_e()`… in PHP, `wp.i18n.__()` in JavaScript, text domain `leiho`). The French translation lives in `plugin/languages/leiho-fr_FR.po`.
 
 After adding or changing a string, run:
 
@@ -49,9 +49,9 @@ After adding or changing a string, run:
 python3 scripts/i18n.py
 ```
 
-It extracts every string into `okno.pot`, updates the French `.po` (new strings appear with an empty translation), and rebuilds the `.mo` and the JSON files used by the scripts. Fill in the French in the `.po` (by hand or with Poedit), then run it again. CI fails if a string has no French translation. Requires GNU gettext (`brew install gettext`, `apt install gettext`).
+It extracts every string into `leiho.pot`, updates the French `.po` (new strings appear with an empty translation), and rebuilds the `.mo` and the JSON files used by the scripts. Fill in the French in the `.po` (by hand or with Poedit), then run it again. CI fails if a string has no French translation. Requires GNU gettext (`brew install gettext`, `apt install gettext`).
 
-To add a language, copy `okno-fr_FR.po` to `okno-<locale>.po`, translate it, and add the locale to `scripts/i18n.py`.
+To add a language, copy `leiho-fr_FR.po` to `leiho-<locale>.po`, translate it, and add the locale to `scripts/i18n.py`.
 
 ## Conventions
 
@@ -63,6 +63,6 @@ To add a language, copy `okno-fr_FR.po` to `okno-<locale>.po`, translate it, and
 
 ## Releasing (maintainers)
 
-1. Bump the version in `plugin/okno.php` (header and `OKNO_VERSION`), `plugin/readme.txt` (Stable tag) and `bridge/package.json`.
+1. Bump the version in `plugin/leiho.php` (header and `LEIHO_VERSION`), `plugin/readme.txt` (Stable tag) and `bridge/package.json`.
 2. Add a section to `CHANGELOG.md`.
 3. Tag and push: `git tag v1.2.3 && git push --tags`. The release workflow builds the zip, publishes the GitHub release, and publishes the bridge to npm through Trusted Publishing (no token needed).

@@ -1,7 +1,7 @@
 /**
- * Okno — publication automatique dans le reste de wp-admin.
+ * Leiho — publication automatique dans le reste de wp-admin.
  *
- * Chargé sur les écrans d'administration (hors éditeur Okno, qui a sa propre
+ * Chargé sur les écrans d'administration (hors éditeur Leiho, qui a sa propre
  * logique) pour les utilisateurs qui peuvent publier, quand la publication
  * automatique est active. Aucune interface :
  *  - une publication attend (écran rechargé après « Mettre à jour », ou
@@ -13,7 +13,7 @@
 ( function () {
 	'use strict';
 
-	var cfg = window.OknoAutoPublish;
+	var cfg = window.LeihoAutoPublish;
 	if ( ! cfg || ! cfg.flushUrl || ! window.fetch ) {
 		return;
 	}
@@ -128,7 +128,7 @@
 			if ( data && data.rest_nonce ) {
 				cfg.nonce = data.rest_nonce;
 			}
-			var info = data && data.okno_autopublish;
+			var info = data && data.leiho_autopublish;
 			if ( ! info ) {
 				return;
 			}

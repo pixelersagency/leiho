@@ -1,11 +1,11 @@
 /**
- * Okno — admin screens: copy buttons, code tabs, publishing mode fields,
+ * Leiho — admin screens: copy buttons, code tabs, publishing mode fields,
  * live connection checks.
  */
 ( function () {
 	'use strict';
 
-	var cfg = window.OknoAdmin || {};
+	var cfg = window.LeihoAdmin || {};
 	var t = cfg.strings || {};
 	var apiFetch = window.wp && window.wp.apiFetch;
 	var __ = window.wp.i18n.__;
@@ -22,7 +22,7 @@
 	function copyText( text, button ) {
 		var done = function () {
 			var label = button.textContent;
-			button.textContent = t.copied || __( 'Copied', 'okno' );
+			button.textContent = t.copied || __( 'Copied', 'leiho' );
 			setTimeout( function () {
 				button.textContent = label;
 			}, 1600 );
@@ -51,14 +51,14 @@
 	}
 
 	document.addEventListener( 'click', function ( event ) {
-		var direct = event.target.closest( '[data-okno-copy]' );
+		var direct = event.target.closest( '[data-leiho-copy]' );
 		if ( direct ) {
-			copyText( direct.getAttribute( 'data-okno-copy' ), direct );
+			copyText( direct.getAttribute( 'data-leiho-copy' ), direct );
 			return;
 		}
-		var from = event.target.closest( '[data-okno-copy-from]' );
+		var from = event.target.closest( '[data-leiho-copy-from]' );
 		if ( from ) {
-			var source = document.getElementById( from.getAttribute( 'data-okno-copy-from' ) );
+			var source = document.getElementById( from.getAttribute( 'data-leiho-copy-from' ) );
 			if ( source ) {
 				copyText( source.value, from );
 			}
@@ -67,7 +67,7 @@
 
 	/* ── Code tabs (HTML / React) ──────────────────────────────────── */
 
-	document.querySelectorAll( '[data-okno-segmented]' ).forEach( function ( group ) {
+	document.querySelectorAll( '[data-leiho-segmented]' ).forEach( function ( group ) {
 		var buttons = group.querySelectorAll( 'button[data-panel]' );
 		var scope = group.parentElement;
 
@@ -89,7 +89,7 @@
 
 	/* ── Settings: only show the fields of the chosen mode ──────────── */
 
-	var radios = document.querySelectorAll( '[data-okno-driver]' );
+	var radios = document.querySelectorAll( '[data-leiho-driver]' );
 	if ( radios.length ) {
 		var syncDriverFields = function () {
 			var current = '';
@@ -98,8 +98,8 @@
 					current = r.value;
 				}
 			} );
-			document.querySelectorAll( '[data-okno-driver-fields]' ).forEach( function ( block ) {
-				var list = block.getAttribute( 'data-okno-driver-fields' ).split( /\s+/ );
+			document.querySelectorAll( '[data-leiho-driver-fields]' ).forEach( function ( block ) {
+				var list = block.getAttribute( 'data-leiho-driver-fields' ).split( /\s+/ );
 				block.hidden = list.indexOf( current ) === -1;
 			} );
 		};
@@ -113,23 +113,23 @@
 
 	function showResult( el, level, message ) {
 		el.hidden = false;
-		el.className = 'okno-check' + ( level ? ' okno-check--' + level : '' );
+		el.className = 'leiho-check' + ( level ? ' leiho-check--' + level : '' );
 		el.innerHTML = '';
 		var dot = document.createElement( 'span' );
-		dot.className = 'okno-dot' + ( level ? ' okno-dot--' + level : '' );
+		dot.className = 'leiho-dot' + ( level ? ' leiho-dot--' + level : '' );
 		var text = document.createElement( 'span' );
 		text.textContent = message;
 		el.appendChild( dot );
 		el.appendChild( text );
 	}
 
-	var headersButton = document.querySelector( '[data-okno-check-headers]' );
-	var headersResult = document.querySelector( '[data-okno-headers-result]' );
+	var headersButton = document.querySelector( '[data-leiho-check-headers]' );
+	var headersResult = document.querySelector( '[data-leiho-headers-result]' );
 	if ( headersButton && headersResult && apiFetch ) {
 		headersButton.addEventListener( 'click', function () {
 			headersButton.disabled = true;
 			showResult( headersResult, '', t.checking || '…' );
-			apiFetch( { path: '/okno/v1/connection' } )
+			apiFetch( { path: '/leiho/v1/connection' } )
 				.then( function ( res ) {
 					showResult( headersResult, res.level, res.message );
 				} )
@@ -146,8 +146,8 @@
 	 * Bridge test: load the site in a hidden iframe and wait for its
 	 * handshake. This is exactly what the editor will do.
 	 */
-	var testButton = document.querySelector( '[data-okno-test-bridge]' );
-	var testResult = document.querySelector( '[data-okno-bridge-result]' );
+	var testButton = document.querySelector( '[data-leiho-test-bridge]' );
+	var testResult = document.querySelector( '[data-leiho-bridge-result]' );
 	if ( testButton && testResult && cfg.previewUrl ) {
 		testButton.addEventListener( 'click', function () {
 			testButton.disabled = true;
@@ -181,7 +181,7 @@
 
 				if ( apiFetch ) {
 					apiFetch( {
-						path: '/okno/v1/connection',
+						path: '/leiho/v1/connection',
 						method: 'POST',
 						data: {
 							ok: !! payload,
@@ -198,7 +198,7 @@
 					return;
 				}
 				var data = event.data;
-				if ( ! data || 'okno' !== data.ns || 'ready' !== data.type ) {
+				if ( ! data || 'leiho' !== data.ns || 'ready' !== data.type ) {
 					return;
 				}
 				var fields = 0;
@@ -213,7 +213,7 @@
 				finish( null );
 			}, 10000 );
 
-			frame.src = cfg.previewUrl + ( cfg.previewUrl.indexOf( '?' ) === -1 ? '?' : '&' ) + 'okno-check=' + Date.now();
+			frame.src = cfg.previewUrl + ( cfg.previewUrl.indexOf( '?' ) === -1 ? '?' : '&' ) + 'leiho-check=' + Date.now();
 			document.body.appendChild( frame );
 		} );
 	}

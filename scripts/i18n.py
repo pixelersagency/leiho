@@ -1,17 +1,17 @@
 #!/usr/bin/env python3
 """
-Builds Okno's translation files.
+Builds Leiho's translation files.
 
     python3 scripts/i18n.py            # regenerate everything
     python3 scripts/i18n.py --check    # exit 1 if a string has no French translation
 
 Outputs (plugin/languages/):
-  okno.pot                      template, extracted from PHP and JS with xgettext
-  okno-fr_FR.po / .mo           French, for PHP (__(), esc_html_e()…)
-  okno-fr_FR-<md5>.json         French, for each script using wp.i18n
+  leiho.pot                      template, extracted from PHP and JS with xgettext
+  leiho-fr_FR.po / .mo           French, for PHP (__(), esc_html_e()…)
+  leiho-fr_FR-<md5>.json         French, for each script using wp.i18n
                                 (<md5> = md5 of the script path relative to the plugin)
 
-French strings come from the existing okno-fr_FR.po, so editing the .po by hand
+French strings come from the existing leiho-fr_FR.po, so editing the .po by hand
 (or with Poedit) and re-running the script is the normal workflow. Seed files
 (--seed file.jsonl, one {"en": …, "fr": …} object per line) can add entries.
 Requires GNU gettext (xgettext, msgfmt).
@@ -28,7 +28,7 @@ import sys
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 PLUGIN = os.path.join(ROOT, 'plugin')
 LANG_DIR = os.path.join(PLUGIN, 'languages')
-DOMAIN = 'okno'
+DOMAIN = 'leiho'
 LOCALE = 'fr_FR'
 PLURAL_FORMS = 'nplurals=2; plural=(n > 1);'
 
@@ -62,7 +62,7 @@ def php_files():
 
 def extract(files, language, keywords, output, join=False):
     cmd = ['xgettext'] + (['--join-existing'] if join else []) + [ '--from-code=UTF-8', '--language=' + language, '--add-comments=translators:',
-           '--no-wrap', '--sort-by-file', '--package-name=Okno', '-o', output]
+           '--no-wrap', '--sort-by-file', '--package-name=Leiho', '-o', output]
     cmd += ['--keyword=' + k for k in keywords]
     run(cmd + files)
 
@@ -176,11 +176,11 @@ def main():
 
     # En-tête du plugin : WordPress traduit la description de la liste des
     # extensions avec le même domaine, mais xgettext ne la voit pas.
-    with open(os.path.join(PLUGIN, 'okno.php'), encoding='utf-8') as fh:
+    with open(os.path.join(PLUGIN, 'leiho.php'), encoding='utf-8') as fh:
         m = re.search(r'^ \* Description:\s*(.+)$', fh.read(), re.M)
     if m:
         with open(pot, 'a', encoding='utf-8') as fh:
-            fh.write('\n#. Description of the plugin\n#: okno.php\nmsgid "%s"\nmsgstr ""\n' % po_escape(m.group(1).strip()))
+            fh.write('\n#. Description of the plugin\n#: leiho.php\nmsgid "%s"\nmsgstr ""\n' % po_escape(m.group(1).strip()))
 
     # Horodatage stable : sans ça, chaque exécution modifierait le .pot.
     with open(pot, encoding='utf-8') as fh:
@@ -218,13 +218,13 @@ def main():
             strs = {}
         entries.append(dict(e, strs=strs))
     header = [
-        'Project-Id-Version: Okno',
+        'Project-Id-Version: Leiho',
         'Language: fr_FR',
         'MIME-Version: 1.0',
         'Content-Type: text/plain; charset=UTF-8',
         'Content-Transfer-Encoding: 8bit',
         'Plural-Forms: ' + PLURAL_FORMS,
-        'X-Domain: okno',
+        'X-Domain: leiho',
     ]
     write_po(po_path, entries, header)
     run(['msgfmt', '--check-format', '-o', os.path.join(LANG_DIR, '%s-%s.mo' % (DOMAIN, LOCALE)), po_path])

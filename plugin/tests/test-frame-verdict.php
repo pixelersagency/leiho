@@ -6,7 +6,7 @@ define( 'ABSPATH', true );
 function __( $s, $d = '' ) { return $s; }
 function wp_parse_url( $u, $c = -1 ) { return parse_url( $u, $c ); }
 class WP_REST_Server { const READABLE = 'GET'; const CREATABLE = 'POST'; const DELETABLE = 'DELETE'; }
-require __DIR__ . '/../includes/class-okno-rest.php';
+require __DIR__ . '/../includes/class-leiho-rest.php';
 
 function check( $label, $cond, $dump = null ) {
 	echo ( $cond ? 'ok   ' : 'FAIL ' ) . $label . "\n";
@@ -18,7 +18,7 @@ function check( $label, $cond, $dump = null ) {
 
 $wp = 'https://cms.exemple.fr';
 $v  = function ( $csp, $xfo = '' ) use ( $wp ) {
-	return Okno_Rest::frame_verdict( $csp, $xfo, $wp )['level'];
+	return Leiho_Rest::frame_verdict( $csp, $xfo, $wp )['level'];
 };
 
 check( 'origine exacte autorisée', 'ok' === $v( "default-src 'self'; frame-ancestors 'self' https://cms.exemple.fr" ) );

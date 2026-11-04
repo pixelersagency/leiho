@@ -37,7 +37,7 @@ $GLOBALS['store'] = array(
 	'field_reglages' => array( 'field_adresse' => 'Paris', 'field_lien' => array( 'url' => 'https://a.fr', 'title' => 'A', 'target' => '' ) ),
 );
 
-$adapter = new Okno_ACF_Adapter();
+$adapter = new Leiho_ACF_Adapter();
 
 /* --- Lecture --- */
 $schema = $adapter->get_schema( 1 );

@@ -1,8 +1,8 @@
-# Okno
+# Leiho
 
-**L'édition visuelle pour WordPress headless.** Vos rédacteurs voient le vrai site (Next.js, Astro, Remix, Vite, Nuxt, SvelteKit ou HTML simple) directement dans wp-admin. Ils cliquent sur un titre, le modifient, voient le changement en direct, enregistrent et publient. Définissez vos types de contenu dans Okno, ou gardez vos champs ACF : dans les deux cas WordPress reste l'unique source de vérité, sans constructeur de pages ni enfermement.
+**L'édition visuelle pour WordPress headless.** Vos rédacteurs voient le vrai site (Next.js, Astro, Remix, Vite, Nuxt, SvelteKit ou HTML simple) directement dans wp-admin. Ils cliquent sur un titre, le modifient, voient le changement en direct, enregistrent et publient. Définissez vos types de contenu dans Leiho, ou gardez vos champs ACF : dans les deux cas WordPress reste l'unique source de vérité, sans constructeur de pages ni enfermement.
 
-> *Okno* veut dire *fenêtre* en polonais, tchèque et russe : une fenêtre sur le vrai site.
+> *Leiho* veut dire *fenêtre* en polonais, tchèque et russe : une fenêtre sur le vrai site.
 
 [English](README.md) · [Changelog](CHANGELOG.md) · [Paquet bridge](bridge/) · [Exemples par framework](examples/)
 
@@ -12,43 +12,43 @@
 
 ## Pourquoi
 
-Le headless donne aux développeurs un front moderne, mais retire aux rédacteurs le « ce que je vois ». Ils remplissent des formulaires à l'aveugle, attendent un build et découvrent le résultat sur le site en ligne. Okno leur remet le site sous les yeux, sans demander aux développeurs de changer de stack.
+Le headless donne aux développeurs un front moderne, mais retire aux rédacteurs le « ce que je vois ». Ils remplissent des formulaires à l'aveugle, attendent un build et découvrent le résultat sur le site en ligne. Leiho leur remet le site sous les yeux, sans demander aux développeurs de changer de stack.
 
 - **Compatible avec n'importe quel front.** Un bridge d'environ 10 Ko, sans dépendance, dialogue avec wp-admin par `postMessage`. Les apps React ont un composant d'une ligne.
-- **Votre modèle de données, intact.** Okno lit et écrit les champs ACF existants : repeaters, groupes, contenu flexible, relations, images.
+- **Votre modèle de données, intact.** Leiho lit et écrit les champs ACF existants : repeaters, groupes, contenu flexible, relations, images.
 - **Rien de public.** Le bridge n'appelle jamais l'API WordPress et ne détient aucun secret. Chaque message est vérifié par son origine, des deux côtés.
 - **Une mise en ligne adaptée à votre hébergement.** Contenu en direct, build hook (Vercel, Netlify, Cloudflare Pages), GitHub Actions avec suivi du build, commit de publication ou Coolify.
 
-## Okno, c'est le back-office
+## Leiho, c'est le back-office
 
-Un clic sur **Okno** dans wp-admin et il s'ouvre en plein écran : menu WordPress, barre d'administration, pied de page et notices des autres extensions disparaissent (sur cette page seulement), remplacés par la navigation d'Okno. WordPress + Okno suffisent, les rédacteurs n'ont jamais besoin d'en sortir.
+Un clic sur **Leiho** dans wp-admin et il s'ouvre en plein écran : menu WordPress, barre d'administration, pied de page et notices des autres extensions disparaissent (sur cette page seulement), remplacés par la navigation d'Leiho. WordPress + Leiho suffisent, les rédacteurs n'ont jamais besoin d'en sortir.
 
 | | |
 |---|---|
 | **Accueil** | Dernières modifications (avant / après), état de la connexion et des publications, raccourcis. |
 | **Éditeur visuel** | Le site tel que le voient les visiteurs, modifiable sur place. |
-| **Collections** | Tous les contenus en trois volets, quel que soit leur moteur : les types à gauche (pages et articles WordPress, types ACF ou du thème, collections et pages uniques Okno, avec leur nombre d'entrées), les entrées du type choisi au milieu (recherche, filtre par statut, tri, création, duplication, mise en ligne ou retour en brouillon, corbeille et restauration), et l'entrée choisie éditée sur place à droite avec tous ses champs, y compris ceux de WordPress : contenu (éditeur de texte riche avec titres, listes, liens, citations et images de la médiathèque), extrait, adresse (slug), catégories, étiquettes et autres taxonomies publiques (pastilles avec recherche ; une nouvelle étiquette est créée à l'enregistrement), auteur, date de publication, parent et ordre, selon ce que le type prend en charge (annuler / rétablir, brouillons locaux, protection des conflits, historique), son statut, **Enregistrer**, et un lien vers l'éditeur visuel ou la page en ligne quand elle en a une. L'onglet **Champs** d'une collection Okno ouvre le constructeur de schéma (administrateurs, voir plus bas) ; les types ACF renvoient vers ACF. |
+| **Collections** | Tous les contenus en trois volets, quel que soit leur moteur : les types à gauche (pages et articles WordPress, types ACF ou du thème, collections et pages uniques Leiho, avec leur nombre d'entrées), les entrées du type choisi au milieu (recherche, filtre par statut, tri, création, duplication, mise en ligne ou retour en brouillon, corbeille et restauration), et l'entrée choisie éditée sur place à droite avec tous ses champs, y compris ceux de WordPress : contenu (éditeur de texte riche avec titres, listes, liens, citations et images de la médiathèque), extrait, adresse (slug), catégories, étiquettes et autres taxonomies publiques (pastilles avec recherche ; une nouvelle étiquette est créée à l'enregistrement), auteur, date de publication, parent et ordre, selon ce que le type prend en charge (annuler / rétablir, brouillons locaux, protection des conflits, historique), son statut, **Enregistrer**, et un lien vers l'éditeur visuel ou la page en ligne quand elle en a une. L'onglet **Champs** d'une collection Leiho ouvre le constructeur de schéma (administrateurs, voir plus bas) ; les types ACF renvoient vers ACF. |
 | **Médias** | La médiathèque : grille, recherche, envoi (bouton ou glisser-déposer), texte alternatif. |
 | **Publications** | L'historique des déploiements. Le bouton **Publier** de la barre du haut signale les changements pas encore publiés. |
-| **Réglages** | Tout ce dont Okno a besoin (administrateurs). |
+| **Réglages** | Tout ce dont Leiho a besoin (administrateurs). |
 
-Éditeurs et auteurs arrivent dans Okno dès la connexion (réglage activé par défaut) ; les administrateurs gardent le tableau de bord WordPress et un lien **Retour à WordPress**. La navigation se replie, se pilote au clavier et devient un tiroir sur petit écran ; le thème clair ou sombre est partagé avec l'éditeur et gardé par utilisateur côté serveur : chaque page s'ouvre directement dans le bon thème (sombre par défaut). Les anciennes adresses (`admin.php?page=okno-settings`, `okno-editor`…) redirigent vers leur vue.
+Éditeurs et auteurs arrivent dans Leiho dès la connexion (réglage activé par défaut) ; les administrateurs gardent le tableau de bord WordPress et un lien **Retour à WordPress**. La navigation se replie, se pilote au clavier et devient un tiroir sur petit écran ; le thème clair ou sombre est partagé avec l'éditeur et gardé par utilisateur côté serveur : chaque page s'ouvre directement dans le bon thème (sombre par défaut). Les anciennes adresses (`admin.php?page=leiho-settings`, `leiho-editor`…) redirigent vers leur vue.
 
-Un contenu écrit avec l'éditeur de blocs de WordPress n'est jamais réécrit par Okno : son champ **Contenu** montre un aperçu en lecture seule et un lien **Ouvrir dans l'éditeur WordPress** (le serveur refuse de l'écraser), tous les autres champs de l'entrée restent modifiables. Un contenu classique est enregistré au format de l'éditeur classique.
+Un contenu écrit avec l'éditeur de blocs de WordPress n'est jamais réécrit par Leiho : son champ **Contenu** montre un aperçu en lecture seule et un lien **Ouvrir dans l'éditeur WordPress** (le serveur refuse de l'écraser), tous les autres champs de l'entrée restent modifiables. Un contenu classique est enregistré au format de l'éditeur classique.
 
 ## Démarrage rapide
 
 ### 1. Installer le plugin
 
-[Téléchargez `okno.zip`](https://github.com/pixelersagency/okno/releases/latest/download/okno.zip) (dernière version, aussi listée sur la [page des versions](https://github.com/pixelersagency/okno/releases)) et téléversez-le dans **Extensions → Ajouter → Téléverser**. Les versions suivantes apparaissent dans **Extensions** comme n’importe quelle mise à jour. Nécessite WordPress 6.0+, PHP 7.4+ et [ACF](https://www.advancedcustomfields.com/) (gratuit ou Pro). Sans ACF, seuls le titre et l'image mise en avant sont modifiables.
+[Téléchargez `leiho.zip`](https://github.com/pixelersagency/leiho/releases/latest/download/leiho.zip) (dernière version, aussi listée sur la [page des versions](https://github.com/pixelersagency/leiho/releases)) et téléversez-le dans **Extensions → Ajouter → Téléverser**. Les versions suivantes apparaissent dans **Extensions** comme n’importe quelle mise à jour. Nécessite WordPress 6.0+, PHP 7.4+ et [ACF](https://www.advancedcustomfields.com/) (gratuit ou Pro). Sans ACF, seuls le titre et l'image mise en avant sont modifiables.
 
 ### 2. Le relier au site
 
-**Okno → Réglages** : l'adresse du site, les types de contenu ouverts aux rédacteurs et le modèle d'URL de chacun (`/{slug}` par défaut ; la page d'accueil correspond à `/`).
+**Leiho → Réglages** : l'adresse du site, les types de contenu ouverts aux rédacteurs et le modèle d'URL de chacun (`/{slug}` par défaut ; la page d'accueil correspond à `/`).
 
 ### 3. Autoriser wp-admin à afficher le site
 
-Le front doit envoyer cet en-tête (**Okno → Démarrer** l'affiche avec votre domaine et le vérifie pour vous) :
+Le front doit envoyer cet en-tête (**Leiho → Démarrer** l'affiche avec votre domaine et le vérifie pour vous) :
 
 ```
 Content-Security-Policy: frame-ancestors 'self' https://votre-wordpress.fr
@@ -59,24 +59,24 @@ Content-Security-Policy: frame-ancestors 'self' https://votre-wordpress.fr
 **React (Next.js, Remix, Vite…)**
 
 ```bash
-npm install @pixelersagency/okno-bridge
+npm install leiho
 ```
 
 ```jsx
 // Layout racine : app/layout.tsx, root.tsx, App.tsx…
-import { OknoBridge } from '@pixelersagency/okno-bridge/react';
+import { LeihoBridge } from 'leiho/react';
 
-<OknoBridge wpOrigin="https://votre-wordpress.fr" />
+<LeihoBridge wpOrigin="https://votre-wordpress.fr" />
 ```
 
-**Autres sites (Astro, Nuxt, SvelteKit, HTML)** : copiez `okno-bridge.js` (téléchargeable depuis **Okno → Démarrer**) dans le dossier public, puis dans le `<head>` :
+**Autres sites (Astro, Nuxt, SvelteKit, HTML)** : copiez `leiho-bridge.js` (téléchargeable depuis **Leiho → Démarrer**) dans le dossier public, puis dans le `<head>` :
 
 ```html
 <script>
   // Ne charge le bridge que dans l'éditeur : ~150 octets pour les visiteurs.
   if (window.self !== window.top) {
     var s = document.createElement('script');
-    s.src = '/okno-bridge.js';
+    s.src = '/leiho-bridge.js';
     s.setAttribute('data-wp-origin', 'https://votre-wordpress.fr');
     document.head.appendChild(s);
   }
@@ -93,9 +93,9 @@ Annotez ensuite ce qui doit être modifiable :
 </main>
 ```
 
-Dans wp-admin, **Okno → Démarrer → Tester la connexion** confirme que le bridge répond. Les intégrations pas à pas par framework sont dans [`examples/`](examples/).
+Dans wp-admin, **Leiho → Démarrer → Tester la connexion** confirme que le bridge répond. Les intégrations pas à pas par framework sont dans [`examples/`](examples/).
 
-> **Vous travaillez avec un agent de code ?** **Okno → Démarrer** fournit des prompts prêts à coller et le contrat d'intégration complet ([`plugin/docs/agent-instructions.md`](plugin/docs/agent-instructions.md)) pour Claude Code, Cursor, Codex, etc.
+> **Vous travaillez avec un agent de code ?** **Leiho → Démarrer** fournit des prompts prêts à coller et le contrat d'intégration complet ([`plugin/docs/agent-instructions.md`](plugin/docs/agent-instructions.md)) pour Claude Code, Cursor, Codex, etc.
 
 ## Annotations
 
@@ -104,12 +104,12 @@ Dans wp-admin, **Okno → Démarrer → Tester la connexion** confirme que le br
 | `data-wp-post="12"` | Conteneur : ID du contenu WordPress des champs qu'il contient |
 | `data-wp-field="hero_titre"` | Élément modifiable : nom du champ ACF, ou `_title` / `_thumbnail` |
 | `data-wp-field="cartes.0.titre"` | Les chemins pointés atteignent repeaters, contenu flexible et groupes |
-| `data-okno-apply="html"` | La valeur contient du balisage : injectée en HTML filtré plutôt qu'en texte |
-| `data-okno-refresh="save"` | Pas d'aperçu en direct ; la page est rechargée après l'enregistrement |
-| `data-okno-section="Hero"` | Nomme une section dans l'arbre de structure |
-| `data-okno-layout="sections.2"` | Lie une section à une ligne de contenu flexible : ajout, déplacement, duplication, suppression |
-| `data-okno-managed="menu"` | Contenu géré ailleurs (menus, listes d'articles, WooCommerce) : un clic explique où le modifier |
-| `data-okno-edit-url="…"` | L'écran wp-admin où modifier ce contenu géré |
+| `data-leiho-apply="html"` | La valeur contient du balisage : injectée en HTML filtré plutôt qu'en texte |
+| `data-leiho-refresh="save"` | Pas d'aperçu en direct ; la page est rechargée après l'enregistrement |
+| `data-leiho-section="Hero"` | Nomme une section dans l'arbre de structure |
+| `data-leiho-layout="sections.2"` | Lie une section à une ligne de contenu flexible : ajout, déplacement, duplication, suppression |
+| `data-leiho-managed="menu"` | Contenu géré ailleurs (menus, listes d'articles, WooCommerce) : un clic explique où le modifier |
+| `data-leiho-edit-url="…"` | L'écran wp-admin où modifier ce contenu géré |
 
 **Une seule règle :** affichez toujours un élément annoté, même quand sa valeur est vide. `{titre && <h2 data-wp-field="titre">…}` empêche l'édition en direct : un élément absent de la page ne peut pas être rempli.
 
@@ -127,20 +127,20 @@ La documentation complète (champs pris en charge, sécurité, extensions, déve
 
 ## API de contenu
 
-Okno sert aussi le contenu au front : WordPress reste la seule source de vérité, le dépôt du front ne garde que le code.
+Leiho sert aussi le contenu au front : WordPress reste la seule source de vérité, le dépôt du front ne garde que le code.
 
 ```ts
-import { loadOknoContent, indexOknoContent } from '@pixelersagency/okno-bridge/content';
+import { loadLeihoContent, indexLeihoContent } from 'leiho/content';
 
-const { data } = await loadOknoContent( { url: 'https://cms.exemple.fr' } );
-const contenu = indexOknoContent( data );
+const { data } = await loadLeihoContent( { url: 'https://cms.exemple.fr' } );
+const contenu = indexLeihoContent( data );
 contenu.byPath( '/services/audit' );
 ```
 
-- `GET /wp-json/okno/v1/export` : tout le contenu publié en une réponse, mis en cache, avec ETag (un build sans changement reçoit un 304). Une requête par build au lieu d'une par page : la base ne sature plus sur un mutualisé.
-- Instantané : chaque chargement réussi est écrit dans `.okno/content.json` ; si WordPress ne répond pas, le build continue avec le dernier contenu connu et le signale.
-- Types : `npx okno types --url https://cms.exemple.fr` écrit `src/okno.d.ts`, généré depuis les groupes de champs ACF.
-- Accès public par défaut (contenu publié seulement), ou restreint par jeton (`OKNO_TOKEN`).
+- `GET /wp-json/leiho/v1/export` : tout le contenu publié en une réponse, mis en cache, avec ETag (un build sans changement reçoit un 304). Une requête par build au lieu d'une par page : la base ne sature plus sur un mutualisé.
+- Instantané : chaque chargement réussi est écrit dans `.leiho/content.json` ; si WordPress ne répond pas, le build continue avec le dernier contenu connu et le signale.
+- Types : `npx leiho types --url https://cms.exemple.fr` écrit `src/leiho.d.ts`, généré depuis les groupes de champs ACF.
+- Accès public par défaut (contenu publié seulement), ou restreint par jeton (`LEIHO_TOKEN`).
 - Publication automatique après chaque modification, en option.
 - À la première installation, WordPress est durci pour le headless : pas d'indexation du CMS, pages publiques redirigées vers le front, XML-RPC coupé, liste des utilisateurs fermée aux visiteurs.
 
@@ -148,40 +148,40 @@ Détails dans le [README anglais](README.md#content-api).
 
 ## Collections
 
-Okno Collections est un modèle de contenu intégré à Okno, sans ACF : des **collections** (Services, Articles : plusieurs entrées) et des **singletons** (Accueil, Contact, Réglages du site : une seule entrée).
+Leiho Collections est un modèle de contenu intégré à Leiho, sans ACF : des **collections** (Services, Articles : plusieurs entrées) et des **singletons** (Accueil, Contact, Réglages du site : une seule entrée).
 
 - **Chaque entrée est un contenu WordPress** (un type de contenu par collection) : rôles, brouillons, corbeille, révisions, médiathèque, extensions SEO et multilingues continuent de fonctionner.
-- **Les valeurs des champs vivent dans une table par collection** (`wp_okno_<collection>`), pas dans les métas : colonnes typées et indexées pour les champs simples, JSON pour les listes, blocs et groupes. MySQL 5.7+, MariaDB et SQLite.
-- **Schéma versionné** : export et import d'un fichier `okno.schema.json`, à garder dans le dépôt du front.
+- **Les valeurs des champs vivent dans une table par collection** (`wp_leiho_<collection>`), pas dans les métas : colonnes typées et indexées pour les champs simples, JSON pour les listes, blocs et groupes. MySQL 5.7+, MariaDB et SQLite.
+- **Schéma versionné** : export et import d'un fichier `leiho.schema.json`, à garder dans le dépôt du front.
 - **Migrations sûres** : renommer un champ ne coûte rien (clé stable), un changement de type copie les valeurs dans une nouvelle colonne, les colonnes retirées sont archivées, jamais supprimées. `dry_run` montre le plan avant.
 - **Révisions** : restaurer une révision restaure aussi les champs.
-- **Même éditeur, même API** que pour ACF : chemins pointés (`sections.2.items.1.title`), `/okno/v1/export`, `/content` et `/types`.
-- **Constructeur de schéma** dans Okno → **Collections** : collections et pages uniques, libellés, modèle d'URL, fonctionnalités, et un éditeur de champs avec les 19 types et leurs options (choix, min / max, cibles des références, sous-champs des listes et groupes, types de blocs), réordonnés par glisser-déposer ou au clavier. La clé d'un champ est générée à partir de son nom et figée une fois appliquée : seuls le nom et le libellé changent ensuite. **Vérifier** lance la migration à blanc et liste ce qui va se passer (nouvelles colonnes, conversions, colonnes archivées) avant de rien appliquer ; les erreurs pointent le champ concerné. Colonnes archivées listées avec un bouton de purge (confirmée en tapant l'identifiant), import et export d'`okno.schema.json` en un clic. Les entrées s'éditent ensuite dans Okno → **Collections** (et dans l'éditeur visuel quand la collection a une URL). **+ Nouvelle collection**, en bas de la liste des types, en crée une.
+- **Même éditeur, même API** que pour ACF : chemins pointés (`sections.2.items.1.title`), `/leiho/v1/export`, `/content` et `/types`.
+- **Constructeur de schéma** dans Leiho → **Collections** : collections et pages uniques, libellés, modèle d'URL, fonctionnalités, et un éditeur de champs avec les 19 types et leurs options (choix, min / max, cibles des références, sous-champs des listes et groupes, types de blocs), réordonnés par glisser-déposer ou au clavier. La clé d'un champ est générée à partir de son nom et figée une fois appliquée : seuls le nom et le libellé changent ensuite. **Vérifier** lance la migration à blanc et liste ce qui va se passer (nouvelles colonnes, conversions, colonnes archivées) avant de rien appliquer ; les erreurs pointent le champ concerné. Colonnes archivées listées avec un bouton de purge (confirmée en tapant l'identifiant), import et export d'`leiho.schema.json` en un clic. Les entrées s'éditent ensuite dans Leiho → **Collections** (et dans l'éditeur visuel quand la collection a une URL). **+ Nouvelle collection**, en bas de la liste des types, en crée une.
 
 ### Importer depuis ACF
 
-Un site ACF passe à Okno Collections un type de contenu à la fois. Dans Okno → **Collections**, un type ACF propose **Importer dans Okno** (administrateurs) :
+Un site ACF passe à Leiho Collections un type de contenu à la fois. Dans Leiho → **Collections**, un type ACF propose **Importer dans Leiho** (administrateurs) :
 
-1. **Aperçu** : les groupes de champs ACF rattachés au type, ce que devient chaque champ dans Okno (`text` → Texte, `repeater` → Liste, `flexible_content` → Blocs, `relationship` → Référence…) et ce qui n'est pas repris (champs sans équivalent comme `page_link`, `taxonomy` ou `user`, logique conditionnelle, valeurs par défaut, restrictions de médias, règles d'emplacement autres que le type, options de répéteur d'ACF Pro), avec le nombre d'entrées, de champs et de valeurs stockées.
-2. **Import** : Okno crée la collection avec les mêmes noms d'API (camelCase et tirets compris), puis copie les entrées par lots en passant par la validation de l'éditeur, avec une barre de progression. Une valeur refusée n'arrête pas l'import : elle est listée avec un lien vers l'entrée. Chaque entrée est ensuite vérifiée : le JSON servi par Okno est comparé, champ par champ, à celui que servait ACF, et chaque écart est listé.
-3. Le type est alors **servi par Okno** : `/export`, `/content` et `/types` donnent le même JSON qu'avant (objets médias, références, lignes de répéteurs, `_layout` des blocs, texte riche rendu, choix, dates, nombres, booléens), et les chemins pointés de l'éditeur visuel fonctionnent toujours. Les groupes ACF restent en place mais ne s'appliquent plus à ce type.
-4. **Revenir à ACF** (réglages de la collection) sert de nouveau les valeurs ACF et supprime la table Okno de la collection.
+1. **Aperçu** : les groupes de champs ACF rattachés au type, ce que devient chaque champ dans Leiho (`text` → Texte, `repeater` → Liste, `flexible_content` → Blocs, `relationship` → Référence…) et ce qui n'est pas repris (champs sans équivalent comme `page_link`, `taxonomy` ou `user`, logique conditionnelle, valeurs par défaut, restrictions de médias, règles d'emplacement autres que le type, options de répéteur d'ACF Pro), avec le nombre d'entrées, de champs et de valeurs stockées.
+2. **Import** : Leiho crée la collection avec les mêmes noms d'API (camelCase et tirets compris), puis copie les entrées par lots en passant par la validation de l'éditeur, avec une barre de progression. Une valeur refusée n'arrête pas l'import : elle est listée avec un lien vers l'entrée. Chaque entrée est ensuite vérifiée : le JSON servi par Leiho est comparé, champ par champ, à celui que servait ACF, et chaque écart est listé.
+3. Le type est alors **servi par Leiho** : `/export`, `/content` et `/types` donnent le même JSON qu'avant (objets médias, références, lignes de répéteurs, `_layout` des blocs, texte riche rendu, choix, dates, nombres, booléens), et les chemins pointés de l'éditeur visuel fonctionnent toujours. Les groupes ACF restent en place mais ne s'appliquent plus à ce type.
+4. **Revenir à ACF** (réglages de la collection) sert de nouveau les valeurs ACF et supprime la table Leiho de la collection.
 
-Rien n'est jamais supprimé côté ACF : ni métas, ni groupe de champs, ni type de contenu. Les valeurs modifiées dans Okno après l'import ne sont **pas** réécrites dans ACF : revenir à ACF rétablit les valeurs du jour de l'import. Un type déclaré par le thème ou une extension y reste déclaré (Okno ne reprend que ses champs) ; un type déclaré dans l'écran **Post Types** d'ACF est enregistré par Okno avec les mêmes réglages si ACF est désactivé. Les pages et articles ne peuvent pas devenir des collections : leurs champs ACF restent dans ACF.
+Rien n'est jamais supprimé côté ACF : ni métas, ni groupe de champs, ni type de contenu. Les valeurs modifiées dans Leiho après l'import ne sont **pas** réécrites dans ACF : revenir à ACF rétablit les valeurs du jour de l'import. Un type déclaré par le thème ou une extension y reste déclaré (Leiho ne reprend que ses champs) ; un type déclaré dans l'écran **Post Types** d'ACF est enregistré par Leiho avec les mêmes réglages si ACF est désactivé. Les pages et articles ne peuvent pas devenir des collections : leurs champs ACF restent dans ACF.
 
-API REST (administrateurs) : `GET /okno/v1/collections/import-acf` (types et état), `GET …/import-acf/preview?post_type=ville`, `POST …/import-acf/run` (`{ "post_type": "ville" }`, un lot par appel jusqu'à `status: done`, reprise possible), `GET …/import-acf/status?post_type=ville`, `POST …/import-acf/rollback` (`{ "post_type": "ville", "confirm": "ville" }`). WP-CLI : `wp okno acf-import list|preview|run|rollback`.
+API REST (administrateurs) : `GET /leiho/v1/collections/import-acf` (types et état), `GET …/import-acf/preview?post_type=ville`, `POST …/import-acf/run` (`{ "post_type": "ville" }`, un lot par appel jusqu'à `status: done`, reprise possible), `GET …/import-acf/status?post_type=ville`, `POST …/import-acf/rollback` (`{ "post_type": "ville", "confirm": "ville" }`). WP-CLI : `wp leiho acf-import list|preview|run|rollback`.
 
 Format et API : [plugin/docs/collections-spec.md](plugin/docs/collections-spec.md) (en anglais).
 
 ## IA (WordPress 7.0+)
 
-Okno écrit avec le fournisseur d’IA configuré dans **Réglages → Connecteurs**, par le client d’IA de WordPress (`wp_ai_client_prompt()`). Okno ne stocke aucune clé d’API et ne choisit aucun fournisseur ; sans WordPress 7.0, ou sans fournisseur capable de générer du texte, les outils d’IA n’apparaissent pas (les administrateurs ont un lien vers les connecteurs).
+Leiho écrit avec le fournisseur d’IA configuré dans **Réglages → Connecteurs**, par le client d’IA de WordPress (`wp_ai_client_prompt()`). Leiho ne stocke aucune clé d’API et ne choisit aucun fournisseur ; sans WordPress 7.0, ou sans fournisseur capable de générer du texte, les outils d’IA n’apparaissent pas (les administrateurs ont un lien vers les connecteurs).
 
 - **Contexte de marque** (Réglages, administrateurs) : nom, offre, public, ton, mots à privilégier et à éviter, **formulations interdites**, faits obligatoires, langue et jusqu’à trois textes d’exemple. Export / import en JSON. Chaque collection peut préciser à quoi elle sert et pour qui.
 - **IA sur les champs texte** (formulaire et éditeur visuel) : Générer, Réécrire, Raccourcir, Développer, Corriger, Changer le ton, Traduire, et *Proposer* un titre ou une description SEO (champs SEO, extrait). Le contexte de marque, celui de la collection et les autres champs de l’entrée sont envoyés. La proposition s’ouvre avec les différences mot à mot ; les formulations interdites sont surlignées et un texte trop long est signalé avant d’accepter. Accepter écrit dans le champ comme une saisie : Annuler fonctionne, rien n’est enregistré avant « Enregistrer ».
 - **Texte alternatif** des images (champs image, Médias), si le fournisseur lit les images.
 - **Nouvelle entrée avec l’IA** dans Collections : un brief, une réponse JSON structurée selon les champs du type (texte, texte riche, listes, sections), un aperçu, puis un brouillon.
-- **Capacités** pour les agents externes (adaptateur MCP, agents WordPress), catégorie `okno` : `okno/get-brand-context`, `okno/list-collections`, `okno/get-entry`, `okno/update-entry-fields` (brouillons et entrées en attente seulement, validées comme dans l’éditeur, ne publie jamais).
+- **Capacités** pour les agents externes (adaptateur MCP, agents WordPress), catégorie `leiho` : `leiho/get-brand-context`, `leiho/list-collections`, `leiho/get-entry`, `leiho/update-entry-fields` (brouillons et entrées en attente seulement, validées comme dans l’éditeur, ne publie jamais).
 
 ## Licence
 
@@ -189,4 +189,4 @@ Okno écrit avec le fournisseur d’IA configuré dans **Réglages → Connecteu
 
 ## Crédits / tiers
 
-La mise en page et les styles de l'application Okno (vue Collections en trois volets, lignes de liste, réglages des champs, boîtes de dialogue) sont en partie dérivés de [Stacki](https://github.com/flowtricks/stacki), Copyright (c) 2026 Timothy Ricks, sous licence MIT : voir [plugin/licenses/stacki-MIT.txt](plugin/licenses/stacki-MIT.txt). Les fichiers concernés le signalent dans leur en-tête.
+La mise en page et les styles de l'application Leiho (vue Collections en trois volets, lignes de liste, réglages des champs, boîtes de dialogue) sont en partie dérivés de [Stacki](https://github.com/flowtricks/stacki), Copyright (c) 2026 Timothy Ricks, sous licence MIT : voir [plugin/licenses/stacki-MIT.txt](plugin/licenses/stacki-MIT.txt). Les fichiers concernés le signalent dans leur en-tête.

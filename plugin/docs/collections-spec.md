@@ -1,6 +1,6 @@
-# Okno Collections — specification (phase 1)
+# Leiho Collections — specification (phase 1)
 
-Okno Collections lets a site define its content model in Okno itself, without ACF: "Strapi / Webflow collections inside WordPress". A site needs WordPress and Okno, nothing else. ACF keeps working through its adapter; both can run side by side.
+Leiho Collections lets a site define its content model in Leiho itself, without ACF: "Strapi / Webflow collections inside WordPress". A site needs WordPress and Leiho, nothing else. ACF keeps working through its adapter; both can run side by side.
 
 Phase 1 covers the storage engine, the schema format, migrations, revisions, the admin REST API and the adapter that plugs Collections into the visual editor and the content API. Phase 2 is the schema builder UI, phase 3 the ACF → Collections import (§9); both build on the API described here.
 
@@ -9,7 +9,7 @@ Phase 1 covers the storage engine, the schema format, migrations, revisions, the
 | | |
 |---|---|
 | **Collection** | A content type with many entries (Services, Articles, Team members). |
-| **Singleton** | A content type with exactly one entry (Home, Contact, Site settings). Okno creates the entry; it can't be duplicated or deleted. |
+| **Singleton** | A content type with exactly one entry (Home, Contact, Site settings). Leiho creates the entry; it can't be duplicated or deleted. |
 | **Entry** | One row of `wp_posts` (post type = the collection id) plus one row of the collection's field table. |
 | **Field** | A typed value of an entry, identified by a stable `key` and exposed under its `name`. |
 
@@ -17,15 +17,15 @@ Phase 1 covers the storage engine, the schema format, migrations, revisions, the
 
 Every entry is a real WordPress post, so users and roles, drafts, scheduling, trash, revisions, the media library, SEO and multilingual plugins keep working. Title, slug, status, dates, author, `post_content` (when `editor` is supported), excerpt and featured image stay in `wp_posts` / `wp_postmeta` as usual.
 
-Field values do **not** go to postmeta. Each collection owns one table, `{$wpdb->prefix}okno_<collection id>`, with one row per entry keyed by `post_id`. Scalar fields get a typed, indexed column; nested values are stored as JSON text. This keeps queries cheap (one primary-key read per entry instead of dozens of meta rows), makes values sortable and filterable in SQL, and keeps `wp_postmeta` small.
+Field values do **not** go to postmeta. Each collection owns one table, `{$wpdb->prefix}leiho_<collection id>`, with one row per entry keyed by `post_id`. Scalar fields get a typed, indexed column; nested values are stored as JSON text. This keeps queries cheap (one primary-key read per entry instead of dozens of meta rows), makes values sortable and filterable in SQL, and keeps `wp_postmeta` small.
 
 ## 2. Schema format
 
-The schema lives in the `okno_collections` option and can be exported to / imported from a file, `okno.schema.json`, meant to be versioned in the front-end repository (schema as code).
+The schema lives in the `leiho_collections` option and can be exported to / imported from a file, `leiho.schema.json`, meant to be versioned in the front-end repository (schema as code).
 
 ```json
 {
-  "okno": "collections",
+  "leiho": "collections",
   "version": 1,
   "collections": [
     {
@@ -71,13 +71,13 @@ The schema lives in the `okno_collections` option and can be exported to / impor
 
 | Property | | |
 |---|---|---|
-| `id` | required | Post type name and table suffix. `^[a-z][a-z0-9_]{0,19}$`, not a WordPress reserved post type (`post`, `page`, `attachment`…), not `export`/`import`/`activity` (Okno's own table). Never changes. |
+| `id` | required | Post type name and table suffix. `^[a-z][a-z0-9_]{0,19}$`, not a WordPress reserved post type (`post`, `page`, `attachment`…), not `export`/`import`/`activity` (Leiho's own table). Never changes. |
 | `kind` | `collection` (default) \| `singleton` | |
 | `label`, `singular_label` | | Admin labels. `singular_label` defaults to `label`. |
-| `path` | | Front-end URL pattern (`/services/{slug}`, `{id}` also works). Used unless the Okno settings set one. |
+| `path` | | Front-end URL pattern (`/services/{slug}`, `{id}` also works). Used unless the Leiho settings set one. |
 | `supports` | | Extra post features: `editor`, `excerpt`, `thumbnail`, `page-attributes`. `title` and `revisions` are always on. |
 | `icon` | | A `dashicons-*` name for the admin menu. |
-| `external` | bool | The post type is registered outside Okno (theme, plugin, ACF): Okno doesn't register it, doesn't refuse it because it already exists, and doesn't add it to the types served by the content API (the Okno settings decide, as before). Okno only owns its fields. Never a singleton. Set by the ACF import. |
+| `external` | bool | The post type is registered outside Leiho (theme, plugin, ACF): Leiho doesn't register it, doesn't refuse it because it already exists, and doesn't add it to the types served by the content API (the Leiho settings decide, as before). Leiho only owns its fields. Never a singleton. Set by the ACF import. |
 | `source` | `""` \| `acf` | `acf`: imported from ACF. Field and block names then keep their ACF API name (`^[A-Za-z_][A-Za-z0-9_-]{0,63}$`, camelCase and hyphens included) so the front end receives the same JSON; keys stay `^[a-z][a-z0-9_]{0,47}$`. |
 | `fields` | | Fields, max 200 at the top level. |
 
@@ -106,10 +106,10 @@ The schema lives in the `okno_collections` option and can be exported to / impor
 | `email` | | `string` | `VARCHAR(191)` indexed |
 | `url` | | `string` | `TEXT` |
 | `color` | | `string` (`#rgb[a]`, `#rrggbb[aa]`, `rgb[a]()`) | `VARCHAR(32)` |
-| `image`, `file` | | `OknoMedia \| null` | `BIGINT UNSIGNED` indexed |
-| `gallery` | `max` | `OknoMedia[]` | JSON |
+| `image`, `file` | | `LeihoMedia \| null` | `BIGINT UNSIGNED` indexed |
+| `gallery` | `max` | `LeihoMedia[]` | JSON |
 | `link` | | `{ url, title, target } \| null` | JSON |
-| `reference` | `to` (collection ids or post types), `multiple`, `max` | `OknoRef \| null` / `OknoRef[]` | `BIGINT UNSIGNED` indexed / JSON |
+| `reference` | `to` (collection ids or post types), `multiple`, `max` | `LeihoRef \| null` / `LeihoRef[]` | `BIGINT UNSIGNED` indexed / JSON |
 | `list` | `fields`, `min`, `max` | `Array<{…}>` | JSON |
 | `blocks` | `blocks` (`[{key,name,label,fields,min,max}]`), `min`, `max` | `Array<{ _layout: name, … }>` | JSON |
 | `group` | `fields` | `{…}` | JSON |
@@ -121,7 +121,7 @@ Nesting is limited to 8 levels; top-level `VARCHAR` columns to 60 per collection
 ## 3. Tables
 
 ```sql
-CREATE TABLE wp_okno_service (
+CREATE TABLE wp_leiho_service (
   post_id BIGINT(20) UNSIGNED NOT NULL,
   f_price DECIMAL(20,6) NULL DEFAULT NULL,
   f_featured TINYINT(1) NULL DEFAULT NULL,
@@ -134,7 +134,7 @@ CREATE TABLE wp_okno_service (
 
 Columns are `f_<key>` (the prefix avoids reserved words). Identifiers are built only from validated ids and keys and re-checked against `^[A-Za-z0-9_]{1,64}$` before any DDL; values always go through `$wpdb->prepare()` / `$wpdb->insert()` / `$wpdb->update()`.
 
-What the database actually contains is recorded in the `okno_collections_state` option: for each collection, its table, and for each field key the column, its SQL type and the field definition it was created for, plus the list of archived columns. Migrations compare the requested schema with this state, never with the previous schema.
+What the database actually contains is recorded in the `leiho_collections_state` option: for each collection, its table, and for each field key the column, its SQL type and the field definition it was created for, plus the list of archived columns. Migrations compare the requested schema with this state, never with the previous schema.
 
 ## 4. Migrations
 
@@ -153,7 +153,7 @@ Saving a schema (REST, import or PHP) validates it, computes a plan, applies it,
 
 Conversions: any scalar to text; numeric text to number; text to boolean (`"", "0", "false", "no"` → false); parsable text to date/datetime; a single value to a list (`id` → `[id]`) and the first element of a list to a single value; anything else is not converted.
 
-Archived columns are listed in `GET /okno/v1/collections/{id}` and dropped only by an explicit `POST /okno/v1/collections/{id}/purge` with `confirm` set to the collection id.
+Archived columns are listed in `GET /leiho/v1/collections/{id}` and dropped only by an explicit `POST /leiho/v1/collections/{id}/purge` with `confirm` set to the collection id.
 
 The plan is idempotent: the state is updated after each successful operation, so a migration interrupted by a database error is resumed by saving again. SQL uses `CREATE TABLE`, `ALTER TABLE … ADD COLUMN`, `CREATE INDEX`, `DROP INDEX` + `ALTER TABLE … DROP COLUMN` (purge only): all supported by MySQL 5.7+, MariaDB 10.3+ and the SQLite drop-in. No `ALTER … MODIFY` / `RENAME COLUMN`.
 
@@ -161,8 +161,8 @@ The plan is idempotent: the state is updated after each successful operation, so
 
 Entry values follow WordPress revisions:
 
-- When WordPress stores a revision of an entry (`_wp_put_post_revision`), the entry's row is snapshotted into the revision's `_okno_fields` meta: `{ "v": 1, "fields": { "<key>": { "type": "…", "value": … } } }` (keyed by field key, so a snapshot survives renames and retypes).
-- `wp_save_post_revision_post_has_changed` also compares the row with the latest snapshot, so a field-only change creates a revision. Saving fields through Okno asks WordPress for a revision after writing.
+- When WordPress stores a revision of an entry (`_wp_put_post_revision`), the entry's row is snapshotted into the revision's `_leiho_fields` meta: `{ "v": 1, "fields": { "<key>": { "type": "…", "value": … } } }` (keyed by field key, so a snapshot survives renames and retypes).
+- `wp_save_post_revision_post_has_changed` also compares the row with the latest snapshot, so a field-only change creates a revision. Saving fields through Leiho asks WordPress for a revision after writing.
 - `wp_restore_post_revision` writes the snapshot back (converting values whose field type changed since, ignoring fields no longer in the schema), then stores a new revision of the restored state.
 - Entries deleted permanently lose their row; trashed entries keep it.
 
@@ -171,20 +171,20 @@ Entry values follow WordPress revisions:
 ### PHP
 
 ```php
-Okno_Collections::schema();                         // normalized schema
-Okno_Collections::get( 'service' );                 // one collection or null
-Okno_Collections::save_schema( $schema, $dry_run ); // validate + migrate + store → report | WP_Error
-Okno_Collections::put_collection( $collection, $dry_run );
-Okno_Collections::delete_collection( 'service' );
-Okno_Collections::export();                         // array, the okno.schema.json content
-Okno_Collections::import( $json_or_array, $dry_run );
-Okno_Collections::entry( 'home' );                  // singleton post id
-Okno_Collections::save_entry( $post_id, array( 'price' => 120, 'sections.0.image' => 12 ) ); // { saved, errors }
+Leiho_Collections::schema();                         // normalized schema
+Leiho_Collections::get( 'service' );                 // one collection or null
+Leiho_Collections::save_schema( $schema, $dry_run ); // validate + migrate + store → report | WP_Error
+Leiho_Collections::put_collection( $collection, $dry_run );
+Leiho_Collections::delete_collection( 'service' );
+Leiho_Collections::export();                         // array, the leiho.schema.json content
+Leiho_Collections::import( $json_or_array, $dry_run );
+Leiho_Collections::entry( 'home' );                  // singleton post id
+Leiho_Collections::save_entry( $post_id, array( 'price' => 120, 'sections.0.image' => 12 ) ); // { saved, errors }
 ```
 
 A migration report: `{ dry_run, operations: [{ op, collection, key?, column?, … }], converted: { "<collection>.<key>": { converted, failed } }, warnings: [] }`.
 
-### REST (`okno/v1`, `manage_options`, filter `okno_collections_capability`)
+### REST (`leiho/v1`, `manage_options`, filter `leiho_collections_capability`)
 
 | Route | |
 |---|---|
@@ -194,7 +194,7 @@ A migration report: `{ dry_run, operations: [{ op, collection, key?, column?, �
 | `PUT /collections/{id}` | Replace a collection's definition, migrate. `?dry_run=1`. |
 | `DELETE /collections/{id}` | Remove from the schema; data kept. |
 | `POST /collections/{id}/purge` | Drop archived columns (`confirm` = id). |
-| `GET /collections/export` | `okno.schema.json` (attachment). |
+| `GET /collections/export` | `leiho.schema.json` (attachment). |
 | `POST /collections/import` | Replace the whole schema with a file's content. `?dry_run=1`. |
 
 | `GET /collections/import-acf` | Content types with ACF fields and their import state; `elsewhere`: field groups attached to no content type. §9. |
@@ -209,11 +209,11 @@ Invalid schemas answer `400` with `data.errors`: a list of `{ path, message }` (
 
 ### Content and editor
 
-Unchanged routes now include Collections: `/okno/v1/export`, `/content`, `/types` serve every collection post type (added to `okno_content_post_types` via the settings), and `/okno/v1/schema/{id}` + `/okno/v1/save/{id}` edit entries with the same dotted paths as ACF (`sections.2.items.1.title`).
+Unchanged routes now include Collections: `/leiho/v1/export`, `/content`, `/types` serve every collection post type (added to `leiho_content_post_types` via the settings), and `/leiho/v1/schema/{id}` + `/leiho/v1/save/{id}` edit entries with the same dotted paths as ACF (`sections.2.items.1.title`).
 
 ## 7. Adapter
 
-`Okno_Native_Adapter` (id `collections`) implements `Okno_Adapter_Interface` and `Okno_Content_Adapter_Interface`. It translates each Collections field to the ACF-shaped field array the existing code already understands, and reuses the shared field engine (`Okno_Field_Adapter`, extracted from the ACF adapter) for describing, reading, patching dotted paths, sanitizing and shaping public values. The visual editor, the change log, the content API and `Okno_Types` therefore work unchanged.
+`Leiho_Native_Adapter` (id `collections`) implements `Leiho_Adapter_Interface` and `Leiho_Content_Adapter_Interface`. It translates each Collections field to the ACF-shaped field array the existing code already understands, and reuses the shared field engine (`Leiho_Field_Adapter`, extracted from the ACF adapter) for describing, reading, patching dotted paths, sanitizing and shaping public values. The visual editor, the change log, the content API and `Leiho_Types` therefore work unchanged.
 
 | Collections | Field engine type |
 |---|---|
@@ -231,22 +231,22 @@ Sanitization mirrors the ACF adapter (required, `max_length`, attachments and re
 
 ## 8. Limits and next phases
 
-- The classic wp-admin edit screen shows the post fields only; collection fields are edited in the Okno editor (or its form view, for collections without a `path`) or through the APIs.
-- Phase 2 (done): the schema builder in Okno → Collections, a UI on top of the REST routes above. New fields get `key = name` (made unique among siblings) when they are first applied; the builder never changes the key of a saved field.
+- The classic wp-admin edit screen shows the post fields only; collection fields are edited in the Leiho editor (or its form view, for collections without a `path`) or through the APIs.
+- Phase 2 (done): the schema builder in Leiho → Collections, a UI on top of the REST routes above. New fields get `key = name` (made unique among siblings) when they are first applied; the builder never changes the key of a saved field.
 - Phase 3 (done): ACF → Collections import, §9.
 - Per-request cache only; the export reads one row per entry (primary key lookups).
 - `datetime` values are stored as entered (site time), like ACF.
-- Uninstalling Okno drops the collection tables and options (define `OKNO_KEEP_DATA` to keep them); entries stay in `wp_posts`.
+- Uninstalling Leiho drops the collection tables and options (define `LEIHO_KEEP_DATA` to keep them); entries stay in `wp_posts`.
 
 ## 9. ACF import
 
-`Okno_ACF_Import` moves the ACF fields of one content type into an Okno collection. Nothing is deleted from ACF (postmeta, field groups, ACF post types): the import is reversible.
+`Leiho_ACF_Import` moves the ACF fields of one content type into an Leiho collection. Nothing is deleted from ACF (postmeta, field groups, ACF post types): the import is reversible.
 
 ### Preview
 
-The field groups attached to the post type are the active groups whose location rules name it (`Okno_ACF_Adapter::targets()`), in ACF's order. A group whose rules add other conditions (page template, taxonomy…) is imported too, and reported: its fields become available on every entry. Each ACF field becomes:
+The field groups attached to the post type are the active groups whose location rules name it (`Leiho_ACF_Adapter::targets()`), in ACF's order. A group whose rules add other conditions (page template, taxonomy…) is imported too, and reported: its fields become available on every entry. Each ACF field becomes:
 
-| ACF | Okno | Notes |
+| ACF | Leiho | Notes |
 |---|---|---|
 | `text`, `textarea` | `text` (`multiline` for a textarea) | `maxlength` → `max_length` |
 | `wysiwyg` | `richtext` | Rendered like ACF (`acf_the_content`), even once ACF is deactivated |
@@ -266,21 +266,21 @@ The field groups attached to the post type are the active groups whose location 
 | `tab`, `message`, `accordion` | — | No value: ignored |
 | `page_link`, `taxonomy`, `user`, `password`, `google_map`, others | — | Not carried over: their values leave the content API (they stay in ACF) |
 
-Keys are derived from the names (`heroTitle` → `herotitle`, unique among siblings); names are kept (`source: "acf"`). Conditional logic and default values are dropped and reported. The generated collection is `external: true` and validated like any schema before anything is written; a post type that can't be a collection id (`post`, `page`, hyphens, more than 20 characters) is not importable, with the reason: Okno fields belong to a collection's own post type, there is no "Okno fields on pages".
+Keys are derived from the names (`heroTitle` → `herotitle`, unique among siblings); names are kept (`source: "acf"`). Conditional logic and default values are dropped and reported. The generated collection is `external: true` and validated like any schema before anything is written; a post type that can't be a collection id (`post`, `page`, hyphens, more than 20 characters) is not importable, with the reason: Leiho fields belong to a collection's own post type, there is no "Leiho fields on pages".
 
 ### Run
 
-`start()` creates the collection (`put_collection()`) and the import record, in the `okno_acf_import` option (post type → `{ status, origin, args, total, done, cursor, imported, failed, different, failures, diffs, … }`). Each `step()` copies the next batch of entries (all statuses but `auto-draft` and `inherit`, by increasing id from `cursor`): it resets the entry's row, reads every ACF value raw (`get_field( key, id, false )`, ACF default values included), converts it to the editor's input format (rows keyed by name, `_layout` for blocks, `Ymd` dates, vanished media and posts removed) and writes it with `Okno_Collections::save_entry()`, i.e. the editor's validation, without a revision per entry. A refused field is recorded (`post_id`, `field`, `code`, `message`) and the rest of the entry and of the import go on. Then the value served by Okno (`Okno_Native_Adapter::get_content()`) is compared with the value ACF served before the copy, field by field (canonical JSON: `5` and `5.0` are equal); any difference is recorded. The first 200 failures and differences are kept; the counters are exact.
+`start()` creates the collection (`put_collection()`) and the import record, in the `leiho_acf_import` option (post type → `{ status, origin, args, total, done, cursor, imported, failed, different, failures, diffs, … }`). Each `step()` copies the next batch of entries (all statuses but `auto-draft` and `inherit`, by increasing id from `cursor`): it resets the entry's row, reads every ACF value raw (`get_field( key, id, false )`, ACF default values included), converts it to the editor's input format (rows keyed by name, `_layout` for blocks, `Ymd` dates, vanished media and posts removed) and writes it with `Leiho_Collections::save_entry()`, i.e. the editor's validation, without a revision per entry. A refused field is recorded (`post_id`, `field`, `code`, `message`) and the rest of the entry and of the import go on. Then the value served by Leiho (`Leiho_Native_Adapter::get_content()`) is compared with the value ACF served before the copy, field by field (canonical JSON: `5` and `5.0` are equal); any difference is recorded. The first 200 failures and differences are kept; the counters are exact.
 
-While the record is `running`, ACF still serves the type (the native adapter only serves it to the import itself). When the last batch is done the record becomes `done` and the type is served by Okno: `Okno_ACF_Adapter` ignores it (`retired()`), and the ACF location rules no longer match it (`acf/location/rule_match`), so the classic edit screen doesn't show the ACF groups anymore. If the collection disappears from the schema afterwards (a schema file imported without it), ACF serves the type again.
+While the record is `running`, ACF still serves the type (the native adapter only serves it to the import itself). When the last batch is done the record becomes `done` and the type is served by Leiho: `Leiho_ACF_Adapter` ignores it (`retired()`), and the ACF location rules no longer match it (`acf/location/rule_match`), so the classic edit screen doesn't show the ACF groups anymore. If the collection disappears from the schema afterwards (a schema file imported without it), ACF serves the type again.
 
 ### Post type registration
 
-`origin` is `acf` (declared in ACF's Post Types screen), `external` (theme, plugin, mu-plugin) or `builtin`. For `acf`, the arguments ACF registers the type with (`ACF_Post_Type::get_post_type_args()`) are stored in the record, and `Okno_ACF_Import::register_post_types()` (`init`, priority 6, after ACF) registers the type with them when nothing else did, i.e. once ACF is deactivated. Taxonomies declared in ACF are not taken over. For `external`, the theme or plugin keeps registering it.
+`origin` is `acf` (declared in ACF's Post Types screen), `external` (theme, plugin, mu-plugin) or `builtin`. For `acf`, the arguments ACF registers the type with (`ACF_Post_Type::get_post_type_args()`) are stored in the record, and `Leiho_ACF_Import::register_post_types()` (`init`, priority 6, after ACF) registers the type with them when nothing else did, i.e. once ACF is deactivated. Taxonomies declared in ACF are not taken over. For `external`, the theme or plugin keeps registering it.
 
 ### Rollback
 
-`rollback()` (ACF must be active) removes the collection from the schema, drops its table and its state (`Okno_Collections_Store::drop()`) and deletes the record: ACF serves the original values again. Values edited in Okno since the import are not written back to ACF; they are lost with the table.
+`rollback()` (ACF must be active) removes the collection from the schema, drops its table and its state (`Leiho_Collections_Store::drop()`) and deletes the record: ACF serves the original values again. Values edited in Leiho since the import are not written back to ACF; they are lost with the table.
 
 ### Front-end compatibility
 

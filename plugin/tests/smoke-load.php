@@ -23,7 +23,7 @@ function register_activation_hook( ...$a ) { $GLOBALS['called'][] = 'activation'
 function register_deactivation_hook( ...$a ) { $GLOBALS['called'][] = 'deactivation'; }
 function register_rest_route( ...$a ) {}
 function plugin_dir_path( $f ) { return dirname( $f ) . '/'; }
-function plugin_dir_url( $f ) { return 'https://wp.test/plugins/okno/'; }
+function plugin_dir_url( $f ) { return 'https://wp.test/plugins/leiho/'; }
 function get_option( $k, $d = false ) { return $d; }
 function update_option( ...$a ) { return true; }
 function get_post_meta( ...$a ) { return ''; }
@@ -108,44 +108,44 @@ function esc_url( $v ) { return $v; }
 function esc_attr( $v ) { return $v; }
 function esc_html( $v ) { return $v; }
 
-require __DIR__ . '/../okno.php';
+require __DIR__ . '/../leiho.php';
 
 echo "chargement OK\n";
-echo 'adapter chargé ? ' . ( class_exists( 'Okno_ACF_Adapter' ) ? 'oui' : 'NON' ) . "\n";
+echo 'adapter chargé ? ' . ( class_exists( 'Leiho_ACF_Adapter' ) ? 'oui' : 'NON' ) . "\n";
 echo 'fichiers inclus : ' . count( get_included_files() ) . "\n";
-foreach ( get_included_files() as $f ) { if ( false !== strpos( $f, 'Okno' ) || false !== strpos( $f, 'okno' ) ) { echo '  - ' . basename( $f ) . "\n"; } }
-$plugin = Okno_Plugin::instance();
+foreach ( get_included_files() as $f ) { if ( false !== strpos( $f, 'Leiho' ) || false !== strpos( $f, 'leiho' ) ) { echo '  - ' . basename( $f ) . "\n"; } }
+$plugin = Leiho_Plugin::instance();
 echo "boot OK — hooks: " . implode( ', ', array_slice( $GLOBALS['called'], 0, 6 ) ) . "\n";
-echo "settings OK — driver='" . Okno_Plugin::settings()['deploy_driver'] . "'\n";
-new Okno_Rest( $plugin );
-new Okno_Schema( $plugin );
-new Okno_ACF_Adapter();
-new Okno_Native_Adapter();
-new Okno_Collections_Rest();
-echo 'collections : ' . count( Okno_Collections::post_types() ) . "\n";
-new Okno_Github_Actions_Driver();
-new Okno_Github_Commit_Driver();
-new Okno_Build_Hook_Driver();
-new Okno_Coolify_Driver();
+echo "settings OK — driver='" . Leiho_Plugin::settings()['deploy_driver'] . "'\n";
+new Leiho_Rest( $plugin );
+new Leiho_Schema( $plugin );
+new Leiho_ACF_Adapter();
+new Leiho_Native_Adapter();
+new Leiho_Collections_Rest();
+echo 'collections : ' . count( Leiho_Collections::post_types() ) . "\n";
+new Leiho_Github_Actions_Driver();
+new Leiho_Github_Commit_Driver();
+new Leiho_Build_Hook_Driver();
+new Leiho_Coolify_Driver();
 echo "instanciations OK\n";
-Okno_Deploy_Manager::cleanup_stale();
-Okno_Deploy_Manager::schedule_cleanup();
+Leiho_Deploy_Manager::cleanup_stale();
+Leiho_Deploy_Manager::schedule_cleanup();
 echo "cron OK\n";
 
-// IA : sans le client d'IA de WordPress 7 (WordPress plus ancien), Okno se
+// IA : sans le client d'IA de WordPress 7 (WordPress plus ancien), Leiho se
 // charge et les outils d'IA sont masqués ; les capacités ne s'enregistrent
 // que si l'Abilities API existe. (Stubs déclarés dans des blocs : une
 // fonction déclarée au niveau du fichier existerait dès la compilation.)
 function add_query_arg( $args, $url ) { return $url . '?' . http_build_query( $args ); }
 function remove_filter( ...$a ) {}
 $smoke_ai_ok = true;
-$ai          = Okno_AI::status( true );
-$smoke_ai_ok = $smoke_ai_ok && ! $ai['client'] && ! $ai['text'] && ! Okno_AI::client_config()['enabled'] && '' === Okno_AI::client_config()['connectorsUrl'];
+$ai          = Leiho_AI::status( true );
+$smoke_ai_ok = $smoke_ai_ok && ! $ai['client'] && ! $ai['text'] && ! Leiho_AI::client_config()['enabled'] && '' === Leiho_AI::client_config()['connectorsUrl'];
 echo 'IA sans WordPress 7 : ' . ( $smoke_ai_ok ? 'masquée' : 'ÉCHEC' ) . "\n";
-Okno_AI_Abilities::register_category();
-Okno_AI_Abilities::register();
+Leiho_AI_Abilities::register_category();
+Leiho_AI_Abilities::register();
 echo "capacités sans Abilities API : OK\n";
-$err         = Okno_AI::generate( '', 'x' );
+$err         = Leiho_AI::generate( '', 'x' );
 $smoke_ai_ok = $smoke_ai_ok && $err instanceof WP_Error;
 echo 'génération sans client : ' . ( $err instanceof WP_Error ? 'erreur propre' : 'ÉCHEC' ) . "\n";
 
@@ -161,13 +161,13 @@ if ( true ) {
 	function wp_register_ability_category( $slug, $args ) { $GLOBALS['registered'][] = $slug; }
 	function wp_register_ability( $name, $args ) { $GLOBALS['registered'][] = $name; }
 }
-$ai          = Okno_AI::status( true );
-$no_provider = $ai['client'] && ! $ai['text'] && ! Okno_AI::client_config()['enabled'] && '' !== Okno_AI::client_config()['connectorsUrl'];
+$ai          = Leiho_AI::status( true );
+$no_provider = $ai['client'] && ! $ai['text'] && ! Leiho_AI::client_config()['enabled'] && '' !== Leiho_AI::client_config()['connectorsUrl'];
 $smoke_ai_ok = $smoke_ai_ok && $no_provider;
 echo 'IA sans fournisseur : ' . ( $no_provider ? 'masquée, lien des connecteurs' : 'ÉCHEC' ) . "\n";
 $GLOBALS['registered'] = array();
-Okno_AI_Abilities::register_category();
-Okno_AI_Abilities::register();
+Leiho_AI_Abilities::register_category();
+Leiho_AI_Abilities::register();
 $smoke_ai_ok = $smoke_ai_ok && 5 === count( $GLOBALS['registered'] );
 echo 'capacités : ' . ( 5 === count( $GLOBALS['registered'] ) ? 'enregistrées' : 'ÉCHEC' ) . "\n";
 exit( $smoke_ai_ok ? 0 : 1 );

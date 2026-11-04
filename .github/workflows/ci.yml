@@ -77,7 +77,7 @@ jobs:
           node --check plugin/assets/admin/app-media.js
           node --check plugin/assets/admin/ui.js
           node --check plugin/assets/admin/ai.js
-          node --check bridge/bin/okno.js
+          node --check bridge/bin/leiho.js
 
   package:
     name: Package
@@ -89,5 +89,5 @@ jobs:
         run: ./scripts/build-zip.sh
       - uses: actions/upload-artifact@v4
         with:
-          name: okno-plugin
+          name: leiho-plugin
           path: dist/*.zip

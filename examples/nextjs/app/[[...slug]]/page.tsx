@@ -14,7 +14,7 @@ export default async function Page({ params }: { params: Promise<{ slug?: string
   return (
     <main data-wp-post={page.id}>
       {/* Titles may contain entities: let the editor inject them as HTML. */}
-      <h1 data-wp-field="_title" data-okno-apply="html" dangerouslySetInnerHTML={{ __html: page.title.rendered }} />
+      <h1 data-wp-field="_title" data-leiho-apply="html" dangerouslySetInnerHTML={{ __html: page.title.rendered }} />
 
       {/* Always render annotated elements, even when empty. */}
       <p data-wp-field="intro">{page.acf.intro ?? ''}</p>
@@ -32,7 +32,7 @@ function SectionBlock({ section, index }: { section: Section; index: number }) {
   switch (section.acf_fc_layout) {
     case 'hero':
       return (
-        <section data-okno-layout={path} data-okno-section="Hero">
+        <section data-leiho-layout={path} data-leiho-section="Hero">
           <h2 data-wp-field={`${path}.title`}>{section.title}</h2>
           <img
             data-wp-field={`${path}.image`}
@@ -43,7 +43,7 @@ function SectionBlock({ section, index }: { section: Section; index: number }) {
       );
     case 'text':
       return (
-        <section data-okno-layout={path} data-okno-section="Text">
+        <section data-leiho-layout={path} data-leiho-section="Text">
           <div data-wp-field={`${path}.body`} dangerouslySetInnerHTML={{ __html: section.body }} />
         </section>
       );

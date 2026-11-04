@@ -1,6 +1,6 @@
 # Examples
 
-Minimal integrations of Okno, one per kind of front end. Each shows the three things a site needs:
+Minimal integrations of Leiho, one per kind of front end. Each shows the three things a site needs:
 
 1. **Frame permission**: a `Content-Security-Policy: frame-ancestors` header that lets wp-admin display the site.
 2. **The bridge**: loaded only inside the editor, never for visitors.
@@ -22,7 +22,7 @@ Replace `https://wp.example.com` with your WordPress address everywhere.
 To let editors add, move and remove blocks, use an ACF flexible content field (here `sections`) and mark each rendered block with its row path:
 
 ```html
-<section data-okno-layout="sections.0" data-okno-section="Hero">
+<section data-leiho-layout="sections.0" data-leiho-section="Hero">
   <h2 data-wp-field="sections.0.title">…</h2>
 </section>
 ```

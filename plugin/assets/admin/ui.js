@@ -1,5 +1,5 @@
 /**
- * Okno — composants d'interface partagés : window.OknoUI.
+ * Leiho — composants d'interface partagés : window.LeihoUI.
  *
  * - select( el )   : remplace l'apparence d'un <select> par un bouton et une
  *                    liste (role listbox) stylés. Le <select> reste dans la
@@ -34,7 +34,7 @@
 
 	function uid( prefix ) {
 		count += 1;
-		return 'okno-ui-' + prefix + '-' + count;
+		return 'leiho-ui-' + prefix + '-' + count;
 	}
 
 	function svg( paths, className ) {
@@ -72,7 +72,7 @@
 
 	/** Couche où poser les listes : la coque de l'app (jetons de couleur). */
 	function layerFor( el ) {
-		return ( el && el.closest && ( el.closest( '.okno-app' ) || el.closest( '.okno-editor' ) ) ) || document.body;
+		return ( el && el.closest && ( el.closest( '.leiho-app' ) || el.closest( '.leiho-editor' ) ) ) || document.body;
 	}
 
 	function normalize( text ) {
@@ -100,7 +100,7 @@
 		this.items = [];
 		this.active = -1;
 		this.el = document.createElement( 'div' );
-		this.el.className = 'okno-listbox';
+		this.el.className = 'leiho-listbox';
 		this.el.id = uid( 'listbox' );
 		this.el.setAttribute( 'role', 'listbox' );
 		this.el.tabIndex = -1;
@@ -155,13 +155,13 @@
 			if ( item.group && item.group !== lastGroup ) {
 				lastGroup = item.group;
 				var g = document.createElement( 'div' );
-				g.className = 'okno-listbox__group';
+				g.className = 'leiho-listbox__group';
 				g.setAttribute( 'role', 'presentation' );
 				g.textContent = item.group;
 				el.appendChild( g );
 			}
 			var opt = document.createElement( 'div' );
-			opt.className = 'okno-listbox__option' + ( item.create ? ' okno-listbox__option--create' : '' );
+			opt.className = 'leiho-listbox__option' + ( item.create ? ' leiho-listbox__option--create' : '' );
 			opt.id = el.id + '-' + i;
 			opt.dataset.index = i;
 			opt.setAttribute( 'role', 'option' );
@@ -169,25 +169,25 @@
 			if ( item.disabled ) {
 				opt.setAttribute( 'aria-disabled', 'true' );
 			}
-			opt.appendChild( svg( item.create ? ICONS.plus : ICONS.check, 'okno-listbox__check' ) );
+			opt.appendChild( svg( item.create ? ICONS.plus : ICONS.check, 'leiho-listbox__check' ) );
 			if ( item.create ) {
 				opt.firstChild.style.visibility = 'visible';
 			}
 			if ( item.dot ) {
 				opt.dataset.dot = item.dot;
 				var dot = document.createElement( 'span' );
-				dot.className = 'okno-listbox__dot';
+				dot.className = 'leiho-listbox__dot';
 				opt.appendChild( dot );
 			}
 			var text = document.createElement( 'span' );
-			text.className = 'okno-listbox__text';
+			text.className = 'leiho-listbox__text';
 			text.textContent = item.label;
 			opt.appendChild( text );
 			el.appendChild( opt );
 		} );
 		if ( ! items.length && emptyText ) {
 			var empty = document.createElement( 'div' );
-			empty.className = 'okno-listbox__empty';
+			empty.className = 'leiho-listbox__empty';
 			empty.textContent = emptyText;
 			el.appendChild( empty );
 		}
@@ -369,9 +369,9 @@
 			'SELECT' === el.tagName &&
 			! el.multiple &&
 			! ( el.size > 1 ) &&
-			! el.oknoSelect &&
-			! el.hasAttribute( 'data-okno-native' ) &&
-			! el.closest( '[data-okno-native]' )
+			! el.leihoSelect &&
+			! el.hasAttribute( 'data-leiho-native' ) &&
+			! el.closest( '[data-leiho-native]' )
 		);
 	}
 
@@ -396,7 +396,7 @@
 
 	function enhanceSelect( select ) {
 		if ( ! canEnhance( select ) ) {
-			return select && select.oknoSelect ? select.oknoSelect : null;
+			return select && select.leihoSelect ? select.leihoSelect : null;
 		}
 
 		var button = document.createElement( 'button' );
@@ -404,12 +404,12 @@
 		button.setAttribute( 'aria-haspopup', 'listbox' );
 		button.setAttribute( 'aria-expanded', 'false' );
 		var dot = document.createElement( 'span' );
-		dot.className = 'okno-select__dot';
+		dot.className = 'leiho-select__dot';
 		var label = document.createElement( 'span' );
-		label.className = 'okno-select__label';
+		label.className = 'leiho-select__label';
 		button.appendChild( dot );
 		button.appendChild( label );
-		button.appendChild( svg( ICONS.chevron, 'okno-select__chevron' ) );
+		button.appendChild( svg( ICONS.chevron, 'leiho-select__chevron' ) );
 
 		var api = { select: select, button: button };
 		var pop = new Popover( {
@@ -453,9 +453,9 @@
 			var classes = ( select.getAttribute( 'class' ) || '' )
 				.split( /\s+/ )
 				.filter( function ( c ) {
-					return c && 'okno-select-native' !== c;
+					return c && 'leiho-select-native' !== c;
 				} );
-			button.className = [ 'okno-select' ].concat( classes ).join( ' ' );
+			button.className = [ 'leiho-select' ].concat( classes ).join( ' ' );
 			button.disabled = select.disabled;
 			button.hidden = select.hidden;
 			button.title = select.title || '';
@@ -506,7 +506,7 @@
 				return;
 			}
 			var items = optionItems( select );
-			pop.el.setAttribute( 'aria-label', labelText() || __( 'Options', 'okno' ) );
+			pop.el.setAttribute( 'aria-label', labelText() || __( 'Options', 'leiho' ) );
 			pop.active = Math.max( 0, select.selectedIndex );
 			pop.render( items );
 			button.setAttribute( 'aria-expanded', 'true' );
@@ -621,11 +621,11 @@
 			attributeFilter: [ 'hidden', 'disabled', 'class', 'title', 'data-status', 'aria-invalid', 'aria-label', 'selected' ],
 		} );
 
-		select.classList.add( 'okno-select-native' );
+		select.classList.add( 'leiho-select-native' );
 		select.setAttribute( 'tabindex', '-1' );
 		select.setAttribute( 'aria-hidden', 'true' );
 		select.parentNode.insertBefore( button, select.nextSibling );
-		select.oknoSelect = api;
+		select.leihoSelect = api;
 		api.sync = sync;
 		api.open = open;
 		api.close = function () {
@@ -642,7 +642,7 @@
 			return;
 		}
 		var target = document.getElementById( l.getAttribute( 'for' ) );
-		var widget = target && ( target.oknoSelect || target.oknoDate );
+		var widget = target && ( target.leihoSelect || target.leihoDate );
 		if ( widget ) {
 			e.preventDefault();
 			widget.button.focus();
@@ -710,19 +710,19 @@
 		} );
 
 		var box = document.createElement( 'div' );
-		box.className = 'okno-chips';
+		box.className = 'leiho-chips';
 		var list = document.createElement( 'span' );
 		list.style.display = 'contents';
 		list.setAttribute( 'role', 'list' );
 		var input = document.createElement( 'input' );
 		input.type = 'text';
-		input.className = 'okno-chips__input';
+		input.className = 'leiho-chips__input';
 		input.id = o.id || uid( 'chips' );
 		input.autocomplete = 'off';
 		input.setAttribute( 'role', 'combobox' );
 		input.setAttribute( 'aria-autocomplete', 'list' );
 		input.setAttribute( 'aria-expanded', 'false' );
-		input.placeholder = o.placeholder || __( 'Search…', 'okno' );
+		input.placeholder = o.placeholder || __( 'Search…', 'leiho' );
 		box.appendChild( list );
 		box.appendChild( input );
 
@@ -793,19 +793,19 @@
 			list.innerHTML = '';
 			selected.forEach( function ( s ) {
 				var chip = document.createElement( 'span' );
-				chip.className = 'okno-chips__chip' + ( s.isNew ? ' is-new' : '' );
+				chip.className = 'leiho-chips__chip' + ( s.isNew ? ' is-new' : '' );
 				chip.setAttribute( 'role', 'listitem' );
 				var text = document.createElement( 'span' );
 				text.textContent = s.label;
 				chip.appendChild( text );
 				if ( s.isNew ) {
-					chip.title = __( 'New: created when you save', 'okno' );
+					chip.title = __( 'New: created when you save', 'leiho' );
 				}
 				var x = document.createElement( 'button' );
 				x.type = 'button';
-				x.className = 'okno-chips__remove';
+				x.className = 'leiho-chips__remove';
 				/* translators: %s: item name (e.g. a tag). */
-				x.setAttribute( 'aria-label', sprintf( __( 'Remove %s', 'okno' ), s.label ) );
+				x.setAttribute( 'aria-label', sprintf( __( 'Remove %s', 'leiho' ), s.label ) );
 				x.appendChild( svg( ICONS.close ) );
 				x.addEventListener( 'click', function ( e ) {
 					e.stopPropagation();
@@ -835,7 +835,7 @@
 				items.push( {
 					value: null,
 					/* translators: %s: name typed by the user (e.g. a new tag). */
-					label: sprintf( __( 'Create “%s”', 'okno' ), input.value.trim() ),
+					label: sprintf( __( 'Create “%s”', 'leiho' ), input.value.trim() ),
 					create: true,
 				} );
 			}
@@ -847,7 +847,7 @@
 			if ( pop.active < 0 || pop.active >= items.length ) {
 				pop.active = items.length ? 0 : -1;
 			}
-			pop.render( items, __( 'No results', 'okno' ) );
+			pop.render( items, __( 'No results', 'leiho' ) );
 			if ( ! pop.open ) {
 				pop.show();
 				input.setAttribute( 'aria-expanded', 'true' );
@@ -920,7 +920,7 @@
 		} );
 
 		renderChips();
-		box.oknoChips = {
+		box.leihoChips = {
 			input: input,
 			value: function () {
 				return selected.map( function ( s ) {
@@ -951,12 +951,12 @@
 		return ( n < 10 ? '0' : '' ) + n;
 	}
 
-	/** Langue, premier jour de la semaine et format horaire du site (OknoUIConfig). */
+	/** Langue, premier jour de la semaine et format horaire du site (LeihoUIConfig). */
 	function dateSetup() {
 		if ( dateFmt ) {
 			return dateFmt;
 		}
-		var cfg = window.OknoUIConfig || {};
+		var cfg = window.LeihoUIConfig || {};
 		var locale;
 		[ cfg.locale, document.documentElement.lang ].some( function ( cand ) {
 			if ( ! cand ) {
@@ -1045,16 +1045,16 @@
 			el &&
 			'INPUT' === el.tagName &&
 			DATE_TYPES.indexOf( String( el.getAttribute( 'type' ) || '' ).toLowerCase() ) !== -1 &&
-			! el.oknoDate &&
-			! el.hasAttribute( 'data-okno-native' ) &&
-			! el.closest( '[data-okno-native]' ) &&
+			! el.leihoDate &&
+			! el.hasAttribute( 'data-leiho-native' ) &&
+			! el.closest( '[data-leiho-native]' ) &&
 			el.parentNode
 		);
 	}
 
 	function enhanceDate( input ) {
 		if ( ! canEnhanceDate( input ) ) {
-			return input && input.oknoDate ? input.oknoDate : null;
+			return input && input.leihoDate ? input.leihoDate : null;
 		}
 		var fmt = dateSetup();
 		var type = String( input.getAttribute( 'type' ) ).toLowerCase();
@@ -1065,19 +1065,19 @@
 		/* ---- Champ : bouton + effacer ---- */
 
 		var wrap = document.createElement( 'span' );
-		wrap.className = 'okno-date';
+		wrap.className = 'leiho-date';
 		var button = document.createElement( 'button' );
 		button.type = 'button';
 		button.setAttribute( 'aria-haspopup', 'dialog' );
 		button.setAttribute( 'aria-expanded', 'false' );
-		button.appendChild( svg( hasDate ? ICONS.calendar : ICONS.clock, 'okno-date__icon' ) );
+		button.appendChild( svg( hasDate ? ICONS.calendar : ICONS.clock, 'leiho-date__icon' ) );
 		var label = document.createElement( 'span' );
-		label.className = 'okno-select__label okno-date__label';
+		label.className = 'leiho-select__label leiho-date__label';
 		label.id = uid( 'date-value' );
 		button.appendChild( label );
 		var clear = document.createElement( 'button' );
 		clear.type = 'button';
-		clear.className = 'okno-date__clear';
+		clear.className = 'leiho-date__clear';
 		clear.appendChild( svg( ICONS.close ) );
 		wrap.appendChild( button );
 		wrap.appendChild( clear );
@@ -1123,9 +1123,9 @@
 				return input.placeholder;
 			}
 			if ( 'time' === mode ) {
-				return __( 'Choose a time', 'okno' );
+				return __( 'Choose a time', 'leiho' );
 			}
-			return 'datetime' === mode ? __( 'Choose a date and time', 'okno' ) : __( 'Choose a date', 'okno' );
+			return 'datetime' === mode ? __( 'Choose a date and time', 'leiho' ) : __( 'Choose a date', 'leiho' );
 		}
 
 		function sync() {
@@ -1133,9 +1133,9 @@
 			label.textContent = value ? display( value ) : placeholder();
 			label.classList.toggle( 'is-placeholder', ! value );
 			var classes = ( input.getAttribute( 'class' ) || '' ).split( /\s+/ ).filter( function ( c ) {
-				return c && 'okno-date-native' !== c;
+				return c && 'leiho-date-native' !== c;
 			} );
-			button.className = [ 'okno-select', 'okno-date__trigger' ].concat( classes ).join( ' ' );
+			button.className = [ 'leiho-select', 'leiho-date__trigger' ].concat( classes ).join( ' ' );
 			button.disabled = input.disabled || input.readOnly;
 			wrap.hidden = input.hidden;
 			button.title = input.title || '';
@@ -1144,7 +1144,7 @@
 			wrap.classList.toggle( 'is-clearable', canClear );
 			var name = fieldLabel();
 			/* translators: %s: field label. */
-			clear.setAttribute( 'aria-label', name ? sprintf( __( 'Clear %s', 'okno' ), name ) : __( 'Clear', 'okno' ) );
+			clear.setAttribute( 'aria-label', name ? sprintf( __( 'Clear %s', 'leiho' ), name ) : __( 'Clear', 'leiho' ) );
 			if ( input.id && input.labels && input.labels.length ) {
 				var ids = [];
 				[].forEach.call( input.labels, function ( l ) {
@@ -1262,7 +1262,7 @@
 		}
 
 		function navButton( dir ) {
-			var b = el( 'button', 'okno-datepicker__nav', { type: 'button' } );
+			var b = el( 'button', 'leiho-datepicker__nav', { type: 'button' } );
 			b.appendChild( svg( dir < 0 ? ICONS.left : ICONS.right ) );
 			b.addEventListener( 'click', function () {
 				if ( 'months' === state.view ) {
@@ -1276,19 +1276,19 @@
 		}
 
 		function buildDialog() {
-			dialog = el( 'div', 'okno-datepicker okno-datepicker--' + mode, {
+			dialog = el( 'div', 'leiho-datepicker leiho-datepicker--' + mode, {
 				role: 'dialog',
 				'aria-modal': 'false',
 				id: uid( 'datepicker' ),
 			} );
 			if ( hasDate ) {
-				var head = el( 'div', 'okno-datepicker__head' );
+				var head = el( 'div', 'leiho-datepicker__head' );
 				els.prev = navButton( -1 );
 				els.next = navButton( 1 );
-				els.title = el( 'button', 'okno-datepicker__title', { type: 'button', id: uid( 'datepicker-title' ), 'aria-live': 'off' } );
+				els.title = el( 'button', 'leiho-datepicker__title', { type: 'button', id: uid( 'datepicker-title' ), 'aria-live': 'off' } );
 				els.titleText = el( 'span' );
 				els.title.appendChild( els.titleText );
-				els.title.appendChild( svg( ICONS.chevron, 'okno-datepicker__title-chevron' ) );
+				els.title.appendChild( svg( ICONS.chevron, 'leiho-datepicker__title-chevron' ) );
 				els.title.addEventListener( 'click', function () {
 					state.view = 'days' === state.view ? 'months' : 'months' === state.view ? 'years' : 'days';
 					render( true );
@@ -1297,26 +1297,26 @@
 				head.appendChild( els.title );
 				head.appendChild( els.next );
 				dialog.appendChild( head );
-				els.live = el( 'div', 'okno-sr', { 'aria-live': 'polite', 'aria-atomic': 'true' } );
+				els.live = el( 'div', 'leiho-sr', { 'aria-live': 'polite', 'aria-atomic': 'true' } );
 				dialog.appendChild( els.live );
-				els.body = el( 'div', 'okno-datepicker__body' );
+				els.body = el( 'div', 'leiho-datepicker__body' );
 				dialog.appendChild( els.body );
 			}
 			if ( hasTime ) {
 				dialog.appendChild( buildTime() );
 			}
-			var foot = el( 'div', 'okno-datepicker__foot' );
-			els.today = el( 'button', 'okno-datepicker__action', { type: 'button', text: hasDate ? __( 'Today', 'okno' ) : __( 'Now', 'okno' ) } );
+			var foot = el( 'div', 'leiho-datepicker__foot' );
+			els.today = el( 'button', 'leiho-datepicker__action', { type: 'button', text: hasDate ? __( 'Today', 'leiho' ) : __( 'Now', 'leiho' ) } );
 			els.today.addEventListener( 'click', pickToday );
 			foot.appendChild( els.today );
-			els.erase = el( 'button', 'okno-datepicker__action', { type: 'button', text: __( 'Clear', 'okno' ) } );
+			els.erase = el( 'button', 'leiho-datepicker__action', { type: 'button', text: __( 'Clear', 'leiho' ) } );
 			els.erase.addEventListener( 'click', function () {
 				setValue( '' );
 				close( 'pick' );
 			} );
 			foot.appendChild( els.erase );
 			if ( hasTime ) {
-				var done = el( 'button', 'okno-datepicker__action okno-datepicker__action--primary', { type: 'button', text: __( 'Done', 'okno' ) } );
+				var done = el( 'button', 'leiho-datepicker__action leiho-datepicker__action--primary', { type: 'button', text: __( 'Done', 'leiho' ) } );
 				done.addEventListener( 'click', function () {
 					close( 'pick' );
 				} );
@@ -1326,19 +1326,19 @@
 			dialog.addEventListener( 'keydown', onDialogKey );
 			dialog.addEventListener( 'focusout', function ( e ) {
 				var to = e.relatedTarget;
-				if ( isOpen && to && ! dialog.contains( to ) && ! wrap.contains( to ) && ! ( to.closest && to.closest( '.okno-listbox' ) ) ) {
+				if ( isOpen && to && ! dialog.contains( to ) && ! wrap.contains( to ) && ! ( to.closest && to.closest( '.leiho-listbox' ) ) ) {
 					close( 'tab' );
 				}
 			} );
 		}
 
-		/* Heure : deux menus OknoUI (heures, minutes), plus AM / PM en 12 h. */
+		/* Heure : deux menus LeihoUI (heures, minutes), plus AM / PM en 12 h. */
 		function buildTime() {
-			var row = el( 'div', 'okno-datepicker__time' );
-			var title = el( 'span', 'okno-datepicker__time-label', { id: uid( 'time-label' ), text: __( 'Time', 'okno' ) } );
+			var row = el( 'div', 'leiho-datepicker__time' );
+			var title = el( 'span', 'leiho-datepicker__time-label', { id: uid( 'time-label' ), text: __( 'Time', 'leiho' ) } );
 			row.appendChild( title );
-			els.hour = el( 'select', 'okno-select--compact okno-datepicker__hour', { 'aria-label': __( 'Hour', 'okno' ) } );
-			els.minute = el( 'select', 'okno-select--compact okno-datepicker__minute', { 'aria-label': __( 'Minutes', 'okno' ) } );
+			els.hour = el( 'select', 'leiho-select--compact leiho-datepicker__hour', { 'aria-label': __( 'Hour', 'leiho' ) } );
+			els.minute = el( 'select', 'leiho-select--compact leiho-datepicker__minute', { 'aria-label': __( 'Minutes', 'leiho' ) } );
 			var hours = fmt.hour12 ? [ 12, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11 ] : null;
 			( hours || Array.apply( null, { length: 24 } ).map( function ( _, i ) {
 				return i;
@@ -1346,10 +1346,10 @@
 				els.hour.appendChild( el( 'option', '', { value: String( hh ), text: fmt.hour12 ? String( hh ) : pad( hh ) } ) );
 			} );
 			row.appendChild( els.hour );
-			row.appendChild( el( 'span', 'okno-datepicker__colon', { 'aria-hidden': 'true', text: ':' } ) );
+			row.appendChild( el( 'span', 'leiho-datepicker__colon', { 'aria-hidden': 'true', text: ':' } ) );
 			row.appendChild( els.minute );
 			if ( fmt.hour12 ) {
-				els.period = el( 'select', 'okno-select--compact okno-datepicker__period', { 'aria-label': __( 'AM or PM', 'okno' ) } );
+				els.period = el( 'select', 'leiho-select--compact leiho-datepicker__period', { 'aria-label': __( 'AM or PM', 'leiho' ) } );
 				els.period.appendChild( el( 'option', '', { value: 'am', text: periodLabel( false ) } ) );
 				els.period.appendChild( el( 'option', '', { value: 'pm', text: periodLabel( true ) } ) );
 				row.appendChild( els.period );
@@ -1491,20 +1491,20 @@
 			if ( 'days' === view ) {
 				els.titleText.textContent = capitalize( fmt.monthYear.format( first ) );
 				/* translators: %s: a month and its year (e.g. August 2026). */
-				els.title.setAttribute( 'aria-label', sprintf( __( '%s, choose a month', 'okno' ), capitalize( fmt.monthYear.format( first ) ) ) );
-				els.prev.setAttribute( 'aria-label', __( 'Previous month', 'okno' ) );
-				els.next.setAttribute( 'aria-label', __( 'Next month', 'okno' ) );
+				els.title.setAttribute( 'aria-label', sprintf( __( '%s, choose a month', 'leiho' ), capitalize( fmt.monthYear.format( first ) ) ) );
+				els.prev.setAttribute( 'aria-label', __( 'Previous month', 'leiho' ) );
+				els.next.setAttribute( 'aria-label', __( 'Next month', 'leiho' ) );
 				renderDays( focusIt );
 			} else if ( 'months' === view ) {
 				els.titleText.textContent = String( state.y );
 				/* translators: %s: a year. */
-				els.title.setAttribute( 'aria-label', sprintf( __( '%s, choose a year', 'okno' ), state.y ) );
-				els.prev.setAttribute( 'aria-label', __( 'Previous year', 'okno' ) );
-				els.next.setAttribute( 'aria-label', __( 'Next year', 'okno' ) );
+				els.title.setAttribute( 'aria-label', sprintf( __( '%s, choose a year', 'leiho' ), state.y ) );
+				els.prev.setAttribute( 'aria-label', __( 'Previous year', 'leiho' ) );
+				els.next.setAttribute( 'aria-label', __( 'Next year', 'leiho' ) );
 				renderMonths( focusIt );
 			} else {
 				els.titleText.textContent = String( state.y );
-				els.title.setAttribute( 'aria-label', __( 'Back to the calendar', 'okno' ) );
+				els.title.setAttribute( 'aria-label', __( 'Back to the calendar', 'leiho' ) );
 				renderYears( focusIt );
 			}
 			els.prev.hidden = els.next.hidden = 'years' === view;
@@ -1523,7 +1523,7 @@
 			var selKey = selected ? ymd( selected ) : '';
 			var todayKey = ymd( today() );
 			var focusKey = ymd( state.focus );
-			var table = el( 'table', 'okno-datepicker__grid', { role: 'grid', 'aria-labelledby': els.title.id } );
+			var table = el( 'table', 'leiho-datepicker__grid', { role: 'grid', 'aria-labelledby': els.title.id } );
 			var thead = el( 'thead' );
 			var hr = el( 'tr' );
 			// Le 2 janvier 2000 est un dimanche : 2 + n donne le jour n.
@@ -1545,7 +1545,7 @@
 				var tr = el( 'tr' );
 				for ( var d = 0; d < 7; d++ ) {
 					var key = ymd( cursor );
-					var td = el( 'td', 'okno-datepicker__day', {
+					var td = el( 'td', 'leiho-datepicker__day', {
 						role: 'gridcell',
 						'data-date': key,
 						tabindex: key === focusKey ? '0' : '-1',
@@ -1628,10 +1628,10 @@
 
 		/** Grille de boutons (mois, années) : flèches, Début / Fin, Entrée. */
 		function choiceGrid( cls, items, cols, onChoose, focusIt ) {
-			var grid = el( 'div', 'okno-datepicker__choices ' + cls, { role: 'group', 'aria-labelledby': els.title.id } );
+			var grid = el( 'div', 'leiho-datepicker__choices ' + cls, { role: 'group', 'aria-labelledby': els.title.id } );
 			var active = 0;
 			items.forEach( function ( item, i ) {
-				var b = el( 'button', 'okno-datepicker__choice', {
+				var b = el( 'button', 'leiho-datepicker__choice', {
 					type: 'button',
 					tabindex: item.active ? '0' : '-1',
 					'aria-pressed': item.selected ? 'true' : 'false',
@@ -1703,7 +1703,7 @@
 					disabled: ( min && key < min ) || ( max && key > max ),
 				} );
 			}
-			choiceGrid( 'okno-datepicker__months', items, 3, function ( m ) {
+			choiceGrid( 'leiho-datepicker__months', items, 3, function ( m ) {
 				var f = state.focus || makeDate( state.y, m, 1 );
 				state.view = 'days';
 				moveTo( makeDate( state.y, m, Math.min( f.getDate(), daysIn( state.y, m ) ) ), true );
@@ -1728,7 +1728,7 @@
 					active: y === state.y,
 				} );
 			}
-			choiceGrid( 'okno-datepicker__years', items, 4, function ( y ) {
+			choiceGrid( 'leiho-datepicker__years', items, 4, function ( y ) {
 				state.y = y;
 				state.view = 'months';
 				render( true );
@@ -1757,14 +1757,14 @@
 
 		function onDocDown( e ) {
 			var t = e.target;
-			if ( dialog.contains( t ) || wrap.contains( t ) || ( t.closest && t.closest( '.okno-listbox' ) ) ) {
+			if ( dialog.contains( t ) || wrap.contains( t ) || ( t.closest && t.closest( '.leiho-listbox' ) ) ) {
 				return;
 			}
 			close( 'outside' );
 		}
 
 		function onReflow( e ) {
-			if ( e && 'scroll' === e.type && e.target && e.target.nodeType === 1 && ( dialog.contains( e.target ) || ( e.target.closest && e.target.closest( '.okno-listbox' ) ) ) ) {
+			if ( e && 'scroll' === e.type && e.target && e.target.nodeType === 1 && ( dialog.contains( e.target ) || ( e.target.closest && e.target.closest( '.leiho-listbox' ) ) ) ) {
 				return;
 			}
 			position();
@@ -1842,8 +1842,8 @@
 			}
 			isOpen = false;
 			[ els.hour, els.minute, els.period ].forEach( function ( s ) {
-				if ( s && s.oknoSelect ) {
-					s.oknoSelect.close();
+				if ( s && s.leihoSelect ) {
+					s.leihoSelect.close();
 				}
 			} );
 			if ( dialog.parentNode ) {
@@ -1918,11 +1918,11 @@
 			attributeFilter: [ 'hidden', 'disabled', 'readonly', 'required', 'class', 'title', 'placeholder', 'aria-invalid', 'aria-label', 'aria-required', 'aria-describedby', 'min', 'max' ],
 		} );
 
-		input.classList.add( 'okno-date-native' );
+		input.classList.add( 'leiho-date-native' );
 		input.setAttribute( 'tabindex', '-1' );
 		input.setAttribute( 'aria-hidden', 'true' );
 		input.parentNode.insertBefore( wrap, input.nextSibling );
-		input.oknoDate = api;
+		input.leihoDate = api;
 		api.sync = sync;
 		api.open = open;
 		api.close = function () {
@@ -1938,26 +1938,26 @@
 	 * cookie et dans le navigateur.
 	 * ------------------------------------------------------------------ */
 
-	var themeCfg = window.OknoTheme || {};
+	var themeCfg = window.LeihoTheme || {};
 
 	function currentTheme() {
-		var t = document.documentElement.getAttribute( 'data-okno-theme' );
+		var t = document.documentElement.getAttribute( 'data-leiho-theme' );
 		return 'light' === t ? 'light' : 'dark';
 	}
 
 	function saveTheme( theme ) {
 		theme = 'light' === theme ? 'light' : 'dark';
-		document.documentElement.setAttribute( 'data-okno-theme', theme );
+		document.documentElement.setAttribute( 'data-leiho-theme', theme );
 		try {
-			window.localStorage.setItem( 'okno-theme', theme );
+			window.localStorage.setItem( 'leiho-theme', theme );
 		} catch ( e ) {
 			/* Stockage indisponible : le cookie et le serveur suffisent. */
 		}
-		document.cookie = 'okno_theme=' + theme + '; path=/; max-age=31536000; SameSite=Lax';
+		document.cookie = 'leiho_theme=' + theme + '; path=/; max-age=31536000; SameSite=Lax';
 		themeCfg.saved = theme;
 		if ( window.wp && window.wp.apiFetch ) {
 			window.wp
-				.apiFetch( { path: '/okno/v1/preferences', method: 'POST', data: { theme: theme } } )
+				.apiFetch( { path: '/leiho/v1/preferences', method: 'POST', data: { theme: theme } } )
 				.catch( function () {
 					/* Hors ligne : le cookie prendra le relais. */
 				} );
@@ -1965,7 +1965,7 @@
 		return theme;
 	}
 
-	window.OknoUI = {
+	window.LeihoUI = {
 		select: enhanceSelect,
 		date: enhanceDate,
 		autoSelects: autoSelects,
@@ -1976,16 +1976,16 @@
 	// Toute l'application : listes déroulantes stylées, y compris celles que
 	// les vues ajoutent plus tard (formulaires d'entrée, réglages, filtres).
 	function boot() {
-		autoSelects( document.getElementById( 'okno-app' ) );
+		autoSelects( document.getElementById( 'leiho-app' ) );
 		// Choix fait avant 1.0.0-beta.9 (navigateur seulement) : recopié une
 		// fois côté serveur, pour que PHP l'imprime dès le premier rendu.
 		var stored = null;
 		try {
-			stored = window.localStorage.getItem( 'okno-theme' );
+			stored = window.localStorage.getItem( 'leiho-theme' );
 		} catch ( e ) {
 			stored = null;
 		}
-		if ( ! themeCfg.saved && ( 'light' === stored || 'dark' === stored ) && document.getElementById( 'okno-app' ) ) {
+		if ( ! themeCfg.saved && ( 'light' === stored || 'dark' === stored ) && document.getElementById( 'leiho-app' ) ) {
 			saveTheme( stored );
 		}
 	}

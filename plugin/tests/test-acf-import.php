@@ -1,12 +1,12 @@
 <?php
 /**
- * Import ACF → Okno Collections sans WordPress : php plugin/tests/test-acf-import.php
+ * Import ACF → Leiho Collections sans WordPress : php plugin/tests/test-acf-import.php
  *
  * Correspondance des champs, conversion des valeurs, import par lots avec
  * la validation de l'éditeur, égalité du contenu servi avant / après (champ
  * par champ, JSON identique), échecs et écarts signalés, bascule des
  * adapters, retour à ACF. ACF est simulé (groupes, get_field) ; les tables
- * Okno tournent sur une vraie base SQLite en mémoire (PDO).
+ * Leiho tournent sur une vraie base SQLite en mémoire (PDO).
  */
 if ( ! extension_loaded( 'pdo_sqlite' ) ) {
 	fwrite( STDERR, "pdo_sqlite is required for this test.\n" );
@@ -14,7 +14,7 @@ if ( ! extension_loaded( 'pdo_sqlite' ) ) {
 }
 
 define( 'ABSPATH', true );
-define( 'OKNO_VERSION', 'test' );
+define( 'LEIHO_VERSION', 'test' );
 define( 'ARRAY_A', 'ARRAY_A' );
 define( 'DAY_IN_SECONDS', 86400 );
 
@@ -102,11 +102,11 @@ function wp_save_post_revision( $id ) { $GLOBALS['revisions']++; }
 function wp_parse_args( $a, $d ) { return array_merge( $d, (array) $a ); }
 function wp_slash( $v ) { return $v; }
 
-class Okno_Plugin {
+class Leiho_Plugin {
 	public static function title( $p ) { return get_the_title( $p ); }
 	public static function settings() {
 		$settings = array( 'front_url' => '', 'url_patterns' => array( 'ville' => '/villes/{slug}', 'pole' => '/poles/{slug}' ), 'path_meta_key' => '', 'post_types' => array( 'page', 'ville', 'pole' ) );
-		return Okno_Collections::settings( $settings );
+		return Leiho_Collections::settings( $settings );
 	}
 }
 
@@ -116,7 +116,7 @@ $GLOBALS['acf_values'] = array(); // post_id => [ field key => raw ].
 function acf_get_field_groups( $filter = array() ) {
 	$out = array();
 	foreach ( $GLOBALS['acf_groups'] as $group ) {
-		if ( isset( $filter['post_id'] ) && null === Okno_ACF_Adapter::targets( $group['location'], get_post_type( $filter['post_id'] ) ) ) {
+		if ( isset( $filter['post_id'] ) && null === Leiho_ACF_Adapter::targets( $group['location'], get_post_type( $filter['post_id'] ) ) ) {
 			continue;
 		}
 		$out[] = $group;
@@ -200,19 +200,19 @@ class Fake_WPDB {
 }
 $GLOBALS['wpdb'] = new Fake_WPDB();
 
-require __DIR__ . '/../includes/adapters/interface-okno-adapter.php';
-require __DIR__ . '/../includes/adapters/abstract-okno-field-adapter.php';
-require __DIR__ . '/../includes/adapters/class-okno-acf-adapter.php';
-require __DIR__ . '/../includes/adapters/class-okno-native-adapter.php';
-require __DIR__ . '/../includes/collections/class-okno-collections-schema.php';
-require __DIR__ . '/../includes/collections/class-okno-collections-values.php';
-require __DIR__ . '/../includes/collections/class-okno-collections-store.php';
-require __DIR__ . '/../includes/collections/class-okno-collections.php';
-require __DIR__ . '/../includes/collections/class-okno-acf-import.php';
-require __DIR__ . '/../includes/class-okno-url-mapper.php';
-require __DIR__ . '/../includes/class-okno-content.php';
-require __DIR__ . '/../includes/class-okno-cache.php';
-require __DIR__ . '/../includes/class-okno-types.php';
+require __DIR__ . '/../includes/adapters/interface-leiho-adapter.php';
+require __DIR__ . '/../includes/adapters/abstract-leiho-field-adapter.php';
+require __DIR__ . '/../includes/adapters/class-leiho-acf-adapter.php';
+require __DIR__ . '/../includes/adapters/class-leiho-native-adapter.php';
+require __DIR__ . '/../includes/collections/class-leiho-collections-schema.php';
+require __DIR__ . '/../includes/collections/class-leiho-collections-values.php';
+require __DIR__ . '/../includes/collections/class-leiho-collections-store.php';
+require __DIR__ . '/../includes/collections/class-leiho-collections.php';
+require __DIR__ . '/../includes/collections/class-leiho-acf-import.php';
+require __DIR__ . '/../includes/class-leiho-url-mapper.php';
+require __DIR__ . '/../includes/class-leiho-content.php';
+require __DIR__ . '/../includes/class-leiho-cache.php';
+require __DIR__ . '/../includes/class-leiho-types.php';
 
 function check( $label, $cond, $dump = null ) {
 	echo ( $cond ? 'ok   ' : 'FAIL ' ) . $label . "\n";
@@ -341,7 +341,7 @@ $GLOBALS['acf_values'][10] = array_merge(
 	contenu( 10, 0 ),
 	array(
 		'field_visuel'   => '7',
-		'field_galerie'  => array( '7', '999', '8' ), // 999 : média supprimé, ignoré par ACF comme par Okno.
+		'field_galerie'  => array( '7', '999', '8' ), // 999 : média supprimé, ignoré par ACF comme par Leiho.
 		'field_cta'      => array( 'title' => 'Devis', 'url' => 'https://dyese.fr/devis', 'target' => '_blank' ),
 		'field_voisines' => array( '11', '13', '12' ), // 13 : brouillon, absent du contenu servi.
 		'field_pole'     => '20',
@@ -379,10 +379,10 @@ $GLOBALS['acf_values'][21] = array( 'field_h1' => str_repeat( 'x', 80 ) ); // Pl
 // Valeurs stockées par ACF : une méta de référence par valeur (compteur de l'aperçu).
 $GLOBALS['wpdb']->exec( "INSERT INTO wp_postmeta (post_id, meta_key, meta_value) VALUES (10, '_h1', 'field_h1'), (10, '_prix', 'field_prix'), (10, '_sections_0_label', 'field_s_label'), (11, '_h1', 'field_h1'), (30, '_sous_titre', 'field_sous')" );
 
-/** Contenu servi, tel que l'export le construit (adapters dans l'ordre d'Okno). */
+/** Contenu servi, tel que l'export le construit (adapters dans l'ordre d'Leiho). */
 function served( $id ) {
 	$fields = array();
-	foreach ( array( new Okno_Native_Adapter(), new Okno_ACF_Adapter() ) as $adapter ) {
+	foreach ( array( new Leiho_Native_Adapter(), new Leiho_ACF_Adapter() ) as $adapter ) {
 		$fields = array_merge( $fields, $adapter->get_content( $id ) );
 	}
 	return $fields;
@@ -393,7 +393,7 @@ function json( $v ) { return json_encode( $v, JSON_UNESCAPED_UNICODE | JSON_UNES
  * Correspondance des champs
  * =================================================================== */
 
-$preview = Okno_ACF_Import::preview( 'ville' );
+$preview = Leiho_ACF_Import::preview( 'ville' );
 check( 'aperçu : ville importable', $preview['importable'] && 'external' === $preview['origin'], array( $preview['reason'], $preview['errors'] ) );
 check( 'aperçu : compteurs', 4 === $preview['counts']['entries'] && 4 === $preview['counts']['values'] && $preview['counts']['fields'] > 30, $preview['counts'] );
 
@@ -433,23 +433,23 @@ check( 'statuts : même, adapté, non repris', 'ok' === $status['prix'] && 'chan
 check( 'onglet ignoré', 'ignored' === $preview['groups'][0]['fields'][0]['status'] );
 
 $errors = array();
-Okno_Collections_Schema::normalize_collection( $c, '', $errors, array( 'ville', 'pole' ) );
+Leiho_Collections_Schema::normalize_collection( $c, '', $errors, array( 'ville', 'pole' ) );
 check( 'schéma généré valide', ! $errors, $errors );
 $errors = array();
-Okno_Collections_Schema::normalize_collection( array_merge( $c, array( 'source' => '' ) ), '', $errors, array( 'ville', 'pole' ) );
+Leiho_Collections_Schema::normalize_collection( array_merge( $c, array( 'source' => '' ) ), '', $errors, array( 'ville', 'pole' ) );
 check( 'noms ACF refusés hors import (snake_case exigé)', in_array( 'fields.2.name', array_column( $errors, 'path' ), true ), $errors );
 $errors = array();
-Okno_Collections_Schema::normalize_collection( array( 'id' => 'x', 'kind' => 'singleton', 'external' => true, 'fields' => array() ), '', $errors, array() );
+Leiho_Collections_Schema::normalize_collection( array( 'id' => 'x', 'kind' => 'singleton', 'external' => true, 'fields' => array() ), '', $errors, array() );
 check( 'type externe : jamais singleton', in_array( 'kind', array_column( $errors, 'path' ), true ) );
 
-$page = Okno_ACF_Import::preview( 'page' );
+$page = Leiho_ACF_Import::preview( 'page' );
 check( 'pages : non importables, raison donnée', ! $page['importable'] && 'builtin' === $page['origin'] && false !== strpos( $page['reason'], 'Pages and posts' ) );
-$overview = Okno_ACF_Import::overview();
+$overview = Leiho_ACF_Import::overview();
 check( 'vue d\'ensemble : groupes hors contenu signalés', array( 'Réglages' ) === array_column( $overview['elsewhere'], 'title' ), $overview['elsewhere'] );
 check( 'vue d\'ensemble : types', array( 'page', 'ville', 'pole' ) === array_column( $overview['types'], 'post_type' ), array_column( $overview['types'], 'post_type' ) );
 
 $taken = array();
-check( 'clés uniques', array( 'hero', 'hero_2', 'f_1x' ) === array( Okno_ACF_Import::key_for( 'hero', $taken ), Okno_ACF_Import::key_for( 'Hero', $taken ), Okno_ACF_Import::key_for( '1x', $taken ) ) );
+check( 'clés uniques', array( 'hero', 'hero_2', 'f_1x' ) === array( Leiho_ACF_Import::key_for( 'hero', $taken ), Leiho_ACF_Import::key_for( 'Hero', $taken ), Leiho_ACF_Import::key_for( '1x', $taken ) ) );
 
 /* =====================================================================
  * Conversion des valeurs
@@ -459,20 +459,20 @@ $acf = array();
 foreach ( $GLOBALS['acf_groups'][1]['fields'] as $field ) { $acf[ $field['name'] ] = $field; }
 foreach ( $GLOBALS['acf_groups'][0]['fields'] as $field ) { $acf[ $field['name'] ] = $field; }
 $raw = $GLOBALS['acf_values'][10];
-check( 'date ACF Ymd → Y-m-d', '2025-01-15' === Okno_ACF_Import::to_input( $acf['lancement'], '20250115' ) );
-check( 'vrai / faux', true === Okno_ACF_Import::to_input( $acf['vedette'], '1' ) && null === Okno_ACF_Import::to_input( $acf['vedette'], '0' ) );
-check( 'galerie : médias disparus retirés', array( 7, 8 ) === Okno_ACF_Import::to_input( $acf['galerie'], $raw['field_galerie'] ) );
-check( 'relation : contenus existants (brouillons compris)', array( 11, 13, 12 ) === Okno_ACF_Import::to_input( $acf['voisines'], $raw['field_voisines'] ) );
-check( 'post object : un id', 20 === Okno_ACF_Import::to_input( $acf['pole'], '20' ) );
-check( 'nombre', 4.5 === Okno_ACF_Import::to_input( $acf['note'], '4.5' ) && null === Okno_ACF_Import::to_input( $acf['prix'], '' ) );
-check( 'vide → rien à écrire', null === Okno_ACF_Import::to_input( $acf['h1'], '' ) && null === Okno_ACF_Import::to_input( $acf['options'], array() ) && null === Okno_ACF_Import::to_input( $acf['cta'], array( 'url' => '' ) ) );
-$rows = Okno_ACF_Import::to_input( $acf['sections'], $raw['field_sections'] );
+check( 'date ACF Ymd → Y-m-d', '2025-01-15' === Leiho_ACF_Import::to_input( $acf['lancement'], '20250115' ) );
+check( 'vrai / faux', true === Leiho_ACF_Import::to_input( $acf['vedette'], '1' ) && null === Leiho_ACF_Import::to_input( $acf['vedette'], '0' ) );
+check( 'galerie : médias disparus retirés', array( 7, 8 ) === Leiho_ACF_Import::to_input( $acf['galerie'], $raw['field_galerie'] ) );
+check( 'relation : contenus existants (brouillons compris)', array( 11, 13, 12 ) === Leiho_ACF_Import::to_input( $acf['voisines'], $raw['field_voisines'] ) );
+check( 'post object : un id', 20 === Leiho_ACF_Import::to_input( $acf['pole'], '20' ) );
+check( 'nombre', 4.5 === Leiho_ACF_Import::to_input( $acf['note'], '4.5' ) && null === Leiho_ACF_Import::to_input( $acf['prix'], '' ) );
+check( 'vide → rien à écrire', null === Leiho_ACF_Import::to_input( $acf['h1'], '' ) && null === Leiho_ACF_Import::to_input( $acf['options'], array() ) && null === Leiho_ACF_Import::to_input( $acf['cta'], array( 'url' => '' ) ) );
+$rows = Leiho_ACF_Import::to_input( $acf['sections'], $raw['field_sections'] );
 check( 'repeaters imbriqués : lignes par nom, vides omis', array( array( 'label' => 'Section 0', 'cartes' => array( array( 'titre' => 'Carte 1', 'puces' => array( array( 'texte' => 'Puce 1' ), array( 'texte' => 'Puce 2' ) ) ), array( 'titre' => 'Carte 2' ) ) ), array( 'faq' => array( array( 'question' => 'Pourquoi ?', 'reponse' => '<strong>Parce que</strong>' ) ) ) ) === $rows, $rows );
-$blocks = Okno_ACF_Import::to_input( $acf['blocs'], $raw['field_blocs'] );
+$blocks = Leiho_ACF_Import::to_input( $acf['blocs'], $raw['field_blocs'] );
 check( 'flexible : _layout, layout disparu ignoré', array( 'texte', 'image-pleine', 'chiffres' ) === array_column( $blocks, '_layout' ) && 8 === $blocks[1]['image'] && 'Légende' === $blocks[1]['legendeImage'], $blocks );
-check( 'groupe', array( 'tel' => '04 72 00 00 00', 'ville' => 11 ) === Okno_ACF_Import::to_input( $acf['coordonnees'], $raw['field_coord'] ) );
-check( 'forme canonique : 5 et 5.0 égaux', Okno_ACF_Import::canonical( array( 'a' => 5.0 ) ) === Okno_ACF_Import::canonical( array( 'a' => 5 ) ) );
-check( 'DECIMAL entier relu en entier', 5 === Okno_Collections_Values::number( '5.000000' ) && 89.5 === Okno_Collections_Values::number( '89.500000' ) );
+check( 'groupe', array( 'tel' => '04 72 00 00 00', 'ville' => 11 ) === Leiho_ACF_Import::to_input( $acf['coordonnees'], $raw['field_coord'] ) );
+check( 'forme canonique : 5 et 5.0 égaux', Leiho_ACF_Import::canonical( array( 'a' => 5.0 ) ) === Leiho_ACF_Import::canonical( array( 'a' => 5 ) ) );
+check( 'DECIMAL entier relu en entier', 5 === Leiho_Collections_Values::number( '5.000000' ) && 89.5 === Leiho_Collections_Values::number( '89.500000' ) );
 
 /* =====================================================================
  * Import : égalité du contenu servi, échecs, écarts
@@ -482,24 +482,24 @@ $before = array();
 foreach ( array( 10, 11, 12, 13, 20, 21 ) as $id ) { $before[ $id ] = served( $id ); }
 check( 'avant : servi par ACF', 'Ville 10' === $before[10]['h1'] && 'Section 0' === $before[10]['sections'][0]['label'] );
 
-$record = Okno_ACF_Import::start( 'ville' );
-check( 'démarrage : collection créée, import en cours', ! is_wp_error( $record ) && 'running' === $record['status'] && Okno_Collections::get( 'ville' ) && 4 === $record['total'], $record );
-check( 'pendant l\'import : ACF sert toujours', 'acf' === Okno_ACF_Import::engine( 'ville' ) && ! Okno_ACF_Import::native_serves( 'ville' ) && json( $before[10] ) === json( served( 10 ) ) );
-check( 'type déjà déclaré : accepté (collection externe)', post_type_exists( 'ville' ) && Okno_Collections::get( 'ville' )['external'] );
-check( 'type externe : pas ajouté aux types servis', ! in_array( 'ville', Okno_Plugin::settings()['post_types'], true ) || in_array( 'ville', array( 'page', 'ville', 'pole' ), true ) );
+$record = Leiho_ACF_Import::start( 'ville' );
+check( 'démarrage : collection créée, import en cours', ! is_wp_error( $record ) && 'running' === $record['status'] && Leiho_Collections::get( 'ville' ) && 4 === $record['total'], $record );
+check( 'pendant l\'import : ACF sert toujours', 'acf' === Leiho_ACF_Import::engine( 'ville' ) && ! Leiho_ACF_Import::native_serves( 'ville' ) && json( $before[10] ) === json( served( 10 ) ) );
+check( 'type déjà déclaré : accepté (collection externe)', post_type_exists( 'ville' ) && Leiho_Collections::get( 'ville' )['external'] );
+check( 'type externe : pas ajouté aux types servis', ! in_array( 'ville', Leiho_Plugin::settings()['post_types'], true ) || in_array( 'ville', array( 'page', 'ville', 'pole' ), true ) );
 
 $GLOBALS['revisions'] = 0;
 $steps = 0;
 while ( 'done' !== $record['status'] && $steps < 10 ) {
-	$record = Okno_ACF_Import::step( 'ville', 1 );
+	$record = Leiho_ACF_Import::step( 'ville', 1 );
 	$steps++;
 }
 check( 'import par lots (reprise au curseur)', 'done' === $record['status'] && 4 === $record['done'] && $steps >= 4, $record );
 check( 'pas de révision par entrée importée', 0 === $GLOBALS['revisions'], $GLOBALS['revisions'] );
 check( 'échec signalé sans arrêter l\'import', 1 === $record['failed'] && 12 === $record['failures'][0]['post_id'] && 'niveau' === $record['failures'][0]['field'] && 'invalid_choice' === $record['failures'][0]['code'] && 3 === $record['imported'], $record['failures'] );
 check( 'écart signalé (texte réécrit par la validation)', 1 === $record['different'] && 13 === $record['diffs'][0]['post_id'] && 'h1' === $record['diffs'][0]['field'], $record['diffs'] );
-check( 'bascule : Okno sert le type, ACF ne le sert plus', 'okno' === Okno_ACF_Import::engine( 'ville' ) && Okno_ACF_Adapter::retired( 'ville' ) && array() === ( new Okno_ACF_Adapter() )->get_content( 10 ) );
-check( 'groupes ACF masqués pour ce type', false === Okno_ACF_Import::rule_match( true, array(), array( 'post_id' => 10 ), array() ) && true === Okno_ACF_Import::rule_match( true, array(), array( 'post_type' => 'pole' ), array() ) );
+check( 'bascule : Leiho sert le type, ACF ne le sert plus', 'leiho' === Leiho_ACF_Import::engine( 'ville' ) && Leiho_ACF_Adapter::retired( 'ville' ) && array() === ( new Leiho_ACF_Adapter() )->get_content( 10 ) );
+check( 'groupes ACF masqués pour ce type', false === Leiho_ACF_Import::rule_match( true, array(), array( 'post_id' => 10 ), array() ) && true === Leiho_ACF_Import::rule_match( true, array(), array( 'post_type' => 'pole' ), array() ) );
 
 $after = array();
 foreach ( array( 10, 11, 12, 13 ) as $id ) { $after[ $id ] = served( $id ); }
@@ -525,55 +525,55 @@ check( 'clone en groupe servi à l\'identique', array( 'prix' => 7 ) === $after[
 check( 'date, booléen, choix multiples', '2025-01-15' === $after[10]['lancement'] && true === $after[10]['vedette'] && false === $after[11]['vedette'] && array( 'x', 'y' ) === $after[10]['options'] );
 
 // Types TypeScript identiques pour un groupe sans condition d'emplacement.
-$ts_after  = Okno_Types::render( array( 'ville' => ( new Okno_Native_Adapter() )->get_definitions( 'ville' ) ) );
-Okno_ACF_Import::flush();
-$saved = $GLOBALS['options'][ Okno_ACF_Import::OPTION ];
-unset( $GLOBALS['options'][ Okno_ACF_Import::OPTION ] );
-$acf_defs = ( new Okno_ACF_Adapter() )->get_definitions( 'ville' );
+$ts_after  = Leiho_Types::render( array( 'ville' => ( new Leiho_Native_Adapter() )->get_definitions( 'ville' ) ) );
+Leiho_ACF_Import::flush();
+$saved = $GLOBALS['options'][ Leiho_ACF_Import::OPTION ];
+unset( $GLOBALS['options'][ Leiho_ACF_Import::OPTION ] );
+$acf_defs = ( new Leiho_ACF_Adapter() )->get_definitions( 'ville' );
 foreach ( $acf_defs as &$group ) {
 	$group['fields'] = array_values( array_filter( $group['fields'], function ( $f ) { return ! in_array( $f['name'], array( 'page_liee', 'reprise' ), true ); } ) );
 }
 unset( $group );
-$ts_before = Okno_Types::render( array( 'ville' => $acf_defs ) );
-$GLOBALS['options'][ Okno_ACF_Import::OPTION ] = $saved;
-Okno_ACF_Import::flush();
+$ts_before = Leiho_Types::render( array( 'ville' => $acf_defs ) );
+$GLOBALS['options'][ Leiho_ACF_Import::OPTION ] = $saved;
+Leiho_ACF_Import::flush();
 check( '/types : déclarations identiques', $ts_before === $ts_after, array( $ts_before, $ts_after ) );
 
 /* =====================================================================
  * Éditeur : chemins pointés après import
  * =================================================================== */
 
-$saved = Okno_Collections::save_entry( 10, array( 'sections.0.cartes.1.titre' => 'Carte éditée', 'hero_stats.1.label' => 'Techniciens' ) );
+$saved = Leiho_Collections::save_entry( 10, array( 'sections.0.cartes.1.titre' => 'Carte éditée', 'hero_stats.1.label' => 'Techniciens' ) );
 check( 'chemins pointés : écriture', array( 'sections.0.cartes.1.titre', 'hero_stats.1.label' ) === $saved['saved'] && ! $saved['errors'], $saved );
 $now = served( 10 );
 check( 'chemins pointés : relus', 'Carte éditée' === $now['sections'][0]['cartes'][1]['titre'] && 'Techniciens' === $now['hero_stats'][1]['label'] && 'Puce 2' === $now['sections'][0]['cartes'][0]['puces'][1]['texte'] );
 check( 'ACF intact', 'Carte 2' === $GLOBALS['acf_values'][10]['field_sections'][0]['field_s_cartes'][1]['field_c_titre'] );
-$schema = ( new Okno_Native_Adapter() )->get_schema( 10 );
-check( 'éditeur : un groupe Okno, aucun groupe ACF', 1 === count( $schema ) && 'collections' === $schema[0]['source'] && array() === ( new Okno_ACF_Adapter() )->get_schema( 10 ) );
+$schema = ( new Leiho_Native_Adapter() )->get_schema( 10 );
+check( 'éditeur : un groupe Leiho, aucun groupe ACF', 1 === count( $schema ) && 'collections' === $schema[0]['source'] && array() === ( new Leiho_ACF_Adapter() )->get_schema( 10 ) );
 
 /* =====================================================================
  * Retour à ACF
  * =================================================================== */
 
-$deleted = Okno_Collections::delete_collection( 'ville' );
-check( 'collection retirée du schéma : ACF reprend la main', 'acf' === Okno_ACF_Import::engine( 'ville' ) && json( array_diff_key( $before[11], array() ) ) === json( served( 11 ) ) );
-Okno_Collections::put_collection( $preview['collection'] );
-check( 'collection remise : Okno sert à nouveau', 'okno' === Okno_ACF_Import::engine( 'ville' ) );
+$deleted = Leiho_Collections::delete_collection( 'ville' );
+check( 'collection retirée du schéma : ACF reprend la main', 'acf' === Leiho_ACF_Import::engine( 'ville' ) && json( array_diff_key( $before[11], array() ) ) === json( served( 11 ) ) );
+Leiho_Collections::put_collection( $preview['collection'] );
+check( 'collection remise : Leiho sert à nouveau', 'leiho' === Leiho_ACF_Import::engine( 'ville' ) );
 
-$result = Okno_ACF_Import::rollback( 'ville' );
-check( 'retour à ACF', ! is_wp_error( $result ) && $result['dropped'] && null === Okno_ACF_Import::engine( 'ville' ) && null === Okno_Collections::get( 'ville' ), $result );
-$tables = $GLOBALS['wpdb']->get_col( "SELECT name FROM sqlite_master WHERE type = 'table' AND name = 'wp_okno_ville'" );
-check( 'table Okno supprimée, état effacé', ! $tables && null === Okno_Collections_Store::collection_state( 'ville' ) );
+$result = Leiho_ACF_Import::rollback( 'ville' );
+check( 'retour à ACF', ! is_wp_error( $result ) && $result['dropped'] && null === Leiho_ACF_Import::engine( 'ville' ) && null === Leiho_Collections::get( 'ville' ), $result );
+$tables = $GLOBALS['wpdb']->get_col( "SELECT name FROM sqlite_master WHERE type = 'table' AND name = 'wp_leiho_ville'" );
+check( 'table Leiho supprimée, état effacé', ! $tables && null === Leiho_Collections_Store::collection_state( 'ville' ) );
 foreach ( array( 10, 11, 12, 13 ) as $id ) {
 	check( "entrée $id : valeurs ACF d'origine servies à nouveau", json( $before[ $id ] ) === json( served( $id ) ) );
 }
-check( 'retour impossible sans import', is_wp_error( Okno_ACF_Import::rollback( 'ville' ) ) );
+check( 'retour impossible sans import', is_wp_error( Leiho_ACF_Import::rollback( 'ville' ) ) );
 
 // Réimport après retour : rien ne reste du précédent.
-$record = Okno_ACF_Import::start( 'ville' );
-while ( ! is_wp_error( $record ) && 'done' !== $record['status'] ) { $record = Okno_ACF_Import::step( 'ville', 10 ); }
-check( 'réimport : modifications Okno précédentes oubliées', 'Carte 2' === served( 10 )['sections'][0]['cartes'][1]['titre'] );
-Okno_ACF_Import::rollback( 'ville' );
+$record = Leiho_ACF_Import::start( 'ville' );
+while ( ! is_wp_error( $record ) && 'done' !== $record['status'] ) { $record = Leiho_ACF_Import::step( 'ville', 10 ); }
+check( 'réimport : modifications Leiho précédentes oubliées', 'Carte 2' === served( 10 )['sections'][0]['cartes'][1]['titre'] );
+Leiho_ACF_Import::rollback( 'ville' );
 
 /* =====================================================================
  * Type sans ACF déclaré par ACF : enregistrement repris
@@ -581,14 +581,14 @@ Okno_ACF_Import::rollback( 'ville' );
 
 $GLOBALS['registered'] = array();
 function register_post_type( $t, $a ) { $GLOBALS['registered'][ $t ] = $a; }
-update_option( Okno_ACF_Import::OPTION, array( 'service' => array( 'status' => 'done', 'origin' => 'acf', 'args' => array( 'public' => true, 'rewrite' => array( 'slug' => 'services' ) ) ) ) );
-Okno_ACF_Import::flush();
-Okno_ACF_Import::register_post_types();
-check( 'type déclaré dans ACF : Okno l\'enregistre si ACF ne le fait plus', isset( $GLOBALS['registered']['service'] ) && 'services' === $GLOBALS['registered']['service']['rewrite']['slug'] );
+update_option( Leiho_ACF_Import::OPTION, array( 'service' => array( 'status' => 'done', 'origin' => 'acf', 'args' => array( 'public' => true, 'rewrite' => array( 'slug' => 'services' ) ) ) ) );
+Leiho_ACF_Import::flush();
+Leiho_ACF_Import::register_post_types();
+check( 'type déclaré dans ACF : Leiho l\'enregistre si ACF ne le fait plus', isset( $GLOBALS['registered']['service'] ) && 'services' === $GLOBALS['registered']['service']['rewrite']['slug'] );
 $GLOBALS['registered'] = array();
-update_option( Okno_ACF_Import::OPTION, array( 'ville' => array( 'status' => 'done', 'origin' => 'acf', 'args' => array( 'public' => true ) ) ) );
-Okno_ACF_Import::flush();
-Okno_ACF_Import::register_post_types();
+update_option( Leiho_ACF_Import::OPTION, array( 'ville' => array( 'status' => 'done', 'origin' => 'acf', 'args' => array( 'public' => true ) ) ) );
+Leiho_ACF_Import::flush();
+Leiho_ACF_Import::register_post_types();
 check( 'type encore déclaré (ACF actif) : pas de double enregistrement', ! $GLOBALS['registered'] );
 
 echo empty( $GLOBALS['failed'] ) ? "\nTOUS LES TESTS PASSENT\n" : "\nÉCHECS\n";

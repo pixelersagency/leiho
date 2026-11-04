@@ -83,7 +83,7 @@ function wp_insert_term( $name, $tax ) {
 }
 function wp_set_object_terms( $post_id, $ids, $tax ) { $GLOBALS['obj_terms'][ $post_id ][ $tax ] = $ids; return $ids; }
 
-require __DIR__ . '/../includes/class-okno-native-fields.php';
+require __DIR__ . '/../includes/class-leiho-native-fields.php';
 
 function check( $label, $cond, $dump = null ) {
 	echo ( $cond ? 'ok   ' : 'FAIL ' ) . $label . "\n";
@@ -118,7 +118,7 @@ $values  = array(
 	'autre'        => 'pour un adapter',
 );
 $GLOBALS['caps']['unfiltered_html'] = false;
-$r = Okno_Native_Fields::prepare( $article, $values );
+$r = Leiho_Native_Fields::prepare( $article, $values );
 check( 'aucune erreur', array() === $r['errors'], $r['errors'] );
 check( 'chemins natifs retirés, les autres laissés', array( 'autre' ) === array_keys( $values ), $values );
 check( 'contenu filtré (pas de droit unfiltered_html)', 'Bonjour <strong>monde</strong>' === $r['postarr']['post_content'], $r['postarr'] );
@@ -135,58 +135,58 @@ unset( $GLOBALS['caps']['unfiltered_html'] );
 
 $values = array( '_author' => 2 );
 $GLOBALS['caps']['edit_others_posts'] = false;
-$r = Okno_Native_Fields::prepare( $article, $values );
+$r = Leiho_Native_Fields::prepare( $article, $values );
 check( 'auteur : refusé sans edit_others_posts', 'forbidden' === ( $r['errors']['_author'] ?? '' ) && ! isset( $r['postarr']['post_author'] ) );
 unset( $GLOBALS['caps']['edit_others_posts'] );
 
 $values = array( '_author' => 3 );
-$r      = Okno_Native_Fields::prepare( $article, $values );
+$r      = Leiho_Native_Fields::prepare( $article, $values );
 check( 'auteur : utilisateur qui ne peut pas écrire refusé', 'invalid_user' === ( $r['errors']['_author'] ?? '' ) );
 
 $values = array( '_tax_category' => array( 'Nouvelle catégorie' ) );
 $GLOBALS['caps']['edit_category'] = false;
 $GLOBALS['inserted']              = array();
-$r = Okno_Native_Fields::prepare( $article, $values );
+$r = Leiho_Native_Fields::prepare( $article, $values );
 check( 'catégorie : création refusée sans edit_terms', 'forbidden' === ( $r['errors']['_tax_category'] ?? '' ) && ! $GLOBALS['inserted'] );
 unset( $GLOBALS['caps']['edit_category'] );
 
 $values = array( '_tax_post_tag' => array( 6 ) );
 $GLOBALS['caps']['assign_post_tag'] = false;
-$r = Okno_Native_Fields::prepare( $article, $values );
+$r = Leiho_Native_Fields::prepare( $article, $values );
 check( 'étiquettes : refusé sans assign_terms', 'forbidden' === ( $r['errors']['_tax_post_tag'] ?? '' ) );
 unset( $GLOBALS['caps']['assign_post_tag'] );
 
 $values = array( '_tax_post_format' => array( 1 ), '_tax_inconnue' => array( 1 ) );
-$r      = Okno_Native_Fields::prepare( $article, $values );
+$r      = Leiho_Native_Fields::prepare( $article, $values );
 check( 'taxonomie non proposée refusée', 'unknown_field' === ( $r['errors']['_tax_post_format'] ?? '' ) && 'unknown_field' === ( $r['errors']['_tax_inconnue'] ?? '' ), $r['errors'] );
 
 $values = array( '_tax_category' => array( 6 ) );
-$r      = Okno_Native_Fields::prepare( $article, $values );
+$r      = Leiho_Native_Fields::prepare( $article, $values );
 check( 'terme d’une autre taxonomie refusé', 'invalid_term' === ( $r['errors']['_tax_category'] ?? '' ) );
 
 /* Contenu en blocs protégé ------------------------------------------- */
 
 $blocks = post( 11, 'post', array( 'post_content' => "<!-- wp:paragraph -->\n<p>Blocs</p>\n<!-- /wp:paragraph -->" ) );
 $values = array( '_content' => '<p>écrasé</p>' );
-$r      = Okno_Native_Fields::prepare( $blocks, $values );
+$r      = Leiho_Native_Fields::prepare( $blocks, $values );
 check( 'contenu en blocs : écriture refusée', 'blocks_protected' === ( $r['errors']['_content'] ?? '' ) && ! isset( $r['postarr']['post_content'] ) );
 
 /* Validation --------------------------------------------------------- */
 
 foreach ( array( '2026-02-30 10:00', '2026-11-04 25:00', 'demain', 12 ) as $bad ) {
 	$values = array( '_date' => $bad );
-	$r      = Okno_Native_Fields::prepare( $article, $values );
+	$r      = Leiho_Native_Fields::prepare( $article, $values );
 	check( 'date invalide refusée : ' . var_export( $bad, true ), 'invalid_date' === ( $r['errors']['_date'] ?? '' ) );
 }
-check( 'date sans heure acceptée', '2026-11-04 00:00:00' === Okno_Native_Fields::parse_date( '2026-11-04' ) );
+check( 'date sans heure acceptée', '2026-11-04 00:00:00' === Leiho_Native_Fields::parse_date( '2026-11-04' ) );
 
 $values = array( '_slug' => '   ' );
-$r      = Okno_Native_Fields::prepare( $article, $values );
+$r      = Leiho_Native_Fields::prepare( $article, $values );
 check( 'slug vide : repris du titre', 'un-titre' === $r['postarr']['post_name'] );
 
 $values = array( '_excerpt' => 'x' );
 $ville  = post( 12, 'ville' );
-$r      = Okno_Native_Fields::prepare( $ville, $values );
+$r      = Leiho_Native_Fields::prepare( $ville, $values );
 check( 'extrait sur un type sans extrait refusé', 'unknown_field' === ( $r['errors']['_excerpt'] ?? '' ) );
 
 /* Parent et ordre (pages) -------------------------------------------- */
@@ -196,26 +196,26 @@ $child = post( 21, 'page', array( 'post_parent' => 20 ) );
 post( 22, 'page', array( 'post_parent' => 21 ) );
 
 $values = array( '_parent' => 22 );
-$r      = Okno_Native_Fields::prepare( $root, $values );
+$r      = Leiho_Native_Fields::prepare( $root, $values );
 check( 'parent : un descendant refusé (boucle)', 'invalid_parent' === ( $r['errors']['_parent'] ?? '' ) );
 
 $values = array( '_parent' => 20 );
-$r      = Okno_Native_Fields::prepare( $root, $values );
+$r      = Leiho_Native_Fields::prepare( $root, $values );
 check( 'parent : soi-même refusé', 'invalid_parent' === ( $r['errors']['_parent'] ?? '' ) );
 
 $values = array( '_parent' => 10 );
-$r      = Okno_Native_Fields::prepare( $child, $values );
+$r      = Leiho_Native_Fields::prepare( $child, $values );
 check( 'parent : autre type refusé', 'invalid_parent' === ( $r['errors']['_parent'] ?? '' ) );
 
 $values = array( '_parent' => 0, '_menu_order' => '3' );
-$r      = Okno_Native_Fields::prepare( $child, $values );
+$r      = Leiho_Native_Fields::prepare( $child, $values );
 check( 'parent retiré et ordre', 0 === $r['postarr']['post_parent'] && 3 === $r['postarr']['menu_order'] && ! $r['errors'] );
 
 $values = array( '_parent' => 20 );
-$r      = Okno_Native_Fields::prepare( $article, $values );
+$r      = Leiho_Native_Fields::prepare( $article, $values );
 check( 'parent sur un type non hiérarchique refusé', 'unknown_field' === ( $r['errors']['_parent'] ?? '' ) );
 
-check( 'owns : chemins natifs', Okno_Native_Fields::owns( '_content' ) && Okno_Native_Fields::owns( '_tax_post_tag' ) && ! Okno_Native_Fields::owns( '_title' ) && ! Okno_Native_Fields::owns( 'titre' ) );
+check( 'owns : chemins natifs', Leiho_Native_Fields::owns( '_content' ) && Leiho_Native_Fields::owns( '_tax_post_tag' ) && ! Leiho_Native_Fields::owns( '_title' ) && ! Leiho_Native_Fields::owns( 'titre' ) );
 
 echo empty( $GLOBALS['failed'] ) ? "\nTOUS LES TESTS PASSENT\n" : "\nÉCHECS\n";
 exit( empty( $GLOBALS['failed'] ) ? 0 : 1 );

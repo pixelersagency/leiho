@@ -1,13 +1,13 @@
 /**
- * Client de l'API de contenu Okno, pour le build du front (Node 18+).
+ * Client de l'API de contenu Leiho, pour le build du front (Node 18+).
  *
- *   import { loadOknoContent, indexOknoContent } from '@pixelersagency/okno-bridge/content';
+ *   import { loadLeihoContent, indexLeihoContent } from 'leiho/content';
  *
- *   const { data } = await loadOknoContent( { url: 'https://cms.example.com' } );
- *   const content  = indexOknoContent( data );
+ *   const { data } = await loadLeihoContent( { url: 'https://cms.example.com' } );
+ *   const content  = indexLeihoContent( data );
  *   content.byPath( '/services/audit' );
  *
- * Une seule requête (/wp-json/okno/v1/export), avec reprises. Chaque réponse
+ * Une seule requête (/wp-json/leiho/v1/export), avec reprises. Chaque réponse
  * réussie est gardée dans un instantané local : si WordPress ne répond pas
  * (base saturée, maintenance), le build continue avec le dernier contenu
  * connu au lieu d'échouer, et le signale. Un contenu inchangé renvoie un 304 :
@@ -17,7 +17,7 @@
  * le double, l'instantané n'est qu'un cache.
  */
 
-const DEFAULT_SNAPSHOT = '.okno/content.json';
+const DEFAULT_SNAPSHOT = '.leiho/content.json';
 
 /**
  * URL de l'export depuis l'adresse du CMS (ou l'URL complète de l'endpoint).
@@ -27,21 +27,21 @@ const DEFAULT_SNAPSHOT = '.okno/content.json';
  */
 export function exportUrl( url ) {
 	if ( ! url ) {
-		throw new Error( 'Okno: missing CMS url (option `url` or OKNO_URL).' );
+		throw new Error( 'Leiho: missing CMS url (option `url` or LEIHO_URL).' );
 	}
 	const clean = String( url ).replace( /\/+$/, '' );
 	if ( clean.includes( '/wp-json/' ) || clean.includes( 'rest_route=' ) ) {
 		return clean;
 	}
-	return clean + '/wp-json/okno/v1/export';
+	return clean + '/wp-json/leiho/v1/export';
 }
 
 /**
  * Charge tout le contenu publié.
  *
  * @param {object}   [options]
- * @param {string}   [options.url]      Adresse du CMS. Défaut : process.env.OKNO_URL.
- * @param {string}   [options.token]    Jeton (accès restreint). Défaut : process.env.OKNO_TOKEN.
+ * @param {string}   [options.url]      Adresse du CMS. Défaut : process.env.LEIHO_URL.
+ * @param {string}   [options.token]    Jeton (accès restreint). Défaut : process.env.LEIHO_TOKEN.
  * @param {string|false} [options.snapshot] Fichier d'instantané, false pour s'en passer.
  * @param {'snapshot'|'error'} [options.fallback] Si WordPress ne répond pas : instantané (défaut) ou échec.
  * @param {number}   [options.retries]  Tentatives (défaut 3).
@@ -50,10 +50,10 @@ export function exportUrl( url ) {
  * @param {{warn:Function}} [options.logger]
  * @returns {Promise<{data: object, source: 'network'|'unchanged'|'snapshot', stale: boolean}>}
  */
-export async function loadOknoContent( options = {} ) {
+export async function loadLeihoContent( options = {} ) {
 	const env = typeof process !== 'undefined' ? process.env : {};
-	const url = exportUrl( options.url || env.OKNO_URL );
-	const token = options.token ?? env.OKNO_TOKEN ?? '';
+	const url = exportUrl( options.url || env.LEIHO_URL );
+	const token = options.token ?? env.LEIHO_TOKEN ?? '';
 	const snapshotPath = options.snapshot === false ? null : options.snapshot || DEFAULT_SNAPSHOT;
 	const fallback = options.fallback || 'snapshot';
 	const retries = Math.max( 1, options.retries ?? 3 );
@@ -65,7 +65,7 @@ export async function loadOknoContent( options = {} ) {
 
 	const headers = { Accept: 'application/json' };
 	if ( token ) {
-		headers[ 'X-Okno-Token' ] = token;
+		headers[ 'X-Leiho-Token' ] = token;
 	}
 	if ( snapshot && snapshot.version ) {
 		headers[ 'If-None-Match' ] = '"' + snapshot.version + '"';
@@ -84,15 +84,15 @@ export async function loadOknoContent( options = {} ) {
 			}
 			if ( response.status === 401 || response.status === 403 ) {
 				// Inutile d'insister : le jeton est faux ou absent.
-				throw Object.assign( new Error( 'Okno: access refused (' + response.status + '). Check OKNO_TOKEN.' ), { fatal: true } );
+				throw Object.assign( new Error( 'Leiho: access refused (' + response.status + '). Check LEIHO_TOKEN.' ), { fatal: true } );
 			}
 			if ( ! response.ok ) {
-				throw new Error( 'Okno: HTTP ' + response.status + ' on ' + url );
+				throw new Error( 'Leiho: HTTP ' + response.status + ' on ' + url );
 			}
 
 			const data = await response.json();
 			if ( ! data || ! Array.isArray( data.items ) ) {
-				throw new Error( 'Okno: unexpected response from ' + url + ' (is Okno 1.0.0-beta.6+ active?)' );
+				throw new Error( 'Leiho: unexpected response from ' + url + ' (is Leiho 1.0.0-beta.6+ active?)' );
 			}
 			if ( snapshotPath ) {
 				await writeSnapshot( snapshotPath, data );
@@ -111,12 +111,12 @@ export async function loadOknoContent( options = {} ) {
 
 	if ( snapshot && fallback === 'snapshot' && ! lastError?.fatal ) {
 		logger.warn(
-			'[okno] WordPress did not answer (' + ( lastError && lastError.message ) + '). ' +
+			'[leiho] WordPress did not answer (' + ( lastError && lastError.message ) + '). ' +
 				'Using the snapshot from ' + ( snapshot.generated || 'an earlier build' ) + '.'
 		);
 		return { data: snapshot, source: 'snapshot', stale: true };
 	}
-	throw lastError || new Error( 'Okno: no content.' );
+	throw lastError || new Error( 'Leiho: no content.' );
 }
 
 /**
@@ -124,7 +124,7 @@ export async function loadOknoContent( options = {} ) {
  *
  * @param {{items: Array<object>}} data
  */
-export function indexOknoContent( data ) {
+export function indexLeihoContent( data ) {
 	const items = ( data && data.items ) || [];
 	const byId = new Map();
 	const byPath = new Map();

@@ -36,7 +36,7 @@ export default function Page({ slug: fixed }: { slug?: string }) {
         <Link to="/">Home</Link> · <Link to="/about">About</Link>
       </nav>
 
-      <h1 data-wp-field="_title" data-okno-apply="html" dangerouslySetInnerHTML={{ __html: page.title.rendered }} />
+      <h1 data-wp-field="_title" data-leiho-apply="html" dangerouslySetInnerHTML={{ __html: page.title.rendered }} />
 
       {/* Always render annotated elements, even when empty. */}
       <p data-wp-field="intro">{page.acf.intro ?? ''}</p>

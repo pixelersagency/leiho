@@ -15,7 +15,7 @@ const { page } = Astro.props;
 ---
 <Base title={page.title.rendered}>
   <main data-wp-post={page.id}>
-    <h1 data-wp-field="_title" data-okno-apply="html" set:html={page.title.rendered} />
+    <h1 data-wp-field="_title" data-leiho-apply="html" set:html={page.title.rendered} />
 
     <!-- Always render annotated elements, even when empty. -->
     <p data-wp-field="intro">{page.acf.intro ?? ''}</p>

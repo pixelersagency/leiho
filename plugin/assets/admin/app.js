@@ -1,17 +1,17 @@
 /**
- * Okno — coque de l'application plein écran.
+ * Leiho — coque de l'application plein écran.
  *
  * Navigation latérale (repliable, au clavier), barre du haut (publication,
  * thème, menu utilisateur) et utilitaires partagés par les vues JavaScript
- * (Collections, Médias) : window.OknoApp.
+ * (Collections, Médias) : window.LeihoApp.
  *
  * Vanilla JS + apis WordPress (wp.apiFetch, wp.i18n). Aucun build.
  */
 ( function () {
 	'use strict';
 
-	var cfg = window.OknoAppConfig || {};
-	var root = document.getElementById( 'okno-app' );
+	var cfg = window.LeihoAppConfig || {};
+	var root = document.getElementById( 'leiho-app' );
 	var apiFetch = window.wp && window.wp.apiFetch;
 	var __ = wp.i18n.__, sprintf = wp.i18n.sprintf;
 
@@ -19,7 +19,7 @@
 		return;
 	}
 
-	document.documentElement.classList.add( 'okno-app-html' );
+	document.documentElement.classList.add( 'leiho-app-html' );
 
 	/* ------------------------------------------------------------------ *
 	 * Utilitaires DOM
@@ -29,7 +29,7 @@
 
 	function uid( prefix ) {
 		uidCount += 1;
-		return 'okno-' + ( prefix || 'id' ) + '-' + uidCount;
+		return 'leiho-' + ( prefix || 'id' ) + '-' + uidCount;
 	}
 
 	/**
@@ -144,7 +144,7 @@
 	function icon( name, size ) {
 		var ns = 'http://www.w3.org/2000/svg';
 		var svg = document.createElementNS( ns, 'svg' );
-		svg.setAttribute( 'class', 'okno-icon' );
+		svg.setAttribute( 'class', 'leiho-icon' );
 		svg.setAttribute( 'viewBox', '0 0 24 24' );
 		svg.setAttribute( 'width', size || 16 );
 		svg.setAttribute( 'height', size || 16 );
@@ -167,7 +167,7 @@
 	 * Annonces, toasts, boîtes de dialogue
 	 * ------------------------------------------------------------------ */
 
-	var live = h( 'div', { class: 'okno-sr', 'aria-live': 'polite', role: 'status' } );
+	var live = h( 'div', { class: 'leiho-sr', 'aria-live': 'polite', role: 'status' } );
 	root.appendChild( live );
 
 	function announce( message ) {
@@ -177,11 +177,11 @@
 		}, 50 );
 	}
 
-	var toasts = h( 'div', { class: 'okno-toasts' } );
+	var toasts = h( 'div', { class: 'leiho-toasts' } );
 	root.appendChild( toasts );
 
 	function toast( message, isError ) {
-		var el = h( 'div', { class: 'okno-toast' + ( isError ? ' okno-toast--error' : '' ), role: isError ? 'alert' : 'status' }, message );
+		var el = h( 'div', { class: 'leiho-toast' + ( isError ? ' leiho-toast--error' : '' ), role: isError ? 'alert' : 'status' }, message );
 		toasts.appendChild( el );
 		setTimeout(
 			function () {
@@ -204,15 +204,15 @@
 	function modal( options ) {
 		var opener = document.activeElement;
 		var titleId = uid( 'dialog-title' );
-		var body = h( 'div', { class: 'okno-dialog__body' }, options.body );
-		var footer = h( 'div', { class: 'okno-dialog__actions' } );
+		var body = h( 'div', { class: 'leiho-dialog__body' }, options.body );
+		var footer = h( 'div', { class: 'leiho-dialog__actions' } );
 		var dialog = h(
 			'div',
-			{ class: 'okno-dialog' + ( options.wide ? ' okno-dialog--wide' : '' ), role: 'dialog', 'aria-modal': 'true', 'aria-labelledby': titleId },
+			{ class: 'leiho-dialog' + ( options.wide ? ' leiho-dialog--wide' : '' ), role: 'dialog', 'aria-modal': 'true', 'aria-labelledby': titleId },
 			[
-				h( 'div', { class: 'okno-dialog__head' }, [
+				h( 'div', { class: 'leiho-dialog__head' }, [
 					h( 'h2', { id: titleId, text: options.title } ),
-					h( 'button', { type: 'button', class: 'okno-icon-btn', 'aria-label': __( 'Close', 'okno' ), onClick: function () {
+					h( 'button', { type: 'button', class: 'leiho-icon-btn', 'aria-label': __( 'Close', 'leiho' ), onClick: function () {
 						close( false );
 					} }, icon( 'close' ) ),
 				] ),
@@ -220,7 +220,7 @@
 				footer,
 			]
 		);
-		var backdrop = h( 'div', { class: 'okno-backdrop' }, dialog );
+		var backdrop = h( 'div', { class: 'leiho-backdrop' }, dialog );
 		var closed = false;
 
 		function close() {
@@ -249,7 +249,7 @@
 
 		function onKey( event ) {
 			// Menu ou calendrier ouvert par-dessus : il gère lui-même Échap et Tab.
-			if ( event.target && event.target.closest && event.target.closest( '.okno-listbox, .okno-datepicker' ) ) {
+			if ( event.target && event.target.closest && event.target.closest( '.leiho-listbox, .leiho-datepicker' ) ) {
 				return;
 			}
 			if ( 'Escape' === event.key ) {
@@ -276,7 +276,7 @@
 		( options.actions || [] ).forEach( function ( action ) {
 			var btn = h( 'button', {
 				type: 'button',
-				class: 'okno-btn' + ( action.primary ? '' : action.danger ? ' okno-btn--danger' : ' okno-btn--quiet' ),
+				class: 'leiho-btn' + ( action.primary ? '' : action.danger ? ' leiho-btn--danger' : ' leiho-btn--quiet' ),
 				text: action.label,
 				onClick: function () {
 					if ( action.onClick ) {
@@ -320,11 +320,11 @@
 			var children = [ h( 'p', { text: options.message } ) ];
 			if ( options.typeToConfirm ) {
 				var inputId = uid( 'confirm' );
-				input = h( 'input', { type: 'text', id: inputId, class: 'okno-input', autocomplete: 'off', spellcheck: 'false' } );
+				input = h( 'input', { type: 'text', id: inputId, class: 'leiho-input', autocomplete: 'off', spellcheck: 'false' } );
 				children.push(
-					h( 'label', { for: inputId, class: 'okno-label' }, [
+					h( 'label', { for: inputId, class: 'leiho-label' }, [
 						/* translators: %s: text the user must type to confirm. */
-						sprintf( __( 'Type %s to confirm', 'okno' ), options.typeToConfirm ),
+						sprintf( __( 'Type %s to confirm', 'leiho' ), options.typeToConfirm ),
 					] ),
 					input
 				);
@@ -338,9 +338,9 @@
 					}
 				},
 				actions: [
-					{ label: options.cancelLabel || __( 'Cancel', 'okno' ) },
+					{ label: options.cancelLabel || __( 'Cancel', 'leiho' ) },
 					{
-						label: options.confirmLabel || __( 'Confirm', 'okno' ),
+						label: options.confirmLabel || __( 'Confirm', 'leiho' ),
 						primary: ! options.danger,
 						danger: !! options.danger,
 						onClick: function ( close ) {
@@ -391,15 +391,15 @@
 		}
 		var diff = ( Date.now() - date.getTime() ) / 1000;
 		if ( diff < 60 ) {
-			return __( 'just now', 'okno' );
+			return __( 'just now', 'leiho' );
 		}
 		if ( diff < 3600 ) {
 			/* translators: %d: number of minutes. */
-			return sprintf( wp.i18n._n( '%d minute ago', '%d minutes ago', Math.floor( diff / 60 ), 'okno' ), Math.floor( diff / 60 ) );
+			return sprintf( wp.i18n._n( '%d minute ago', '%d minutes ago', Math.floor( diff / 60 ), 'leiho' ), Math.floor( diff / 60 ) );
 		}
 		if ( diff < 86400 ) {
 			/* translators: %d: number of hours. */
-			return sprintf( wp.i18n._n( '%d hour ago', '%d hours ago', Math.floor( diff / 3600 ), 'okno' ), Math.floor( diff / 3600 ) );
+			return sprintf( wp.i18n._n( '%d hour ago', '%d hours ago', Math.floor( diff / 3600 ), 'leiho' ), Math.floor( diff / 3600 ) );
 		}
 		return date.toLocaleDateString( LOCALE, { day: 'numeric', month: 'short', year: 'numeric' } );
 	}
@@ -419,14 +419,14 @@
 	}
 
 	function errorMessage( err, fallback ) {
-		return ( err && err.message ) || fallback || __( 'Something went wrong.', 'okno' );
+		return ( err && err.message ) || fallback || __( 'Something went wrong.', 'leiho' );
 	}
 
 	/* ------------------------------------------------------------------ *
 	 * Thème clair / sombre (partagé avec l'éditeur)
 	 * ------------------------------------------------------------------ */
 
-	var themeBtn = document.getElementById( 'okno-app-theme' );
+	var themeBtn = document.getElementById( 'leiho-app-theme' );
 
 	function storage( key, value ) {
 		try {
@@ -445,15 +445,15 @@
 		if ( themeBtn ) {
 			clear( themeBtn ).appendChild( icon( 'dark' === theme ? 'sun' : 'moon' ) );
 			themeBtn.setAttribute( 'aria-pressed', 'dark' === theme ? 'true' : 'false' );
-			themeBtn.setAttribute( 'aria-label', 'dark' === theme ? __( 'Switch to light theme', 'okno' ) : __( 'Switch to dark theme', 'okno' ) );
+			themeBtn.setAttribute( 'aria-label', 'dark' === theme ? __( 'Switch to light theme', 'leiho' ) : __( 'Switch to dark theme', 'leiho' ) );
 		}
 	}
 
 	// Sombre par défaut, comme une application de bureau. Le thème est déjà
 	// posé par PHP au premier rendu (méta utilisateur) ; le choix est gardé
-	// côté serveur, en cookie et dans le navigateur (OknoUI.theme).
-	var themeApi = window.OknoUI && window.OknoUI.theme;
-	applyTheme( themeApi ? themeApi.current() : 'light' === storage( 'okno-theme' ) ? 'light' : 'dark' );
+	// côté serveur, en cookie et dans le navigateur (LeihoUI.theme).
+	var themeApi = window.LeihoUI && window.LeihoUI.theme;
+	applyTheme( themeApi ? themeApi.current() : 'light' === storage( 'leiho-theme' ) ? 'light' : 'dark' );
 
 	if ( themeBtn ) {
 		themeBtn.addEventListener( 'click', function () {
@@ -461,7 +461,7 @@
 			if ( themeApi ) {
 				themeApi.save( next );
 			} else {
-				storage( 'okno-theme', next );
+				storage( 'leiho-theme', next );
 			}
 			applyTheme( next );
 		} );
@@ -471,42 +471,42 @@
 	 * Navigation : repliable (bureau), tiroir (mobile)
 	 * ------------------------------------------------------------------ */
 
-	var nav = document.getElementById( 'okno-nav' );
-	var collapseBtn = document.getElementById( 'okno-nav-collapse' );
-	var navToggle = document.getElementById( 'okno-nav-toggle' );
-	var embedded = root.classList.contains( 'okno-app--embedded' );
+	var nav = document.getElementById( 'leiho-nav' );
+	var collapseBtn = document.getElementById( 'leiho-nav-collapse' );
+	var navToggle = document.getElementById( 'leiho-nav-toggle' );
+	var embedded = root.classList.contains( 'leiho-app--embedded' );
 
 	function setCollapsed( collapsed, persist ) {
-		root.classList.toggle( 'okno-app--collapsed', collapsed );
+		root.classList.toggle( 'leiho-app--collapsed', collapsed );
 		if ( collapseBtn ) {
 			collapseBtn.setAttribute( 'aria-expanded', collapsed ? 'false' : 'true' );
-			var label = collapsed ? __( 'Expand the menu', 'okno' ) : __( 'Collapse the menu', 'okno' );
+			var label = collapsed ? __( 'Expand the menu', 'leiho' ) : __( 'Collapse the menu', 'leiho' );
 			collapseBtn.title = label;
-			var span = collapseBtn.querySelector( '.okno-nav__label' );
+			var span = collapseBtn.querySelector( '.leiho-nav__label' );
 			if ( span ) {
 				span.textContent = label;
 			}
 		}
 		if ( persist ) {
-			storage( 'okno-nav', collapsed ? 'collapsed' : 'expanded' );
+			storage( 'leiho-nav', collapsed ? 'collapsed' : 'expanded' );
 		}
 	}
 
 	// Rail d'icônes par défaut (les volets ont besoin de place) ; l'éditeur
 	// reste replié quel que soit le choix enregistré.
-	setCollapsed( embedded || 'expanded' !== storage( 'okno-nav' ), false );
+	setCollapsed( embedded || 'expanded' !== storage( 'leiho-nav' ), false );
 
 	if ( collapseBtn ) {
 		collapseBtn.addEventListener( 'click', function () {
-			setCollapsed( ! root.classList.contains( 'okno-app--collapsed' ), ! embedded );
+			setCollapsed( ! root.classList.contains( 'leiho-app--collapsed' ), ! embedded );
 		} );
 	}
 
 	function setDrawer( open ) {
-		root.classList.toggle( 'okno-app--nav-open', open );
+		root.classList.toggle( 'leiho-app--nav-open', open );
 		if ( navToggle ) {
 			navToggle.setAttribute( 'aria-expanded', open ? 'true' : 'false' );
-			navToggle.setAttribute( 'aria-label', open ? __( 'Close the menu', 'okno' ) : __( 'Open the menu', 'okno' ) );
+			navToggle.setAttribute( 'aria-label', open ? __( 'Close the menu', 'leiho' ) : __( 'Open the menu', 'leiho' ) );
 		}
 		if ( open ) {
 			var current = nav.querySelector( '[aria-current="page"]' ) || nav.querySelector( 'a' );
@@ -518,12 +518,12 @@
 
 	if ( navToggle ) {
 		navToggle.addEventListener( 'click', function () {
-			setDrawer( ! root.classList.contains( 'okno-app--nav-open' ) );
+			setDrawer( ! root.classList.contains( 'leiho-app--nav-open' ) );
 		} );
 	}
 
 	document.addEventListener( 'keydown', function ( event ) {
-		if ( 'Escape' === event.key && root.classList.contains( 'okno-app--nav-open' ) ) {
+		if ( 'Escape' === event.key && root.classList.contains( 'leiho-app--nav-open' ) ) {
 			setDrawer( false );
 			if ( navToggle ) {
 				navToggle.focus();
@@ -532,7 +532,7 @@
 	} );
 
 	root.addEventListener( 'click', function ( event ) {
-		if ( root.classList.contains( 'okno-app--nav-open' ) && ! nav.contains( event.target ) && navToggle && ! navToggle.contains( event.target ) ) {
+		if ( root.classList.contains( 'leiho-app--nav-open' ) && ! nav.contains( event.target ) && navToggle && ! navToggle.contains( event.target ) ) {
 			setDrawer( false );
 		}
 	} );
@@ -542,7 +542,7 @@
 		if ( 'ArrowDown' !== event.key && 'ArrowUp' !== event.key ) {
 			return;
 		}
-		var links = Array.prototype.slice.call( nav.querySelectorAll( '.okno-nav__link' ) );
+		var links = Array.prototype.slice.call( nav.querySelectorAll( '.leiho-nav__link' ) );
 		var index = links.indexOf( document.activeElement );
 		if ( -1 === index ) {
 			return;
@@ -556,8 +556,8 @@
 	 * Menu utilisateur
 	 * ------------------------------------------------------------------ */
 
-	var userBtn = document.getElementById( 'okno-user-button' );
-	var userMenu = document.getElementById( 'okno-user-menu' );
+	var userBtn = document.getElementById( 'leiho-user-button' );
+	var userMenu = document.getElementById( 'leiho-user-menu' );
 
 	function setUserMenu( open, focusFirst ) {
 		userMenu.hidden = ! open;
@@ -605,9 +605,9 @@
 	 * Publication (barre du haut)
 	 * ------------------------------------------------------------------ */
 
-	var publishBtn = document.getElementById( 'okno-app-publish' );
-	var pendingDot = document.getElementById( 'okno-app-pending' );
-	var statusEl = document.getElementById( 'okno-app-deploy' );
+	var publishBtn = document.getElementById( 'leiho-app-publish' );
+	var pendingDot = document.getElementById( 'leiho-app-pending' );
+	var statusEl = document.getElementById( 'leiho-app-deploy' );
 	var publish = cfg.publish || {};
 	var pollTimer = null;
 	var publishing = false;
@@ -617,7 +617,7 @@
 			return;
 		}
 		statusEl.textContent = text || '';
-		statusEl.className = 'okno-topbar__status' + ( level ? ' is-' + level : '' );
+		statusEl.className = 'leiho-topbar__status' + ( level ? ' is-' + level : '' );
 	}
 
 	function renderPending( state ) {
@@ -627,15 +627,15 @@
 		pendingDot.hidden = ! state.pending;
 		publishBtn.title = state.pending
 			? state.auto
-				? __( 'Changes are waiting to be published. They will be published automatically.', 'okno' )
-				: __( 'Some changes aren’t published yet.', 'okno' )
-			: __( 'Everything is published', 'okno' );
+				? __( 'Changes are waiting to be published. They will be published automatically.', 'leiho' )
+				: __( 'Some changes aren’t published yet.', 'leiho' )
+			: __( 'Everything is published', 'leiho' );
 		publishBtn.setAttribute(
 			'aria-label',
-			state.pending ? __( 'Publish (unpublished changes)', 'okno' ) : __( 'Publish', 'okno' )
+			state.pending ? __( 'Publish (unpublished changes)', 'leiho' ) : __( 'Publish', 'leiho' )
 		);
 		if ( state.active && ! publishing ) {
-			setStatus( __( 'Publishing…', 'okno' ), 'busy' );
+			setStatus( __( 'Publishing…', 'leiho' ), 'busy' );
 			if ( publish.tracks ) {
 				poll( state.active );
 			}
@@ -648,7 +648,7 @@
 		if ( ! publishBtn ) {
 			return Promise.resolve();
 		}
-		return apiFetch( { path: '/okno/v1/deploy/state' } )
+		return apiFetch( { path: '/leiho/v1/deploy/state' } )
 			.then( renderPending )
 			.catch( function () {
 				/* Pas grave : l'indicateur se remettra à jour plus tard. */
@@ -658,10 +658,10 @@
 	function poll( id ) {
 		clearTimeout( pollTimer );
 		pollTimer = setTimeout( function () {
-			apiFetch( { path: '/okno/v1/deploy/' + encodeURIComponent( id ) } )
+			apiFetch( { path: '/leiho/v1/deploy/' + encodeURIComponent( id ) } )
 				.then( function ( record ) {
 					if ( 'pending' === record.status || 'building' === record.status ) {
-						setStatus( __( 'Publishing…', 'okno' ), 'busy' );
+						setStatus( __( 'Publishing…', 'leiho' ), 'busy' );
 						poll( id );
 						return;
 					}
@@ -670,11 +670,11 @@
 						publishBtn.disabled = false;
 					}
 					if ( 'success' === record.status || 'triggered' === record.status ) {
-						setStatus( __( 'Published', 'okno' ), 'ok' );
-						toast( __( 'Your site is up to date.', 'okno' ) );
+						setStatus( __( 'Published', 'leiho' ), 'ok' );
+						toast( __( 'Your site is up to date.', 'leiho' ) );
 					} else {
-						setStatus( __( 'Publishing failed', 'okno' ), 'error' );
-						toast( record.message || __( 'Publishing failed.', 'okno' ), true );
+						setStatus( __( 'Publishing failed', 'leiho' ), 'error' );
+						toast( record.message || __( 'Publishing failed.', 'leiho' ), true );
 					}
 					refreshPublishState();
 				} )
@@ -696,23 +696,23 @@
 			}
 			publishing = true;
 			publishBtn.disabled = true;
-			setStatus( __( 'Publishing…', 'okno' ), 'busy' );
-			apiFetch( { path: '/okno/v1/deploy', method: 'POST' } )
+			setStatus( __( 'Publishing…', 'leiho' ), 'busy' );
+			apiFetch( { path: '/leiho/v1/deploy', method: 'POST' } )
 				.then( function ( record ) {
 					pendingDot.hidden = true;
-					announce( __( 'Publishing started.', 'okno' ) );
+					announce( __( 'Publishing started.', 'leiho' ) );
 					if ( publish.tracks && ( 'pending' === record.status || 'building' === record.status ) ) {
 						poll( record.deploy_id );
 						return;
 					}
 					publishing = false;
 					publishBtn.disabled = false;
-					setStatus( __( 'Publishing started', 'okno' ), 'ok' );
+					setStatus( __( 'Publishing started', 'leiho' ), 'ok' );
 					toast(
 						record.eta
 							? /* translators: %d: estimated build time in minutes. */
-							  sprintf( __( 'Publishing started. Your site will be up to date in about %d min.', 'okno' ), record.eta )
-							: __( 'Publishing started.', 'okno' )
+							  sprintf( __( 'Publishing started. Your site will be up to date in about %d min.', 'leiho' ), record.eta )
+							: __( 'Publishing started.', 'leiho' )
 					);
 					refreshPublishState();
 				} )
@@ -720,7 +720,7 @@
 					publishing = false;
 					publishBtn.disabled = false;
 					setStatus( '' );
-					toast( errorMessage( err, __( 'Publishing failed.', 'okno' ) ), true );
+					toast( errorMessage( err, __( 'Publishing failed.', 'leiho' ) ), true );
 				} );
 		} );
 
@@ -746,10 +746,10 @@
 	 * API pour les vues
 	 * ------------------------------------------------------------------ */
 
-	window.OknoApp = {
+	window.LeihoApp = {
 		cfg: cfg,
 		root: root,
-		view: document.getElementById( 'okno-app-view' ),
+		view: document.getElementById( 'leiho-app-view' ),
 		api: apiFetch,
 		h: h,
 		append: append,

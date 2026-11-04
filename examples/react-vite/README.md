@@ -9,12 +9,12 @@ vite.config.ts frame-ancestors header for the dev server
 ```
 
 ```bash
-npm install @pixelersagency/okno-bridge react-router-dom
+npm install leiho react-router-dom
 ```
 
 Set `VITE_WORDPRESS_URL=https://wp.example.com` in `.env`.
 
-**Publishing mode.** Content is fetched on each visit: choose **Live content** in Okno's settings.
+**Publishing mode.** Content is fetched on each visit: choose **Live content** in Leiho's settings.
 
 **Re-renders and navigation.** Nothing to do. When React re-renders or the router changes the URL, the bridge re-scans the page, keeps unsaved edits applied, and tells the editor which page is open.
 

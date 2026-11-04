@@ -1,17 +1,17 @@
 /**
- * Okno — vue Collections : constructeur de schéma (onglet « Champs » d'une
- * collection Okno, administrateurs seulement).
+ * Leiho — vue Collections : constructeur de schéma (onglet « Champs » d'une
+ * collection Leiho, administrateurs seulement).
  *
- * Monté dans #okno-builder par app-content.js, qui le pilote par
- * window.OknoBuilder (show, showNew, confirmLeave, import / export) : la
+ * Monté dans #leiho-builder par app-content.js, qui le pilote par
+ * window.LeihoBuilder (show, showNew, confirmLeave, import / export) : la
  * liste des collections est celle du volet de gauche de la vue.
  *
- * Interface posée sur l'API REST okno/v1/collections (voir
+ * Interface posée sur l'API REST leiho/v1/collections (voir
  * docs/collections-spec.md) : liste des collections et singletons, édition
  * d'une collection (libellés, type, chemin, fonctionnalités), éditeur de
  * champs (glisser-déposer, 19 types et leurs options, sous-champs, blocs),
  * aperçu du plan de migration (dry_run) avant application, colonnes
- * archivées et purge, suppression, import / export d'okno.schema.json.
+ * archivées et purge, suppression, import / export d'leiho.schema.json.
  *
  * La clé d'un champ (key) est son identité stable : générée à partir du nom
  * à la création, elle ne change plus une fois enregistrée. Seuls le nom (API)
@@ -20,10 +20,10 @@
 ( function () {
 	'use strict';
 
-	var App = window.OknoApp;
+	var App = window.LeihoApp;
 	var __ = wp.i18n.__, _n = wp.i18n._n, sprintf = wp.i18n.sprintf;
 
-	var host = document.getElementById( 'okno-builder' );
+	var host = document.getElementById( 'leiho-builder' );
 	if ( ! App || ! host ) {
 		return;
 	}
@@ -35,25 +35,25 @@
 	 * ------------------------------------------------------------------ */
 
 	var TYPES = [
-		{ type: 'text', label: __( 'Text', 'okno' ), help: __( 'A line or a paragraph of plain text.', 'okno' ) },
-		{ type: 'richtext', label: __( 'Rich text', 'okno' ), help: __( 'Formatted text: bold, links, lists.', 'okno' ) },
-		{ type: 'number', label: __( 'Number', 'okno' ), help: __( 'A price, a quantity, a rating.', 'okno' ) },
-		{ type: 'boolean', label: __( 'Yes / no', 'okno' ), help: __( 'A switch.', 'okno' ) },
-		{ type: 'date', label: __( 'Date', 'okno' ), help: __( 'A day.', 'okno' ) },
-		{ type: 'datetime', label: __( 'Date and time', 'okno' ), help: __( 'A day and an hour.', 'okno' ) },
-		{ type: 'select', label: __( 'Choice', 'okno' ), help: __( 'One or several values from a list.', 'okno' ) },
-		{ type: 'slug', label: __( 'Slug', 'okno' ), help: __( 'An identifier for URLs.', 'okno' ) },
-		{ type: 'email', label: __( 'Email', 'okno' ), help: __( 'An email address.', 'okno' ) },
-		{ type: 'url', label: __( 'URL', 'okno' ), help: __( 'A web address.', 'okno' ) },
-		{ type: 'color', label: __( 'Color', 'okno' ), help: __( 'A color code.', 'okno' ) },
-		{ type: 'image', label: __( 'Image', 'okno' ), help: __( 'One image from the media library.', 'okno' ) },
-		{ type: 'file', label: __( 'File', 'okno' ), help: __( 'A PDF or any document.', 'okno' ) },
-		{ type: 'gallery', label: __( 'Gallery', 'okno' ), help: __( 'Several images.', 'okno' ) },
-		{ type: 'link', label: __( 'Link', 'okno' ), help: __( 'A URL with its text and target.', 'okno' ) },
-		{ type: 'reference', label: __( 'Reference', 'okno' ), help: __( 'Points to entries of other collections.', 'okno' ) },
-		{ type: 'list', label: __( 'List', 'okno' ), help: __( 'Repeated rows of sub-fields.', 'okno' ) },
-		{ type: 'blocks', label: __( 'Blocks', 'okno' ), help: __( 'Sections of different kinds, in any order.', 'okno' ) },
-		{ type: 'group', label: __( 'Group', 'okno' ), help: __( 'Sub-fields grouped together.', 'okno' ) },
+		{ type: 'text', label: __( 'Text', 'leiho' ), help: __( 'A line or a paragraph of plain text.', 'leiho' ) },
+		{ type: 'richtext', label: __( 'Rich text', 'leiho' ), help: __( 'Formatted text: bold, links, lists.', 'leiho' ) },
+		{ type: 'number', label: __( 'Number', 'leiho' ), help: __( 'A price, a quantity, a rating.', 'leiho' ) },
+		{ type: 'boolean', label: __( 'Yes / no', 'leiho' ), help: __( 'A switch.', 'leiho' ) },
+		{ type: 'date', label: __( 'Date', 'leiho' ), help: __( 'A day.', 'leiho' ) },
+		{ type: 'datetime', label: __( 'Date and time', 'leiho' ), help: __( 'A day and an hour.', 'leiho' ) },
+		{ type: 'select', label: __( 'Choice', 'leiho' ), help: __( 'One or several values from a list.', 'leiho' ) },
+		{ type: 'slug', label: __( 'Slug', 'leiho' ), help: __( 'An identifier for URLs.', 'leiho' ) },
+		{ type: 'email', label: __( 'Email', 'leiho' ), help: __( 'An email address.', 'leiho' ) },
+		{ type: 'url', label: __( 'URL', 'leiho' ), help: __( 'A web address.', 'leiho' ) },
+		{ type: 'color', label: __( 'Color', 'leiho' ), help: __( 'A color code.', 'leiho' ) },
+		{ type: 'image', label: __( 'Image', 'leiho' ), help: __( 'One image from the media library.', 'leiho' ) },
+		{ type: 'file', label: __( 'File', 'leiho' ), help: __( 'A PDF or any document.', 'leiho' ) },
+		{ type: 'gallery', label: __( 'Gallery', 'leiho' ), help: __( 'Several images.', 'leiho' ) },
+		{ type: 'link', label: __( 'Link', 'leiho' ), help: __( 'A URL with its text and target.', 'leiho' ) },
+		{ type: 'reference', label: __( 'Reference', 'leiho' ), help: __( 'Points to entries of other collections.', 'leiho' ) },
+		{ type: 'list', label: __( 'List', 'leiho' ), help: __( 'Repeated rows of sub-fields.', 'leiho' ) },
+		{ type: 'blocks', label: __( 'Blocks', 'leiho' ), help: __( 'Sections of different kinds, in any order.', 'leiho' ) },
+		{ type: 'group', label: __( 'Group', 'leiho' ), help: __( 'Sub-fields grouped together.', 'leiho' ) },
 	];
 	var TYPE_INDEX = {};
 	TYPES.forEach( function ( t ) {
@@ -61,10 +61,10 @@
 	} );
 
 	var SUPPORTS = [
-		{ value: 'editor', label: __( 'Main text (WordPress editor)', 'okno' ) },
-		{ value: 'excerpt', label: __( 'Excerpt', 'okno' ) },
-		{ value: 'thumbnail', label: __( 'Featured image', 'okno' ) },
-		{ value: 'page-attributes', label: __( 'Order and parent', 'okno' ) },
+		{ value: 'editor', label: __( 'Main text (WordPress editor)', 'leiho' ) },
+		{ value: 'excerpt', label: __( 'Excerpt', 'leiho' ) },
+		{ value: 'thumbnail', label: __( 'Featured image', 'leiho' ) },
+		{ value: 'page-attributes', label: __( 'Order and parent', 'leiho' ) },
 	];
 
 	var LENGTH_TYPES = [ 'text', 'slug', 'email', 'url' ];
@@ -151,7 +151,7 @@
 	} );
 
 	function confirmLeave() {
-		return ! state.dirty || window.confirm( __( 'Your changes to this collection aren’t applied yet. Leave anyway?', 'okno' ) );
+		return ! state.dirty || window.confirm( __( 'Your changes to this collection aren’t applied yet. Leave anyway?', 'leiho' ) );
 	}
 
 	/* ------------------------------------------------------------------ *
@@ -160,7 +160,7 @@
 
 	var importInput = h( 'input', { type: 'file', accept: 'application/json,.json', hidden: true } );
 	// Volets du milieu (champs) et de droite (réglages), refaits à chaque rendu.
-	var editorEl = h( 'div', { class: 'okno-builder__editor', 'aria-live': 'off' } );
+	var editorEl = h( 'div', { class: 'leiho-builder__editor', 'aria-live': 'off' } );
 	var applyBtn = null;
 	var dirtyNote = null;
 
@@ -179,14 +179,14 @@
 	 * ------------------------------------------------------------------ */
 
 	function load() {
-		state.loaded = App.api( { path: '/okno/v1/collections' } )
+		state.loaded = App.api( { path: '/leiho/v1/collections' } )
 			.then( function ( body ) {
 				state.items = body.collections || [];
 				return state.items;
 			} )
 			.catch( function ( err ) {
 				state.loaded = null;
-				App.clear( editorEl ).appendChild( h( 'p', { class: 'okno-list-empty', text: App.errorMessage( err, __( 'Couldn’t load the collections.', 'okno' ) ) } ) );
+				App.clear( editorEl ).appendChild( h( 'p', { class: 'leiho-list-empty', text: App.errorMessage( err, __( 'Couldn’t load the collections.', 'leiho' ) ) } ) );
 				throw err;
 			} );
 		return state.loaded;
@@ -213,10 +213,10 @@
 		state.current = null;
 		state.dirty = false;
 		App.clear( editorEl ).appendChild(
-			h( 'section', { class: 'okno-pane okno-pane--detail' }, h( 'div', { class: 'okno-detail__body' }, h( 'div', { class: 'okno-empty-state' }, [
-				h( 'span', { class: 'okno-empty-state__icon' }, icon( 'database', 22 ) ),
-				h( 'h3', { text: __( 'This collection doesn’t exist anymore', 'okno' ) } ),
-				h( 'p', { text: __( 'It may have been removed or renamed. Reload the page to see the current collections.', 'okno' ) } ),
+			h( 'section', { class: 'leiho-pane leiho-pane--detail' }, h( 'div', { class: 'leiho-detail__body' }, h( 'div', { class: 'leiho-empty-state' }, [
+				h( 'span', { class: 'leiho-empty-state__icon' }, icon( 'database', 22 ) ),
+				h( 'h3', { text: __( 'This collection doesn’t exist anymore', 'leiho' ) } ),
+				h( 'p', { text: __( 'It may have been removed or renamed. Reload the page to see the current collections.', 'leiho' ) } ),
 			] ) ) )
 		);
 	}
@@ -240,7 +240,7 @@
 		};
 		state.dirty = false;
 		renderEditor();
-		var first = editorEl.querySelector( '.okno-pane--detail input' );
+		var first = editorEl.querySelector( '.leiho-pane--detail input' );
 		if ( first ) {
 			first.focus();
 		}
@@ -252,7 +252,7 @@
 		hooks.onSaved( id || '' );
 	}
 
-	window.OknoBuilder = {
+	window.LeihoBuilder = {
 		setHooks: function ( next ) {
 			Object.keys( next || {} ).forEach( function ( k ) {
 				hooks[ k ] = next[ k ];
@@ -303,8 +303,8 @@
 	}
 
 	function renderEditor( focusSelector ) {
-		var oldBody = editorEl.querySelector( '.okno-detail__body' );
-		var oldList = editorEl.querySelector( '.okno-builder__fields .okno-pane__body' );
+		var oldBody = editorEl.querySelector( '.leiho-detail__body' );
+		var oldList = editorEl.querySelector( '.leiho-builder__fields .leiho-pane__body' );
 		var sameSelection = editorEl.dataset.selected === ( state.current && state.current.selected );
 		var scroll = oldBody && sameSelection ? oldBody.scrollTop : 0;
 		var listScroll = oldList ? oldList.scrollTop : 0;
@@ -314,35 +314,35 @@
 		App.clear( editorEl );
 		editorEl.dataset.selected = cur.selected;
 
-		var title = cur.isNew ? __( 'New collection', 'okno' ) : d.label || d.id;
-		applyBtn = h( 'button', { type: 'button', class: 'okno-btn', disabled: ! state.dirty && ! cur.isNew, onClick: review }, cur.isNew ? __( 'Review and create', 'okno' ) : __( 'Review and apply', 'okno' ) );
-		dirtyNote = h( 'span', { class: 'okno-dirty-note', hidden: ! state.dirty, text: __( 'Changes not applied yet', 'okno' ) } );
+		var title = cur.isNew ? __( 'New collection', 'leiho' ) : d.label || d.id;
+		applyBtn = h( 'button', { type: 'button', class: 'leiho-btn', disabled: ! state.dirty && ! cur.isNew, onClick: review }, cur.isNew ? __( 'Review and create', 'leiho' ) : __( 'Review and apply', 'leiho' ) );
+		dirtyNote = h( 'span', { class: 'leiho-dirty-note', hidden: ! state.dirty, text: __( 'Changes not applied yet', 'leiho' ) } );
 
 		/* Volet du milieu : réglages de la collection, puis ses champs. */
 		var general = errorsFor( '' ).concat( errorsFor( 'id' ), errorsFor( 'label' ), errorsFor( 'path' ) );
-		var fieldsBody = h( 'div', { class: 'okno-pane__body' }, [
-			h( 'ul', { class: 'okno-rows' }, h( 'li', { class: 'okno-item' + ( sel ? '' : ' is-active' ) + ( general.length ? ' has-error' : '' ) }, h( 'button', {
+		var fieldsBody = h( 'div', { class: 'leiho-pane__body' }, [
+			h( 'ul', { class: 'leiho-rows' }, h( 'li', { class: 'leiho-item' + ( sel ? '' : ' is-active' ) + ( general.length ? ' has-error' : '' ) }, h( 'button', {
 				type: 'button',
-				class: 'okno-item__link okno-select-general',
+				class: 'leiho-item__link leiho-select-general',
 				'aria-pressed': sel ? 'false' : 'true',
 				onClick: function () {
 					select( 'general' );
 				},
 			}, [
-				h( 'span', { class: 'okno-coll__icon' }, icon( 'settings', 14 ) ),
-				h( 'span', { class: 'okno-item__title', text: __( 'General', 'okno' ) } ),
+				h( 'span', { class: 'leiho-coll__icon' }, icon( 'settings', 14 ) ),
+				h( 'span', { class: 'leiho-item__title', text: __( 'General', 'leiho' ) } ),
 			] ) ) ),
-			h( 'h3', { class: 'okno-group-label', text: __( 'Fields', 'okno' ) } ),
+			h( 'h3', { class: 'leiho-group-label', text: __( 'Fields', 'leiho' ) } ),
 			renderRootList( d.fields ),
-			h( 'p', { class: 'okno-help okno-pane__hint', text: __( 'Drag the handle or use the arrows to reorder. The title (and the features ticked above) come with every entry.', 'okno' ) } ),
+			h( 'p', { class: 'leiho-help leiho-pane__hint', text: __( 'Drag the handle or use the arrows to reorder. The title (and the features ticked above) come with every entry.', 'leiho' ) } ),
 		] );
 
-		var fieldsPane = h( 'section', { class: 'okno-pane okno-pane--list okno-builder__fields', 'aria-label': __( 'Fields', 'okno' ) }, [
-			h( 'div', { class: 'okno-pane__head' }, [
-				h( 'h2', { class: 'okno-pane__title', text: title } ),
-				h( 'div', { class: 'okno-pane__tools' }, [
+		var fieldsPane = h( 'section', { class: 'leiho-pane leiho-pane--list leiho-builder__fields', 'aria-label': __( 'Fields', 'leiho' ) }, [
+			h( 'div', { class: 'leiho-pane__head' }, [
+				h( 'h2', { class: 'leiho-pane__title', text: title } ),
+				h( 'div', { class: 'leiho-pane__tools' }, [
 					cur.isNew ? null : hooks.headTools(),
-					h( 'button', { type: 'button', class: 'okno-icon-btn', title: __( 'Add a field', 'okno' ), 'aria-label': __( 'Add a field', 'okno' ), onClick: function ( event ) {
+					h( 'button', { type: 'button', class: 'leiho-icon-btn', title: __( 'Add a field', 'leiho' ), 'aria-label': __( 'Add a field', 'leiho' ), onClick: function ( event ) {
 						pickType( event.currentTarget ).then( function ( type ) {
 							if ( type ) {
 								addField( d.fields, type );
@@ -357,29 +357,29 @@
 		/* Volet de droite : réglages de la sélection. */
 		var headActions = [ dirtyNote, applyBtn ];
 
-		var detailTitle = sel ? sel.field.label || sel.field.name : __( 'General', 'okno' );
-		var head = h( 'div', { class: 'okno-detail__head' }, [
-			h( 'span', { class: 'okno-detail__icon' + ( sel ? '' : ' okno-detail__icon--purple' ) }, sel ? h( 'span', { class: 'okno-type-tag', text: typeAbbr( sel.field.type ) } ) : icon( 'database', 15 ) ),
-			h( 'h2', { class: 'okno-detail__title', dataset: sel ? { uid: sel.field._uid } : {}, text: detailTitle } ),
-			sel ? h( 'code', { class: 'okno-detail__path okno-fieldrow__name', text: sel.field.name } ) : cur.isNew ? null : h( 'span', { class: 'okno-detail__path', text: ( 'singleton' === d.kind ? __( 'Single page', 'okno' ) : __( 'Collection', 'okno' ) ) + ' · ' + d.id } ),
-			h( 'div', { class: 'okno-detail__actions' }, headActions ),
+		var detailTitle = sel ? sel.field.label || sel.field.name : __( 'General', 'leiho' );
+		var head = h( 'div', { class: 'leiho-detail__head' }, [
+			h( 'span', { class: 'leiho-detail__icon' + ( sel ? '' : ' leiho-detail__icon--purple' ) }, sel ? h( 'span', { class: 'leiho-type-tag', text: typeAbbr( sel.field.type ) } ) : icon( 'database', 15 ) ),
+			h( 'h2', { class: 'leiho-detail__title', dataset: sel ? { uid: sel.field._uid } : {}, text: detailTitle } ),
+			sel ? h( 'code', { class: 'leiho-detail__path leiho-fieldrow__name', text: sel.field.name } ) : cur.isNew ? null : h( 'span', { class: 'leiho-detail__path', text: ( 'singleton' === d.kind ? __( 'Single page', 'leiho' ) : __( 'Collection', 'leiho' ) ) + ' · ' + d.id } ),
+			h( 'div', { class: 'leiho-detail__actions' }, headActions ),
 		] );
 
-		var body = h( 'div', { class: 'okno-detail__body' } );
+		var body = h( 'div', { class: 'leiho-detail__body' } );
 		if ( general.length && ! sel ) {
-			body.appendChild( h( 'div', { class: 'okno-detail__card okno-notice okno-notice--error', role: 'alert' }, errorsFor( '' ).map( function ( m ) {
+			body.appendChild( h( 'div', { class: 'leiho-detail__card leiho-notice leiho-notice--error', role: 'alert' }, errorsFor( '' ).map( function ( m ) {
 				return h( 'p', { text: m } );
 			} ) ) );
 		}
 		if ( sel ) {
 			var path = 'fields.' + sel.index;
 			var errors = collectErrors( path );
-			body.appendChild( h( 'div', { class: 'okno-detail__card', dataset: { uid: sel.field._uid } }, h( 'div', { class: 'okno-field-settings' }, renderFieldSettings( d.fields, sel.field, 1, path, errors.own ) ) ) );
+			body.appendChild( h( 'div', { class: 'leiho-detail__card', dataset: { uid: sel.field._uid } }, h( 'div', { class: 'leiho-field-settings' }, renderFieldSettings( d.fields, sel.field, 1, path, errors.own ) ) ) );
 		} else {
 			body.appendChild( renderGeneral( d, cur ) );
 			if ( ! cur.isNew ) {
 				// Contexte de la collection pour l'IA (ai.js), enregistré à part.
-				var aiCard = window.OknoAI ? window.OknoAI.collectionCard( d.id ) : null;
+				var aiCard = window.LeihoAI ? window.LeihoAI.collectionCard( d.id ) : null;
 				if ( aiCard ) {
 					body.appendChild( aiCard );
 				}
@@ -388,12 +388,12 @@
 				if ( imported ) {
 					body.appendChild( renderImported( cur.item ) );
 				} else body.appendChild(
-					h( 'div', { class: 'okno-detail__card' }, h( 'div', { class: 'okno-danger-zone' }, [
+					h( 'div', { class: 'leiho-detail__card' }, h( 'div', { class: 'leiho-danger-zone' }, [
 						h( 'div', {}, [
-							h( 'h3', { text: __( 'Remove this collection', 'okno' ) } ),
-							h( 'p', { class: 'okno-muted', text: __( 'It disappears from Okno and the content API. Its entries and their values are kept: create it again with the same id to get everything back.', 'okno' ) } ),
+							h( 'h3', { text: __( 'Remove this collection', 'leiho' ) } ),
+							h( 'p', { class: 'leiho-muted', text: __( 'It disappears from Leiho and the content API. Its entries and their values are kept: create it again with the same id to get everything back.', 'leiho' ) } ),
 						] ),
-						h( 'button', { type: 'button', class: 'okno-btn okno-btn--danger', onClick: removeCollection }, [ icon( 'trash' ), __( 'Remove', 'okno' ) ] ),
+						h( 'button', { type: 'button', class: 'leiho-btn leiho-btn--danger', onClick: removeCollection }, [ icon( 'trash' ), __( 'Remove', 'leiho' ) ] ),
 					] ) )
 				);
 			}
@@ -401,7 +401,7 @@
 
 		App.append( editorEl, [
 			fieldsPane,
-			h( 'section', { class: 'okno-pane okno-pane--detail', 'aria-label': detailTitle }, [ head, body ] ),
+			h( 'section', { class: 'leiho-pane leiho-pane--detail', 'aria-label': detailTitle }, [ head, body ] ),
 		] );
 
 		body.scrollTop = scroll;
@@ -420,25 +420,25 @@
 	function renderImported( item ) {
 		var info = item.acf_import;
 		var date = info.finished ? new Date( info.finished ).toLocaleDateString() : '';
-		return h( 'div', { class: 'okno-detail__card' }, h( 'div', { class: 'okno-danger-zone' }, [
+		return h( 'div', { class: 'leiho-detail__card' }, h( 'div', { class: 'leiho-danger-zone' }, [
 			h( 'div', {}, [
-				h( 'h3', { text: __( 'Go back to ACF', 'okno' ) } ),
-				h( 'p', { class: 'okno-muted', text: date
+				h( 'h3', { text: __( 'Go back to ACF', 'leiho' ) } ),
+				h( 'p', { class: 'leiho-muted', text: date
 					? /* translators: %s: date of the import. */
-					  sprintf( __( 'Imported from ACF on %s. ACF still has the values of that day: going back serves them again and deletes the Okno values of this collection.', 'okno' ), date )
-					: __( 'ACF still has the values of the import day: going back serves them again and deletes the Okno values of this collection.', 'okno' ) } ),
+					  sprintf( __( 'Imported from ACF on %s. ACF still has the values of that day: going back serves them again and deletes the Leiho values of this collection.', 'leiho' ), date )
+					: __( 'ACF still has the values of the import day: going back serves them again and deletes the Leiho values of this collection.', 'leiho' ) } ),
 			] ),
 			h( 'button', {
 				type: 'button',
-				class: 'okno-btn okno-btn--danger',
+				class: 'leiho-btn leiho-btn--danger',
 				disabled: ! info.can_rollback,
-				title: info.can_rollback ? null : __( 'Activate ACF (or Secure Custom Fields) first.', 'okno' ),
+				title: info.can_rollback ? null : __( 'Activate ACF (or Secure Custom Fields) first.', 'leiho' ),
 				onClick: function () {
-					if ( window.OknoAcfImport ) {
-						window.OknoAcfImport.rollback( item.collection.id, item.collection.label );
+					if ( window.LeihoAcfImport ) {
+						window.LeihoAcfImport.rollback( item.collection.id, item.collection.label );
 					}
 				},
-			}, [ icon( 'restore' ), __( 'Go back to ACF', 'okno' ) ] ),
+			}, [ icon( 'restore' ), __( 'Go back to ACF', 'leiho' ) ] ),
 		] ) );
 	}
 
@@ -449,10 +449,10 @@
 	}
 
 	function field( labelText, control, help, id ) {
-		return h( 'div', { class: 'okno-setting' }, [
-			h( 'label', { class: 'okno-label', for: id, text: labelText } ),
+		return h( 'div', { class: 'leiho-setting' }, [
+			h( 'label', { class: 'leiho-label', for: id, text: labelText } ),
 			control,
-			help ? h( 'p', { class: 'okno-help', text: help } ) : null,
+			help ? h( 'p', { class: 'leiho-help', text: help } ) : null,
 		] );
 	}
 
@@ -462,10 +462,10 @@
 		var idId = App.uid( 'id' );
 		var pathId = App.uid( 'path' );
 
-		var idInput = h( 'input', { type: 'text', id: idId, class: 'okno-input okno-mono', value: d.id, readOnly: ! cur.isNew, maxlength: '20', 'aria-describedby': idId + '-help' } );
-		var label = h( 'input', { type: 'text', id: labelId, class: 'okno-input', value: d.label, placeholder: __( 'Services', 'okno' ) } );
-		var singular = h( 'input', { type: 'text', id: singularId, class: 'okno-input', value: d.singular_label === d.label ? '' : d.singular_label, placeholder: __( 'Service', 'okno' ) } );
-		var path = h( 'input', { type: 'text', id: pathId, class: 'okno-input okno-mono', value: d.path, placeholder: 'singleton' === d.kind ? '/contact' : '/services/{slug}' } );
+		var idInput = h( 'input', { type: 'text', id: idId, class: 'leiho-input leiho-mono', value: d.id, readOnly: ! cur.isNew, maxlength: '20', 'aria-describedby': idId + '-help' } );
+		var label = h( 'input', { type: 'text', id: labelId, class: 'leiho-input', value: d.label, placeholder: __( 'Services', 'leiho' ) } );
+		var singular = h( 'input', { type: 'text', id: singularId, class: 'leiho-input', value: d.singular_label === d.label ? '' : d.singular_label, placeholder: __( 'Service', 'leiho' ) } );
+		var path = h( 'input', { type: 'text', id: pathId, class: 'leiho-input leiho-mono', value: d.path, placeholder: 'singleton' === d.kind ? '/contact' : '/services/{slug}' } );
 
 		label.addEventListener( 'input', function () {
 			d.label = label.value;
@@ -490,23 +490,23 @@
 		} );
 
 		var kindName = App.uid( 'kind' );
-		var kinds = h( 'fieldset', { class: 'okno-setting okno-radios' }, [
-			h( 'legend', { class: 'okno-label', text: __( 'Kind', 'okno' ) } ),
+		var kinds = h( 'fieldset', { class: 'leiho-setting leiho-radios' }, [
+			h( 'legend', { class: 'leiho-label', text: __( 'Kind', 'leiho' ) } ),
 			[
-				{ value: 'collection', label: __( 'Collection', 'okno' ), help: __( 'Many entries (services, articles, testimonials).', 'okno' ) },
-				{ value: 'singleton', label: __( 'Single page', 'okno' ), help: __( 'Exactly one entry (home, contact, site settings).', 'okno' ) },
+				{ value: 'collection', label: __( 'Collection', 'leiho' ), help: __( 'Many entries (services, articles, testimonials).', 'leiho' ) },
+				{ value: 'singleton', label: __( 'Single page', 'leiho' ), help: __( 'Exactly one entry (home, contact, site settings).', 'leiho' ) },
 			].map( function ( k ) {
 				var input = h( 'input', { type: 'radio', name: kindName, value: k.value, checked: d.kind === k.value } );
 				input.addEventListener( 'change', function () {
 					d.kind = k.value;
 					markDirty();
 				} );
-				return h( 'label', { class: 'okno-radio' }, [ input, h( 'span', {}, [ h( 'strong', { text: k.label } ), h( 'span', { class: 'okno-help', text: k.help } ) ] ) ] );
+				return h( 'label', { class: 'leiho-radio' }, [ input, h( 'span', {}, [ h( 'strong', { text: k.label } ), h( 'span', { class: 'leiho-help', text: k.help } ) ] ) ] );
 			} ),
 		] );
 
-		var features = h( 'fieldset', { class: 'okno-setting okno-checks-inline' }, [
-			h( 'legend', { class: 'okno-label', text: __( 'Built-in features', 'okno' ) } ),
+		var features = h( 'fieldset', { class: 'leiho-setting leiho-checks-inline' }, [
+			h( 'legend', { class: 'leiho-label', text: __( 'Built-in features', 'leiho' ) } ),
 			SUPPORTS.map( function ( s ) {
 				var input = h( 'input', { type: 'checkbox', value: s.value, checked: d.supports.indexOf( s.value ) !== -1 } );
 				input.addEventListener( 'change', function () {
@@ -518,46 +518,46 @@
 					}
 					markDirty();
 				} );
-				return h( 'label', { class: 'okno-check' }, [ input, s.label ] );
+				return h( 'label', { class: 'leiho-check' }, [ input, s.label ] );
 			} ),
 		] );
 
 		var idErrors = errorsFor( 'id' ).concat( errorsFor( 'label' ) );
 		var pathErrors = errorsFor( 'path' );
 
-		// Type déclaré par le thème, une extension ou ACF : Okno n'en gère que
+		// Type déclaré par le thème, une extension ou ACF : Leiho n'en gère que
 		// les champs (libellés, nature, URL et fonctionnalités viennent d'ailleurs).
 		if ( d.external ) {
-			return h( 'div', { class: 'okno-detail__card' }, [
-				h( 'h3', { text: __( 'General', 'okno' ) } ),
-				h( 'p', { class: 'okno-muted', text: 'acf' === d.source
-					? __( 'These fields come from ACF. The content type itself (labels, URL, features) is still declared where it was: in ACF, the theme or a plugin. Okno manages its fields.', 'okno' )
-					: __( 'This content type is declared by the theme or a plugin. Okno manages its fields.', 'okno' ) } ),
-				h( 'div', { class: 'okno-settings-grid' }, [
-					h( 'div', { class: 'okno-setting' }, [
-						h( 'label', { class: 'okno-label', for: idId, text: __( 'Identifier', 'okno' ) } ),
+			return h( 'div', { class: 'leiho-detail__card' }, [
+				h( 'h3', { text: __( 'General', 'leiho' ) } ),
+				h( 'p', { class: 'leiho-muted', text: 'acf' === d.source
+					? __( 'These fields come from ACF. The content type itself (labels, URL, features) is still declared where it was: in ACF, the theme or a plugin. Leiho manages its fields.', 'leiho' )
+					: __( 'This content type is declared by the theme or a plugin. Leiho manages its fields.', 'leiho' ) } ),
+				h( 'div', { class: 'leiho-settings-grid' }, [
+					h( 'div', { class: 'leiho-setting' }, [
+						h( 'label', { class: 'leiho-label', for: idId, text: __( 'Identifier', 'leiho' ) } ),
 						idInput,
 					] ),
-					field( __( 'Name (plural)', 'okno' ), label, __( 'Shown in Okno.', 'okno' ), labelId ),
+					field( __( 'Name (plural)', 'leiho' ), label, __( 'Shown in Leiho.', 'leiho' ), labelId ),
 				] ),
 			] );
 		}
 
-		return h( 'div', { class: 'okno-detail__card' }, [
-			h( 'h3', { text: __( 'General', 'okno' ) } ),
-			h( 'div', { class: 'okno-settings-grid' }, [
-				field( __( 'Name (plural)', 'okno' ), label, null, labelId ),
-				field( __( 'Name of one entry', 'okno' ), singular, __( 'Optional. Used in “New service”.', 'okno' ), singularId ),
-				h( 'div', { class: 'okno-setting' + ( idErrors.length ? ' has-error' : '' ) }, [
-					h( 'label', { class: 'okno-label', for: idId, text: __( 'Identifier', 'okno' ) } ),
+		return h( 'div', { class: 'leiho-detail__card' }, [
+			h( 'h3', { text: __( 'General', 'leiho' ) } ),
+			h( 'div', { class: 'leiho-settings-grid' }, [
+				field( __( 'Name (plural)', 'leiho' ), label, null, labelId ),
+				field( __( 'Name of one entry', 'leiho' ), singular, __( 'Optional. Used in “New service”.', 'leiho' ), singularId ),
+				h( 'div', { class: 'leiho-setting' + ( idErrors.length ? ' has-error' : '' ) }, [
+					h( 'label', { class: 'leiho-label', for: idId, text: __( 'Identifier', 'leiho' ) } ),
 					idInput,
-					h( 'p', { class: 'okno-help', id: idId + '-help', text: cur.isNew ? __( 'Content type and table name. Lowercase letters, digits and underscores; it can’t change later.', 'okno' ) : __( 'The identifier never changes.', 'okno' ) } ),
+					h( 'p', { class: 'leiho-help', id: idId + '-help', text: cur.isNew ? __( 'Content type and table name. Lowercase letters, digits and underscores; it can’t change later.', 'leiho' ) : __( 'The identifier never changes.', 'leiho' ) } ),
 					idErrors.map( errorLine ),
 				] ),
-				h( 'div', { class: 'okno-setting' + ( pathErrors.length ? ' has-error' : '' ) }, [
-					h( 'label', { class: 'okno-label', for: pathId, text: __( 'URL on the site', 'okno' ) } ),
+				h( 'div', { class: 'leiho-setting' + ( pathErrors.length ? ' has-error' : '' ) }, [
+					h( 'label', { class: 'leiho-label', for: pathId, text: __( 'URL on the site', 'leiho' ) } ),
 					path,
-					h( 'p', { class: 'okno-help', text: __( 'Where an entry is shown on the site, with {slug} or {id}. Leave empty for content without a page (testimonials, settings): its entries are then edited in Collections only, without the visual editor.', 'okno' ) } ),
+					h( 'p', { class: 'leiho-help', text: __( 'Where an entry is shown on the site, with {slug} or {id}. Leave empty for content without a page (testimonials, settings): its entries are then edited in Collections only, without the visual editor.', 'leiho' ) } ),
 					pathErrors.map( errorLine ),
 				] ),
 				kinds,
@@ -567,7 +567,7 @@
 	}
 
 	function errorLine( message ) {
-		return h( 'p', { class: 'okno-error', role: 'alert', text: message } );
+		return h( 'p', { class: 'leiho-error', role: 'alert', text: message } );
 	}
 
 	/* ------------------------------------------------------------------ *
@@ -581,20 +581,20 @@
 	 * champ ; un clic ouvre ses réglages dans le volet de droite.
 	 */
 	function renderRootList( list ) {
-		var ol = h( 'ol', { class: 'okno-rows okno-fields okno-fields--root' } );
+		var ol = h( 'ol', { class: 'leiho-rows leiho-fields leiho-fields--root' } );
 		list.forEach( function ( f, index ) {
 			ol.appendChild( renderRootRow( list, f, index ) );
 		} );
 		if ( ! list.length ) {
-			ol.appendChild( h( 'li', { class: 'okno-list-empty', text: __( 'No fields yet. Each entry still has a title.', 'okno' ) } ) );
+			ol.appendChild( h( 'li', { class: 'leiho-list-empty', text: __( 'No fields yet. Each entry still has a title.', 'leiho' ) } ) );
 		}
-		ol.appendChild( h( 'li', {}, h( 'button', { type: 'button', class: 'okno-item okno-item--add okno-add-field', onClick: function ( event ) {
+		ol.appendChild( h( 'li', {}, h( 'button', { type: 'button', class: 'leiho-item leiho-item--add leiho-add-field', onClick: function ( event ) {
 			pickType( event.currentTarget ).then( function ( type ) {
 				if ( type ) {
 					addField( list, type );
 				}
 			} );
-		} }, [ icon( 'plus', 13 ), __( 'Add a field', 'okno' ) ] ) ) );
+		} }, [ icon( 'plus', 13 ), __( 'Add a field', 'leiho' ) ] ) ) );
 		return ol;
 	}
 
@@ -603,23 +603,23 @@
 		var errors = collectErrors( path );
 		var active = state.current.selected === f._uid;
 		var label = f.label || f.name;
-		var grip = h( 'span', { class: 'okno-grip', title: __( 'Drag to reorder', 'okno' ), 'aria-hidden': 'true' }, icon( 'grip', 12 ) );
+		var grip = h( 'span', { class: 'leiho-grip', title: __( 'Drag to reorder', 'leiho' ), 'aria-hidden': 'true' }, icon( 'grip', 12 ) );
 		var li = h( 'li', {
-			class: 'okno-item' + ( active ? ' is-active' : '' ) + ( errors.own.length || errors.nested ? ' has-error' : '' ),
+			class: 'leiho-item' + ( active ? ' is-active' : '' ) + ( errors.own.length || errors.nested ? ' has-error' : '' ),
 			dataset: { uid: f._uid },
 		}, [
 			grip,
 			h( 'button', {
 				type: 'button',
-				class: 'okno-item__link okno-field-select',
+				class: 'leiho-item__link leiho-field-select',
 				'aria-pressed': active ? 'true' : 'false',
 				onClick: function () {
-					select( f._uid, '[data-uid="' + f._uid + '"] .okno-field-label-input' );
+					select( f._uid, '[data-uid="' + f._uid + '"] .leiho-field-label-input' );
 				},
 			}, [
-				h( 'span', { class: 'okno-type-tag', title: ( TYPE_INDEX[ f.type ] || { label: f.type } ).label, text: typeAbbr( f.type ) } ),
-				h( 'span', { class: 'okno-item__title okno-fieldrow__label', text: label + ( f.required ? ' *' : '' ) } ),
-				h( 'code', { class: 'okno-item__meta okno-fieldrow__name', text: f.name } ),
+				h( 'span', { class: 'leiho-type-tag', title: ( TYPE_INDEX[ f.type ] || { label: f.type } ).label, text: typeAbbr( f.type ) } ),
+				h( 'span', { class: 'leiho-item__title leiho-fieldrow__label', text: label + ( f.required ? ' *' : '' ) } ),
+				h( 'code', { class: 'leiho-item__meta leiho-fieldrow__name', text: f.name } ),
 			] ),
 			rowActions( list, f, index, label ),
 		] );
@@ -629,37 +629,37 @@
 
 	/** Monter, descendre, retirer : au survol de la ligne (et au clavier). */
 	function rowActions( list, f, index, label ) {
-		return h( 'div', { class: 'okno-item__actions okno-fieldrow__actions' }, [
+		return h( 'div', { class: 'leiho-item__actions leiho-fieldrow__actions' }, [
 			h( 'button', {
 				type: 'button',
-				class: 'okno-icon-btn okno-move-up',
+				class: 'leiho-icon-btn leiho-move-up',
 				disabled: 0 === index,
 				/* translators: %s: field label. */
-				'aria-label': sprintf( __( 'Move “%s” up', 'okno' ), label ),
-				title: __( 'Move up', 'okno' ),
+				'aria-label': sprintf( __( 'Move “%s” up', 'leiho' ), label ),
+				title: __( 'Move up', 'leiho' ),
 				onClick: function () {
 					move( list, index, index - 1 );
-					renderEditor( '[data-uid="' + f._uid + '"] .okno-move-up:not([disabled]), [data-uid="' + f._uid + '"] .okno-move-down' );
+					renderEditor( '[data-uid="' + f._uid + '"] .leiho-move-up:not([disabled]), [data-uid="' + f._uid + '"] .leiho-move-down' );
 				},
 			}, icon( 'up' ) ),
 			h( 'button', {
 				type: 'button',
-				class: 'okno-icon-btn okno-move-down',
+				class: 'leiho-icon-btn leiho-move-down',
 				disabled: index === list.length - 1,
 				/* translators: %s: field label. */
-				'aria-label': sprintf( __( 'Move “%s” down', 'okno' ), label ),
-				title: __( 'Move down', 'okno' ),
+				'aria-label': sprintf( __( 'Move “%s” down', 'leiho' ), label ),
+				title: __( 'Move down', 'leiho' ),
 				onClick: function () {
 					move( list, index, index + 1 );
-					renderEditor( '[data-uid="' + f._uid + '"] .okno-move-down:not([disabled]), [data-uid="' + f._uid + '"] .okno-move-up' );
+					renderEditor( '[data-uid="' + f._uid + '"] .leiho-move-down:not([disabled]), [data-uid="' + f._uid + '"] .leiho-move-up' );
 				},
 			}, icon( 'down' ) ),
 			h( 'button', {
 				type: 'button',
-				class: 'okno-icon-btn okno-icon-btn--danger',
+				class: 'leiho-icon-btn leiho-icon-btn--danger',
 				/* translators: %s: field label. */
-				'aria-label': sprintf( __( 'Remove “%s”', 'okno' ), label ),
-				title: __( 'Remove', 'okno' ),
+				'aria-label': sprintf( __( 'Remove “%s”', 'leiho' ), label ),
+				title: __( 'Remove', 'leiho' ),
 				onClick: function () {
 					removeField( list, index, f );
 				},
@@ -673,22 +673,22 @@
 	 * pathPrefix : chemin des erreurs du serveur.
 	 */
 	function renderFieldList( list, depth, pathPrefix ) {
-		var ol = h( 'ol', { class: 'okno-fields' } );
+		var ol = h( 'ol', { class: 'leiho-fields' } );
 		list.forEach( function ( f, index ) {
 			ol.appendChild( renderFieldRow( list, f, index, depth, pathPrefix + '.' + index ) );
 		} );
-		var wrap = h( 'div', { class: 'okno-list-field okno-fields-wrap' }, [
-			list.length ? ol : h( 'div', { class: 'okno-list-field__empty', text: __( 'No sub-fields yet.', 'okno' ) } ),
+		var wrap = h( 'div', { class: 'leiho-list-field leiho-fields-wrap' }, [
+			list.length ? ol : h( 'div', { class: 'leiho-list-field__empty', text: __( 'No sub-fields yet.', 'leiho' ) } ),
 		] );
 		if ( depth <= MAX_DEPTH ) {
 			wrap.appendChild(
-				h( 'button', { type: 'button', class: 'okno-list-field__add okno-add-field', onClick: function ( event ) {
+				h( 'button', { type: 'button', class: 'leiho-list-field__add leiho-add-field', onClick: function ( event ) {
 					pickType( event.currentTarget ).then( function ( type ) {
 						if ( type ) {
 							addField( list, type );
 						}
 					} );
-				} }, [ icon( 'plus' ), __( 'Add a sub-field', 'okno' ) ] )
+				} }, [ icon( 'plus' ), __( 'Add a sub-field', 'leiho' ) ] )
 			);
 		}
 		return wrap;
@@ -781,7 +781,7 @@
 			state.current.selected = f._uid; // Champ de premier niveau : ses réglages à droite.
 		}
 		markDirty();
-		renderEditor( '[data-uid="' + f._uid + '"] .okno-field-label-input' );
+		renderEditor( '[data-uid="' + f._uid + '"] .leiho-field-label-input' );
 	}
 
 	function setType( list, f, type ) {
@@ -802,7 +802,7 @@
 		} );
 		f.type = type;
 		markDirty();
-		renderEditor( '[data-uid="' + f._uid + '"] .okno-field-type-input' );
+		renderEditor( '[data-uid="' + f._uid + '"] .leiho-field-type-input' );
 	}
 
 	function move( list, from, to ) {
@@ -821,7 +821,7 @@
 	}
 
 	function renderFieldRow( list, f, index, depth, path ) {
-		var bodyId = 'okno-fieldbody-' + f._uid;
+		var bodyId = 'leiho-fieldbody-' + f._uid;
 		var meta = TYPE_INDEX[ f.type ] || { label: f.type };
 		var errors = collectErrors( path );
 		var hasNestedErrors = errors.nested;
@@ -832,7 +832,7 @@
 
 		var toggle = h( 'button', {
 			type: 'button',
-			class: 'okno-fieldrow__toggle',
+			class: 'leiho-fieldrow__toggle',
 			'aria-expanded': f._open ? 'true' : 'false',
 			'aria-controls': bodyId,
 			onClick: function () {
@@ -843,20 +843,20 @@
 			},
 		}, [
 			icon( 'chevron', 12 ),
-			h( 'span', { class: 'okno-type-badge', text: meta.label } ),
-			h( 'span', { class: 'okno-fieldrow__label', text: ( f.label || f.name ) + ( f.required ? ' *' : '' ) } ),
-			h( 'code', { class: 'okno-fieldrow__name', text: f.name } ),
+			h( 'span', { class: 'leiho-type-badge', text: meta.label } ),
+			h( 'span', { class: 'leiho-fieldrow__label', text: ( f.label || f.name ) + ( f.required ? ' *' : '' ) } ),
+			h( 'code', { class: 'leiho-fieldrow__name', text: f.name } ),
 		] );
 
-		var grip = h( 'span', { class: 'okno-grip', title: __( 'Drag to reorder', 'okno' ), 'aria-hidden': 'true' }, icon( 'grip', 12 ) );
+		var grip = h( 'span', { class: 'leiho-grip', title: __( 'Drag to reorder', 'leiho' ), 'aria-hidden': 'true' }, icon( 'grip', 12 ) );
 		var actions = rowActions( list, f, index, f.label || f.name );
 
-		var body = h( 'div', { class: 'okno-fieldrow__body', id: bodyId, hidden: ! f._open }, renderFieldSettings( list, f, depth, path, errors.own ) );
+		var body = h( 'div', { class: 'leiho-fieldrow__body', id: bodyId, hidden: ! f._open }, renderFieldSettings( list, f, depth, path, errors.own ) );
 
 		var li = h( 'li', {
-			class: 'okno-fieldrow' + ( f._open ? ' is-open' : '' ) + ( errors.own.length || hasNestedErrors ? ' has-error' : '' ),
+			class: 'leiho-fieldrow' + ( f._open ? ' is-open' : '' ) + ( errors.own.length || hasNestedErrors ? ' has-error' : '' ),
 			dataset: { uid: f._uid },
-		}, [ h( 'div', { class: 'okno-fieldrow__head' }, [ grip, toggle, actions ] ), body ] );
+		}, [ h( 'div', { class: 'leiho-fieldrow__head' }, [ grip, toggle, actions ] ), body ] );
 
 		bindDrag( li, grip, list, index );
 		return li;
@@ -921,7 +921,7 @@
 				drag = null;
 				var to = target > index ? target - 1 : target;
 				if ( move( list, index, to ) ) {
-					App.announce( __( 'Field moved.', 'okno' ) );
+					App.announce( __( 'Field moved.', 'leiho' ) );
 					renderEditor();
 				}
 			}
@@ -935,15 +935,15 @@
 	function removeField( list, index, f ) {
 		var nested = !! list._nested;
 		var message = f._new
-			? __( 'This field isn’t saved yet: it is simply removed.', 'okno' )
+			? __( 'This field isn’t saved yet: it is simply removed.', 'leiho' )
 			: nested
-			? __( 'Its values disappear from each entry the next time the entry is saved. Revisions keep the previous values.', 'okno' )
-			: __( 'Its column is archived, not deleted: add a field with the same key and type again to get the values back, or purge archived columns to delete them.', 'okno' );
+			? __( 'Its values disappear from each entry the next time the entry is saved. Revisions keep the previous values.', 'leiho' )
+			: __( 'Its column is archived, not deleted: add a field with the same key and type again to get the values back, or purge archived columns to delete them.', 'leiho' );
 		App.confirm( {
 			/* translators: %s: field label. */
-			title: sprintf( __( 'Remove “%s”?', 'okno' ), f.label || f.name ),
+			title: sprintf( __( 'Remove “%s”?', 'leiho' ), f.label || f.name ),
 			message: message,
-			confirmLabel: __( 'Remove', 'okno' ),
+			confirmLabel: __( 'Remove', 'leiho' ),
 			danger: true,
 		} ).then( function ( ok ) {
 			if ( ok ) {
@@ -958,7 +958,7 @@
 	}
 
 	function numberInput( id, value, onValue, attrs ) {
-		var input = h( 'input', Object.assign( { type: 'number', id: id, class: 'okno-input okno-input--small', value: null === value || undefined === value ? '' : String( value ) }, attrs || {} ) );
+		var input = h( 'input', Object.assign( { type: 'number', id: id, class: 'leiho-input leiho-input--small', value: null === value || undefined === value ? '' : String( value ) }, attrs || {} ) );
 		input.addEventListener( 'input', function () {
 			onValue( '' === input.value ? null : Number( input.value ) );
 			markDirty();
@@ -972,7 +972,7 @@
 			onValue( input.checked );
 			markDirty();
 		} );
-		return h( 'label', { class: 'okno-check' }, [ input, labelText ] );
+		return h( 'label', { class: 'leiho-check' }, [ input, labelText ] );
 	}
 
 	function renderFieldSettings( list, f, depth, path, ownErrors ) {
@@ -985,21 +985,21 @@
 		var out = [];
 
 		if ( ownErrors.length ) {
-			out.push( h( 'div', { class: 'okno-notice okno-notice--error', role: 'alert' }, ownErrors.map( function ( m ) {
+			out.push( h( 'div', { class: 'leiho-notice leiho-notice--error', role: 'alert' }, ownErrors.map( function ( m ) {
 				return h( 'p', { text: m } );
 			} ) ) );
 		}
 
-		var labelInput = h( 'input', { type: 'text', id: ids.label, class: 'okno-input okno-field-label-input', value: f.label || '' } );
-		var nameInput = h( 'input', { type: 'text', id: ids.name, class: 'okno-input okno-mono', value: f.name, maxlength: '64', spellcheck: 'false' } );
-		var keyNote = h( 'p', { class: 'okno-help okno-key-note' } );
+		var labelInput = h( 'input', { type: 'text', id: ids.label, class: 'leiho-input leiho-field-label-input', value: f.label || '' } );
+		var nameInput = h( 'input', { type: 'text', id: ids.name, class: 'leiho-input leiho-mono', value: f.name, maxlength: '64', spellcheck: 'false' } );
+		var keyNote = h( 'p', { class: 'leiho-help leiho-key-note' } );
 
 		function renderKeyNote() {
 			keyNote.textContent = savedField( f )
 				? /* translators: %s: field key. */
-				  sprintf( __( 'Key: %s (fixed: it names the stored data, renaming is free).', 'okno' ), f.key )
+				  sprintf( __( 'Key: %s (fixed: it names the stored data, renaming is free).', 'leiho' ), f.key )
 				: /* translators: %s: field key. */
-				  sprintf( __( 'Key: %s (set when you apply, then fixed).', 'okno' ), f.key );
+				  sprintf( __( 'Key: %s (set when you apply, then fixed).', 'leiho' ), f.key );
 		}
 		renderKeyNote();
 
@@ -1008,19 +1008,19 @@
 			if ( ! row ) {
 				return;
 			}
-			var labelEl = row.querySelector( '.okno-fieldrow__label' );
-			var nameEl = row.querySelector( '.okno-fieldrow__name' );
+			var labelEl = row.querySelector( '.leiho-fieldrow__label' );
+			var nameEl = row.querySelector( '.leiho-fieldrow__name' );
 			if ( labelEl ) {
 				labelEl.textContent = ( f.label || f.name ) + ( f.required ? ' *' : '' );
 			}
 			if ( nameEl ) {
 				nameEl.textContent = f.name;
 			}
-			var titleEl = editorEl.querySelector( '.okno-detail__title[data-uid="' + f._uid + '"]' );
+			var titleEl = editorEl.querySelector( '.leiho-detail__title[data-uid="' + f._uid + '"]' );
 			if ( titleEl ) {
 				titleEl.textContent = f.label || f.name;
 			}
-			var pathEl = titleEl && titleEl.parentNode.querySelector( '.okno-detail__path' );
+			var pathEl = titleEl && titleEl.parentNode.querySelector( '.leiho-detail__path' );
 			if ( pathEl ) {
 				pathEl.textContent = f.name;
 			}
@@ -1050,7 +1050,7 @@
 
 		var typeSelect = h(
 			'select',
-			{ id: ids.type, class: 'okno-input okno-field-type-input' },
+			{ id: ids.type, class: 'leiho-input leiho-field-type-input' },
 			TYPES.filter( function ( t ) {
 				// Pas de conteneur au-delà de la profondeur maximale.
 				return depth < MAX_DEPTH || [ 'list', 'group', 'blocks' ].indexOf( t.type ) === -1 || t.type === f.type;
@@ -1062,7 +1062,7 @@
 			setType( list, f, typeSelect.value );
 		} );
 
-		var helpInput = h( 'input', { type: 'text', id: ids.help, class: 'okno-input', value: f.help || '', placeholder: __( 'Shown to editors under the field', 'okno' ) } );
+		var helpInput = h( 'input', { type: 'text', id: ids.help, class: 'leiho-input', value: f.help || '', placeholder: __( 'Shown to editors under the field', 'leiho' ) } );
 		helpInput.addEventListener( 'input', function () {
 			f.help = helpInput.value;
 			markDirty();
@@ -1070,46 +1070,46 @@
 
 		var typeHelp = ( TYPE_INDEX[ f.type ] || {} ).help;
 		if ( savedField( f ) && depth === 1 ) {
-			typeHelp = ( typeHelp ? typeHelp + ' ' : '' ) + __( 'Changing the type of a saved field moves its values to a new column; values that can’t be converted stay in the archived column.', 'okno' );
+			typeHelp = ( typeHelp ? typeHelp + ' ' : '' ) + __( 'Changing the type of a saved field moves its values to a new column; values that can’t be converted stay in the archived column.', 'leiho' );
 		}
 
 		out.push(
-			h( 'div', { class: 'okno-settings-grid' }, [
-				field( __( 'Label', 'okno' ), labelInput, null, ids.label ),
-				h( 'div', { class: 'okno-setting' }, [
-					h( 'label', { class: 'okno-label', for: ids.name, text: __( 'Name in the API', 'okno' ) } ),
+			h( 'div', { class: 'leiho-settings-grid' }, [
+				field( __( 'Label', 'leiho' ), labelInput, null, ids.label ),
+				h( 'div', { class: 'leiho-setting' }, [
+					h( 'label', { class: 'leiho-label', for: ids.name, text: __( 'Name in the API', 'leiho' ) } ),
 					nameInput,
 					keyNote,
 				] ),
-				field( __( 'Type', 'okno' ), typeSelect, typeHelp, ids.type ),
-				field( __( 'Instructions', 'okno' ), helpInput, null, ids.help ),
+				field( __( 'Type', 'leiho' ), typeSelect, typeHelp, ids.type ),
+				field( __( 'Instructions', 'leiho' ), helpInput, null, ids.help ),
 			] )
 		);
 
 		// Cases à cocher propres au type, réglages chiffrés repliés (options
 		// avancées), choix et cibles toujours visibles.
-		var flags = h( 'div', { class: 'okno-checks-inline' } );
-		var advanced = h( 'div', { class: 'okno-disclosure__body' } );
+		var flags = h( 'div', { class: 'leiho-checks-inline' } );
+		var advanced = h( 'div', { class: 'leiho-disclosure__body' } );
 		var wide = [];
 
 		if ( 'text' === f.type ) {
-			flags.appendChild( checkbox( __( 'Several lines', 'okno' ), f.multiline, function ( v ) {
+			flags.appendChild( checkbox( __( 'Several lines', 'leiho' ), f.multiline, function ( v ) {
 				f.multiline = v;
 			} ) );
 		}
 
 		if ( LENGTH_TYPES.indexOf( f.type ) !== -1 ) {
 			var lenId = App.uid( 'flen' );
-			advanced.appendChild( field( __( 'Maximum length', 'okno' ), numberInput( lenId, f.max_length || null, function ( v ) {
+			advanced.appendChild( field( __( 'Maximum length', 'leiho' ), numberInput( lenId, f.max_length || null, function ( v ) {
 				f.max_length = v ? Math.max( 0, Math.round( v ) ) : 0;
-			}, { min: 0, placeholder: __( 'No limit', 'okno' ) } ), 'text' === f.type ? __( 'Up to 191 characters, the text is indexed (fast to sort and filter).', 'okno' ) : null, lenId ) );
+			}, { min: 0, placeholder: __( 'No limit', 'leiho' ) } ), 'text' === f.type ? __( 'Up to 191 characters, the text is indexed (fast to sort and filter).', 'leiho' ) : null, lenId ) );
 		}
 
 		if ( 'number' === f.type ) {
-			flags.appendChild( checkbox( __( 'Whole numbers only', 'okno' ), f.integer, function ( v ) {
+			flags.appendChild( checkbox( __( 'Whole numbers only', 'leiho' ), f.integer, function ( v ) {
 				f.integer = v;
 			} ) );
-			[ [ 'min', __( 'Minimum', 'okno' ) ], [ 'max', __( 'Maximum', 'okno' ) ], [ 'step', __( 'Step', 'okno' ) ] ].forEach( function ( pair ) {
+			[ [ 'min', __( 'Minimum', 'leiho' ) ], [ 'max', __( 'Maximum', 'leiho' ) ], [ 'step', __( 'Step', 'leiho' ) ] ].forEach( function ( pair ) {
 				var id = App.uid( 'fnum' );
 				advanced.appendChild( field( pair[ 1 ], numberInput( id, f[ pair[ 0 ] ], function ( v ) {
 					f[ pair[ 0 ] ] = v;
@@ -1118,11 +1118,11 @@
 		}
 
 		if ( 'select' === f.type ) {
-			flags.appendChild( checkbox( __( 'Several choices', 'okno' ), f.multiple, function ( v ) {
+			flags.appendChild( checkbox( __( 'Several choices', 'leiho' ), f.multiple, function ( v ) {
 				f.multiple = v;
 			} ) );
 			var choicesId = App.uid( 'fchoices' );
-			var choices = h( 'textarea', { id: choicesId, class: 'okno-input okno-mono', rows: '5', spellcheck: 'false', placeholder: 'light : Light\ndark : Dark' } );
+			var choices = h( 'textarea', { id: choicesId, class: 'leiho-input leiho-mono', rows: '5', spellcheck: 'false', placeholder: 'light : Light\ndark : Dark' } );
 			choices.value = ( f.choices || [] ).map( function ( c ) {
 				return c.value === c.label ? c.value : c.value + ' : ' + c.label;
 			} ).join( '\n' );
@@ -1130,37 +1130,37 @@
 				f.choices = parseChoices( choices.value );
 				markDirty();
 			} );
-			wide.push( h( 'div', { class: 'okno-setting okno-setting--wide' }, [
-				h( 'label', { class: 'okno-label', for: choicesId, text: __( 'Choices', 'okno' ) } ),
+			wide.push( h( 'div', { class: 'leiho-setting leiho-setting--wide' }, [
+				h( 'label', { class: 'leiho-label', for: choicesId, text: __( 'Choices', 'leiho' ) } ),
 				choices,
-				h( 'p', { class: 'okno-help', text: __( 'One choice per line. Write “value : Label” to show a label different from the stored value.', 'okno' ) } ),
+				h( 'p', { class: 'leiho-help', text: __( 'One choice per line. Write “value : Label” to show a label different from the stored value.', 'leiho' ) } ),
 			] ) );
 		}
 
 		if ( 'gallery' === f.type ) {
 			var gmax = App.uid( 'fmax' );
-			advanced.appendChild( field( __( 'Maximum images', 'okno' ), numberInput( gmax, f.max || null, function ( v ) {
+			advanced.appendChild( field( __( 'Maximum images', 'leiho' ), numberInput( gmax, f.max || null, function ( v ) {
 				f.max = v ? Math.max( 0, Math.round( v ) ) : 0;
-			}, { min: 0, placeholder: __( 'No limit', 'okno' ) } ), null, gmax ) );
+			}, { min: 0, placeholder: __( 'No limit', 'leiho' ) } ), null, gmax ) );
 		}
 
 		if ( 'reference' === f.type ) {
-			flags.appendChild( checkbox( __( 'Several entries', 'okno' ), f.multiple, function ( v ) {
+			flags.appendChild( checkbox( __( 'Several entries', 'leiho' ), f.multiple, function ( v ) {
 				f.multiple = v;
 			} ) );
 			var rmax = App.uid( 'fmax' );
-			advanced.appendChild( field( __( 'Maximum entries', 'okno' ), numberInput( rmax, f.max || null, function ( v ) {
+			advanced.appendChild( field( __( 'Maximum entries', 'leiho' ), numberInput( rmax, f.max || null, function ( v ) {
 				f.max = v ? Math.max( 0, Math.round( v ) ) : 0;
-			}, { min: 0, placeholder: __( 'No limit', 'okno' ) } ), __( 'With “Several entries”.', 'okno' ), rmax ) );
+			}, { min: 0, placeholder: __( 'No limit', 'leiho' ) } ), __( 'With “Several entries”.', 'leiho' ), rmax ) );
 			wide.push( renderTargets( f ) );
 		}
 
 		if ( 'list' === f.type || 'blocks' === f.type ) {
-			[ [ 'min', __( 'Minimum rows', 'okno' ) ], [ 'max', __( 'Maximum rows', 'okno' ) ] ].forEach( function ( pair ) {
+			[ [ 'min', __( 'Minimum rows', 'leiho' ) ], [ 'max', __( 'Maximum rows', 'leiho' ) ] ].forEach( function ( pair ) {
 				var id = App.uid( 'frows' );
 				advanced.appendChild( field( pair[ 1 ], numberInput( id, f[ pair[ 0 ] ] || null, function ( v ) {
 					f[ pair[ 0 ] ] = v ? Math.max( 0, Math.round( v ) ) : 0;
-				}, { min: 0, placeholder: 'max' === pair[ 0 ] ? __( 'No limit', 'okno' ) : '0' } ), null, id ) );
+				}, { min: 0, placeholder: 'max' === pair[ 0 ] ? __( 'No limit', 'leiho' ) : '0' } ), null, id ) );
 			} );
 		}
 
@@ -1171,8 +1171,8 @@
 			out.push( node );
 		} );
 		if ( advanced.children.length ) {
-			var details = h( 'details', { class: 'okno-disclosure', open: f._advanced || ownErrors.length ? true : null }, [
-				h( 'summary', {}, [ icon( 'chevron', 12 ), __( 'Advanced options', 'okno' ) ] ),
+			var details = h( 'details', { class: 'leiho-disclosure', open: f._advanced || ownErrors.length ? true : null }, [
+				h( 'summary', {}, [ icon( 'chevron', 12 ), __( 'Advanced options', 'leiho' ) ] ),
 				advanced,
 			] );
 			details.addEventListener( 'toggle', function () {
@@ -1180,7 +1180,7 @@
 			} );
 			out.push( details );
 		}
-		out.push( h( 'div', { class: 'okno-field-settings__required' }, h( 'label', { class: 'okno-switch' }, [
+		out.push( h( 'div', { class: 'leiho-field-settings__required' }, h( 'label', { class: 'leiho-switch' }, [
 			( function () {
 				var input = h( 'input', { type: 'checkbox', checked: !! f.required } );
 				input.addEventListener( 'change', function () {
@@ -1190,15 +1190,15 @@
 				} );
 				return input;
 			} )(),
-			__( 'Required', 'okno' ),
+			__( 'Required', 'leiho' ),
 		] ) ) );
 
 		if ( CONTAINERS.indexOf( f.type ) !== -1 ) {
 			f.fields = f.fields || [];
 			f.fields._nested = true;
 			out.push(
-				h( 'div', { class: 'okno-subfields' }, [
-					h( 'h4', { text: 'list' === f.type ? __( 'Fields of each row', 'okno' ) : __( 'Fields of the group', 'okno' ) } ),
+				h( 'div', { class: 'leiho-subfields' }, [
+					h( 'h4', { text: 'list' === f.type ? __( 'Fields of each row', 'leiho' ) : __( 'Fields of the group', 'leiho' ) } ),
 					renderFieldList( f.fields, depth + 1, path + '.fields' ),
 				] )
 			);
@@ -1247,8 +1247,8 @@
 				options.push( { name: t.name, label: t.label } );
 			}
 		} );
-		return h( 'fieldset', { class: 'okno-setting okno-setting--wide okno-checks-inline' }, [
-			h( 'legend', { class: 'okno-label', text: __( 'Points to', 'okno' ) } ),
+		return h( 'fieldset', { class: 'leiho-setting leiho-setting--wide leiho-checks-inline' }, [
+			h( 'legend', { class: 'leiho-label', text: __( 'Points to', 'leiho' ) } ),
 			options.map( function ( o ) {
 				var input = h( 'input', { type: 'checkbox', value: o.name, checked: ( f.to || [] ).indexOf( o.name ) !== -1 } );
 				input.addEventListener( 'change', function () {
@@ -1260,7 +1260,7 @@
 					}
 					markDirty();
 				} );
-				return h( 'label', { class: 'okno-check' }, [ input, o.label, ' ', h( 'code', { text: o.name } ) ] );
+				return h( 'label', { class: 'leiho-check' }, [ input, o.label, ' ', h( 'code', { text: o.name } ) ] );
 			} ),
 		] );
 	}
@@ -1270,21 +1270,21 @@
 	 * ------------------------------------------------------------------ */
 
 	function renderBlocks( f, depth, path ) {
-		var wrap = h( 'div', { class: 'okno-subfields okno-blocktypes' }, [ h( 'h4', { text: __( 'Block types', 'okno' ) } ) ] );
+		var wrap = h( 'div', { class: 'leiho-subfields leiho-blocktypes' }, [ h( 'h4', { text: __( 'Block types', 'leiho' ) } ) ] );
 		if ( ! f.blocks.length ) {
-			wrap.appendChild( h( 'p', { class: 'okno-help', text: __( 'Add at least one block type: editors pick one each time they add a block.', 'okno' ) } ) );
+			wrap.appendChild( h( 'p', { class: 'leiho-help', text: __( 'Add at least one block type: editors pick one each time they add a block.', 'leiho' ) } ) );
 		}
 		f.blocks.forEach( function ( block, index ) {
 			wrap.appendChild( renderBlockType( f, block, index, depth, path + '.blocks.' + index ) );
 		} );
 		wrap.appendChild(
-			h( 'button', { type: 'button', class: 'okno-btn okno-btn--quiet okno-btn--small', onClick: function () {
-				var block = { _uid: nextUid(), _new: true, _open: true, label: __( 'New block', 'okno' ), min: 0, max: 0, fields: [] };
+			h( 'button', { type: 'button', class: 'leiho-btn leiho-btn--quiet leiho-btn--small', onClick: function () {
+				var block = { _uid: nextUid(), _new: true, _open: true, label: __( 'New block', 'leiho' ), min: 0, max: 0, fields: [] };
 				syncName( f.blocks, block );
 				f.blocks.push( block );
 				markDirty();
-				renderEditor( '[data-uid="' + block._uid + '"] .okno-block-label-input' );
-			} }, [ icon( 'plus' ), __( 'Add a block type', 'okno' ) ] )
+				renderEditor( '[data-uid="' + block._uid + '"] .leiho-block-label-input' );
+			} }, [ icon( 'plus' ), __( 'Add a block type', 'leiho' ) ] )
 		);
 		return wrap;
 	}
@@ -1293,8 +1293,8 @@
 		var errors = collectErrors( path );
 		var labelId = App.uid( 'blabel' );
 		var nameId = App.uid( 'bname' );
-		var labelInput = h( 'input', { type: 'text', id: labelId, class: 'okno-input okno-block-label-input', value: block.label || '' } );
-		var nameInput = h( 'input', { type: 'text', id: nameId, class: 'okno-input okno-mono', value: block.name || '', spellcheck: 'false' } );
+		var labelInput = h( 'input', { type: 'text', id: labelId, class: 'leiho-input leiho-block-label-input', value: block.label || '' } );
+		var nameInput = h( 'input', { type: 'text', id: nameId, class: 'leiho-input leiho-mono', value: block.name || '', spellcheck: 'false' } );
 		labelInput.addEventListener( 'input', function () {
 			block.label = labelInput.value;
 			if ( block._new && ! block._nameTouched ) {
@@ -1317,33 +1317,33 @@
 		block.fields._nested = true;
 
 		var label = block.label || block.name;
-		return h( 'div', { class: 'okno-blocktype' + ( errors.own.length || errors.nested ? ' has-error' : '' ), dataset: { uid: block._uid } }, [
-			h( 'div', { class: 'okno-blocktype__head' }, [
+		return h( 'div', { class: 'leiho-blocktype' + ( errors.own.length || errors.nested ? ' has-error' : '' ), dataset: { uid: block._uid } }, [
+			h( 'div', { class: 'leiho-blocktype__head' }, [
 				h( 'strong', { text: label } ),
-				h( 'div', { class: 'okno-fieldrow__actions' }, [
-					h( 'button', { type: 'button', class: 'okno-icon-btn', disabled: 0 === index, title: __( 'Move up', 'okno' ),
+				h( 'div', { class: 'leiho-fieldrow__actions' }, [
+					h( 'button', { type: 'button', class: 'leiho-icon-btn', disabled: 0 === index, title: __( 'Move up', 'leiho' ),
 						/* translators: %s: block type label. */
-						'aria-label': sprintf( __( 'Move “%s” up', 'okno' ), label ),
+						'aria-label': sprintf( __( 'Move “%s” up', 'leiho' ), label ),
 						onClick: function () {
 							move( f.blocks, index, index - 1 );
 							renderEditor();
 						} }, icon( 'up' ) ),
-					h( 'button', { type: 'button', class: 'okno-icon-btn', disabled: index === f.blocks.length - 1, title: __( 'Move down', 'okno' ),
+					h( 'button', { type: 'button', class: 'leiho-icon-btn', disabled: index === f.blocks.length - 1, title: __( 'Move down', 'leiho' ),
 						/* translators: %s: block type label. */
-						'aria-label': sprintf( __( 'Move “%s” down', 'okno' ), label ),
+						'aria-label': sprintf( __( 'Move “%s” down', 'leiho' ), label ),
 						onClick: function () {
 							move( f.blocks, index, index + 1 );
 							renderEditor();
 						} }, icon( 'down' ) ),
-					h( 'button', { type: 'button', class: 'okno-icon-btn okno-icon-btn--danger', title: __( 'Remove', 'okno' ),
+					h( 'button', { type: 'button', class: 'leiho-icon-btn leiho-icon-btn--danger', title: __( 'Remove', 'leiho' ),
 						/* translators: %s: block type label. */
-						'aria-label': sprintf( __( 'Remove “%s”', 'okno' ), label ),
+						'aria-label': sprintf( __( 'Remove “%s”', 'leiho' ), label ),
 						onClick: function () {
 							App.confirm( {
 								/* translators: %s: block type label. */
-								title: sprintf( __( 'Remove the block type “%s”?', 'okno' ), label ),
-								message: __( 'Blocks of this type disappear from each entry the next time the entry is saved. Revisions keep them.', 'okno' ),
-								confirmLabel: __( 'Remove', 'okno' ),
+								title: sprintf( __( 'Remove the block type “%s”?', 'leiho' ), label ),
+								message: __( 'Blocks of this type disappear from each entry the next time the entry is saved. Revisions keep them.', 'leiho' ),
+								confirmLabel: __( 'Remove', 'leiho' ),
 								danger: true,
 							} ).then( function ( ok ) {
 								if ( ok ) {
@@ -1355,21 +1355,21 @@
 						} }, icon( 'trash' ) ),
 				] ),
 			] ),
-			errors.own.length ? h( 'div', { class: 'okno-notice okno-notice--error', role: 'alert' }, errors.own.map( function ( m ) {
+			errors.own.length ? h( 'div', { class: 'leiho-notice leiho-notice--error', role: 'alert' }, errors.own.map( function ( m ) {
 				return h( 'p', { text: m } );
 			} ) ) : null,
-			h( 'div', { class: 'okno-settings-grid' }, [
-				field( __( 'Label', 'okno' ), labelInput, null, labelId ),
-				field( __( 'Name in the API', 'okno' ), nameInput, block._new ? null : sprintf( /* translators: %s: block key. */ __( 'Key: %s', 'okno' ), block.key ), nameId ),
-				field( __( 'Minimum', 'okno' ), numberInput( minId, block.min || null, function ( v ) {
+			h( 'div', { class: 'leiho-settings-grid' }, [
+				field( __( 'Label', 'leiho' ), labelInput, null, labelId ),
+				field( __( 'Name in the API', 'leiho' ), nameInput, block._new ? null : sprintf( /* translators: %s: block key. */ __( 'Key: %s', 'leiho' ), block.key ), nameId ),
+				field( __( 'Minimum', 'leiho' ), numberInput( minId, block.min || null, function ( v ) {
 					block.min = v ? Math.max( 0, Math.round( v ) ) : 0;
 				}, { min: 0 } ), null, minId ),
-				field( __( 'Maximum', 'okno' ), numberInput( maxId, block.max || null, function ( v ) {
+				field( __( 'Maximum', 'leiho' ), numberInput( maxId, block.max || null, function ( v ) {
 					block.max = v ? Math.max( 0, Math.round( v ) ) : 0;
-				}, { min: 0, placeholder: __( 'No limit', 'okno' ) } ), null, maxId ),
+				}, { min: 0, placeholder: __( 'No limit', 'leiho' ) } ), null, maxId ),
 			] ),
-			h( 'div', { class: 'okno-subfields' }, [
-				h( 'h4', { text: __( 'Fields of this block', 'okno' ) } ),
+			h( 'div', { class: 'leiho-subfields' }, [
+				h( 'h4', { text: __( 'Fields of this block', 'leiho' ) } ),
 				renderFieldList( block.fields, depth + 1, path + '.fields' ),
 			] ),
 		] );
@@ -1390,15 +1390,15 @@
 	}
 
 	var PROP_LABELS = {
-		key: __( 'Key', 'okno' ),
-		name: __( 'Name in the API', 'okno' ),
-		type: __( 'Type', 'okno' ),
-		fields: __( 'Sub-fields', 'okno' ),
-		blocks: __( 'Block types', 'okno' ),
-		choices: __( 'Choices', 'okno' ),
-		to: __( 'Points to', 'okno' ),
-		min: __( 'Minimum', 'okno' ),
-		max: __( 'Maximum', 'okno' ),
+		key: __( 'Key', 'leiho' ),
+		name: __( 'Name in the API', 'leiho' ),
+		type: __( 'Type', 'leiho' ),
+		fields: __( 'Sub-fields', 'leiho' ),
+		blocks: __( 'Block types', 'leiho' ),
+		choices: __( 'Choices', 'leiho' ),
+		to: __( 'Points to', 'leiho' ),
+		min: __( 'Minimum', 'leiho' ),
+		max: __( 'Maximum', 'leiho' ),
 	};
 
 	/** Erreurs d'un champ (own : le champ lui-même et ses options ; nested : sous-champs). */
@@ -1431,36 +1431,36 @@
 
 	function renderArchived( item ) {
 		var archived = item.archived || [];
-		var card = h( 'div', { class: 'okno-detail__card' }, [
-			h( 'h3', { text: __( 'Archived columns', 'okno' ) } ),
-			h( 'p', { class: 'okno-muted', text: __( 'Values of removed or retyped fields. They are kept until you purge them.', 'okno' ) } ),
+		var card = h( 'div', { class: 'leiho-detail__card' }, [
+			h( 'h3', { text: __( 'Archived columns', 'leiho' ) } ),
+			h( 'p', { class: 'leiho-muted', text: __( 'Values of removed or retyped fields. They are kept until you purge them.', 'leiho' ) } ),
 		] );
 		if ( ! archived.length ) {
-			card.appendChild( h( 'p', { class: 'okno-help', text: __( 'No archived columns.', 'okno' ) } ) );
+			card.appendChild( h( 'p', { class: 'leiho-help', text: __( 'No archived columns.', 'leiho' ) } ) );
 			return card;
 		}
 		card.appendChild(
-			h( 'table', { class: 'okno-table' }, [
+			h( 'table', { class: 'leiho-table' }, [
 				h( 'thead', {}, h( 'tr', {}, [
-					h( 'th', { scope: 'col', text: __( 'Field', 'okno' ) } ),
-					h( 'th', { scope: 'col', text: __( 'Column', 'okno' ) } ),
-					h( 'th', { scope: 'col', text: __( 'Why', 'okno' ) } ),
-					h( 'th', { scope: 'col', text: __( 'Archived', 'okno' ) } ),
+					h( 'th', { scope: 'col', text: __( 'Field', 'leiho' ) } ),
+					h( 'th', { scope: 'col', text: __( 'Column', 'leiho' ) } ),
+					h( 'th', { scope: 'col', text: __( 'Why', 'leiho' ) } ),
+					h( 'th', { scope: 'col', text: __( 'Archived', 'leiho' ) } ),
 				] ) ),
 				h( 'tbody', {}, archived.map( function ( col ) {
 					return h( 'tr', {}, [
-						h( 'td', {}, [ col.name || col.key, ' ', h( 'span', { class: 'okno-type-badge', text: ( TYPE_INDEX[ col.type ] || { label: col.type } ).label } ) ] ),
+						h( 'td', {}, [ col.name || col.key, ' ', h( 'span', { class: 'leiho-type-badge', text: ( TYPE_INDEX[ col.type ] || { label: col.type } ).label } ) ] ),
 						h( 'td', {}, h( 'code', { text: col.column } ) ),
-						h( 'td', { text: 'retyped' === col.reason ? __( 'Type changed', 'okno' ) : __( 'Field removed', 'okno' ) } ),
+						h( 'td', { text: 'retyped' === col.reason ? __( 'Type changed', 'leiho' ) : __( 'Field removed', 'leiho' ) } ),
 						h( 'td', { text: App.formatDate( col.archived_at ) } ),
 					] );
 				} ) ),
 			] )
 		);
 		card.appendChild(
-			h( 'div', { class: 'okno-actions okno-archived-actions' }, h( 'button', { type: 'button', class: 'okno-btn okno-btn--danger', onClick: function () {
+			h( 'div', { class: 'leiho-actions leiho-archived-actions' }, h( 'button', { type: 'button', class: 'leiho-btn leiho-btn--danger', onClick: function () {
 				purge( item );
-			} }, [ icon( 'archive' ), __( 'Purge archived columns', 'okno' ) ] ) )
+			} }, [ icon( 'archive' ), __( 'Purge archived columns', 'leiho' ) ] ) )
 		);
 		return card;
 	}
@@ -1468,20 +1468,20 @@
 	function purge( item ) {
 		var id = item.collection.id;
 		App.confirm( {
-			title: __( 'Purge archived columns?', 'okno' ),
-			message: __( 'Their values are deleted from the database for good. Revisions of entries keep a copy, but the columns can’t be restored.', 'okno' ),
-			confirmLabel: __( 'Purge', 'okno' ),
+			title: __( 'Purge archived columns?', 'leiho' ),
+			message: __( 'Their values are deleted from the database for good. Revisions of entries keep a copy, but the columns can’t be restored.', 'leiho' ),
+			confirmLabel: __( 'Purge', 'leiho' ),
 			danger: true,
 			typeToConfirm: id,
 		} ).then( function ( ok ) {
 			if ( ! ok ) {
 				return;
 			}
-			App.api( { path: '/okno/v1/collections/' + id + '/purge', method: 'POST', data: { confirm: id } } )
+			App.api( { path: '/leiho/v1/collections/' + id + '/purge', method: 'POST', data: { confirm: id } } )
 				.then( function ( body ) {
 					var count = ( body.dropped || [] ).length;
 					/* translators: %d: number of columns. */
-					App.toast( sprintf( _n( '%d column purged.', '%d columns purged.', count, 'okno' ), count ) );
+					App.toast( sprintf( _n( '%d column purged.', '%d columns purged.', count, 'leiho' ), count ) );
 					state.current = null;
 					return load().then( function () {
 						return show( id );
@@ -1549,25 +1549,25 @@
 		switch ( op.op ) {
 			case 'create_table':
 				/* translators: %s: collection id. */
-				return sprintf( __( 'Create the table of “%s”.', 'okno' ), op.collection );
+				return sprintf( __( 'Create the table of “%s”.', 'leiho' ), op.collection );
 			case 'add_column':
 				/* translators: 1: field label, 2: SQL column type. */
-				return sprintf( __( 'Add a column for “%1$s” (%2$s).', 'okno' ), label, op.sql );
+				return sprintf( __( 'Add a column for “%1$s” (%2$s).', 'leiho' ), label, op.sql );
 			case 'restore':
 				/* translators: %s: field label. */
-				return sprintf( __( 'Bring back the archived values of “%s”.', 'okno' ), label );
+				return sprintf( __( 'Bring back the archived values of “%s”.', 'leiho' ), label );
 			case 'retype':
 				/* translators: 1: field label, 2: previous type, 3: new type. */
-				return sprintf( __( 'Convert “%1$s” from %2$s to %3$s: values move to a new column, the old one is archived.', 'okno' ), label, typeLabel( op.from_type ), typeLabel( op.to_type ) );
+				return sprintf( __( 'Convert “%1$s” from %2$s to %3$s: values move to a new column, the old one is archived.', 'leiho' ), label, typeLabel( op.from_type ), typeLabel( op.to_type ) );
 			case 'archive':
 				/* translators: %s: field label. */
-				return sprintf( __( 'Archive the column of “%s” (values kept).', 'okno' ), label );
+				return sprintf( __( 'Archive the column of “%s” (values kept).', 'leiho' ), label );
 			case 'remove_collection':
 				/* translators: %s: collection id. */
-				return sprintf( __( 'Remove the collection “%s” from Okno (entries and values kept).', 'okno' ), op.collection );
+				return sprintf( __( 'Remove the collection “%s” from Leiho (entries and values kept).', 'leiho' ), op.collection );
 			case 'create_entry':
 				/* translators: %s: collection id. */
-				return sprintf( __( 'Create the entry of “%s”.', 'okno' ), op.collection );
+				return sprintf( __( 'Create the entry of “%s”.', 'leiho' ), op.collection );
 		}
 		return op.op;
 	}
@@ -1587,7 +1587,7 @@
 	function request( dryRun ) {
 		var cur = state.current;
 		var d = payload();
-		var path = cur.isNew ? '/okno/v1/collections' : '/okno/v1/collections/' + encodeURIComponent( cur.item.collection.id );
+		var path = cur.isNew ? '/leiho/v1/collections' : '/leiho/v1/collections/' + encodeURIComponent( cur.item.collection.id );
 		return App.api( {
 			path: path + ( dryRun ? '?dry_run=1' : '' ),
 			method: cur.isNew ? 'POST' : 'PUT',
@@ -1605,12 +1605,12 @@
 			var target = match && state.current.draft.fields[ Number( match[ 1 ] ) ];
 			state.current.selected = target ? target._uid : 'general';
 			renderEditor();
-			var first = editorEl.querySelector( '.okno-pane--detail .has-error, .okno-pane--detail .okno-notice--error' );
+			var first = editorEl.querySelector( '.leiho-pane--detail .has-error, .leiho-pane--detail .leiho-notice--error' );
 			if ( first ) {
 				first.scrollIntoView( { block: 'center', behavior: 'smooth' } );
 			}
 			/* translators: %d: number of problems. */
-			App.toast( sprintf( _n( '%d problem to fix before applying.', '%d problems to fix before applying.', errors.length, 'okno' ), errors.length ), true );
+			App.toast( sprintf( _n( '%d problem to fix before applying.', '%d problems to fix before applying.', errors.length, 'leiho' ), errors.length ), true );
 			return;
 		}
 		App.toast( App.errorMessage( err ), true );
@@ -1641,16 +1641,16 @@
 		var ops = report.operations || [];
 		var children = [];
 		if ( ops.length ) {
-			children.push( h( 'p', { text: __( 'Okno will make these changes to the database:', 'okno' ) } ) );
-			children.push( h( 'ul', { class: 'okno-plan' }, ops.map( function ( op ) {
+			children.push( h( 'p', { text: __( 'Leiho will make these changes to the database:', 'leiho' ) } ) );
+			children.push( h( 'ul', { class: 'leiho-plan' }, ops.map( function ( op ) {
 				var danger = 'retype' === op.op || 'archive' === op.op || 'remove_collection' === op.op;
 				return h( 'li', { class: danger ? 'is-warn' : '' }, [ icon( danger ? 'warning' : 'check', 14 ), describeOp( op ) ] );
 			} ) ) );
 		} else {
-			children.push( h( 'p', { text: __( 'No database change needed: only the field definitions are updated (labels, options, sub-fields, order).', 'okno' ) } ) );
+			children.push( h( 'p', { text: __( 'No database change needed: only the field definitions are updated (labels, options, sub-fields, order).', 'leiho' ) } ) );
 		}
 		( report.warnings || [] ).forEach( function ( w ) {
-			children.push( h( 'p', { class: 'okno-notice okno-notice--warn', text: 'string' === typeof w ? w : w.message || JSON.stringify( w ) } ) );
+			children.push( h( 'p', { class: 'leiho-notice leiho-notice--warn', text: 'string' === typeof w ? w : w.message || JSON.stringify( w ) } ) );
 		} );
 		( extra || [] ).forEach( function ( node ) {
 			children.push( node );
@@ -1666,8 +1666,8 @@
 				return r.nested;
 			} );
 			if ( removed.length ) {
-				extra.push( h( 'div', { class: 'okno-notice okno-notice--warn' }, [
-					h( 'p', { text: __( 'Removed sub-fields lose their values the next time each entry is saved (revisions keep them):', 'okno' ) } ),
+				extra.push( h( 'div', { class: 'leiho-notice leiho-notice--warn' }, [
+					h( 'p', { text: __( 'Removed sub-fields lose their values the next time each entry is saved (revisions keep them):', 'leiho' ) } ),
 					h( 'ul', {}, removed.map( function ( r ) {
 						return h( 'li', { text: r.label } );
 					} ) ),
@@ -1675,13 +1675,13 @@
 			}
 		}
 		App.modal( {
-			title: cur.isNew ? __( 'Create this collection?', 'okno' ) : __( 'Apply these changes?', 'okno' ),
+			title: cur.isNew ? __( 'Create this collection?', 'leiho' ) : __( 'Apply these changes?', 'leiho' ),
 			body: planBody( report, extra ),
 			wide: true,
 			actions: [
-				{ label: __( 'Keep editing', 'okno' ) },
+				{ label: __( 'Keep editing', 'leiho' ) },
 				{
-					label: cur.isNew ? __( 'Create', 'okno' ) : __( 'Apply', 'okno' ),
+					label: cur.isNew ? __( 'Create', 'leiho' ) : __( 'Apply', 'leiho' ),
 					primary: true,
 					onClick: function ( close, btn ) {
 						btn.disabled = true;
@@ -1708,12 +1708,12 @@
 				} );
 				if ( failed ) {
 					/* translators: %d: number of values. */
-					App.toast( sprintf( _n( '%d value couldn’t be converted: it stays in the archived column.', '%d values couldn’t be converted: they stay in the archived column.', failed, 'okno' ), failed ), true );
+					App.toast( sprintf( _n( '%d value couldn’t be converted: it stays in the archived column.', '%d values couldn’t be converted: they stay in the archived column.', failed, 'leiho' ), failed ), true );
 				}
 				( report.warnings || [] ).forEach( function ( w ) {
 					App.toast( 'string' === typeof w ? w : w.message || '', true );
 				} );
-				App.toast( cur.isNew ? __( 'Collection created.', 'okno' ) : __( 'Changes applied.', 'okno' ) );
+				App.toast( cur.isNew ? __( 'Collection created.', 'leiho' ) : __( 'Changes applied.', 'leiho' ) );
 				App.notifyChanged();
 				done( id );
 			} )
@@ -1727,18 +1727,18 @@
 		var c = state.current.item.collection;
 		App.confirm( {
 			/* translators: %s: collection label. */
-			title: sprintf( __( 'Remove “%s”?', 'okno' ), c.label ),
-			message: __( 'The collection disappears from Okno, the editor and the content API. Its entries and their values are kept in the database: creating it again with the same identifier brings everything back.', 'okno' ),
-			confirmLabel: __( 'Remove', 'okno' ),
+			title: sprintf( __( 'Remove “%s”?', 'leiho' ), c.label ),
+			message: __( 'The collection disappears from Leiho, the editor and the content API. Its entries and their values are kept in the database: creating it again with the same identifier brings everything back.', 'leiho' ),
+			confirmLabel: __( 'Remove', 'leiho' ),
 			danger: true,
 			typeToConfirm: c.id,
 		} ).then( function ( ok ) {
 			if ( ! ok ) {
 				return;
 			}
-			App.api( { path: '/okno/v1/collections/' + encodeURIComponent( c.id ), method: 'DELETE' } )
+			App.api( { path: '/leiho/v1/collections/' + encodeURIComponent( c.id ), method: 'DELETE' } )
 				.then( function () {
-					App.toast( __( 'Collection removed. Its data is kept.', 'okno' ) );
+					App.toast( __( 'Collection removed. Its data is kept.', 'leiho' ) );
 					state.current = null;
 					App.notifyChanged();
 					done( '' );
@@ -1750,15 +1750,15 @@
 	}
 
 	/* ------------------------------------------------------------------ *
-	 * Import / export d'okno.schema.json
+	 * Import / export d'leiho.schema.json
 	 * ------------------------------------------------------------------ */
 
 	function exportSchema() {
-		App.api( { path: '/okno/v1/collections/export' } )
+		App.api( { path: '/leiho/v1/collections/export' } )
 			.then( function ( schema ) {
 				var blob = new Blob( [ JSON.stringify( schema, null, 2 ) + '\n' ], { type: 'application/json' } );
 				var url = URL.createObjectURL( blob );
-				var a = h( 'a', { href: url, download: 'okno.schema.json', hidden: true } );
+				var a = h( 'a', { href: url, download: 'leiho.schema.json', hidden: true } );
 				document.body.appendChild( a );
 				a.click();
 				a.remove();
@@ -1778,36 +1778,36 @@
 			try {
 				data = JSON.parse( String( reader.result ) );
 			} catch ( e ) {
-				App.toast( __( 'The file is not valid JSON.', 'okno' ), true );
+				App.toast( __( 'The file is not valid JSON.', 'leiho' ), true );
 				return;
 			}
-			App.api( { path: '/okno/v1/collections/import?dry_run=1', method: 'POST', data: data } )
+			App.api( { path: '/leiho/v1/collections/import?dry_run=1', method: 'POST', data: data } )
 				.then( function ( report ) {
 					var ids = ( data.collections || [] ).map( function ( c ) {
 						return c && c.id;
 					} ).filter( Boolean );
 					App.modal( {
 						/* translators: %s: file name. */
-						title: sprintf( __( 'Import %s?', 'okno' ), file.name ),
+						title: sprintf( __( 'Import %s?', 'leiho' ), file.name ),
 						wide: true,
 						body: [
 							h( 'p', { text: sprintf(
 								/* translators: %s: list of collection ids. */
-								__( 'The file replaces the whole schema with: %s.', 'okno' ),
+								__( 'The file replaces the whole schema with: %s.', 'leiho' ),
 								ids.join( ', ' ) || '—'
 							) } ),
 						].concat( planBody( report ) ),
 						actions: [
-							{ label: __( 'Cancel', 'okno' ) },
+							{ label: __( 'Cancel', 'leiho' ) },
 							{
-								label: __( 'Import', 'okno' ),
+								label: __( 'Import', 'leiho' ),
 								primary: true,
 								onClick: function ( close, btn ) {
 									btn.disabled = true;
-									App.api( { path: '/okno/v1/collections/import', method: 'POST', data: data } )
+									App.api( { path: '/leiho/v1/collections/import', method: 'POST', data: data } )
 										.then( function () {
 											close();
-											App.toast( __( 'Schema imported.', 'okno' ) );
+											App.toast( __( 'Schema imported.', 'leiho' ) );
 											state.current = null;
 											App.notifyChanged();
 											done( '' );
@@ -1846,20 +1846,20 @@
 		return new Promise( function ( resolve ) {
 			var picked = null;
 			var dialog = App.modal( {
-				title: __( 'Add a field', 'okno' ),
+				title: __( 'Add a field', 'leiho' ),
 				wide: true,
-				body: h( 'ul', { class: 'okno-type-grid' }, TYPES.map( function ( t ) {
-					return h( 'li', {}, h( 'button', { type: 'button', class: 'okno-type-card', onClick: function () {
+				body: h( 'ul', { class: 'leiho-type-grid' }, TYPES.map( function ( t ) {
+					return h( 'li', {}, h( 'button', { type: 'button', class: 'leiho-type-card', onClick: function () {
 						picked = t.type;
 						dialog.close();
-					} }, [ h( 'span', { class: 'okno-type-card__icon' }, icon( 'type-' + t.type, 18 ) ), h( 'strong', { text: t.label } ), h( 'span', { text: t.help } ) ] ) );
+					} }, [ h( 'span', { class: 'leiho-type-card__icon' }, icon( 'type-' + t.type, 18 ) ), h( 'strong', { text: t.label } ), h( 'span', { text: t.help } ) ] ) );
 				} ) ),
 				onClose: function () {
 					resolve( picked );
 				},
-				actions: [ { label: __( 'Cancel', 'okno' ) } ],
+				actions: [ { label: __( 'Cancel', 'leiho' ) } ],
 			} );
-			var first = dialog.el.querySelector( '.okno-type-card' );
+			var first = dialog.el.querySelector( '.leiho-type-card' );
 			if ( first ) {
 				first.focus();
 			}

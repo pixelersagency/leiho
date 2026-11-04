@@ -1,4 +1,4 @@
-# Okno — instructions pour l'agent qui construit ou intègre le site
+# Leiho — instructions pour l'agent qui construit ou intègre le site
 
 ## Ton rôle
 
@@ -6,7 +6,7 @@ Tu construis, ou tu adaptes, le front d'un site dont le contenu vit dans WordPre
 (champs ACF et champs natifs). Le front peut être écrit avec n'importe quelle technologie :
 React, Next.js, Remix, Vite, Astro, Nuxt, SvelteKit, ou du HTML généré.
 
-Okno donne au client une édition visuelle de ce front depuis wp-admin : il voit son vrai
+Leiho donne au client une édition visuelle de ce front depuis wp-admin : il voit son vrai
 site dans une iframe, clique sur un texte ou une image, modifie la valeur, voit le
 résultat immédiatement, puis enregistre. Pour que ça fonctionne, le front doit respecter
 le contrat ci-dessous **dès le premier composant**.
@@ -16,7 +16,7 @@ Répartition des rôles :
 - **WordPress** possède le contenu : pages, champs ACF, médias, menus.
 - **Le front** possède la mise en page, le style, le comportement, et affiche le contenu
   qu'il lit dans WordPress (API REST, WPGraphQL, ou export au build).
-- **Okno** relie les deux : il lit les annotations posées par le front, et écrit les
+- **Leiho** relie les deux : il lit les annotations posées par le front, et écrit les
   modifications du client dans les champs WordPress existants. Il ne stocke aucun contenu
   à lui.
 
@@ -35,7 +35,7 @@ Répartition des rôles :
    saisi. Nouveau contenu = nouveau champ.
 5. La mise en page ne se modifie jamais depuis un champ : pas de classes, de tailles, de
    couleurs ou de HTML de structure stockés dans ACF.
-6. Le site doit fonctionner **sans Okno** : le bridge ne se charge que dans l'éditeur,
+6. Le site doit fonctionner **sans Leiho** : le bridge ne se charge que dans l'éditeur,
    les annotations sont de simples attributs `data-*` ignorés par les visiteurs.
 
 ## Installer le bridge
@@ -49,25 +49,25 @@ HTML, Astro, Nuxt, SvelteKit, tout site rendu côté serveur — dans le `<head>
 <script>
   if (window.self !== window.top) {
     var s = document.createElement('script');
-    s.src = '/okno-bridge.js';
+    s.src = '/leiho-bridge.js';
     s.setAttribute('data-wp-origin', 'https://ADRESSE-DU-WORDPRESS');
     document.head.appendChild(s);
   }
 </script>
 ```
 
-Copie `okno-bridge.js` (fourni par le paquet `@pixelersagency/okno-bridge`, dossier `dist/`) dans le
+Copie `leiho-bridge.js` (fourni par le paquet `leiho`, dossier `dist/`) dans le
 dossier public du site.
 
 React, Next.js, Remix, Vite — une fois, dans le layout racine :
 
 ```jsx
-import { OknoBridge } from '@pixelersagency/okno-bridge/react';
+import { LeihoBridge } from 'leiho/react';
 
 export default function RootLayout({ children }) {
   return (
     <>
-      <OknoBridge wpOrigin="https://ADRESSE-DU-WORDPRESS" />
+      <LeihoBridge wpOrigin="https://ADRESSE-DU-WORDPRESS" />
       {children}
     </>
   );
@@ -85,9 +85,9 @@ Ne pose pas `X-Frame-Options: DENY` ou `SAMEORIGIN` : il bloquerait l'éditeur.
 ## Annoter les contenus
 
 ```jsx
-<section data-wp-post={page.id} data-okno-section="Hero">
+<section data-wp-post={page.id} data-leiho-section="Hero">
   <h1 data-wp-field="hero_titre">{page.acf.hero_titre}</h1>
-  <div data-wp-field="hero_intro" data-okno-apply="html"
+  <div data-wp-field="hero_intro" data-leiho-apply="html"
        dangerouslySetInnerHTML={{ __html: page.acf.hero_intro }} />
   <img data-wp-field="hero_image" src={page.acf.hero_image.url} alt={page.acf.hero_image.alt} />
 </section>
@@ -97,13 +97,13 @@ Ne pose pas `X-Frame-Options: DENY` ou `SAMEORIGIN` : il bloquerait l'éditeur.
 |---|---|
 | `data-wp-post="12"` | Conteneur : ID du contenu WordPress auquel appartiennent les champs dedans |
 | `data-wp-field="chemin"` | Élément qui affiche ce champ |
-| `data-okno-apply="html"` | La valeur contient du balisage (un `<span>` d'accent dans un titre, un wysiwyg) |
-| `data-okno-section="Libellé"` | Nom de la section dans l'arbre de structure de l'éditeur |
-| `data-okno-layout="sections.2"` | La section est la ligne 2 du flexible content `sections` : le client peut l'ajouter, la déplacer, la dupliquer, la supprimer |
-| `data-okno-refresh="save"` | Pas d'aperçu instantané : l'éditeur recharge la page après enregistrement (rendu complexe) |
-| `data-okno-managed="menu"` | Contenu géré ailleurs (menu, liste d'articles, produit WooCommerce) |
-| `data-okno-managed-label="…"` | Texte affiché au client pour ce contenu géré ailleurs |
-| `data-okno-edit-url="…"` | Écran de wp-admin où le modifier (doit être sur l'adresse de wp-admin) |
+| `data-leiho-apply="html"` | La valeur contient du balisage (un `<span>` d'accent dans un titre, un wysiwyg) |
+| `data-leiho-section="Libellé"` | Nom de la section dans l'arbre de structure de l'éditeur |
+| `data-leiho-layout="sections.2"` | La section est la ligne 2 du flexible content `sections` : le client peut l'ajouter, la déplacer, la dupliquer, la supprimer |
+| `data-leiho-refresh="save"` | Pas d'aperçu instantané : l'éditeur recharge la page après enregistrement (rendu complexe) |
+| `data-leiho-managed="menu"` | Contenu géré ailleurs (menu, liste d'articles, produit WooCommerce) |
+| `data-leiho-managed-label="…"` | Texte affiché au client pour ce contenu géré ailleurs |
+| `data-leiho-edit-url="…"` | Écran de wp-admin où le modifier (doit être sur l'adresse de wp-admin) |
 
 ### Chemins
 
@@ -128,7 +128,7 @@ avec l'index de la boucle, pas avec un identifiant.
 Le bridge écrit la valeur dans l'élément annoté. Pose `data-wp-field` sur l'élément qui
 contient **directement** la valeur, pas sur un parent qui contient aussi de la mise en
 page. Si un titre a besoin d'un mot mis en avant, ne découpe pas le titre en deux champs :
-stocke le balisage dans le champ et annote avec `data-okno-apply="html"`.
+stocke le balisage dans le champ et annote avec `data-leiho-apply="html"`.
 
 ### Images
 
@@ -147,8 +147,8 @@ composant. L'éditeur prévient le client quand l'image choisie sera fortement r
 
 Une page que le client doit pouvoir composer (ajouter une FAQ, déplacer un bloc) est un
 champ **flexible content** ACF. Chaque layout du flexible correspond à un composant du front.
-Annote chaque bloc rendu avec `data-okno-layout="nom_du_champ.index"` et
-`data-okno-section="Libellé lisible"`.
+Annote chaque bloc rendu avec `data-leiho-layout="nom_du_champ.index"` et
+`data-leiho-section="Libellé lisible"`.
 
 ### Contenu géré ailleurs
 
@@ -156,7 +156,7 @@ Menus WordPress, listes d'articles, produits, données calculées : ne les recop
 un champ. Rends-les normalement et entoure le plus petit bloc utile d'une région gérée :
 
 ```html
-<nav data-okno-managed="menu" data-okno-edit-url="https://ADRESSE-DU-WORDPRESS/wp-admin/nav-menus.php">…</nav>
+<nav data-leiho-managed="menu" data-leiho-edit-url="https://ADRESSE-DU-WORDPRESS/wp-admin/nav-menus.php">…</nav>
 ```
 
 ## Modéliser le contenu dans ACF
@@ -164,36 +164,36 @@ un champ. Rends-les normalement et entoure le plus petit bloc utile d'une régio
 - Un groupe de champs par modèle de page, rattaché par règle d'emplacement.
 - Noms de champs en `snake_case` descriptif (`hero_titre`, pas `field_1`).
 - Donne une **limite de caractères** aux textes courts qui cassent la mise en page quand ils
-  débordent (titres, boutons) : Okno l'applique dans l'éditeur.
-- Marque **requis** ce qui ne peut pas être vide : Okno le fait respecter à l'enregistrement.
+  débordent (titres, boutons) : Leiho l'applique dans l'éditeur.
+- Marque **requis** ce qui ne peut pas être vide : Leiho le fait respecter à l'enregistrement.
 - Un lien avec libellé = champ `link` (URL, texte, nouvel onglet), pas deux champs texte.
 
 ## Charger le contenu
 
-Lis le contenu dans l'API de contenu d'Okno, pas dans l'API REST de WordPress ni dans des
+Lis le contenu dans l'API de contenu d'Leiho, pas dans l'API REST de WordPress ni dans des
 fichiers JSON du dépôt : WordPress est la seule source de vérité.
 
 ```js
-import { loadOknoContent, indexOknoContent } from '@pixelersagency/okno-bridge/content';
+import { loadLeihoContent, indexLeihoContent } from 'leiho/content';
 
-const { data } = await loadOknoContent( { url: process.env.OKNO_URL } );
-const contenu = indexOknoContent( data );
+const { data } = await loadLeihoContent( { url: process.env.LEIHO_URL } );
+const contenu = indexLeihoContent( data );
 const page = contenu.byPath( Astro.url.pathname );
 ```
 
-- Une requête par build (`/wp-json/okno/v1/export`). Charge-la une fois et partage-la entre
+- Une requête par build (`/wp-json/leiho/v1/export`). Charge-la une fois et partage-la entre
   les pages (cache au niveau du module), jamais une fois par page.
 - Les champs sont indexés par nom de champ ACF, déjà mis en forme : `fields.hero.image.url`,
   `fields.sections[0]._layout`. N'appelle jamais ACF ni `/wp/v2` pour les lire.
-- Génère les types avec `npx okno types --url $OKNO_URL` et type les composants avec.
+- Génère les types avec `npx leiho types --url $LEIHO_URL` et type les composants avec.
   Régénère-les après chaque changement de groupe de champs.
-- Versionne `src/okno.d.ts`, ignore `.okno/` (l'instantané est un cache de build).
-- API restreinte : le jeton va dans l'environnement de build (`OKNO_TOKEN`), jamais dans le code.
+- Versionne `src/leiho.d.ts`, ignore `.leiho/` (l'instantané est un cache de build).
+- API restreinte : le jeton va dans l'environnement de build (`LEIHO_TOKEN`), jamais dans le code.
 
 ## Publication
 
 - Site qui lit WordPress **à chaque visite** (rendu serveur à la demande, SPA qui interroge
-  l'API) : choisir le mode « Contenu en direct » dans les réglages d'Okno. Enregistrer suffit.
+  l'API) : choisir le mode « Contenu en direct » dans les réglages d'Leiho. Enregistrer suffit.
 - Site **généré au build** (Astro statique, export Next) : configurer le déploiement dans les
   réglages (build hook, GitHub Actions, Coolify, commit). Le client clique « Publier ».
 
@@ -201,7 +201,7 @@ const page = contenu.byPath( Astro.url.pathname );
 
 - [ ] Le bridge ne se charge que dans l'iframe (vérifier l'onglet Réseau en navigation normale).
 - [ ] L'en-tête `frame-ancestors` autorise l'adresse de wp-admin.
-- [ ] Okno → Démarrer → « Tester la connexion » est vert.
+- [ ] Leiho → Démarrer → « Tester la connexion » est vert.
 - [ ] Chaque texte, image et lien visible appartient à un champ annoté, ou à une région gérée.
 - [ ] Aucun élément annoté n'est rendu conditionnellement à sa valeur.
 - [ ] Dans l'éditeur, aucun champ de la page n'affiche « non visible dans l'aperçu » sans raison.
@@ -210,9 +210,9 @@ const page = contenu.byPath( Astro.url.pathname );
 - [ ] Sur une page à flexible content, ajouter / déplacer / supprimer un bloc depuis l'arbre de
       structure, enregistrer : l'aperçu reflète la nouvelle structure.
 - [ ] Cliquer un lien interne dans l'aperçu bascule l'éditeur sur la bonne page.
-- [ ] Le site public fonctionne avec le plugin Okno désactivé.
-- [ ] Le build ne fait qu'une requête de contenu (`/okno/v1/export`) et survit à une panne
-      de WordPress (instantané dans `.okno/`).
+- [ ] Le site public fonctionne avec le plugin Leiho désactivé.
+- [ ] Le build ne fait qu'une requête de contenu (`/leiho/v1/export`) et survit à une panne
+      de WordPress (instantané dans `.leiho/`).
 
 ## À ne jamais faire
 

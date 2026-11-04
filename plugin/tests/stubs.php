@@ -5,7 +5,7 @@
  */
 
 define( 'ABSPATH', true );
-define( 'OKNO_VERSION', 'test' );
+define( 'LEIHO_VERSION', 'test' );
 
 $GLOBALS['store'] = array();
 $GLOBALS['update_ok'] = true;
@@ -35,7 +35,7 @@ function current_user_can( $cap, $id = 0 ) { return true; }
 function get_post_type( $id ) { return in_array( (int) $id, array( 7, 8 ), true ) ? 'attachment' : 'page'; }
 function get_post( $id ) { return (object) array( 'ID' => $id ); }
 function get_the_title( $id ) { return 'Titre ' . ( is_object( $id ) ? $id->ID : $id ); }
-class Okno_Plugin { public static function title( $p ) { return html_entity_decode( get_the_title( $p ), ENT_QUOTES, 'UTF-8' ); } }
+class Leiho_Plugin { public static function title( $p ) { return html_entity_decode( get_the_title( $p ), ENT_QUOTES, 'UTF-8' ); } }
 function get_edit_post_link( $id, $ctx = '' ) { return 'edit?' . $id; }
 function wp_get_attachment_url( $id ) { return 'https://cdn/' . $id . '.jpg'; }
 function wp_get_attachment_image_url( $id, $size ) { return 'https://cdn/' . $id . '-' . $size . '.jpg'; }
@@ -46,9 +46,9 @@ function is_wp_error( $t ) { return false; }
 function __( $s, $d = '' ) { return $s; }
 function _x( $s, $c, $d = '' ) { return $s; }
 
-require __DIR__ . '/../includes/adapters/interface-okno-adapter.php';
-require __DIR__ . '/../includes/adapters/abstract-okno-field-adapter.php';
-require __DIR__ . '/../includes/adapters/class-okno-acf-adapter.php';
+require __DIR__ . '/../includes/adapters/interface-leiho-adapter.php';
+require __DIR__ . '/../includes/adapters/abstract-leiho-field-adapter.php';
+require __DIR__ . '/../includes/adapters/class-leiho-acf-adapter.php';
 
 function field( $name, $type, $extra = array() ) {
 	return array_merge(

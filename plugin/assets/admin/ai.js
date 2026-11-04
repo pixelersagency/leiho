@@ -1,5 +1,5 @@
 /**
- * Okno — outils d'IA : window.OknoAI.
+ * Leiho — outils d'IA : window.LeihoAI.
  *
  * Menu « IA » des champs texte (générer, réécrire, raccourcir, développer,
  * corriger, changer le ton, traduire, proposer un titre ou une description
@@ -11,12 +11,12 @@
  * Rien n'est enregistré par l'IA : le texte accepté est écrit dans le champ
  * comme une saisie (annulable, enregistré avec le reste).
  *
- * Vanilla JS + apis WordPress (wp.apiFetch, wp.i18n) et window.OknoApp.
+ * Vanilla JS + apis WordPress (wp.apiFetch, wp.i18n) et window.LeihoApp.
  */
 ( function () {
 	'use strict';
 
-	var App = window.OknoApp;
+	var App = window.LeihoApp;
 	var apiFetch = window.wp && window.wp.apiFetch;
 	var __ = wp.i18n.__, _n = wp.i18n._n, sprintf = wp.i18n.sprintf;
 
@@ -24,13 +24,13 @@
 		return;
 	}
 
-	var cfg = window.OknoAIConfig || {};
+	var cfg = window.LeihoAIConfig || {};
 	var h = App.h;
-	var API = '/okno/v1/ai';
+	var API = '/leiho/v1/ai';
 	var TEXT_TYPES = [ 'text', 'textarea', 'wysiwyg' ];
 
 	/* ------------------------------------------------------------------ *
-	 * Icônes (même trait que le reste d'Okno)
+	 * Icônes (même trait que le reste d'Leiho)
 	 * ------------------------------------------------------------------ */
 
 	var ICONS = {
@@ -52,7 +52,7 @@
 	function icon( name, size ) {
 		var ns = 'http://www.w3.org/2000/svg';
 		var svg = document.createElementNS( ns, 'svg' );
-		svg.setAttribute( 'class', 'okno-icon' );
+		svg.setAttribute( 'class', 'leiho-icon' );
 		svg.setAttribute( 'viewBox', '0 0 24 24' );
 		svg.setAttribute( 'width', size || 16 );
 		svg.setAttribute( 'height', size || 16 );
@@ -226,7 +226,7 @@
 			if ( start > pos ) {
 				parent.appendChild( document.createTextNode( text.slice( pos, start ) ) );
 			}
-			parent.appendChild( h( 'mark', { class: 'okno-ai-flag', title: sprintf( /* translators: %s: forbidden claim rule. */ __( 'Forbidden claim: %s', 'okno' ), r.rule ) }, text.slice( start, end ) ) );
+			parent.appendChild( h( 'mark', { class: 'leiho-ai-flag', title: sprintf( /* translators: %s: forbidden claim rule. */ __( 'Forbidden claim: %s', 'leiho' ), r.rule ) }, text.slice( start, end ) ) );
 			pos = end;
 		} );
 		if ( pos < text.length ) {
@@ -236,7 +236,7 @@
 
 	/** Vue des différences, passages interdits surlignés dans le nouveau texte. */
 	function renderDiff( before, after, forbidden ) {
-		var box = h( 'div', { class: 'okno-ai-diff', tabindex: '0', 'aria-label': __( 'Changes', 'okno' ) } );
+		var box = h( 'div', { class: 'leiho-ai-diff', tabindex: '0', 'aria-label': __( 'Changes', 'leiho' ) } );
 		var ranges = flagRanges( after, forbidden );
 		var offset = 0;
 		diff( before, after ).forEach( function ( op ) {
@@ -263,26 +263,26 @@
 	 */
 	function showMenu( anchor, items, label ) {
 		closeMenu();
-		var layer = anchor.closest( '.okno-app' ) || document.body;
-		var menu = h( 'div', { class: 'okno-listbox okno-ai-menu', role: 'menu', 'aria-label': label } );
+		var layer = anchor.closest( '.leiho-app' ) || document.body;
+		var menu = h( 'div', { class: 'leiho-listbox leiho-ai-menu', role: 'menu', 'aria-label': label } );
 		var entries = [];
 		items.forEach( function ( item ) {
 			if ( item.separator ) {
-				menu.appendChild( h( 'div', { class: 'okno-ai-menu__sep', role: 'separator' } ) );
+				menu.appendChild( h( 'div', { class: 'leiho-ai-menu__sep', role: 'separator' } ) );
 				return;
 			}
 			if ( item.note ) {
-				menu.appendChild( h( 'div', { class: 'okno-ai-menu__note', role: 'presentation', text: item.note } ) );
+				menu.appendChild( h( 'div', { class: 'leiho-ai-menu__note', role: 'presentation', text: item.note } ) );
 				return;
 			}
 			var el = h( item.href ? 'a' : 'div', {
-				class: 'okno-listbox__option okno-ai-menu__item',
+				class: 'leiho-listbox__option leiho-ai-menu__item',
 				role: 'menuitem',
 				tabindex: '-1',
 				href: item.href || null,
 				'aria-disabled': item.disabled ? 'true' : null,
 				title: item.title || null,
-			}, [ icon( item.icon || 'sparkle', 15 ), h( 'span', { class: 'okno-listbox__text', text: item.label } ), item.hint ? h( 'span', { class: 'okno-ai-menu__hint', text: item.hint } ) : null ] );
+			}, [ icon( item.icon || 'sparkle', 15 ), h( 'span', { class: 'leiho-listbox__text', text: item.label } ), item.hint ? h( 'span', { class: 'leiho-ai-menu__hint', text: item.hint } ) : null ] );
 			el.addEventListener( 'click', function ( event ) {
 				if ( item.disabled ) {
 					event.preventDefault();
@@ -410,12 +410,12 @@
 	function trigger( label, onOpen, extraClass ) {
 		var btn = h( 'button', {
 			type: 'button',
-			class: 'okno-ai-trigger' + ( extraClass ? ' ' + extraClass : '' ),
+			class: 'leiho-ai-trigger' + ( extraClass ? ' ' + extraClass : '' ),
 			title: label,
 			'aria-label': label,
 			'aria-haspopup': 'menu',
 			'aria-expanded': 'false',
-		}, [ icon( 'sparkle', 14 ), h( 'span', { class: 'okno-ai-trigger__text', text: __( 'AI', 'okno' ) } ) ] );
+		}, [ icon( 'sparkle', 14 ), h( 'span', { class: 'leiho-ai-trigger__text', text: __( 'AI', 'leiho' ) } ) ] );
 		btn.addEventListener( 'click', function ( event ) {
 			event.preventDefault();
 			event.stopPropagation();
@@ -437,12 +437,12 @@
 	/** Menu d'un administrateur sans fournisseur : un lien vers les connecteurs. */
 	function setupItems() {
 		return [
-			{ note: __( 'AI isn’t set up on this site yet.', 'okno' ) },
+			{ note: __( 'AI isn’t set up on this site yet.', 'leiho' ) },
 			{
-				label: __( 'Set up an AI provider', 'okno' ),
+				label: __( 'Set up an AI provider', 'leiho' ),
 				icon: 'external',
 				href: cfg.connectorsUrl,
-				hint: __( 'Settings → Connectors', 'okno' ),
+				hint: __( 'Settings → Connectors', 'leiho' ),
 			},
 		];
 	}
@@ -459,28 +459,28 @@
 		if ( err && 'AbortError' === err.name ) {
 			return '';
 		}
-		return App.errorMessage( err, __( 'The AI couldn’t answer. Try again.', 'okno' ) );
+		return App.errorMessage( err, __( 'The AI couldn’t answer. Try again.', 'leiho' ) );
 	}
 
 	function loadingBody( text ) {
-		return h( 'div', { class: 'okno-ai-loading', role: 'status' }, [
-			h( 'span', { class: 'okno-ai-loading__spark' }, icon( 'sparkle', 22 ) ),
-			h( 'span', { text: text || __( 'Writing…', 'okno' ) } ),
+		return h( 'div', { class: 'leiho-ai-loading', role: 'status' }, [
+			h( 'span', { class: 'leiho-ai-loading__spark' }, icon( 'sparkle', 22 ) ),
+			h( 'span', { text: text || __( 'Writing…', 'leiho' ) } ),
 		] );
 	}
 
 	function errorBody( message ) {
-		return h( 'div', { class: 'okno-notice okno-notice--error', role: 'alert' }, h( 'p', { text: message } ) );
+		return h( 'div', { class: 'leiho-notice leiho-notice--error', role: 'alert' }, h( 'p', { text: message } ) );
 	}
 
 	function setActions( dialog, actions ) {
-		var footer = dialog.el.querySelector( '.okno-dialog__actions' );
+		var footer = dialog.el.querySelector( '.leiho-dialog__actions' );
 		App.clear( footer );
 		var first = null;
 		actions.forEach( function ( action ) {
 			var btn = h( 'button', {
 				type: 'button',
-				class: 'okno-btn' + ( action.primary ? '' : ' okno-btn--quiet' ),
+				class: 'leiho-btn' + ( action.primary ? '' : ' leiho-btn--quiet' ),
 				disabled: !! action.disabled,
 				onClick: action.onClick,
 			}, [ action.icon ? icon( action.icon, 14 ) : null, action.label ] );
@@ -509,30 +509,30 @@
 				return true;
 			} );
 			items.push( h( 'li', {}, [
-				h( 'strong', { text: _n( 'Forbidden claim found:', 'Forbidden claims found:', list.length, 'okno' ) } ),
+				h( 'strong', { text: _n( 'Forbidden claim found:', 'Forbidden claims found:', list.length, 'leiho' ) } ),
 				' ',
 				list.map( function ( f, i ) {
-					return [ i ? ', ' : '', h( 'mark', { class: 'okno-ai-flag', text: f.found } ), f.found.toLowerCase() !== f.rule.toLowerCase() ? ' (' + f.rule + ')' : '' ];
+					return [ i ? ', ' : '', h( 'mark', { class: 'leiho-ai-flag', text: f.found } ), f.found.toLowerCase() !== f.rule.toLowerCase() ? ' (' + f.rule + ')' : '' ];
 				} ),
 				'. ',
-				__( 'Edit the text after accepting, or regenerate.', 'okno' ),
+				__( 'Edit the text after accepting, or regenerate.', 'leiho' ),
 			] ) );
 		}
 		if ( check && check.too_long ) {
 			items.push( h( 'li', {}, [
-				h( 'strong', { text: __( 'Too long:', 'okno' ) } ),
+				h( 'strong', { text: __( 'Too long:', 'leiho' ) } ),
 				' ',
 				/* translators: 1: length of the text, 2: maximum length. */
-				sprintf( __( '%1$d characters for %2$d allowed.', 'okno' ), check.length, check.max ),
+				sprintf( __( '%1$d characters for %2$d allowed.', 'leiho' ), check.length, check.max ),
 				' ',
-				cut ? __( 'Accepting cuts it at the last word that fits.', 'okno' ) : '',
+				cut ? __( 'Accepting cuts it at the last word that fits.', 'leiho' ) : '',
 			] ) );
 		}
 		if ( ! items.length ) {
 			return null;
 		}
-		return h( 'div', { class: 'okno-notice okno-notice--warn okno-ai-warnings', role: 'alert' }, [
-			h( 'span', { class: 'okno-ai-warnings__icon' }, icon( 'warning', 16 ) ),
+		return h( 'div', { class: 'leiho-notice leiho-notice--warn leiho-ai-warnings', role: 'alert' }, [
+			h( 'span', { class: 'leiho-ai-warnings__icon' }, icon( 'warning', 16 ) ),
 			h( 'ul', {}, items ),
 		] );
 	}
@@ -554,12 +554,12 @@
 	 * ------------------------------------------------------------------ */
 
 	var TONES = [
-		__( 'More formal', 'okno' ),
-		__( 'Warmer', 'okno' ),
-		__( 'More direct', 'okno' ),
-		__( 'Simpler', 'okno' ),
-		__( 'More enthusiastic', 'okno' ),
-		__( 'More reassuring', 'okno' ),
+		__( 'More formal', 'leiho' ),
+		__( 'Warmer', 'leiho' ),
+		__( 'More direct', 'leiho' ),
+		__( 'Simpler', 'leiho' ),
+		__( 'More enthusiastic', 'leiho' ),
+		__( 'More reassuring', 'leiho' ),
 	];
 
 	var LANGUAGES = [ 'English', 'Français', 'Español', 'Deutsch', 'Italiano', 'Português', 'Nederlands' ];
@@ -567,21 +567,21 @@
 	function actionLabel( action, seo ) {
 		switch ( action ) {
 			case 'generate':
-				return __( 'Generate…', 'okno' );
+				return __( 'Generate…', 'leiho' );
 			case 'rewrite':
-				return __( 'Rewrite', 'okno' );
+				return __( 'Rewrite', 'leiho' );
 			case 'shorten':
-				return __( 'Shorten', 'okno' );
+				return __( 'Shorten', 'leiho' );
 			case 'expand':
-				return __( 'Expand', 'okno' );
+				return __( 'Expand', 'leiho' );
 			case 'fix':
-				return __( 'Fix spelling and grammar', 'okno' );
+				return __( 'Fix spelling and grammar', 'leiho' );
 			case 'tone':
-				return __( 'Change the tone…', 'okno' );
+				return __( 'Change the tone…', 'leiho' );
 			case 'translate':
-				return __( 'Translate…', 'okno' );
+				return __( 'Translate…', 'leiho' );
 			case 'suggest':
-				return 'title' === seo ? __( 'Suggest a search title', 'okno' ) : __( 'Suggest a description', 'okno' );
+				return 'title' === seo ? __( 'Suggest a search title', 'leiho' ) : __( 'Suggest a description', 'leiho' );
 		}
 		return action;
 	}
@@ -609,7 +609,7 @@
 		}
 		var label = o.label || o.def.label || o.path;
 		/* translators: %s: field label. */
-		var btnLabel = sprintf( __( 'AI actions for “%s”', 'okno' ), label );
+		var btnLabel = sprintf( __( 'AI actions for “%s”', 'leiho' ), label );
 		return trigger( btnLabel, function ( btn ) {
 			var empty = ! plain( o.read() ).length;
 			var seo = seoKind( o.path, o.def.label );
@@ -619,7 +619,7 @@
 			}
 			items.push( { separator: true } );
 			[ 'rewrite', 'shorten', 'expand', 'fix', 'tone', 'translate' ].forEach( function ( action ) {
-				items.push( { action: action, disabled: empty, title: empty ? __( 'The field is empty.', 'okno' ) : null } );
+				items.push( { action: action, disabled: empty, title: empty ? __( 'The field is empty.', 'leiho' ) : null } );
 			} );
 			showMenu(
 				btn,
@@ -655,7 +655,7 @@
 
 		var dialog = App.modal( {
 			/* translators: 1: action (e.g. Rewrite), 2: field label. */
-			title: sprintf( __( '%1$s · %2$s', 'okno' ), actionLabel( action, seo ).replace( /…$/, '' ), label ),
+			title: sprintf( __( '%1$s · %2$s', 'leiho' ), actionLabel( action, seo ).replace( /…$/, '' ), label ),
 			wide: true,
 			sticky: true,
 			body: h( 'div' ),
@@ -666,7 +666,7 @@
 				}
 			},
 		} );
-		dialog.el.classList.add( 'okno-ai-dialog' );
+		dialog.el.classList.add( 'leiho-ai-dialog' );
 
 		function show( nodes ) {
 			App.append( App.clear( dialog.body ), nodes );
@@ -677,34 +677,34 @@
 			var input;
 			var nodes = [];
 			if ( 'generate' === action ) {
-				input = h( 'textarea', { id: id, class: 'okno-input', rows: '4', maxlength: '1000', placeholder: __( 'For example: a two-sentence intro about our on-site audits, for facility managers.', 'okno' ) } );
+				input = h( 'textarea', { id: id, class: 'leiho-input', rows: '4', maxlength: '1000', placeholder: __( 'For example: a two-sentence intro about our on-site audits, for facility managers.', 'leiho' ) } );
 				input.value = params.instruction;
-				nodes.push( h( 'label', { class: 'okno-label', for: id, text: __( 'What should the AI write?', 'okno' ) } ), input );
+				nodes.push( h( 'label', { class: 'leiho-label', for: id, text: __( 'What should the AI write?', 'leiho' ) } ), input );
 			} else if ( 'tone' === action ) {
-				input = h( 'input', { type: 'text', id: id, class: 'okno-input', maxlength: '100', placeholder: __( 'Or describe it…', 'okno' ) } );
+				input = h( 'input', { type: 'text', id: id, class: 'leiho-input', maxlength: '100', placeholder: __( 'Or describe it…', 'leiho' ) } );
 				input.value = params.tone;
-				var chips = h( 'div', { class: 'okno-ai-chips', role: 'group', 'aria-label': __( 'Tone', 'okno' ) }, TONES.map( function ( tone ) {
-					return h( 'button', { type: 'button', class: 'okno-ai-chip', 'aria-pressed': tone === input.value ? 'true' : 'false', onClick: function ( event ) {
+				var chips = h( 'div', { class: 'leiho-ai-chips', role: 'group', 'aria-label': __( 'Tone', 'leiho' ) }, TONES.map( function ( tone ) {
+					return h( 'button', { type: 'button', class: 'leiho-ai-chip', 'aria-pressed': tone === input.value ? 'true' : 'false', onClick: function ( event ) {
 						input.value = tone;
 						Array.prototype.forEach.call( chips.children, function ( c ) {
 							c.setAttribute( 'aria-pressed', c === event.currentTarget ? 'true' : 'false' );
 						} );
 					} }, tone );
 				} ) );
-				nodes.push( h( 'span', { class: 'okno-label', text: __( 'New tone', 'okno' ) } ), chips, h( 'label', { class: 'okno-sr', for: id, text: __( 'Tone', 'okno' ) } ), input );
+				nodes.push( h( 'span', { class: 'leiho-label', text: __( 'New tone', 'leiho' ) } ), chips, h( 'label', { class: 'leiho-sr', for: id, text: __( 'Tone', 'leiho' ) } ), input );
 			} else if ( 'translate' === action ) {
-				input = h( 'input', { type: 'text', id: id, class: 'okno-input', maxlength: '60', list: id + '-list', placeholder: 'English' } );
+				input = h( 'input', { type: 'text', id: id, class: 'leiho-input', maxlength: '60', list: id + '-list', placeholder: 'English' } );
 				input.value = params.language || ( /^fr|fran/i.test( cfg.language || '' ) ? 'English' : '' );
 				nodes.push(
-					h( 'label', { class: 'okno-label', for: id, text: __( 'Translate into', 'okno' ) } ),
+					h( 'label', { class: 'leiho-label', for: id, text: __( 'Translate into', 'leiho' ) } ),
 					input,
 					h( 'datalist', { id: id + '-list' }, LANGUAGES.map( function ( l ) {
 						return h( 'option', { value: l } );
 					} ) )
 				);
 			}
-			nodes.push( h( 'p', { class: 'okno-help', text: __( 'The brand context and the other fields of this entry are sent along.', 'okno' ) } ) );
-			var form = h( 'form', { class: 'okno-form-grid', onSubmit: function ( event ) {
+			nodes.push( h( 'p', { class: 'leiho-help', text: __( 'The brand context and the other fields of this entry are sent along.', 'leiho' ) } ) );
+			var form = h( 'form', { class: 'leiho-form-grid', onSubmit: function ( event ) {
 				event.preventDefault();
 				go();
 			} }, nodes );
@@ -726,8 +726,8 @@
 				generate();
 			}
 			setActions( dialog, [
-				{ label: __( 'Cancel', 'okno' ), onClick: dialog.close },
-				{ label: __( 'Generate', 'okno' ), icon: 'sparkle', primary: true, onClick: go },
+				{ label: __( 'Cancel', 'leiho' ), onClick: dialog.close },
+				{ label: __( 'Generate', 'leiho' ), icon: 'sparkle', primary: true, onClick: go },
 			] );
 			input.focus();
 			if ( 'generate' === action ) {
@@ -746,9 +746,9 @@
 			}
 			controller = window.AbortController ? new window.AbortController() : null;
 			show( loadingBody() );
-			setActions( dialog, [ { label: __( 'Cancel', 'okno' ), onClick: dialog.close } ] );
-			dialog.el.querySelector( '.okno-dialog__actions .okno-btn' ).focus();
-			App.announce( __( 'Writing…', 'okno' ) );
+			setActions( dialog, [ { label: __( 'Cancel', 'leiho' ), onClick: dialog.close } ] );
+			dialog.el.querySelector( '.leiho-dialog__actions .leiho-btn' ).focus();
+			App.announce( __( 'Writing…', 'leiho' ) );
 			request(
 				'/field',
 				{
@@ -776,8 +776,8 @@
 				show( errorBody( message ) );
 				App.announce( message );
 				var retry = setActions( dialog, [
-					{ label: __( 'Cancel', 'okno' ), onClick: dialog.close },
-					{ label: __( 'Try again', 'okno' ), primary: true, onClick: generate },
+					{ label: __( 'Cancel', 'leiho' ), onClick: dialog.close },
+					{ label: __( 'Try again', 'leiho' ), primary: true, onClick: generate },
 				] );
 				if ( retry ) {
 					retry.focus();
@@ -792,34 +792,34 @@
 			var beforePlain = plain( before, html );
 			var afterPlain = plain( text, html );
 			var nodes = [ warningsBox( check, cut ) ];
-			nodes.push( h( 'div', { class: 'okno-ai-compare' }, [
-				h( 'div', { class: 'okno-ai-compare__head' }, [
-					h( 'span', { class: 'okno-label', text: beforePlain ? __( 'Changes', 'okno' ) : __( 'Proposal', 'okno' ) } ),
-					h( 'span', { class: 'okno-ai-count' + ( check.too_long ? ' is-over' : '' ), text: result.max
+			nodes.push( h( 'div', { class: 'leiho-ai-compare' }, [
+				h( 'div', { class: 'leiho-ai-compare__head' }, [
+					h( 'span', { class: 'leiho-label', text: beforePlain ? __( 'Changes', 'leiho' ) : __( 'Proposal', 'leiho' ) } ),
+					h( 'span', { class: 'leiho-ai-count' + ( check.too_long ? ' is-over' : '' ), text: result.max
 						? Array.from( afterPlain ).length + ' / ' + result.max
 						/* translators: %d: number of characters. */
-						: sprintf( _n( '%d character', '%d characters', Array.from( afterPlain ).length, 'okno' ), Array.from( afterPlain ).length ) } ),
+						: sprintf( _n( '%d character', '%d characters', Array.from( afterPlain ).length, 'leiho' ), Array.from( afterPlain ).length ) } ),
 				] ),
 				renderDiff( beforePlain, afterPlain, check.forbidden ),
 			] ) );
 			if ( html && text ) {
-				var rendered = h( 'div', { class: 'okno-ai-rendered' } );
+				var rendered = h( 'div', { class: 'leiho-ai-rendered' } );
 				// HTML filtré par wp_kses_post() côté serveur.
 				rendered.innerHTML = text;
-				nodes.push( h( 'details', { class: 'okno-ai-details' }, [ h( 'summary', { text: __( 'Formatted result', 'okno' ) } ), rendered ] ) );
+				nodes.push( h( 'details', { class: 'leiho-ai-details' }, [ h( 'summary', { text: __( 'Formatted result', 'leiho' ) } ), rendered ] ) );
 			}
 			if ( ! cfg.brandFilled && cfg.settingsUrl ) {
-				nodes.push( h( 'p', { class: 'okno-help' }, [
-					__( 'Tip: fill in the brand context so the AI writes in your voice.', 'okno' ),
+				nodes.push( h( 'p', { class: 'leiho-help' }, [
+					__( 'Tip: fill in the brand context so the AI writes in your voice.', 'leiho' ),
 					' ',
-					h( 'a', { href: cfg.settingsUrl, text: __( 'Brand context', 'okno' ) } ),
+					h( 'a', { href: cfg.settingsUrl, text: __( 'Brand context', 'leiho' ) } ),
 				] ) );
 			}
 			show( nodes );
 			var forbidden = check.forbidden && check.forbidden.length;
 			var accept = setActions( dialog, [
-				{ label: __( 'Cancel', 'okno' ), onClick: dialog.close },
-				{ label: __( 'Regenerate', 'okno' ), icon: 'sparkle', onClick: function () {
+				{ label: __( 'Cancel', 'leiho' ), onClick: dialog.close },
+				{ label: __( 'Regenerate', 'leiho' ), icon: 'sparkle', onClick: function () {
 					if ( 'generate' === action || 'tone' === action || 'translate' === action ) {
 						askStep();
 					} else {
@@ -827,18 +827,18 @@
 					}
 				} },
 				{
-					label: forbidden ? __( 'Accept anyway', 'okno' ) : cut ? __( 'Accept and cut', 'okno' ) : __( 'Accept', 'okno' ),
+					label: forbidden ? __( 'Accept anyway', 'leiho' ) : cut ? __( 'Accept and cut', 'leiho' ) : __( 'Accept', 'leiho' ),
 					primary: true,
 					disabled: ! plain( text, html ),
 					onClick: function () {
 						var value = cut ? cutToLength( text, result.max ) : text;
 						dialog.close();
 						o.write( value );
-						App.toast( __( 'Text applied. Undo with Ctrl+Z; save to keep it.', 'okno' ) );
+						App.toast( __( 'Text applied. Undo with Ctrl+Z; save to keep it.', 'leiho' ) );
 					},
 				},
 			] );
-			App.announce( forbidden ? __( 'Proposal ready, with warnings.', 'okno' ) : __( 'Proposal ready.', 'okno' ) );
+			App.announce( forbidden ? __( 'Proposal ready, with warnings.', 'leiho' ) : __( 'Proposal ready.', 'leiho' ) );
 			if ( accept ) {
 				accept.focus();
 			}
@@ -871,8 +871,8 @@
 		if ( ! cfg.image ) {
 			return null;
 		}
-		var label = __( 'Write the alternative text with AI', 'okno' );
-		var btn = h( 'button', { type: 'button', class: 'okno-btn okno-btn--quiet okno-ai-alt' + ( o.small ? ' okno-btn--small' : '' ), title: label }, [ icon( 'sparkle', 14 ), h( 'span', { text: __( 'Alt text', 'okno' ) } ) ] );
+		var label = __( 'Write the alternative text with AI', 'leiho' );
+		var btn = h( 'button', { type: 'button', class: 'leiho-btn leiho-btn--quiet leiho-ai-alt' + ( o.small ? ' leiho-btn--small' : '' ), title: label }, [ icon( 'sparkle', 14 ), h( 'span', { text: __( 'Alt text', 'leiho' ) } ) ] );
 		btn.setAttribute( 'aria-label', label );
 		btn.addEventListener( 'click', function () {
 			var id = o.attachmentId();
@@ -886,7 +886,7 @@
 	function runAlt( id, o ) {
 		var controller = null;
 		var dialog = App.modal( {
-			title: __( 'Alternative text', 'okno' ),
+			title: __( 'Alternative text', 'leiho' ),
 			wide: true,
 			sticky: true,
 			body: h( 'div' ),
@@ -897,7 +897,7 @@
 				}
 			},
 		} );
-		dialog.el.classList.add( 'okno-ai-dialog' );
+		dialog.el.classList.add( 'leiho-ai-dialog' );
 
 		function show( nodes ) {
 			App.append( App.clear( dialog.body ), nodes );
@@ -905,33 +905,33 @@
 
 		function generate() {
 			controller = window.AbortController ? new window.AbortController() : null;
-			show( loadingBody( __( 'Looking at the image…', 'okno' ) ) );
-			setActions( dialog, [ { label: __( 'Cancel', 'okno' ), onClick: dialog.close } ] );
+			show( loadingBody( __( 'Looking at the image…', 'leiho' ) ) );
+			setActions( dialog, [ { label: __( 'Cancel', 'leiho' ), onClick: dialog.close } ] );
 			request( '/alt', { attachment_id: id, post_id: o.postId || 0, context: o.context || '' }, controller ? controller.signal : undefined )
 				.then( function ( result ) {
 					controller = null;
 					var fieldId = App.uid( 'ai-alt' );
-					var input = h( 'textarea', { id: fieldId, class: 'okno-input', rows: '3' } );
+					var input = h( 'textarea', { id: fieldId, class: 'leiho-input', rows: '3' } );
 					input.value = result.text || '';
 					var forbidden = result.check && result.check.forbidden && result.check.forbidden.length;
 					show( [
 						warningsBox( result.check, false ),
-						h( 'label', { class: 'okno-label', for: fieldId, text: __( 'Proposal (you can edit it)', 'okno' ) } ),
+						h( 'label', { class: 'leiho-label', for: fieldId, text: __( 'Proposal (you can edit it)', 'leiho' ) } ),
 						input,
-						h( 'p', { class: 'okno-help', text: __( 'Describe what matters in this context. Leave it empty for a purely decorative image.', 'okno' ) } ),
+						h( 'p', { class: 'leiho-help', text: __( 'Describe what matters in this context. Leave it empty for a purely decorative image.', 'leiho' ) } ),
 					] );
 					var accept = setActions( dialog, [
-						{ label: __( 'Cancel', 'okno' ), onClick: dialog.close },
-						{ label: __( 'Regenerate', 'okno' ), icon: 'sparkle', onClick: generate },
-						{ label: forbidden ? __( 'Accept anyway', 'okno' ) : __( 'Accept', 'okno' ), primary: true, onClick: function () {
+						{ label: __( 'Cancel', 'leiho' ), onClick: dialog.close },
+						{ label: __( 'Regenerate', 'leiho' ), icon: 'sparkle', onClick: generate },
+						{ label: forbidden ? __( 'Accept anyway', 'leiho' ) : __( 'Accept', 'leiho' ), primary: true, onClick: function () {
 							var text = input.value.trim();
 							dialog.close();
 							Promise.resolve( o.onAccept( text ) ).catch( function ( err ) {
-								App.toast( App.errorMessage( err, __( 'Couldn’t save the alternative text.', 'okno' ) ), true );
+								App.toast( App.errorMessage( err, __( 'Couldn’t save the alternative text.', 'leiho' ) ), true );
 							} );
 						} },
 					] );
-					App.announce( __( 'Proposal ready.', 'okno' ) );
+					App.announce( __( 'Proposal ready.', 'leiho' ) );
 					if ( accept ) {
 						input.focus();
 					}
@@ -942,8 +942,8 @@
 					if ( message ) {
 						show( errorBody( message ) );
 						setActions( dialog, [
-							{ label: __( 'Cancel', 'okno' ), onClick: dialog.close },
-							{ label: __( 'Try again', 'okno' ), primary: true, onClick: generate },
+							{ label: __( 'Cancel', 'leiho' ), onClick: dialog.close },
+							{ label: __( 'Try again', 'leiho' ), primary: true, onClick: generate },
 						] );
 					}
 				} );
@@ -966,8 +966,8 @@
 		if ( ! enabled() && ! canSetUp() ) {
 			return null;
 		}
-		var label = __( 'New entry with AI', 'okno' );
-		var btn = h( 'button', { type: 'button', class: 'okno-icon-btn okno-ai-new', title: label, 'aria-label': label }, icon( 'sparkle', 16 ) );
+		var label = __( 'New entry with AI', 'leiho' );
+		var btn = h( 'button', { type: 'button', class: 'leiho-icon-btn leiho-ai-new', title: label, 'aria-label': label }, icon( 'sparkle', 16 ) );
 		btn.addEventListener( 'click', function () {
 			if ( ! enabled() ) {
 				btn.setAttribute( 'aria-haspopup', 'menu' );
@@ -984,7 +984,7 @@
 		var controller = null;
 		var dialog = App.modal( {
 			/* translators: %s: content type (e.g. Services). */
-			title: sprintf( __( 'New entry in %s with AI', 'okno' ), type.label ),
+			title: sprintf( __( 'New entry in %s with AI', 'leiho' ), type.label ),
 			wide: true,
 			sticky: true,
 			body: h( 'div' ),
@@ -995,7 +995,7 @@
 				}
 			},
 		} );
-		dialog.el.classList.add( 'okno-ai-dialog', 'okno-ai-dialog--entry' );
+		dialog.el.classList.add( 'leiho-ai-dialog', 'leiho-ai-dialog--entry' );
 
 		function show( nodes ) {
 			App.append( App.clear( dialog.body ), nodes );
@@ -1003,15 +1003,15 @@
 
 		function askStep() {
 			var id = App.uid( 'ai-brief' );
-			var input = h( 'textarea', { id: id, class: 'okno-input', rows: '6', maxlength: '4000', placeholder: __( 'Subject, key points, facts and figures to include, who it’s for…', 'okno' ) } );
+			var input = h( 'textarea', { id: id, class: 'leiho-input', rows: '6', maxlength: '4000', placeholder: __( 'Subject, key points, facts and figures to include, who it’s for…', 'leiho' ) } );
 			input.value = brief;
-			show( h( 'form', { class: 'okno-form-grid', onSubmit: function ( event ) {
+			show( h( 'form', { class: 'leiho-form-grid', onSubmit: function ( event ) {
 				event.preventDefault();
 				go();
 			} }, [
-				h( 'label', { class: 'okno-label', for: id, text: __( 'Brief', 'okno' ) } ),
+				h( 'label', { class: 'leiho-label', for: id, text: __( 'Brief', 'leiho' ) } ),
 				input,
-				h( 'p', { class: 'okno-help', text: __( 'The AI fills the text fields of this type from your brief and the brand context. You review everything before the draft is created; images and links stay for you to add.', 'okno' ) } ),
+				h( 'p', { class: 'leiho-help', text: __( 'The AI fills the text fields of this type from your brief and the brand context. You review everything before the draft is created; images and links stay for you to add.', 'leiho' ) } ),
 			] ) );
 			function go() {
 				brief = input.value.trim();
@@ -1029,17 +1029,17 @@
 				}
 			} );
 			setActions( dialog, [
-				{ label: __( 'Cancel', 'okno' ), onClick: dialog.close },
-				{ label: __( 'Generate', 'okno' ), icon: 'sparkle', primary: true, onClick: go },
+				{ label: __( 'Cancel', 'leiho' ), onClick: dialog.close },
+				{ label: __( 'Generate', 'leiho' ), icon: 'sparkle', primary: true, onClick: go },
 			] );
 			input.focus();
 		}
 
 		function generate() {
 			controller = window.AbortController ? new window.AbortController() : null;
-			show( loadingBody( __( 'Writing the entry…', 'okno' ) ) );
-			setActions( dialog, [ { label: __( 'Cancel', 'okno' ), onClick: dialog.close } ] );
-			App.announce( __( 'Writing the entry…', 'okno' ) );
+			show( loadingBody( __( 'Writing the entry…', 'leiho' ) ) );
+			setActions( dialog, [ { label: __( 'Cancel', 'leiho' ), onClick: dialog.close } ] );
+			App.announce( __( 'Writing the entry…', 'leiho' ) );
 			request( '/entry', { post_type: type.name, brief: brief }, controller ? controller.signal : undefined )
 				.then( function ( result ) {
 					controller = null;
@@ -1051,8 +1051,8 @@
 					if ( message ) {
 						show( errorBody( message ) );
 						setActions( dialog, [
-							{ label: __( 'Edit the brief', 'okno' ), onClick: askStep },
-							{ label: __( 'Try again', 'okno' ), primary: true, onClick: generate },
+							{ label: __( 'Edit the brief', 'leiho' ), onClick: askStep },
+							{ label: __( 'Try again', 'leiho' ), primary: true, onClick: generate },
 						] );
 					}
 				} );
@@ -1070,41 +1070,41 @@
 			} );
 			var nodes = [];
 			if ( flagged.length ) {
-				nodes.push( h( 'div', { class: 'okno-notice okno-notice--warn okno-ai-warnings', role: 'alert' }, [
-					h( 'span', { class: 'okno-ai-warnings__icon' }, icon( 'warning', 16 ) ),
+				nodes.push( h( 'div', { class: 'leiho-notice leiho-notice--warn leiho-ai-warnings', role: 'alert' }, [
+					h( 'span', { class: 'leiho-ai-warnings__icon' }, icon( 'warning', 16 ) ),
 					h( 'p', { text: sprintf(
 						/* translators: %d: number of fields. */
-						_n( 'Forbidden claims found in %d field: they’re highlighted below. Edit them after creating the draft, or regenerate.', 'Forbidden claims found in %d fields: they’re highlighted below. Edit them after creating the draft, or regenerate.', flagged.length, 'okno' ),
+						_n( 'Forbidden claims found in %d field: they’re highlighted below. Edit them after creating the draft, or regenerate.', 'Forbidden claims found in %d fields: they’re highlighted below. Edit them after creating the draft, or regenerate.', flagged.length, 'leiho' ),
 						flagged.length
 					) } ),
 				] ) );
 			}
-			nodes.push( h( 'dl', { class: 'okno-ai-entry' }, filled.map( function ( f ) {
+			nodes.push( h( 'dl', { class: 'leiho-ai-entry' }, filled.map( function ( f ) {
 				return renderValue( f, values[ f.path ], f.path, warnings );
 			} ) ) );
 			var empty = fields.length - filled.length;
-			nodes.push( h( 'p', { class: 'okno-help', text: [
-				__( 'Created as a draft: nothing is visible on the site until you publish it.', 'okno' ),
+			nodes.push( h( 'p', { class: 'leiho-help', text: [
+				__( 'Created as a draft: nothing is visible on the site until you publish it.', 'leiho' ),
 				/* translators: %d: number of fields. */
-				empty ? sprintf( _n( '%d field left empty.', '%d fields left empty.', empty, 'okno' ), empty ) : '',
+				empty ? sprintf( _n( '%d field left empty.', '%d fields left empty.', empty, 'leiho' ), empty ) : '',
 			].join( ' ' ) } ) );
 			show( nodes );
 			var create = setActions( dialog, [
-				{ label: __( 'Cancel', 'okno' ), onClick: dialog.close },
-				{ label: __( 'Edit the brief', 'okno' ), onClick: askStep },
-				{ label: __( 'Regenerate', 'okno' ), icon: 'sparkle', onClick: generate },
-				{ label: __( 'Create the draft', 'okno' ), primary: true, disabled: ! values._title, onClick: function () {
+				{ label: __( 'Cancel', 'leiho' ), onClick: dialog.close },
+				{ label: __( 'Edit the brief', 'leiho' ), onClick: askStep },
+				{ label: __( 'Regenerate', 'leiho' ), icon: 'sparkle', onClick: generate },
+				{ label: __( 'Create the draft', 'leiho' ), primary: true, disabled: ! values._title, onClick: function () {
 					createDraft( values );
 				} },
 			] );
-			App.announce( __( 'Proposal ready.', 'okno' ) );
+			App.announce( __( 'Proposal ready.', 'leiho' ) );
 			if ( create ) {
 				create.focus();
 			}
 		}
 
 		function createDraft( values ) {
-			show( loadingBody( __( 'Creating the draft…', 'okno' ) ) );
+			show( loadingBody( __( 'Creating the draft…', 'leiho' ) ) );
 			setActions( dialog, [] );
 			request( '/entry/create', { post_type: type.name, values: values } )
 				.then( function ( result ) {
@@ -1112,20 +1112,20 @@
 					var refused = Object.keys( result.errors || {} );
 					if ( refused.length ) {
 						/* translators: %s: comma-separated field paths. */
-						App.toast( sprintf( __( 'Draft created. Some values were refused, check: %s', 'okno' ), refused.join( ', ' ) ), true );
+						App.toast( sprintf( __( 'Draft created. Some values were refused, check: %s', 'leiho' ), refused.join( ', ' ) ), true );
 					} else {
 						/* translators: %s: entry title. */
-						App.toast( sprintf( __( '“%s” created as a draft.', 'okno' ), result.post.title ) );
+						App.toast( sprintf( __( '“%s” created as a draft.', 'leiho' ), result.post.title ) );
 					}
 					if ( onCreated ) {
 						onCreated( result.post );
 					}
 				} )
 				.catch( function ( err ) {
-					show( errorBody( App.errorMessage( err, __( 'Couldn’t create the draft.', 'okno' ) ) ) );
+					show( errorBody( App.errorMessage( err, __( 'Couldn’t create the draft.', 'leiho' ) ) ) );
 					setActions( dialog, [
-						{ label: __( 'Cancel', 'okno' ), onClick: dialog.close },
-						{ label: __( 'Try again', 'okno' ), primary: true, onClick: function () {
+						{ label: __( 'Cancel', 'leiho' ), onClick: dialog.close },
+						{ label: __( 'Try again', 'leiho' ), primary: true, onClick: function () {
 							createDraft( values );
 						} },
 					] );
@@ -1141,7 +1141,7 @@
 		var dd = h( 'dd', {} );
 		switch ( def.type ) {
 			case 'wysiwyg':
-				var box = h( 'div', { class: 'okno-ai-rendered' } );
+				var box = h( 'div', { class: 'leiho-ai-rendered' } );
 				box.innerHTML = String( value ); // Filtré par wp_kses_post() côté serveur.
 				if ( forbidden ) {
 					markIn( box, forbidden );
@@ -1156,7 +1156,7 @@
 				dd.textContent = ( def.options && def.options[ value ] ) || String( value );
 				break;
 			case 'true_false':
-				dd.textContent = value ? __( 'Yes', 'okno' ) : __( 'No', 'okno' );
+				dd.textContent = value ? __( 'Yes', 'leiho' ) : __( 'No', 'leiho' );
 				break;
 			case 'number':
 			case 'range':
@@ -1164,7 +1164,7 @@
 				break;
 			case 'group':
 			case 'clone':
-				dd.appendChild( h( 'dl', { class: 'okno-ai-entry okno-ai-entry--nested' }, ( def.sub_fields || [] ).filter( function ( s ) {
+				dd.appendChild( h( 'dl', { class: 'leiho-ai-entry leiho-ai-entry--nested' }, ( def.sub_fields || [] ).filter( function ( s ) {
 					return value && undefined !== value[ s.path ];
 				} ).map( function ( s ) {
 					return renderValue( s, value[ s.path ], path + '.' + s.path, warnings );
@@ -1172,7 +1172,7 @@
 				break;
 			case 'repeater':
 			case 'flexible_content':
-				dd.appendChild( h( 'ol', { class: 'okno-ai-rows' }, ( value || [] ).map( function ( row, i ) {
+				dd.appendChild( h( 'ol', { class: 'leiho-ai-rows' }, ( value || [] ).map( function ( row, i ) {
 					var subs = def.sub_fields || [];
 					var title = '#' + ( i + 1 );
 					if ( 'flexible_content' === def.type ) {
@@ -1183,8 +1183,8 @@
 						title += ' · ' + ( layout ? layout.label : row._layout );
 					}
 					return h( 'li', {}, [
-						h( 'span', { class: 'okno-ai-rows__title', text: title } ),
-						h( 'dl', { class: 'okno-ai-entry okno-ai-entry--nested' }, subs.filter( function ( s ) {
+						h( 'span', { class: 'leiho-ai-rows__title', text: title } ),
+						h( 'dl', { class: 'leiho-ai-entry leiho-ai-entry--nested' }, subs.filter( function ( s ) {
 							return undefined !== row[ s.path ];
 						} ).map( function ( s ) {
 							return renderValue( s, row[ s.path ], path + '.' + i + '.' + s.path, warnings );
@@ -1193,8 +1193,8 @@
 				} ) ) );
 				break;
 		}
-		var note = warnings[ path ] && warnings[ path ].trimmed ? h( 'span', { class: 'okno-ai-entry__note', text: __( 'cut to the maximum length', 'okno' ) } ) : null;
-		return h( 'div', { class: 'okno-ai-entry__row' + ( forbidden ? ' has-flag' : '' ) }, [ h( 'dt', {}, [ def.label || def.path, note ] ), dd ] );
+		var note = warnings[ path ] && warnings[ path ].trimmed ? h( 'span', { class: 'leiho-ai-entry__note', text: __( 'cut to the maximum length', 'leiho' ) } ) : null;
+		return h( 'div', { class: 'leiho-ai-entry__row' + ( forbidden ? ' has-flag' : '' ) }, [ h( 'dt', {}, [ def.label || def.path, note ] ), dd ] );
 	}
 
 	/** Surligne les passages interdits dans un HTML rendu. */
@@ -1225,10 +1225,10 @@
 		}
 		var purposeId = App.uid( 'ai-purpose' );
 		var audienceId = App.uid( 'ai-audience' );
-		var purpose = h( 'textarea', { id: purposeId, class: 'okno-input', rows: '3', maxlength: '1000', disabled: true, placeholder: __( 'Example: our services, one per page, to explain what we do and get a quote request.', 'okno' ) } );
-		var audience = h( 'textarea', { id: audienceId, class: 'okno-input', rows: '3', maxlength: '1000', disabled: true, placeholder: __( 'Example: facility managers of mid-sized companies.', 'okno' ) } );
-		var status = h( 'span', { class: 'okno-muted', role: 'status' } );
-		var save = h( 'button', { type: 'button', class: 'okno-btn okno-btn--quiet', disabled: true }, __( 'Save the AI context', 'okno' ) );
+		var purpose = h( 'textarea', { id: purposeId, class: 'leiho-input', rows: '3', maxlength: '1000', disabled: true, placeholder: __( 'Example: our services, one per page, to explain what we do and get a quote request.', 'leiho' ) } );
+		var audience = h( 'textarea', { id: audienceId, class: 'leiho-input', rows: '3', maxlength: '1000', disabled: true, placeholder: __( 'Example: facility managers of mid-sized companies.', 'leiho' ) } );
+		var status = h( 'span', { class: 'leiho-muted', role: 'status' } );
+		var save = h( 'button', { type: 'button', class: 'leiho-btn leiho-btn--quiet', disabled: true }, __( 'Save the AI context', 'leiho' ) );
 		var dirty = false;
 		function touch() {
 			dirty = true;
@@ -1239,11 +1239,11 @@
 		audience.addEventListener( 'input', touch );
 		save.addEventListener( 'click', function () {
 			save.disabled = true;
-			status.textContent = __( 'Saving…', 'okno' );
+			status.textContent = __( 'Saving…', 'leiho' );
 			apiFetch( { path: API + '/collections/' + encodeURIComponent( type ), method: 'POST', data: { purpose: purpose.value, audience: audience.value } } )
 				.then( function () {
 					dirty = false;
-					status.textContent = __( 'Saved.', 'okno' );
+					status.textContent = __( 'Saved.', 'leiho' );
 				} )
 				.catch( function ( err ) {
 					save.disabled = false;
@@ -1260,19 +1260,19 @@
 				audience.disabled = false;
 			} )
 			.catch( function () {
-				status.textContent = __( 'Couldn’t load the AI context.', 'okno' );
+				status.textContent = __( 'Couldn’t load the AI context.', 'leiho' );
 			} );
 
-		return h( 'div', { class: 'okno-detail__card okno-ai-card' }, [
-			h( 'h3', {}, [ icon( 'sparkle', 15 ), ' ', __( 'AI context', 'okno' ) ] ),
-			h( 'p', { class: 'okno-muted', text: enabled() || ! cfg.client
-				? __( 'Sent to the AI with the brand context when it writes entries of this type. Saved on its own, apart from the fields.', 'okno' )
-				: __( 'Used once an AI provider is set up in Settings → Connectors.', 'okno' ) } ),
-			h( 'div', { class: 'okno-settings-grid' }, [
-				h( 'div', { class: 'okno-setting' }, [ h( 'label', { class: 'okno-label', for: purposeId, text: __( 'Purpose of this collection', 'okno' ) } ), purpose ] ),
-				h( 'div', { class: 'okno-setting' }, [ h( 'label', { class: 'okno-label', for: audienceId, text: __( 'Readers', 'okno' ) } ), audience ] ),
+		return h( 'div', { class: 'leiho-detail__card leiho-ai-card' }, [
+			h( 'h3', {}, [ icon( 'sparkle', 15 ), ' ', __( 'AI context', 'leiho' ) ] ),
+			h( 'p', { class: 'leiho-muted', text: enabled() || ! cfg.client
+				? __( 'Sent to the AI with the brand context when it writes entries of this type. Saved on its own, apart from the fields.', 'leiho' )
+				: __( 'Used once an AI provider is set up in Settings → Connectors.', 'leiho' ) } ),
+			h( 'div', { class: 'leiho-settings-grid' }, [
+				h( 'div', { class: 'leiho-setting' }, [ h( 'label', { class: 'leiho-label', for: purposeId, text: __( 'Purpose of this collection', 'leiho' ) } ), purpose ] ),
+				h( 'div', { class: 'leiho-setting' }, [ h( 'label', { class: 'leiho-label', for: audienceId, text: __( 'Readers', 'leiho' ) } ), audience ] ),
 			] ),
-			h( 'div', { class: 'okno-ai-card__foot' }, [ save, status ] ),
+			h( 'div', { class: 'leiho-ai-card__foot' }, [ save, status ] ),
 		] );
 	}
 
@@ -1281,17 +1281,17 @@
 	 * ------------------------------------------------------------------ */
 
 	function setupBrandSettings() {
-		var section = document.querySelector( '[data-okno-brand]' );
+		var section = document.querySelector( '[data-leiho-brand]' );
 		if ( ! section ) {
 			return;
 		}
-		var exportBtn = section.querySelector( '[data-okno-brand-export]' );
-		var importBtn = section.querySelector( '[data-okno-brand-import]' );
+		var exportBtn = section.querySelector( '[data-leiho-brand-export]' );
+		var importBtn = section.querySelector( '[data-leiho-brand-import]' );
 		var file = h( 'input', { type: 'file', accept: 'application/json,.json', hidden: true } );
 		section.appendChild( file );
 
 		function collect() {
-			var out = { okno: 'brand', version: 1, samples: [] };
+			var out = { leiho: 'brand', version: 1, samples: [] };
 			Array.prototype.forEach.call( section.querySelectorAll( '[data-brand-key]' ), function ( el ) {
 				var key = el.getAttribute( 'data-brand-key' );
 				if ( 'samples' === key ) {
@@ -1331,7 +1331,7 @@
 			exportBtn.addEventListener( 'click', function () {
 				var blob = new Blob( [ JSON.stringify( collect(), null, '\t' ) + '\n' ], { type: 'application/json' } );
 				var url = URL.createObjectURL( blob );
-				var a = h( 'a', { href: url, download: 'okno-brand.json', hidden: true } );
+				var a = h( 'a', { href: url, download: 'leiho-brand.json', hidden: true } );
 				document.body.appendChild( a );
 				a.click();
 				setTimeout( function () {
@@ -1358,19 +1358,19 @@
 				} catch ( e ) {
 					data = null;
 				}
-				if ( ! data || 'object' !== typeof data || Array.isArray( data ) || ( data.okno && 'brand' !== data.okno ) ) {
-					App.toast( __( 'This file isn’t a brand context.', 'okno' ), true );
+				if ( ! data || 'object' !== typeof data || Array.isArray( data ) || ( data.leiho && 'brand' !== data.leiho ) ) {
+					App.toast( __( 'This file isn’t a brand context.', 'leiho' ), true );
 					return;
 				}
 				fill( data );
-				App.toast( __( 'Brand context imported: check it, then save.', 'okno' ) );
+				App.toast( __( 'Brand context imported: check it, then save.', 'leiho' ) );
 			} );
 		} );
 	}
 
 	setupBrandSettings();
 
-	window.OknoAI = {
+	window.LeihoAI = {
 		config: cfg,
 		enabled: enabled,
 		isTextField: isTextField,

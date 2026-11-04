@@ -1,7 +1,7 @@
 {
-	"name": "@pixelersagency/okno-bridge",
+	"name": "leiho",
 	"version": "1.0.0-beta.11",
-	"description": "Pont postMessage de l'éditeur visuel Okno : rend n'importe quel site (React, Next.js, Remix, Vite, Nuxt, SvelteKit, Astro, HTML) éditable depuis WordPress. Zéro dépendance, inactif hors de l'éditeur.",
+	"description": "Pont postMessage de l'éditeur visuel Leiho : rend n'importe quel site (React, Next.js, Remix, Vite, Nuxt, SvelteKit, Astro, HTML) éditable depuis WordPress. Zéro dépendance, inactif hors de l'éditeur.",
 	"keywords": [
 		"wordpress",
 		"headless",
@@ -18,17 +18,17 @@
 	"license": "GPL-2.0-or-later",
 	"author": "Pixelers (https://pixelers.fr)",
 	"type": "module",
-	"main": "./dist/okno-bridge.js",
+	"main": "./dist/leiho-bridge.js",
 	"module": "./src/index.js",
 	"exports": {
 		".": {
 			"import": "./src/index.js",
-			"default": "./dist/okno-bridge.js"
+			"default": "./dist/leiho-bridge.js"
 		},
 		"./react": {
 			"import": "./src/react.js"
 		},
-		"./standalone": "./dist/okno-bridge.js",
+		"./standalone": "./dist/leiho-bridge.js",
 		"./content": {
 			"import": "./src/content.js"
 		}
@@ -46,10 +46,10 @@
 	"sideEffects": false,
 	"repository": {
 		"type": "git",
-		"url": "git+https://github.com/pixelersagency/okno.git",
+		"url": "git+https://github.com/pixelersagency/leiho.git",
 		"directory": "bridge"
 	},
-	"homepage": "https://github.com/pixelersagency/okno#readme",
+	"homepage": "https://github.com/pixelersagency/leiho#readme",
 	"peerDependencies": {
 		"react": ">=17"
 	},
@@ -59,7 +59,7 @@
 		}
 	},
 	"bin": {
-		"okno": "./bin/okno.js"
+		"leiho": "./bin/leiho.js"
 	},
 	"engines": {
 		"node": ">=18"

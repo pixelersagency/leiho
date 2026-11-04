@@ -1,16 +1,16 @@
 /**
- * @pixelersagency/okno-bridge v5 — pont postMessage entre un site et l'éditeur Okno.
+ * leiho v5 — pont postMessage entre un site et l'éditeur Leiho.
  *
  * Fonctionne avec n'importe quel front : HTML statique, Astro, Next.js, Remix,
  * React (SPA ou rendu serveur), Vue/Nuxt, Svelte/SvelteKit.
  *
  * Usage (ESM) :
  *   if ( window.self !== window.top ) {
- *     const { initOknoBridge } = await import( '@pixelersagency/okno-bridge' );
- *     initOknoBridge( { wpOrigin: 'https://admin.monsite.fr' } );
+ *     const { initLeihoBridge } = await import( 'leiho' );
+ *     initLeihoBridge( { wpOrigin: 'https://admin.monsite.fr' } );
  *   }
  *
- * React : import { OknoBridge } from '@pixelersagency/okno-bridge/react' — voir src/react.js.
+ * React : import { LeihoBridge } from 'leiho/react' — voir src/react.js.
  *
  * Le bridge ne fait RIEN hors iframe. Il n'appelle jamais l'API WordPress :
  * les valeurs arrivent de wp-admin par postMessage, avec vérification stricte
@@ -19,14 +19,14 @@
  * Annotations :
  *   data-wp-post="12"              conteneur : ID du contenu WordPress
  *   data-wp-field="chemin"         élément éditable (chemins pointés : cartes.0.titre)
- *   data-okno-apply="html"         la valeur est du HTML (balisage interne conservé)
- *   data-okno-section="Libellé"    section logique (arbre de structure)
- *   data-okno-layout="sections.2"  section portée par une ligne de flexible content
- *   data-okno-refresh="save"       pas d'aperçu instantané, rechargement après enregistrement
- *   data-okno-style="prop"         champ couleur : propriété CSS ciblée
- *   data-okno-managed="menu"       contenu géré ailleurs : l'éditeur explique où le modifier
- *   data-okno-managed-label="…"    libellé de la région gérée
- *   data-okno-edit-url="…"         écran wp-admin où modifier ce contenu
+ *   data-leiho-apply="html"         la valeur est du HTML (balisage interne conservé)
+ *   data-leiho-section="Libellé"    section logique (arbre de structure)
+ *   data-leiho-layout="sections.2"  section portée par une ligne de flexible content
+ *   data-leiho-refresh="save"       pas d'aperçu instantané, rechargement après enregistrement
+ *   data-leiho-style="prop"         champ couleur : propriété CSS ciblée
+ *   data-leiho-managed="menu"       contenu géré ailleurs : l'éditeur explique où le modifier
+ *   data-leiho-managed-label="…"    libellé de la région gérée
+ *   data-leiho-edit-url="…"         écran wp-admin où modifier ce contenu
  *
  * Sites React / SPA — ce qui change par rapport à une page statique :
  *   - aucun écouteur n'est posé sur les éléments : tout passe par délégation
@@ -38,11 +38,11 @@
  *   - la navigation client (pushState, popstate) déclenche un nouveau handshake.
  */
 
-const NS = 'okno';
+const NS = 'leiho';
 const VERSION = 5;
-const HOVER_CLASS = 'okno-hover';
-const MANAGED_CLASS = 'okno-managed-hover';
-const CLOAK_CLASS = 'okno-cloak';
+const HOVER_CLASS = 'leiho-hover';
+const MANAGED_CLASS = 'leiho-managed-hover';
+const CLOAK_CLASS = 'leiho-cloak';
 
 /** Attente de stabilisation du DOM avant re-collecte (rendus successifs de React). */
 const SETTLE_MS = 120;
@@ -50,19 +50,19 @@ const SETTLE_MS = 120;
 /** Balises retirées de tout HTML injecté dans l'aperçu. */
 const BANNED_TAGS = [ 'script', 'style', 'iframe', 'object', 'embed', 'link', 'meta', 'base', 'form' ];
 
-export function initOknoBridge( options ) {
+export function initLeihoBridge( options ) {
 	if ( typeof window === 'undefined' || window.self === window.top ) {
 		return; // Jamais actif en navigation publique ni côté serveur.
 	}
 
 	// Idempotent : React StrictMode monte les effets deux fois en développement.
-	if ( window.__oknoBridge ) {
+	if ( window.__leihoBridge ) {
 		return;
 	}
 
 	const wpOrigin = options && options.wpOrigin;
 	if ( ! wpOrigin ) {
-		console.warn( '[okno] Missing wpOrigin: bridge inactive.' );
+		console.warn( '[leiho] Missing wpOrigin: bridge inactive.' );
 		return;
 	}
 
@@ -76,7 +76,7 @@ export function initOknoBridge( options ) {
 		}
 	}
 
-	window.__oknoBridge = { version: VERSION };
+	window.__leihoBridge = { version: VERSION };
 
 	/* ------------------------------------------------------------------ *
 	 * État
@@ -117,7 +117,7 @@ export function initOknoBridge( options ) {
 		cloakTimer = setTimeout( () => {
 			uncloak();
 			send( { type: 'cloakTimeout' } );
-			console.warn( '[okno] wp-admin did not respond: preview shown without hydration.' );
+			console.warn( '[leiho] wp-admin did not respond: preview shown without hydration.' );
 		}, cloakDelay );
 	}
 
@@ -142,7 +142,7 @@ export function initOknoBridge( options ) {
 	// Libellé vide = libellé par défaut, composé et traduit côté éditeur
 	// (le bridge ne connaît pas la langue de wp-admin) ; voir sectionAuto().
 	function sectionLabel( el ) {
-		const explicit = el.getAttribute( 'data-okno-section' ) || el.getAttribute( 'aria-label' );
+		const explicit = el.getAttribute( 'data-leiho-section' ) || el.getAttribute( 'aria-label' );
 		if ( explicit ) {
 			return explicit;
 		}
@@ -165,7 +165,7 @@ export function initOknoBridge( options ) {
 	}
 
 	function sectionLayout( el ) {
-		const raw = el.getAttribute( 'data-okno-layout' );
+		const raw = el.getAttribute( 'data-leiho-layout' );
 		if ( ! raw ) {
 			return null;
 		}
@@ -181,11 +181,11 @@ export function initOknoBridge( options ) {
 		const nextFields = new Map();
 		const nextSections = [];
 
-		document.querySelectorAll( '[data-okno-sid]' ).forEach( ( el ) => el.removeAttribute( 'data-okno-sid' ) );
+		document.querySelectorAll( '[data-leiho-sid]' ).forEach( ( el ) => el.removeAttribute( 'data-leiho-sid' ) );
 
 		// 1. Sections annotées explicitement : elles priment, même à l'intérieur
 		//    d'une balise <section> générique (sauf imbriquées dans une autre annotée).
-		const EXPLICIT = '[data-okno-section], [data-okno-layout]';
+		const EXPLICIT = '[data-leiho-section], [data-leiho-layout]';
 		const explicit = [ ...document.querySelectorAll( EXPLICIT ) ].filter(
 			( el ) => ! ( el.parentElement && el.parentElement.closest( EXPLICIT ) )
 		);
@@ -209,7 +209,7 @@ export function initOknoBridge( options ) {
 			.sort( ( a, b ) => ( a.compareDocumentPosition( b ) & Node.DOCUMENT_POSITION_FOLLOWING ? -1 : 1 ) )
 			.forEach( ( el ) => {
 				const id = 's' + nextSections.length;
-				el.setAttribute( 'data-okno-sid', id );
+				el.setAttribute( 'data-leiho-sid', id );
 				nextSections.push( {
 					id,
 					label: sectionLabel( el ),
@@ -232,13 +232,13 @@ export function initOknoBridge( options ) {
 				entry = {
 					postId,
 					path,
-					refresh: 'save' === el.getAttribute( 'data-okno-refresh' ),
+					refresh: 'save' === el.getAttribute( 'data-leiho-refresh' ),
 					els: [],
 				};
 				nextFields.set( key, entry );
 
-				const host = el.closest( '[data-okno-sid]' );
-				const section = host && nextSections.find( ( s ) => s.id === host.getAttribute( 'data-okno-sid' ) );
+				const host = el.closest( '[data-leiho-sid]' );
+				const section = host && nextSections.find( ( s ) => s.id === host.getAttribute( 'data-leiho-sid' ) );
 				if ( section ) {
 					section.fields.push( { post: postId, path, refresh: entry.refresh } );
 				}
@@ -308,7 +308,7 @@ export function initOknoBridge( options ) {
 				el.style.backgroundImage = value ? 'url("' + value + '")' : '';
 			}
 		} else if ( 'color_picker' === fieldType ) {
-			el.style.setProperty( el.getAttribute( 'data-okno-style' ) || 'color', value || '' );
+			el.style.setProperty( el.getAttribute( 'data-leiho-style' ) || 'color', value || '' );
 		} else if ( 'link' === fieldType ) {
 			const link = 'A' === el.tagName ? el : el.querySelector( 'a' );
 			const data = value && 'object' === typeof value ? value : { url: value };
@@ -323,7 +323,7 @@ export function initOknoBridge( options ) {
 					setText( link, data.title );
 				}
 			}
-		} else if ( 'wysiwyg' === fieldType || 'html' === el.getAttribute( 'data-okno-apply' ) ) {
+		} else if ( 'wysiwyg' === fieldType || 'html' === el.getAttribute( 'data-leiho-apply' ) ) {
 			const html = sanitizeHtml( value );
 			if ( el.innerHTML !== html ) {
 				el.innerHTML = html;
@@ -429,7 +429,7 @@ export function initOknoBridge( options ) {
 
 	document.addEventListener( 'mouseover', ( event ) => {
 		const field = fieldTarget( event.target );
-		const managed = ! field && event.target.closest ? event.target.closest( '[data-okno-managed]' ) : null;
+		const managed = ! field && event.target.closest ? event.target.closest( '[data-leiho-managed]' ) : null;
 		document.querySelectorAll( '.' + HOVER_CLASS + ', .' + MANAGED_CLASS ).forEach( ( el ) => {
 			if ( el !== field && el !== managed ) {
 				el.classList.remove( HOVER_CLASS, MANAGED_CLASS );
@@ -480,25 +480,25 @@ export function initOknoBridge( options ) {
 			}
 
 			// 3. Un contenu géré ailleurs.
-			const managed = target.closest( '[data-okno-managed]' );
+			const managed = target.closest( '[data-leiho-managed]' );
 			if ( managed ) {
 				event.preventDefault();
 				event.stopPropagation();
-				const provider = managed.getAttribute( 'data-okno-managed' ) || '';
+				const provider = managed.getAttribute( 'data-leiho-managed' ) || '';
 				send( {
 					type: 'managedFocus',
 					provider,
-					label: managed.getAttribute( 'data-okno-managed-label' ) || '',
-					editUrl: managed.getAttribute( 'data-okno-edit-url' ) || '',
+					label: managed.getAttribute( 'data-leiho-managed-label' ) || '',
+					editUrl: managed.getAttribute( 'data-leiho-edit-url' ) || '',
 				} );
 				return;
 			}
 
 			// 4. Une section.
-			const section = target.closest( '[data-okno-sid]' );
+			const section = target.closest( '[data-leiho-sid]' );
 			if ( section ) {
 				event.preventDefault();
-				send( { type: 'sectionFocus', id: section.getAttribute( 'data-okno-sid' ) } );
+				send( { type: 'sectionFocus', id: section.getAttribute( 'data-leiho-sid' ) } );
 			}
 		},
 		true
@@ -558,5 +558,5 @@ export function initOknoBridge( options ) {
 	}
 }
 
-// Pas d'auto-init en ESM : appelez initOknoBridge({ wpOrigin }) explicitement.
-// Pour l'auto-init via <script src=… data-wp-origin=…>, utilisez dist/okno-bridge.js.
+// Pas d'auto-init en ESM : appelez initLeihoBridge({ wpOrigin }) explicitement.
+// Pour l'auto-init via <script src=… data-wp-origin=…>, utilisez dist/leiho-bridge.js.

@@ -1,6 +1,6 @@
 <?php
 /**
- * Okno Collections sans WordPress : php plugin/tests/test-collections.php
+ * Leiho Collections sans WordPress : php plugin/tests/test-collections.php
  *
  * Schéma, plan de migration, conversions, adapter natif (lecture, chemins
  * pointés, sanitization, contenu, types). Les migrations et les lignes
@@ -13,7 +13,7 @@ if ( ! extension_loaded( 'pdo_sqlite' ) ) {
 }
 
 define( 'ABSPATH', true );
-define( 'OKNO_VERSION', 'test' );
+define( 'LEIHO_VERSION', 'test' );
 define( 'ARRAY_A', 'ARRAY_A' );
 define( 'DAY_IN_SECONDS', 86400 );
 
@@ -81,17 +81,17 @@ function wp_save_post_revision( $id ) { $GLOBALS['revisions']++; }
 function wp_insert_post( $a, $e = false ) { $GLOBALS['post_types'][1] = $a['post_type']; $GLOBALS['inserted'][] = $a; return 1; }
 function wp_parse_args( $a, $d ) { return array_merge( $d, (array) $a ); }
 
-class Okno_Plugin {
+class Leiho_Plugin {
 	public static function title( $p ) { return get_the_title( $p ); }
 	public static function settings() {
 		$settings = array( 'front_url' => '', 'url_patterns' => array( 'service' => '/services/{slug}' ), 'path_meta_key' => '', 'post_types' => array() );
-		// Le vrai Okno_Plugin::settings() passe par le filtre okno_settings.
-		return class_exists( 'Okno_Collections' ) ? Okno_Collections::settings( $settings ) : $settings;
+		// Le vrai Leiho_Plugin::settings() passe par le filtre leiho_settings.
+		return class_exists( 'Leiho_Collections' ) ? Leiho_Collections::settings( $settings ) : $settings;
 	}
 }
 
 /**
- * $wpdb minimal sur SQLite en mémoire (PDO). Le SQL d'Okno est du MySQL
+ * $wpdb minimal sur SQLite en mémoire (PDO). Le SQL d'Leiho est du MySQL
  * portable : SQLite l'accepte tel quel (backticks, types, CREATE INDEX).
  */
 class Fake_WPDB {
@@ -170,18 +170,18 @@ class Fake_WPDB {
 }
 $GLOBALS['wpdb'] = new Fake_WPDB();
 
-require __DIR__ . '/../includes/adapters/interface-okno-adapter.php';
-require __DIR__ . '/../includes/adapters/abstract-okno-field-adapter.php';
-require __DIR__ . '/../includes/adapters/class-okno-acf-adapter.php';
-require __DIR__ . '/../includes/adapters/class-okno-native-adapter.php';
-require __DIR__ . '/../includes/collections/class-okno-collections-schema.php';
-require __DIR__ . '/../includes/collections/class-okno-collections-values.php';
-require __DIR__ . '/../includes/collections/class-okno-collections-store.php';
-require __DIR__ . '/../includes/collections/class-okno-collections.php';
-require __DIR__ . '/../includes/class-okno-url-mapper.php';
-require __DIR__ . '/../includes/class-okno-content.php';
-require __DIR__ . '/../includes/class-okno-cache.php';
-require __DIR__ . '/../includes/class-okno-types.php';
+require __DIR__ . '/../includes/adapters/interface-leiho-adapter.php';
+require __DIR__ . '/../includes/adapters/abstract-leiho-field-adapter.php';
+require __DIR__ . '/../includes/adapters/class-leiho-acf-adapter.php';
+require __DIR__ . '/../includes/adapters/class-leiho-native-adapter.php';
+require __DIR__ . '/../includes/collections/class-leiho-collections-schema.php';
+require __DIR__ . '/../includes/collections/class-leiho-collections-values.php';
+require __DIR__ . '/../includes/collections/class-leiho-collections-store.php';
+require __DIR__ . '/../includes/collections/class-leiho-collections.php';
+require __DIR__ . '/../includes/class-leiho-url-mapper.php';
+require __DIR__ . '/../includes/class-leiho-content.php';
+require __DIR__ . '/../includes/class-leiho-cache.php';
+require __DIR__ . '/../includes/class-leiho-types.php';
 
 function check( $label, $cond, $dump = null ) {
 	echo ( $cond ? 'ok   ' : 'FAIL ' ) . $label . "\n";
@@ -210,7 +210,7 @@ function sql_columns( $table ) {
  * =================================================================== */
 
 $errors = array();
-Okno_Collections_Schema::normalize(
+Leiho_Collections_Schema::normalize(
 	array(
 		'collections' => array(
 			array( 'id' => 'Page' ),
@@ -289,7 +289,7 @@ $service = array(
 );
 
 $errors = array();
-$schema = Okno_Collections_Schema::normalize( array( 'collections' => array( $home, $service ) ), $errors );
+$schema = Leiho_Collections_Schema::normalize( array( 'collections' => array( $home, $service ) ), $errors );
 check( 'schéma valide', array() === $errors, $errors );
 check( 'clé = nom par défaut', 'hero_title' === $schema['collections'][0]['fields'][0]['key'] );
 check( 'choix objet → liste', array( 'value' => 'dark', 'label' => 'Dark' ) === $schema['collections'][1]['fields'][2]['choices'][1] );
@@ -297,36 +297,36 @@ check( 'choix liste de chaînes', 'b' === $schema['collections'][1]['fields'][3]
 check( 'slug plafonné à 191', 191 === $schema['collections'][1]['fields'][5]['max_length'] );
 
 $again = array();
-$reread = Okno_Collections_Schema::normalize( Okno_Collections_Schema::compact( $schema ), $again );
+$reread = Leiho_Collections_Schema::normalize( Leiho_Collections_Schema::compact( $schema ), $again );
 check( 'export relu à l’identique', $schema === $reread && ! $again, first_diff( $schema, $reread ) . json_encode( $again ) );
-check( 'export compact (pas de required:false)', false === strpos( json_encode( Okno_Collections_Schema::compact( $schema ) ), '"required":false' ) );
+check( 'export compact (pas de required:false)', false === strpos( json_encode( Leiho_Collections_Schema::compact( $schema ) ), '"required":false' ) );
 
 /* --- Colonnes --- */
-$f = function ( $def ) { $e = array(); return Okno_Collections_Schema::normalize_field( $def, '', $e, array( 'service' ), 1 ); };
-check( 'texte court indexé', 'VARCHAR(191)' === Okno_Collections_Schema::column_type( $f( array( 'name' => 'a', 'type' => 'text', 'max_length' => 80 ) ) ) );
-check( 'texte long', 'TEXT' === Okno_Collections_Schema::column_type( $f( array( 'name' => 'a', 'type' => 'text' ) ) ) );
-check( 'nombre décimal', 'DECIMAL(20,6)' === Okno_Collections_Schema::column_type( $f( array( 'name' => 'a', 'type' => 'number' ) ) ) );
-check( 'référence unique', 'BIGINT(20) UNSIGNED' === Okno_Collections_Schema::column_type( $f( array( 'name' => 'a', 'type' => 'reference', 'to' => 'service' ) ) ) );
-check( 'référence multiple en JSON', Okno_Collections_Schema::is_json( $f( array( 'name' => 'a', 'type' => 'reference', 'to' => 'service', 'multiple' => true ) ) ) );
-check( 'date indexée', Okno_Collections_Schema::is_indexed( $f( array( 'name' => 'a', 'type' => 'date' ) ) ) );
-check( 'JSON non indexé', ! Okno_Collections_Schema::is_indexed( $f( array( 'name' => 'a', 'type' => 'list', 'fields' => array( array( 'name' => 'b', 'type' => 'text' ) ) ) ) ) );
+$f = function ( $def ) { $e = array(); return Leiho_Collections_Schema::normalize_field( $def, '', $e, array( 'service' ), 1 ); };
+check( 'texte court indexé', 'VARCHAR(191)' === Leiho_Collections_Schema::column_type( $f( array( 'name' => 'a', 'type' => 'text', 'max_length' => 80 ) ) ) );
+check( 'texte long', 'TEXT' === Leiho_Collections_Schema::column_type( $f( array( 'name' => 'a', 'type' => 'text' ) ) ) );
+check( 'nombre décimal', 'DECIMAL(20,6)' === Leiho_Collections_Schema::column_type( $f( array( 'name' => 'a', 'type' => 'number' ) ) ) );
+check( 'référence unique', 'BIGINT(20) UNSIGNED' === Leiho_Collections_Schema::column_type( $f( array( 'name' => 'a', 'type' => 'reference', 'to' => 'service' ) ) ) );
+check( 'référence multiple en JSON', Leiho_Collections_Schema::is_json( $f( array( 'name' => 'a', 'type' => 'reference', 'to' => 'service', 'multiple' => true ) ) ) );
+check( 'date indexée', Leiho_Collections_Schema::is_indexed( $f( array( 'name' => 'a', 'type' => 'date' ) ) ) );
+check( 'JSON non indexé', ! Leiho_Collections_Schema::is_indexed( $f( array( 'name' => 'a', 'type' => 'list', 'fields' => array( array( 'name' => 'b', 'type' => 'text' ) ) ) ) ) );
 
 /* =====================================================================
  * Migrations sur SQLite
  * =================================================================== */
 
-$report = Okno_Collections::save_schema( array( 'collections' => array( $home, $service ) ), true );
-check( 'dry run : plan sans table', ! is_wp_error( $report ) && 'create_table' === $report['operations'][0]['op'] && ! Okno_Collections_Store::collection_state( 'home' ), $report );
+$report = Leiho_Collections::save_schema( array( 'collections' => array( $home, $service ) ), true );
+check( 'dry run : plan sans table', ! is_wp_error( $report ) && 'create_table' === $report['operations'][0]['op'] && ! Leiho_Collections_Store::collection_state( 'home' ), $report );
 
-$report = Okno_Collections::save_schema( array( 'collections' => array( $home, $service ) ) );
-check( 'schéma enregistré', ! is_wp_error( $report ) && Okno_Collections::get( 'service' ), $report );
-$cols = sql_columns( 'wp_okno_service' );
+$report = Leiho_Collections::save_schema( array( 'collections' => array( $home, $service ) ) );
+check( 'schéma enregistré', ! is_wp_error( $report ) && Leiho_Collections::get( 'service' ), $report );
+$cols = sql_columns( 'wp_leiho_service' );
 check( 'table créée avec colonnes typées', isset( $cols['f_price'], $cols['f_featured'], $cols['f_tags'] ) && 'TINYINT(1)' === $cols['f_featured'] && 'DATE' === $cols['f_starts'], $cols );
-check( 'index créés', (bool) $GLOBALS['wpdb']->get_var( "SELECT name FROM sqlite_master WHERE type='index' AND tbl_name='wp_okno_service' AND sql LIKE '%f_tone%'" ) );
-check( 'post types', array( 'home', 'service' ) === Okno_Collections::post_types() );
+check( 'index créés', (bool) $GLOBALS['wpdb']->get_var( "SELECT name FROM sqlite_master WHERE type='index' AND tbl_name='wp_leiho_service' AND sql LIKE '%f_tone%'" ) );
+check( 'post types', array( 'home', 'service' ) === Leiho_Collections::post_types() );
 check( 'entrée du singleton créée', 'create_entry' === end( $report['operations'] )['op'] && 'home' === $GLOBALS['inserted'][0]['post_name'], $report['operations'] );
 
-$settings = Okno_Collections::settings( array( 'post_types' => array( 'page' ), 'url_patterns' => array( 'home' => '/accueil' ) ) );
+$settings = Leiho_Collections::settings( array( 'post_types' => array( 'page' ), 'url_patterns' => array( 'home' => '/accueil' ) ) );
 check( 'réglages : types ajoutés', array( 'page', 'home', 'service' ) === $settings['post_types'] );
 check( 'réglages : chemin du réglage prioritaire', '/accueil' === $settings['url_patterns']['home'] && '/services/{slug}' === $settings['url_patterns']['service'] );
 
@@ -335,7 +335,7 @@ check( 'réglages : chemin du réglage prioritaire', '/accueil' === $settings['u
  * =================================================================== */
 
 $GLOBALS['post_types'] = array( 1 => 'home', 2 => 'service', 3 => 'service', 7 => 'attachment', 8 => 'attachment', 9 => 'page' );
-$adapter = new Okno_Native_Adapter();
+$adapter = new Leiho_Native_Adapter();
 
 $result = $adapter->save_values(
 	1,
@@ -357,19 +357,19 @@ check( 'chemin inconnu laissé aux autres adapters', ! isset( $result['errors'][
 check( 'révision demandée', 1 === $GLOBALS['revisions'] );
 // Les champs vivent dans la table de la collection, pas en postmeta : le
 // cache de contenu et la publication automatique doivent l'apprendre quand même.
-$changed = array_values( array_filter( $GLOBALS['actions'], function ( $a ) { return 'okno_content_changed' === $a[0]; } ) );
-check( 'écriture : okno_content_changed', $changed && 1 === $changed[ count( $changed ) - 1 ][1][0], $changed );
-$gen = Okno_Cache::generation();
-$inv = new ReflectionProperty( 'Okno_Content', 'invalidated' );
+$changed = array_values( array_filter( $GLOBALS['actions'], function ( $a ) { return 'leiho_content_changed' === $a[0]; } ) );
+check( 'écriture : leiho_content_changed', $changed && 1 === $changed[ count( $changed ) - 1 ][1][0], $changed );
+$gen = Leiho_Cache::generation();
+$inv = new ReflectionProperty( 'Leiho_Content', 'invalidated' );
 $inv->setAccessible( true );
 $inv->setValue( null, false );
-$GLOBALS['options'][ Okno_Content::OPTION_CACHE ] = array( 'stale' => true );
+$GLOBALS['options'][ Leiho_Content::OPTION_CACHE ] = array( 'stale' => true );
 $adapter->save_values( 1, array( 'hero_title' => 'Bonjour !' ) );
-check( 'écriture : cache de contenu invalidé', $gen !== Okno_Cache::generation() && ! isset( $GLOBALS['options'][ Okno_Content::OPTION_CACHE ] ) );
+check( 'écriture : cache de contenu invalidé', $gen !== Leiho_Cache::generation() && ! isset( $GLOBALS['options'][ Leiho_Content::OPTION_CACHE ] ) );
 $adapter->save_values( 1, array( 'hero_title' => 'Bonjour' ) );
 $GLOBALS['revisions'] = 1;
 
-$row = $GLOBALS['wpdb']->get_row( 'SELECT * FROM wp_okno_home WHERE post_id = 1' );
+$row = $GLOBALS['wpdb']->get_row( 'SELECT * FROM wp_leiho_home WHERE post_id = 1' );
 $stored = json_decode( $row['f_sections'], true );
 check( 'JSON indexé par clé, bloc par _block', 'cards' === $stored[1]['_block'] && 'Audit' === $stored[1]['items'][0]['title'] && 2 === $stored[1]['items'][0]['service'], $stored );
 check( 'richtext nettoyé', '<b>Hi</b>' === $stored[0]['body'] );
@@ -444,7 +444,7 @@ foreach ( $bad as $case ) {
 }
 $tags = array_values( array_filter( $adapter->get_schema( 2 )[0]['fields'], function ( $x ) { return 'tags' === $x['path']; } ) )[0];
 check( 'éditeur : select multiple en liste', true === $tags['multiple'] && array( 'b', 'a' ) === $tags['value'], $tags );
-check( 'vider un champ = NULL', array( 'tone' ) === $adapter->save_values( 2, array( 'tone' => '' ) )['saved'] && null === $GLOBALS['wpdb']->get_var( 'SELECT f_tone FROM wp_okno_service WHERE post_id = 2' ) );
+check( 'vider un champ = NULL', array( 'tone' ) === $adapter->save_values( 2, array( 'tone' => '' ) )['saved'] && null === $GLOBALS['wpdb']->get_var( 'SELECT f_tone FROM wp_leiho_service WHERE post_id = 2' ) );
 check( 'select vide servi en chaîne vide', '' === $adapter->get_content( 2 )['tone'] );
 check( 'autre type de post ignoré', array() === $adapter->get_schema( 9 ) && array() === $adapter->get_content( 9 ) );
 
@@ -452,7 +452,7 @@ check( 'autre type de post ignoré', array() === $adapter->get_schema( 9 ) && ar
  * Migrations avec données
  * =================================================================== */
 
-$GLOBALS['wpdb']->insert( 'wp_okno_service', array( 'post_id' => 3, 'f_price' => '99.5' ) );
+$GLOBALS['wpdb']->insert( 'wp_leiho_service', array( 'post_id' => 3, 'f_price' => '99.5' ) );
 $v2              = $service;
 $v2['fields'][0] = array( 'key' => 'price', 'name' => 'price', 'type' => 'number' );                // texte → nombre.
 $v2['fields'][1] = array( 'key' => 'featured', 'name' => 'highlighted', 'type' => 'boolean' );       // renommé.
@@ -460,54 +460,54 @@ $v2['fields'][6] = array( 'name' => 'related', 'type' => 'reference', 'to' => ar
 unset( $v2['fields'][7] );                                                                             // galerie retirée.
 $v2['fields'][]  = array( 'name' => 'summary', 'type' => 'text', 'multiline' => true );            // ajouté.
 
-$plan = Okno_Collections::save_schema( array( 'collections' => array( $home, $v2 ) ), true );
+$plan = Leiho_Collections::save_schema( array( 'collections' => array( $home, $v2 ) ), true );
 $ops  = array();
 foreach ( $plan['operations'] as $op ) { $ops[] = $op['op'] . ( isset( $op['key'] ) ? ':' . $op['key'] : '' ); }
 check( 'plan', array( 'retype:price', 'retype:related', 'add_column:summary', 'archive:gallery' ) === $ops, $ops );
 
-$report = Okno_Collections::save_schema( array( 'collections' => array( $home, $v2 ) ) );
+$report = Leiho_Collections::save_schema( array( 'collections' => array( $home, $v2 ) ) );
 check( 'migration appliquée', ! is_wp_error( $report ), $report );
 check( 'conversion comptée', array( 'converted' => 1, 'failed' => 1 ) === $report['converted']['service.price'], $report['converted'] );
 check( 'échec signalé', 1 === count( $report['warnings'] ), $report['warnings'] );
-$cols = sql_columns( 'wp_okno_service' );
+$cols = sql_columns( 'wp_leiho_service' );
 check( 'nouvelle colonne, ancienne gardée', isset( $cols['f_price__2'], $cols['f_price'], $cols['f_gallery'] ), $cols );
 $c2 = $adapter->get_content( 2 );
 $c3 = $adapter->get_content( 3 );
 check( 'nombre converti', 99.5 === $c3['price'], $c3 );
-check( 'texte non numérique : null, gardé en archive', null === $c2['price'] && '120 €' === $GLOBALS['wpdb']->get_var( 'SELECT f_price FROM wp_okno_service WHERE post_id = 2' ) );
+check( 'texte non numérique : null, gardé en archive', null === $c2['price'] && '120 €' === $GLOBALS['wpdb']->get_var( 'SELECT f_price FROM wp_leiho_service WHERE post_id = 2' ) );
 check( 'renommage sans perte', true === $c2['highlighted'] && ! isset( $c2['featured'] ) );
 check( 'unique → multiple', array( 3 ) === array_column( $c2['related'], 'id' ), $c2['related'] );
 check( 'champ retiré absent du contenu', ! isset( $c2['gallery'] ) );
-$state = Okno_Collections_Store::collection_state( 'service' );
+$state = Leiho_Collections_Store::collection_state( 'service' );
 check( 'colonnes archivées listées', array( 'f_price', 'f_related', 'f_gallery' ) === array_column( $state['archived'], 'column' ), $state['archived'] );
 
 /* --- Champ rajouté : sa colonne revient --- */
 $v3            = $v2;
 $v3['fields'][] = array( 'name' => 'gallery', 'type' => 'gallery', 'max' => 2 );
-$report = Okno_Collections::save_schema( array( 'collections' => array( $home, $v3 ) ) );
+$report = Leiho_Collections::save_schema( array( 'collections' => array( $home, $v3 ) ) );
 $ops    = array_column( $report['operations'], 'op' );
 check( 'restauration de colonne archivée', in_array( 'restore', $ops, true ) && ! in_array( 'add_column', $ops, true ), $report['operations'] );
-check( 'valeurs retrouvées', 2 === count( ( new Okno_Native_Adapter() )->get_content( 2 )['gallery'] ) );
+check( 'valeurs retrouvées', 2 === count( ( new Leiho_Native_Adapter() )->get_content( 2 )['gallery'] ) );
 
 /* --- Retrait d'une collection : données gardées --- */
-$report = Okno_Collections::save_schema( array( 'collections' => array( $v3 ) ) );
-check( 'collection retirée sans DROP', 'remove_collection' === $report['operations'][0]['op'] && null === Okno_Collections::get( 'home' ) && Okno_Collections_Store::collection_state( 'home' ) );
-Okno_Collections::save_schema( array( 'collections' => array( $home, $v3 ) ) );
-check( 'collection remise : contenu intact', 'Bonjour' === ( new Okno_Native_Adapter() )->get_content( 1 )['hero_title'] );
+$report = Leiho_Collections::save_schema( array( 'collections' => array( $v3 ) ) );
+check( 'collection retirée sans DROP', 'remove_collection' === $report['operations'][0]['op'] && null === Leiho_Collections::get( 'home' ) && Leiho_Collections_Store::collection_state( 'home' ) );
+Leiho_Collections::save_schema( array( 'collections' => array( $home, $v3 ) ) );
+check( 'collection remise : contenu intact', 'Bonjour' === ( new Leiho_Native_Adapter() )->get_content( 1 )['hero_title'] );
 
 /* --- Purge explicite --- */
-$dropped = Okno_Collections_Store::purge( 'service', array( 'f_related' ) );
-check( 'purge d’une colonne archivée', array( 'f_related' ) === $dropped && ! isset( sql_columns( 'wp_okno_service' )['f_related'] ), $dropped );
+$dropped = Leiho_Collections_Store::purge( 'service', array( 'f_related' ) );
+check( 'purge d’une colonne archivée', array( 'f_related' ) === $dropped && ! isset( sql_columns( 'wp_leiho_service' )['f_related'] ), $dropped );
 
 /* --- Erreurs d'une collection seule : chemins relatifs --- */
-$err = Okno_Collections::put_collection( array( 'id' => 'team', 'fields' => array( array( 'name' => 'Bad', 'type' => 'text' ) ) ) );
+$err = Leiho_Collections::put_collection( array( 'id' => 'team', 'fields' => array( array( 'name' => 'Bad', 'type' => 'text' ) ) ) );
 check( 'put_collection : erreurs relatives', is_wp_error( $err ) && 'fields.0.name' === $err->get_error_data()['errors'][0]['path'], $err );
-$err = Okno_Collections::put_collection( array( 'id' => 'activity' ) );
+$err = Leiho_Collections::put_collection( array( 'id' => 'activity' ) );
 check( 'id de la table du journal réservé', is_wp_error( $err ) && 'id' === $err->get_error_data()['errors'][0]['path'] );
 
 /* --- Identifiants --- */
 $threw = false;
-try { Okno_Collections_Store::ident( 'x`; DROP TABLE wp_posts; --' ); } catch ( InvalidArgumentException $e ) { $threw = true; }
+try { Leiho_Collections_Store::ident( 'x`; DROP TABLE wp_posts; --' ); } catch ( InvalidArgumentException $e ) { $threw = true; }
 check( 'identifiant SQL refusé', $threw );
 
 /* =====================================================================
@@ -516,40 +516,40 @@ check( 'identifiant SQL refusé', $threw );
 
 $ok = true;
 $to = function ( $def ) use ( $f ) { return $f( $def ); };
-check( 'texte → booléen', 0 === Okno_Collections_Values::convert( 'no', array( 'type' => 'text' ), $to( array( 'name' => 'a', 'type' => 'boolean' ) ), $ok ) && $ok );
-check( 'texte → date', '2026-11-04' === Okno_Collections_Values::convert( '2026-11-04 10:00', array( 'type' => 'text' ), $to( array( 'name' => 'a', 'type' => 'date' ) ), $ok ) );
-check( 'liste → unique', 5 === Okno_Collections_Values::convert( '[5,6]', array( 'type' => 'reference', 'multiple' => true ), $to( array( 'name' => 'a', 'type' => 'reference', 'to' => 'service' ) ), $ok ) );
-Okno_Collections_Values::convert( 'zzz', array( 'type' => 'text' ), $to( array( 'name' => 'a', 'type' => 'select', 'choices' => array( 'a' ) ) ), $ok );
+check( 'texte → booléen', 0 === Leiho_Collections_Values::convert( 'no', array( 'type' => 'text' ), $to( array( 'name' => 'a', 'type' => 'boolean' ) ), $ok ) && $ok );
+check( 'texte → date', '2026-11-04' === Leiho_Collections_Values::convert( '2026-11-04 10:00', array( 'type' => 'text' ), $to( array( 'name' => 'a', 'type' => 'date' ) ), $ok ) );
+check( 'liste → unique', 5 === Leiho_Collections_Values::convert( '[5,6]', array( 'type' => 'reference', 'multiple' => true ), $to( array( 'name' => 'a', 'type' => 'reference', 'to' => 'service' ) ), $ok ) );
+Leiho_Collections_Values::convert( 'zzz', array( 'type' => 'text' ), $to( array( 'name' => 'a', 'type' => 'select', 'choices' => array( 'a' ) ) ), $ok );
 check( 'choix inconnu : échec', false === $ok );
-Okno_Collections_Values::convert( str_repeat( 'x', 300 ), array( 'type' => 'text' ), $to( array( 'name' => 'a', 'type' => 'text', 'max_length' => 100 ) ), $ok );
+Leiho_Collections_Values::convert( str_repeat( 'x', 300 ), array( 'type' => 'text' ), $to( array( 'name' => 'a', 'type' => 'text', 'max_length' => 100 ) ), $ok );
 check( 'trop long pour la colonne : échec, pas de troncature', false === $ok );
 
 /* =====================================================================
  * Révisions
  * =================================================================== */
 
-$snap = Okno_Collections::snapshot( Okno_Collections::get( 'home' ), 1 );
+$snap = Leiho_Collections::snapshot( Leiho_Collections::get( 'home' ), 1 );
 check( 'instantané indexé par clé', isset( $snap['fields']['hero_title'], $snap['fields']['sections'] ) && 'text' === $snap['fields']['hero_title']['type'], $snap );
 
 /* =====================================================================
  * Types TypeScript
  * =================================================================== */
 
-$ts = Okno_Types::render(
+$ts = Leiho_Types::render(
 	array(
 		'home'    => $adapter->get_definitions( 'home' ),
-		'service' => ( new Okno_Native_Adapter() )->get_definitions( 'service' ),
+		'service' => ( new Leiho_Native_Adapter() )->get_definitions( 'service' ),
 	)
 );
-check( 'singleton typé', false !== strpos( $ts, "export type Home = OknoItem<'home', HomeFields>;" ) );
+check( 'singleton typé', false !== strpos( $ts, "export type Home = LeihoItem<'home', HomeFields>;" ) );
 check( 'blocs discriminés', false !== strpos( $ts, "_layout: 'cards';" ) );
-check( 'référence dans une liste', false !== strpos( $ts, 'service: OknoRef | null;' ), $ts );
+check( 'référence dans une liste', false !== strpos( $ts, 'service: LeihoRef | null;' ), $ts );
 check( 'select multiple', false !== strpos( $ts, "tags: Array<'a' | 'b'>;" ), $ts );
-check( 'référence multiple', false !== strpos( $ts, 'related: OknoRef[];' ) );
+check( 'référence multiple', false !== strpos( $ts, 'related: LeihoRef[];' ) );
 check( 'nombre', false !== strpos( $ts, 'price: number | null;' ) );
 $tsc = trim( (string) shell_exec( 'command -v tsc 2>/dev/null' ) );
 if ( '' !== $tsc ) {
-	$file = sys_get_temp_dir() . '/okno-collections-' . getmypid() . '.d.ts';
+	$file = sys_get_temp_dir() . '/leiho-collections-' . getmypid() . '.d.ts';
 	file_put_contents( $file, $ts );
 	exec( escapeshellarg( $tsc ) . ' --noEmit --strict ' . escapeshellarg( $file ) . ' 2>&1', $output, $code );
 	unlink( $file );

@@ -4,7 +4,7 @@
  */
 define( 'ABSPATH', true );
 function wp_json_encode( $v, $o = 0 ) { return json_encode( $v, $o ); }
-require __DIR__ . '/../includes/class-okno-activity.php';
+require __DIR__ . '/../includes/class-leiho-activity.php';
 
 function check( $label, $cond, $dump = null ) {
 	echo ( $cond ? 'ok   ' : 'FAIL ' ) . $label . "\n";
@@ -48,7 +48,7 @@ function schema( $h1, $cards, $adresse ) {
 $before = schema( 'Bonjour', array( array( 'titre' => 'A' ) ), 'Paris' );
 $after  = schema( 'Bonsoir', array( array( 'titre' => 'A' ), array( 'titre' => 'B' ) ), 'Lyon' );
 
-$rows = Okno_Activity::diff( $before, $after, array( 'sections.0.h1', 'cartes', 'reglages.adresse', '_title', 'inconnu' ) );
+$rows = Leiho_Activity::diff( $before, $after, array( 'sections.0.h1', 'cartes', 'reglages.adresse', '_title', 'inconnu' ) );
 $by   = array();
 foreach ( $rows as $r ) { $by[ $r['path'] ] = $r; }
 
@@ -61,9 +61,9 @@ check( 'group : libellé', 'Réglages › Adresse' === $by['reglages.adresse']['
 check( 'group : valeurs', 'Paris' === $by['reglages.adresse']['old'] && 'Lyon' === $by['reglages.adresse']['new'] );
 check( 'chemin inconnu ignoré', ! isset( $by['inconnu'] ) );
 
-check( 'sérialisation structure en JSON', '[{"titre":"A"}]' === Okno_Activity::serialize( array( array( 'titre' => 'A' ) ) ), Okno_Activity::serialize( array( array( 'titre' => 'A' ) ) ) );
-check( 'sérialisation booléen', '1' === Okno_Activity::serialize( true ) );
-check( 'sérialisation accents conservés', '"é"' === Okno_Activity::serialize( array( 'é' ) ) || '["é"]' === Okno_Activity::serialize( array( 'é' ) ) );
+check( 'sérialisation structure en JSON', '[{"titre":"A"}]' === Leiho_Activity::serialize( array( array( 'titre' => 'A' ) ) ), Leiho_Activity::serialize( array( array( 'titre' => 'A' ) ) ) );
+check( 'sérialisation booléen', '1' === Leiho_Activity::serialize( true ) );
+check( 'sérialisation accents conservés', '"é"' === Leiho_Activity::serialize( array( 'é' ) ) || '["é"]' === Leiho_Activity::serialize( array( 'é' ) ) );
 
 echo empty( $GLOBALS['failed'] ) ? "\nTOUS LES TESTS PASSENT\n" : "\nÉCHECS\n";
 exit( empty( $GLOBALS['failed'] ) ? 0 : 1 );

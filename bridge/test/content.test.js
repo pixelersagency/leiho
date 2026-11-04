@@ -6,7 +6,7 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs/promises';
 import os from 'node:os';
 import path from 'node:path';
-import { exportUrl, indexOknoContent, loadOknoContent } from '../src/content.js';
+import { exportUrl, indexLeihoContent, loadLeihoContent } from '../src/content.js';
 
 const sample = {
 	format: 1,
@@ -26,20 +26,20 @@ function respond( status, body ) {
 }
 
 async function tmpSnapshot() {
-	const dir = await fs.mkdtemp( path.join( os.tmpdir(), 'okno-' ) );
+	const dir = await fs.mkdtemp( path.join( os.tmpdir(), 'leiho-' ) );
 	return path.join( dir, 'content.json' );
 }
 
 test( 'exportUrl accepte l’adresse du CMS ou l’endpoint complet', () => {
-	assert.equal( exportUrl( 'https://cms.example.com/' ), 'https://cms.example.com/wp-json/okno/v1/export' );
-	assert.equal( exportUrl( 'https://cms.example.com/wp-json/okno/v1/export' ), 'https://cms.example.com/wp-json/okno/v1/export' );
+	assert.equal( exportUrl( 'https://cms.example.com/' ), 'https://cms.example.com/wp-json/leiho/v1/export' );
+	assert.equal( exportUrl( 'https://cms.example.com/wp-json/leiho/v1/export' ), 'https://cms.example.com/wp-json/leiho/v1/export' );
 	assert.throws( () => exportUrl( '' ) );
 } );
 
 test( 'charge, envoie le jeton et écrit l’instantané', async () => {
 	const snapshot = await tmpSnapshot();
 	let seen;
-	const result = await loadOknoContent( {
+	const result = await loadLeihoContent( {
 		url: 'https://cms.example.com',
 		token: 'secret',
 		snapshot,
@@ -49,7 +49,7 @@ test( 'charge, envoie le jeton et écrit l’instantané', async () => {
 		},
 	} );
 	assert.equal( result.source, 'network' );
-	assert.equal( seen.init.headers[ 'X-Okno-Token' ], 'secret' );
+	assert.equal( seen.init.headers[ 'X-Leiho-Token' ], 'secret' );
 	assert.deepEqual( JSON.parse( await fs.readFile( snapshot, 'utf8' ) ), sample );
 } );
 
@@ -57,7 +57,7 @@ test( '304 : réutilise l’instantané sans le retélécharger', async () => {
 	const snapshot = await tmpSnapshot();
 	await fs.writeFile( snapshot, JSON.stringify( sample ) );
 	let sent;
-	const result = await loadOknoContent( {
+	const result = await loadLeihoContent( {
 		url: 'https://cms.example.com',
 		snapshot,
 		fetch: async ( url, init ) => {
@@ -75,7 +75,7 @@ test( 'WordPress en panne : reprises puis instantané signalé', async () => {
 	await fs.writeFile( snapshot, JSON.stringify( sample ) );
 	let calls = 0;
 	const warnings = [];
-	const result = await loadOknoContent( {
+	const result = await loadLeihoContent( {
 		url: 'https://cms.example.com',
 		snapshot,
 		retries: 2,
@@ -93,7 +93,7 @@ test( 'WordPress en panne : reprises puis instantané signalé', async () => {
 
 test( 'WordPress en panne sans instantané : échec', async () => {
 	await assert.rejects(
-		loadOknoContent( { url: 'https://cms.example.com', snapshot: false, retries: 1, fetch: async () => respond( 502, null ), logger: silent } ),
+		loadLeihoContent( { url: 'https://cms.example.com', snapshot: false, retries: 1, fetch: async () => respond( 502, null ), logger: silent } ),
 		/HTTP 502/
 	);
 } );
@@ -102,7 +102,7 @@ test( 'fallback error : pas d’instantané même s’il existe', async () => {
 	const snapshot = await tmpSnapshot();
 	await fs.writeFile( snapshot, JSON.stringify( sample ) );
 	await assert.rejects(
-		loadOknoContent( { url: 'https://cms.example.com', snapshot, fallback: 'error', retries: 1, fetch: async () => respond( 503, null ), logger: silent } )
+		loadLeihoContent( { url: 'https://cms.example.com', snapshot, fallback: 'error', retries: 1, fetch: async () => respond( 503, null ), logger: silent } )
 	);
 } );
 
@@ -111,7 +111,7 @@ test( 'jeton refusé : pas de reprise ni d’instantané', async () => {
 	await fs.writeFile( snapshot, JSON.stringify( sample ) );
 	let calls = 0;
 	await assert.rejects(
-		loadOknoContent( {
+		loadLeihoContent( {
 			url: 'https://cms.example.com',
 			snapshot,
 			retries: 3,
@@ -121,13 +121,13 @@ test( 'jeton refusé : pas de reprise ni d’instantané', async () => {
 			},
 			logger: silent,
 		} ),
-		/OKNO_TOKEN/
+		/LEIHO_TOKEN/
 	);
 	assert.equal( calls, 1 );
 } );
 
 test( 'index : par chemin, id, type et slug', () => {
-	const content = indexOknoContent( sample );
+	const content = indexLeihoContent( sample );
 	assert.equal( content.byPath( '/services/audit/' ).id, 9 );
 	assert.equal( content.byPath( '' ).id, 2 );
 	assert.equal( content.byId( '9' ).slug, 'audit' );

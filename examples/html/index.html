@@ -4,11 +4,11 @@
     <meta charset="utf-8" />
     <title>About us</title>
 
-    <!-- Okno: loads the bridge only inside the editor. -->
+    <!-- Leiho: loads the bridge only inside the editor. -->
     <script>
       if (window.self !== window.top) {
         var s = document.createElement('script');
-        s.src = '/okno-bridge.js';
+        s.src = '/leiho-bridge.js';
         s.setAttribute('data-wp-origin', 'https://wp.example.com');
         document.head.appendChild(s);
       }
@@ -24,8 +24,8 @@
       <!-- A group field: dotted path to its sub-field. -->
       <address data-wp-field="contact.address">1 Main Street</address>
 
-      <!-- Content Okno doesn't edit: clicking it explains where to go. -->
-      <nav data-okno-managed="menu" data-okno-edit-url="https://wp.example.com/wp-admin/nav-menus.php">
+      <!-- Content Leiho doesn't edit: clicking it explains where to go. -->
+      <nav data-leiho-managed="menu" data-leiho-edit-url="https://wp.example.com/wp-admin/nav-menus.php">
         <a href="/">Home</a> <a href="/about">About</a>
       </nav>
     </main>

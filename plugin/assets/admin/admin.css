@@ -1,227 +1,227 @@
 /*
- * Okno — pages d'administration (Accueil, Démarrer, Réglages, Publications).
+ * Leiho — pages d'administration (Accueil, Démarrer, Réglages, Publications).
  *
  * Même grammaire que l'éditeur : fond WordPress, barre blanche, cartes
  * blanches, un seul accent. Aucune dépendance à Dashicons.
  */
 
-.okno-admin {
-	--okno-bg: #ffffff;
-	--okno-surface: #f5f5f5;
-	--okno-canvas: #ebebeb;
-	--okno-line: #e5e5e5;
-	--okno-line-strong: #d4d4d4;
-	--okno-ink: #0a0a0a;
-	--okno-body: #404040;
-	--okno-muted: #525252;
-	--okno-faint: #8a8a8a;
-	--okno-accent: #c5ff3e;
-	--okno-accent-hover: #b4f01f;
-	--okno-accent-ink: #3d6b00;
-	--okno-on-accent: #0a0a0a;
-	--okno-accent-soft: #f1fdd4;
-	--okno-accent-line: #86c400;
-	--okno-subtle: var(--okno-surface);
-	--okno-ok: #1a7f4b;
-	--okno-ok-soft: #e7f5ee;
-	--okno-warn: #8a5a00;
-	--okno-warn-soft: #fdf3dc;
-	--okno-error: #b42318;
-	--okno-error-soft: #fdecea;
-	--okno-radius: 10px;
+.leiho-admin {
+	--leiho-bg: #ffffff;
+	--leiho-surface: #f5f5f5;
+	--leiho-canvas: #ebebeb;
+	--leiho-line: #e5e5e5;
+	--leiho-line-strong: #d4d4d4;
+	--leiho-ink: #0a0a0a;
+	--leiho-body: #404040;
+	--leiho-muted: #525252;
+	--leiho-faint: #8a8a8a;
+	--leiho-accent: #c5ff3e;
+	--leiho-accent-hover: #b4f01f;
+	--leiho-accent-ink: #3d6b00;
+	--leiho-on-accent: #0a0a0a;
+	--leiho-accent-soft: #f1fdd4;
+	--leiho-accent-line: #86c400;
+	--leiho-subtle: var(--leiho-surface);
+	--leiho-ok: #1a7f4b;
+	--leiho-ok-soft: #e7f5ee;
+	--leiho-warn: #8a5a00;
+	--leiho-warn-soft: #fdf3dc;
+	--leiho-error: #b42318;
+	--leiho-error-soft: #fdecea;
+	--leiho-radius: 10px;
 
 	margin: 0 0 0 -20px;
-	color: var(--okno-body);
+	color: var(--leiho-body);
 	font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
 	font-size: 14px;
 	line-height: 1.6;
 }
 
-.okno-admin *,
-.okno-admin *::before,
-.okno-admin *::after {
+.leiho-admin *,
+.leiho-admin *::before,
+.leiho-admin *::after {
 	box-sizing: border-box;
 }
 
-.okno-admin [hidden] {
+.leiho-admin [hidden] {
 	display: none !important;
 }
 
-.okno-admin a {
-	color: var(--okno-accent-ink);
+.leiho-admin a {
+	color: var(--leiho-accent-ink);
 }
 
-.okno-admin code {
-	font-size: var(--okno-text-base, 14px);
+.leiho-admin code {
+	font-size: var(--leiho-text-base, 14px);
 	padding: 1px 5px;
 	border-radius: 4px;
-	background: var(--okno-subtle);
-	color: var(--okno-ink);
+	background: var(--leiho-subtle);
+	color: var(--leiho-ink);
 }
 
 /* ── Barre du haut ─────────────────────────────────────────────────── */
 
-.okno-bar {
+.leiho-bar {
 	display: flex;
 	align-items: center;
 	justify-content: space-between;
 	gap: 24px;
 	flex-wrap: wrap;
 	padding: 14px 28px;
-	background: var(--okno-bg);
-	border-bottom: 1px solid var(--okno-line);
+	background: var(--leiho-bg);
+	border-bottom: 1px solid var(--leiho-line);
 }
 
-.okno-bar__brand {
+.leiho-bar__brand {
 	display: flex;
 	align-items: center;
 	gap: 10px;
 }
 
-.okno-bar__brand img {
+.leiho-bar__brand img {
 	display: block;
 	width: 24px;
 	height: 24px;
 }
 
-.okno-bar__title {
+.leiho-bar__title {
 	margin: 0;
 	padding: 0;
 	font-size: 16px;
 	font-weight: 650;
-	color: var(--okno-ink);
+	color: var(--leiho-ink);
 }
 
-.okno-bar__version {
+.leiho-bar__version {
 	padding: 2px 8px;
 	border-radius: 999px;
-	background: var(--okno-subtle);
-	color: var(--okno-muted);
-	font-size: var(--okno-text-base, 14px);
+	background: var(--leiho-subtle);
+	color: var(--leiho-muted);
+	font-size: var(--leiho-text-base, 14px);
 }
 
-.okno-tabs {
+.leiho-tabs {
 	display: flex;
 	gap: 4px;
 	flex-wrap: wrap;
 }
 
-.okno-tabs a {
+.leiho-tabs a {
 	padding: 7px 12px;
 	border-radius: 7px;
-	color: var(--okno-muted);
+	color: var(--leiho-muted);
 	font-size: 13px;
 	font-weight: 550;
 	text-decoration: none;
 	transition: color 0.15s ease, background 0.15s ease;
 }
 
-.okno-tabs a:hover {
-	color: var(--okno-ink);
-	background: var(--okno-subtle);
+.leiho-tabs a:hover {
+	color: var(--leiho-ink);
+	background: var(--leiho-subtle);
 }
 
-.okno-tabs a:focus-visible {
-	outline: 2px solid var(--okno-accent-ink);
+.leiho-tabs a:focus-visible {
+	outline: 2px solid var(--leiho-accent-ink);
 	outline-offset: 1px;
 	box-shadow: none;
 }
 
-.okno-tabs a[aria-current="page"] {
-	color: var(--okno-accent-ink);
-	background: var(--okno-accent-soft);
+.leiho-tabs a[aria-current="page"] {
+	color: var(--leiho-accent-ink);
+	background: var(--leiho-accent-soft);
 }
 
 /* ── Contenu ───────────────────────────────────────────────────────── */
 
-.okno-page {
+.leiho-page {
 	max-width: 960px;
 	margin: 32px auto 64px;
 	padding: 0 28px;
 }
 
-.okno-page--narrow {
+.leiho-page--narrow {
 	max-width: 760px;
 }
 
-.okno-eyebrow {
+.leiho-eyebrow {
 	display: block;
 	margin: 0 0 6px;
-	color: var(--okno-muted);
-	font-size: var(--okno-text-sm, 13px);
+	color: var(--leiho-muted);
+	font-size: var(--leiho-text-sm, 13px);
 	font-weight: 650;
 	letter-spacing: 0.08em;
 	text-transform: uppercase;
 }
 
-.okno-heading {
+.leiho-heading {
 	margin: 36px 0 12px;
-	color: var(--okno-muted);
-	font-size: var(--okno-text-sm, 13px);
+	color: var(--leiho-muted);
+	font-size: var(--leiho-text-sm, 13px);
 	font-weight: 650;
 	letter-spacing: 0.08em;
 	text-transform: uppercase;
 }
 
-.okno-heading:first-child {
+.leiho-heading:first-child {
 	margin-top: 0;
 }
 
-.okno-lead {
+.leiho-lead {
 	max-width: 620px;
 	margin: 0 0 24px;
-	color: var(--okno-body);
+	color: var(--leiho-body);
 	font-size: 15px;
 }
 
-.okno-card {
+.leiho-card {
 	padding: 28px 32px;
-	background: var(--okno-bg);
-	border: 1px solid var(--okno-line);
-	border-radius: var(--okno-radius);
+	background: var(--leiho-bg);
+	border: 1px solid var(--leiho-line);
+	border-radius: var(--leiho-radius);
 }
 
-.okno-card + .okno-card {
+.leiho-card + .leiho-card {
 	margin-top: 16px;
 }
 
-.okno-card h2 {
+.leiho-card h2 {
 	margin: 0 0 6px;
 	padding: 0;
-	color: var(--okno-ink);
+	color: var(--leiho-ink);
 	font-size: 17px;
 	font-weight: 650;
 	line-height: 1.35;
 }
 
-.okno-card h3 {
+.leiho-card h3 {
 	margin: 0 0 4px;
-	color: var(--okno-ink);
+	color: var(--leiho-ink);
 	font-size: 14px;
 	font-weight: 650;
 }
 
-.okno-card p {
+.leiho-card p {
 	margin: 0 0 12px;
 }
 
-.okno-card p:last-child {
+.leiho-card p:last-child {
 	margin-bottom: 0;
 }
 
-.okno-card--accent {
-	background: linear-gradient( 180deg, var(--okno-accent-soft) 0%, var(--okno-bg) 100% );
-	border-color: var(--okno-accent-line);
+.leiho-card--accent {
+	background: linear-gradient( 180deg, var(--leiho-accent-soft) 0%, var(--leiho-bg) 100% );
+	border-color: var(--leiho-accent-line);
 }
 
-.okno-card--flush {
+.leiho-card--flush {
 	padding: 0;
 	overflow: hidden;
 }
 
 /* ── Boutons ───────────────────────────────────────────────────────── */
 
-.okno-admin .okno-btn {
+.leiho-admin .leiho-btn {
 	display: inline-flex;
 	align-items: center;
 	justify-content: center;
@@ -230,8 +230,8 @@
 	padding: 0 18px;
 	border: 1px solid transparent;
 	border-radius: 8px;
-	background: var(--okno-accent);
-	color: var(--okno-on-accent);
+	background: var(--leiho-accent);
+	color: var(--leiho-on-accent);
 	font-size: 13.5px;
 	font-weight: 600;
 	line-height: 1;
@@ -240,42 +240,42 @@
 	transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
 }
 
-.okno-admin .okno-btn:hover {
-	background: var(--okno-accent-hover);
-	color: var(--okno-on-accent);
+.leiho-admin .leiho-btn:hover {
+	background: var(--leiho-accent-hover);
+	color: var(--leiho-on-accent);
 }
 
-.okno-admin .okno-btn:focus-visible {
-	outline: 2px solid var(--okno-accent-ink);
+.leiho-admin .leiho-btn:focus-visible {
+	outline: 2px solid var(--leiho-accent-ink);
 	outline-offset: 2px;
 	box-shadow: none;
 }
 
-.okno-admin .okno-btn--quiet {
-	background: var(--okno-bg);
-	border-color: var(--okno-line);
-	color: var(--okno-ink);
+.leiho-admin .leiho-btn--quiet {
+	background: var(--leiho-bg);
+	border-color: var(--leiho-line);
+	color: var(--leiho-ink);
 }
 
-.okno-admin .okno-btn--quiet:hover {
-	background: var(--okno-subtle);
-	border-color: var(--okno-line-strong);
-	color: var(--okno-ink);
+.leiho-admin .leiho-btn--quiet:hover {
+	background: var(--leiho-subtle);
+	border-color: var(--leiho-line-strong);
+	color: var(--leiho-ink);
 }
 
-.okno-admin .okno-btn--small {
+.leiho-admin .leiho-btn--small {
 	min-height: 30px;
 	padding: 0 12px;
-	font-size: var(--okno-text-base, 14px);
+	font-size: var(--leiho-text-base, 14px);
 }
 
-.okno-admin .okno-btn[disabled],
-.okno-admin .okno-btn[aria-disabled="true"] {
+.leiho-admin .leiho-btn[disabled],
+.leiho-admin .leiho-btn[aria-disabled="true"] {
 	opacity: 0.5;
 	cursor: default;
 }
 
-.okno-actions {
+.leiho-actions {
 	display: flex;
 	align-items: center;
 	flex-wrap: wrap;
@@ -285,7 +285,7 @@
 
 /* ── Carte d'ouverture (Accueil) ───────────────────────────────────── */
 
-.okno-open {
+.leiho-open {
 	display: flex;
 	align-items: center;
 	justify-content: space-between;
@@ -293,123 +293,123 @@
 	flex-wrap: wrap;
 }
 
-.okno-open__text {
+.leiho-open__text {
 	flex: 1 1 360px;
 }
 
 /* ── Indicateurs ───────────────────────────────────────────────────── */
 
-.okno-stats {
+.leiho-stats {
 	display: grid;
 	grid-template-columns: repeat( auto-fit, minmax( 200px, 1fr ) );
 	gap: 12px;
 	margin-top: 16px;
 }
 
-.okno-stat {
+.leiho-stat {
 	padding: 16px 18px;
-	background: var(--okno-bg);
-	border: 1px solid var(--okno-line);
-	border-radius: var(--okno-radius);
+	background: var(--leiho-bg);
+	border: 1px solid var(--leiho-line);
+	border-radius: var(--leiho-radius);
 }
 
-.okno-stat__label {
+.leiho-stat__label {
 	display: block;
 	margin-bottom: 6px;
-	color: var(--okno-muted);
-	font-size: var(--okno-text-base, 14px);
+	color: var(--leiho-muted);
+	font-size: var(--leiho-text-base, 14px);
 }
 
-.okno-stat__value {
+.leiho-stat__value {
 	display: flex;
 	align-items: center;
 	gap: 8px;
-	color: var(--okno-ink);
+	color: var(--leiho-ink);
 	font-size: 15px;
 	font-weight: 600;
 }
 
-.okno-stat__hint {
+.leiho-stat__hint {
 	display: block;
 	margin-top: 4px;
-	color: var(--okno-faint);
-	font-size: var(--okno-text-base, 14px);
+	color: var(--leiho-faint);
+	font-size: var(--leiho-text-base, 14px);
 }
 
-.okno-dot {
+.leiho-dot {
 	flex: 0 0 auto;
 	width: 8px;
 	height: 8px;
 	border-radius: 50%;
-	background: var(--okno-faint);
+	background: var(--leiho-faint);
 }
 
-.okno-dot--ok {
+.leiho-dot--ok {
 	background: #22a06b;
-	box-shadow: 0 0 0 3px var(--okno-ok-soft);
+	box-shadow: 0 0 0 3px var(--leiho-ok-soft);
 }
 
-.okno-dot--warn {
+.leiho-dot--warn {
 	background: #d99b0e;
-	box-shadow: 0 0 0 3px var(--okno-warn-soft);
+	box-shadow: 0 0 0 3px var(--leiho-warn-soft);
 }
 
-.okno-dot--error {
+.leiho-dot--error {
 	background: #d92d20;
-	box-shadow: 0 0 0 3px var(--okno-error-soft);
+	box-shadow: 0 0 0 3px var(--leiho-error-soft);
 }
 
-.okno-pill {
+.leiho-pill {
 	display: inline-flex;
 	align-items: center;
 	gap: 6px;
 	padding: 2px 9px;
 	border-radius: 999px;
-	background: var(--okno-subtle);
-	color: var(--okno-muted);
-	font-size: var(--okno-text-base, 14px);
+	background: var(--leiho-subtle);
+	color: var(--leiho-muted);
+	font-size: var(--leiho-text-base, 14px);
 	font-weight: 550;
 	white-space: nowrap;
 }
 
-.okno-pill--ok {
-	background: var(--okno-ok-soft);
-	color: var(--okno-ok);
+.leiho-pill--ok {
+	background: var(--leiho-ok-soft);
+	color: var(--leiho-ok);
 }
 
-.okno-pill--warn {
-	background: var(--okno-warn-soft);
-	color: var(--okno-warn);
+.leiho-pill--warn {
+	background: var(--leiho-warn-soft);
+	color: var(--leiho-warn);
 }
 
-.okno-pill--error {
-	background: var(--okno-error-soft);
-	color: var(--okno-error);
+.leiho-pill--error {
+	background: var(--leiho-error-soft);
+	color: var(--leiho-error);
 }
 
-.okno-pill--accent {
-	background: var(--okno-accent-soft);
-	color: var(--okno-accent-ink);
+.leiho-pill--accent {
+	background: var(--leiho-accent-soft);
+	color: var(--leiho-accent-ink);
 }
 
 /* ── Journal des modifications ─────────────────────────────────────── */
 
-.okno-log {
+.leiho-log {
 	margin: 0;
 	padding: 0;
 	list-style: none;
 }
 
-.okno-log__item {
+.leiho-log__item {
 	padding: 20px 24px;
-	border-top: 1px solid var(--okno-line);
+	border-top: 1px solid var(--leiho-line);
 }
 
-.okno-log__item:first-child {
+.leiho-log__item:first-child {
 	border-top: 0;
 }
 
-.okno-log__head {
+.leiho-log__head {
 	display: flex;
 	align-items: flex-start;
 	justify-content: space-between;
@@ -417,60 +417,60 @@
 	margin-bottom: 12px;
 }
 
-.okno-log__field {
+.leiho-log__field {
 	display: block;
-	color: var(--okno-ink);
+	color: var(--leiho-ink);
 	font-size: 14px;
 	font-weight: 650;
 }
 
-.okno-log__meta {
+.leiho-log__meta {
 	display: flex;
 	align-items: center;
 	flex-wrap: wrap;
 	gap: 6px;
 	margin-top: 3px;
-	color: var(--okno-muted);
-	font-size: var(--okno-text-base, 14px);
+	color: var(--leiho-muted);
+	font-size: var(--leiho-text-base, 14px);
 }
 
-.okno-avatar {
+.leiho-avatar {
 	display: inline-grid;
 	place-items: center;
 	width: 20px;
 	height: 20px;
 	border-radius: 50%;
-	background: var(--okno-accent-soft);
-	color: var(--okno-accent-ink);
-	font-size: var(--okno-text-xs, 12px);
+	background: var(--leiho-accent-soft);
+	color: var(--leiho-accent-ink);
+	font-size: var(--leiho-text-xs, 12px);
 	font-weight: 700;
 	overflow: hidden;
 }
 
-.okno-avatar img {
+.leiho-avatar img {
 	width: 100%;
 	height: 100%;
 }
 
-.okno-diff {
+.leiho-diff {
 	display: grid;
 	grid-template-columns: 1fr auto 1fr;
 	align-items: stretch;
 	gap: 10px;
 }
 
-.okno-diff__arrow {
+.leiho-diff__arrow {
 	display: grid;
 	place-items: center;
-	color: var(--okno-faint);
+	color: var(--leiho-faint);
 }
 
-.okno-diff__value {
+.leiho-diff__value {
 	min-width: 0;
 	padding: 10px 12px;
 	border-radius: 8px;
-	background: var(--okno-subtle);
-	color: var(--okno-body);
+	background: var(--leiho-subtle);
+	color: var(--leiho-body);
 	font-size: 13px;
 	line-height: 1.5;
 	overflow-wrap: anywhere;
@@ -478,90 +478,90 @@
 	overflow: auto;
 }
 
-.okno-diff__value--after {
-	background: var(--okno-accent-soft);
-	color: var(--okno-ink);
+.leiho-diff__value--after {
+	background: var(--leiho-accent-soft);
+	color: var(--leiho-ink);
 }
 
-.okno-diff__label {
+.leiho-diff__label {
 	display: block;
 	margin-bottom: 2px;
-	color: var(--okno-faint);
-	font-size: var(--okno-text-sm, 13px);
+	color: var(--leiho-faint);
+	font-size: var(--leiho-text-sm, 13px);
 	font-weight: 650;
 	letter-spacing: 0.06em;
 	text-transform: uppercase;
 }
 
-.okno-diff__value--after .okno-diff__label {
-	color: var(--okno-accent-ink);
+.leiho-diff__value--after .leiho-diff__label {
+	color: var(--leiho-accent-ink);
 }
 
-.okno-diff__empty {
-	color: var(--okno-faint);
+.leiho-diff__empty {
+	color: var(--leiho-faint);
 	font-style: italic;
 }
 
-.okno-diff__value img {
+.leiho-diff__value img {
 	display: block;
 	max-width: 100%;
 	max-height: 90px;
 	border-radius: 6px;
 }
 
-.okno-diff__value p {
+.leiho-diff__value p {
 	margin: 0 0 6px;
 }
 
 /* ── État vide ─────────────────────────────────────────────────────── */
 
-.okno-empty {
+.leiho-empty {
 	padding: 48px 32px;
 	text-align: center;
 }
 
-.okno-empty svg {
+.leiho-empty svg {
 	display: block;
 	margin: 0 auto 14px;
-	color: var(--okno-faint);
+	color: var(--leiho-faint);
 }
 
-.okno-empty h3 {
+.leiho-empty h3 {
 	margin: 0 0 6px;
-	color: var(--okno-ink);
+	color: var(--leiho-ink);
 	font-size: 15px;
 }
 
-.okno-empty p {
+.leiho-empty p {
 	max-width: 420px;
 	margin: 0 auto;
-	color: var(--okno-muted);
+	color: var(--leiho-muted);
 }
 
 /* ── Étapes (Démarrer) ─────────────────────────────────────────────── */
 
-.okno-steps {
+.leiho-steps {
 	margin: 0;
 	padding: 0;
 	list-style: none;
-	counter-reset: okno-step;
+	counter-reset: leiho-step;
 }
 
-.okno-step {
+.leiho-step {
 	position: relative;
 	padding: 24px 32px 24px 80px;
-	background: var(--okno-bg);
-	border: 1px solid var(--okno-line);
-	border-radius: var(--okno-radius);
-	counter-increment: okno-step;
+	background: var(--leiho-bg);
+	border: 1px solid var(--leiho-line);
+	border-radius: var(--leiho-radius);
+	counter-increment: leiho-step;
 }
 
-.okno-step + .okno-step {
+.leiho-step + .leiho-step {
 	margin-top: 12px;
 }
 
-.okno-step::before {
-	content: counter( okno-step );
+.leiho-step::before {
+	content: counter( leiho-step );
 	position: absolute;
 	top: 22px;
 	left: 28px;
@@ -570,79 +570,79 @@
 	width: 30px;
 	height: 30px;
 	border-radius: 50%;
-	background: var(--okno-subtle);
-	color: var(--okno-muted);
+	background: var(--leiho-subtle);
+	color: var(--leiho-muted);
 	font-size: 13px;
 	font-weight: 700;
 }
 
-.okno-step--done::before {
+.leiho-step--done::before {
 	content: "";
-	background: var(--okno-ok-soft) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%231a7f4b' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 12.5l4.5 4.5L19 7.5'/%3E%3C/svg%3E") center / 14px no-repeat;
+	background: var(--leiho-ok-soft) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%231a7f4b' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 12.5l4.5 4.5L19 7.5'/%3E%3C/svg%3E") center / 14px no-repeat;
 }
 
-.okno-step--current::before {
-	background: var(--okno-accent);
-	color: var(--okno-on-accent);
+.leiho-step--current::before {
+	background: var(--leiho-accent);
+	color: var(--leiho-on-accent);
 }
 
-.okno-step h3 {
+.leiho-step h3 {
 	display: flex;
 	align-items: center;
 	flex-wrap: wrap;
 	gap: 10px;
 	margin: 3px 0 6px;
-	color: var(--okno-ink);
+	color: var(--leiho-ink);
 	font-size: 15px;
 	font-weight: 650;
 }
 
-.okno-step p {
+.leiho-step p {
 	margin: 0 0 12px;
 }
 
-.okno-step p:last-child {
+.leiho-step p:last-child {
 	margin-bottom: 0;
 }
 
-.okno-check {
+.leiho-check {
 	display: flex;
 	align-items: flex-start;
 	gap: 10px;
 	margin-top: 14px;
 	padding: 12px 14px;
 	border-radius: 8px;
-	background: var(--okno-subtle);
+	background: var(--leiho-subtle);
 	font-size: 13px;
 }
 
-.okno-check .okno-dot {
+.leiho-check .leiho-dot {
 	margin-top: 6px;
 }
 
-.okno-check--ok {
-	background: var(--okno-ok-soft);
-	color: var(--okno-ok);
+.leiho-check--ok {
+	background: var(--leiho-ok-soft);
+	color: var(--leiho-ok);
 }
 
-.okno-check--warn {
-	background: var(--okno-warn-soft);
-	color: var(--okno-warn);
+.leiho-check--warn {
+	background: var(--leiho-warn-soft);
+	color: var(--leiho-warn);
 }
 
-.okno-check--error {
-	background: var(--okno-error-soft);
-	color: var(--okno-error);
+.leiho-check--error {
+	background: var(--leiho-error-soft);
+	color: var(--leiho-error);
 }
 
 /* ── Code à copier ─────────────────────────────────────────────────── */
 
-.okno-code {
+.leiho-code {
 	position: relative;
 	margin: 12px 0 0;
 }
 
-.okno-code pre {
+.leiho-code pre {
 	margin: 0;
 	padding: 14px 16px;
 	padding-right: 88px;
@@ -650,7 +650,7 @@
 	background: #0a0a0a;
 	color: #ededed;
 	font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-	font-size: var(--okno-text-base, 14px);
+	font-size: var(--leiho-text-base, 14px);
 	line-height: 1.6;
 	/* Une ligne CSP ou une URL longue revient à la ligne au lieu de passer
 	   sous le bouton Copier. */
@@ -658,7 +658,7 @@
 	overflow-wrap: anywhere;
 }
 
-.okno-code button {
+.leiho-code button {
 	position: absolute;
 	top: 8px;
 	right: 8px;
@@ -668,87 +668,87 @@
 	border-radius: 6px;
 	background: rgba( 255, 255, 255, 0.06 );
 	color: #ededed;
-	font-size: var(--okno-text-base, 14px);
+	font-size: var(--leiho-text-base, 14px);
 	cursor: pointer;
 }
 
-.okno-code button:hover {
+.leiho-code button:hover {
 	background: rgba( 255, 255, 255, 0.14 );
 }
 
-.okno-segmented {
+.leiho-segmented {
 	display: inline-flex;
 	flex-wrap: wrap;
 	gap: 2px;
 	margin-top: 12px;
 	padding: 3px;
 	border-radius: 9px;
-	background: var(--okno-subtle);
-	border: 1px solid var(--okno-line);
+	background: var(--leiho-subtle);
+	border: 1px solid var(--leiho-line);
 }
 
-.okno-segmented button {
+.leiho-segmented button {
 	padding: 5px 11px;
 	border: 0;
 	border-radius: 6px;
 	background: transparent;
-	color: var(--okno-muted);
-	font-size: var(--okno-text-base, 14px);
+	color: var(--leiho-muted);
+	font-size: var(--leiho-text-base, 14px);
 	font-weight: 550;
 	cursor: pointer;
 }
 
-.okno-segmented button[aria-selected="true"] {
-	background: var(--okno-bg);
-	color: var(--okno-ink);
+.leiho-segmented button[aria-selected="true"] {
+	background: var(--leiho-bg);
+	color: var(--leiho-ink);
 	box-shadow: 0 1px 2px rgba( 10, 10, 10, 0.08 );
 }
 
-.okno-segmented button:focus-visible {
-	outline: 2px solid var(--okno-accent-ink);
+.leiho-segmented button:focus-visible {
+	outline: 2px solid var(--leiho-accent-ink);
 	outline-offset: 1px;
 }
 
 /* ── Guide pour agents ─────────────────────────────────────────────── */
 
-.okno-prompts {
+.leiho-prompts {
 	display: grid;
 	grid-template-columns: repeat( auto-fit, minmax( 260px, 1fr ) );
 	gap: 12px;
 	margin-top: 16px;
 }
 
-.okno-prompt {
+.leiho-prompt {
 	display: flex;
 	flex-direction: column;
 	gap: 6px;
 	padding: 20px 22px;
-	border: 1px solid var(--okno-line);
-	border-radius: var(--okno-radius);
-	background: var(--okno-bg);
+	border: 1px solid var(--leiho-line);
+	border-radius: var(--leiho-radius);
+	background: var(--leiho-bg);
 }
 
-.okno-prompt p {
+.leiho-prompt p {
 	flex: 1;
 	margin: 0 0 12px;
-	color: var(--okno-muted);
+	color: var(--leiho-muted);
 }
 
-.okno-prompt .okno-btn {
+.leiho-prompt .leiho-btn {
 	align-self: flex-start;
 }
 
-.okno-agents {
+.leiho-agents {
 	display: flex;
 	align-items: center;
 	flex-wrap: wrap;
 	gap: 6px;
 	margin: 12px 0 0;
-	color: var(--okno-muted);
-	font-size: var(--okno-text-base, 14px);
+	color: var(--leiho-muted);
+	font-size: var(--leiho-text-base, 14px);
 }
 
-.okno-copy-source {
+.leiho-copy-source {
 	position: absolute;
 	left: -9999px;
 	width: 1px;
@@ -756,232 +756,232 @@
 	opacity: 0;
 }
 
-.okno-instructions {
+.leiho-instructions {
 	display: block;
 	width: 100%;
 	min-height: 360px;
 	margin-top: 12px;
 	padding: 16px;
-	border: 1px solid var(--okno-line);
+	border: 1px solid var(--leiho-line);
 	border-radius: 8px;
-	background: var(--okno-subtle);
-	color: var(--okno-ink);
+	background: var(--leiho-subtle);
+	color: var(--leiho-ink);
 	font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-	font-size: var(--okno-text-base, 14px);
+	font-size: var(--leiho-text-base, 14px);
 	line-height: 1.6;
 	resize: vertical;
 }
 
 /* ── Formulaires (Réglages) ────────────────────────────────────────── */
 
-.okno-form-section {
+.leiho-form-section {
 	padding: 28px 32px;
-	background: var(--okno-bg);
-	border: 1px solid var(--okno-line);
-	border-radius: var(--okno-radius);
+	background: var(--leiho-bg);
+	border: 1px solid var(--leiho-line);
+	border-radius: var(--leiho-radius);
 }
 
-.okno-form-section + .okno-form-section {
+.leiho-form-section + .leiho-form-section {
 	margin-top: 16px;
 }
 
-.okno-form-section > h2 {
+.leiho-form-section > h2 {
 	margin: 0 0 4px;
-	color: var(--okno-ink);
+	color: var(--leiho-ink);
 	font-size: 16px;
 	font-weight: 650;
 }
 
-.okno-form-section > .okno-help {
+.leiho-form-section > .leiho-help {
 	margin: 0 0 20px;
 }
 
-.okno-row {
+.leiho-row {
 	display: grid;
 	grid-template-columns: 220px 1fr;
 	gap: 8px 24px;
 	padding: 16px 0;
-	border-top: 1px solid var(--okno-line);
+	border-top: 1px solid var(--leiho-line);
 }
 
-.okno-row:first-of-type {
+.leiho-row:first-of-type {
 	border-top: 0;
 	padding-top: 4px;
 }
 
-.okno-row > label,
-.okno-row > .okno-row__label {
+.leiho-row > label,
+.leiho-row > .leiho-row__label {
 	padding-top: 8px;
-	color: var(--okno-ink);
+	color: var(--leiho-ink);
 	font-size: 13.5px;
 	font-weight: 600;
 }
 
-.okno-help {
+.leiho-help {
 	display: block;
 	margin-top: 6px;
-	color: var(--okno-muted);
-	font-size: var(--okno-text-base, 14px);
+	color: var(--leiho-muted);
+	font-size: var(--leiho-text-base, 14px);
 	line-height: 1.55;
 }
 
-.okno-admin input[type="text"],
-.okno-admin input[type="url"],
-.okno-admin input[type="password"],
-.okno-admin input[type="number"],
-.okno-admin select {
+.leiho-admin input[type="text"],
+.leiho-admin input[type="url"],
+.leiho-admin input[type="password"],
+.leiho-admin input[type="number"],
+.leiho-admin select {
 	width: 100%;
 	max-width: 480px;
 	min-height: 38px;
 	padding: 0 12px;
-	border: 1px solid var(--okno-line-strong);
+	border: 1px solid var(--leiho-line-strong);
 	border-radius: 8px;
-	background: var(--okno-bg);
-	color: var(--okno-ink);
+	background: var(--leiho-bg);
+	color: var(--leiho-ink);
 	font-size: 14px;
 	box-shadow: none;
 }
 
-.okno-admin input[type="number"] {
+.leiho-admin input[type="number"] {
 	max-width: 120px;
 }
 
-.okno-admin input:focus,
-.okno-admin select:focus {
+.leiho-admin input:focus,
+.leiho-admin select:focus {
 	/* accent-ink et non accent-line : le contour est le seul signe du focus
 	   (outline retiré), il lui faut 3:1 minimum sur fond clair. */
-	border-color: var(--okno-accent-ink);
-	box-shadow: 0 0 0 3px var(--okno-accent-soft);
+	border-color: var(--leiho-accent-ink);
+	box-shadow: 0 0 0 3px var(--leiho-accent-soft);
 	outline: none;
 }
 
-.okno-checks {
+.leiho-checks {
 	display: flex;
 	flex-wrap: wrap;
 	gap: 8px;
 }
 
-.okno-checks label {
+.leiho-checks label {
 	display: inline-flex;
 	align-items: center;
 	gap: 8px;
 	padding: 7px 12px;
-	border: 1px solid var(--okno-line);
+	border: 1px solid var(--leiho-line);
 	border-radius: 8px;
-	background: var(--okno-bg);
+	background: var(--leiho-bg);
 	font-size: 13px;
 	cursor: pointer;
 }
 
-.okno-checks label:has( input:checked ) {
-	border-color: var(--okno-accent-line);
-	background: var(--okno-accent-soft);
-	color: var(--okno-ink);
+.leiho-checks label:has( input:checked ) {
+	border-color: var(--leiho-accent-line);
+	background: var(--leiho-accent-soft);
+	color: var(--leiho-ink);
 }
 
-.okno-patterns {
+.leiho-patterns {
 	display: grid;
 	gap: 8px;
 	max-width: 480px;
 }
 
-.okno-patterns div {
+.leiho-patterns div {
 	display: grid;
 	grid-template-columns: 110px 1fr;
 	align-items: center;
 	gap: 10px;
 }
 
-.okno-patterns code {
+.leiho-patterns code {
 	justify-self: start;
 }
 
 /* Choix du mode de publication : cartes radio. */
-.okno-choices {
+.leiho-choices {
 	display: grid;
 	grid-template-columns: repeat( auto-fit, minmax( 210px, 1fr ) );
 	gap: 10px;
 }
 
-.okno-choice {
+.leiho-choice {
 	position: relative;
 	display: block;
 	padding: 14px 16px 14px 44px;
-	border: 1px solid var(--okno-line);
+	border: 1px solid var(--leiho-line);
 	border-radius: 10px;
-	background: var(--okno-bg);
+	background: var(--leiho-bg);
 	cursor: pointer;
 	transition: border-color 0.15s ease, background 0.15s ease;
 }
 
-.okno-choice:hover {
-	border-color: var(--okno-line-strong);
+.leiho-choice:hover {
+	border-color: var(--leiho-line-strong);
 }
 
-.okno-choice input {
+.leiho-choice input {
 	position: absolute;
 	top: 16px;
 	left: 16px;
 	margin: 0;
 }
 
-.okno-choice strong {
+.leiho-choice strong {
 	display: block;
-	color: var(--okno-ink);
+	color: var(--leiho-ink);
 	font-size: 13.5px;
 }
 
-.okno-choice span {
+.leiho-choice span {
 	display: block;
 	margin-top: 2px;
-	color: var(--okno-muted);
-	font-size: var(--okno-text-base, 14px);
+	color: var(--leiho-muted);
+	font-size: var(--leiho-text-base, 14px);
 	line-height: 1.45;
 }
 
-.okno-choice:has( input:checked ) {
-	border-color: var(--okno-accent-line);
-	background: var(--okno-accent-soft);
-	box-shadow: 0 0 0 1px var(--okno-accent-line);
+.leiho-choice:has( input:checked ) {
+	border-color: var(--leiho-accent-line);
+	background: var(--leiho-accent-soft);
+	box-shadow: 0 0 0 1px var(--leiho-accent-line);
 }
 
-.okno-driver-fields {
+.leiho-driver-fields {
 	margin-top: 8px;
 }
 
-.okno-choices + .okno-driver-fields,
-.okno-driver-fields + .okno-driver-fields {
+.leiho-choices + .leiho-driver-fields,
+.leiho-driver-fields + .leiho-driver-fields {
 	margin-top: 0;
 }
 
 /* Premier champ d'un mode : séparé des cartes de choix par un filet. */
-.okno-form-section > .okno-driver-fields > .okno-row:first-child {
+.leiho-form-section > .leiho-driver-fields > .leiho-row:first-child {
 	margin-top: 20px;
 	padding-top: 16px;
-	border-top: 1px solid var(--okno-line);
+	border-top: 1px solid var(--leiho-line);
 }
 
-.okno-driver-fields .okno-driver-fields > .okno-row:first-child {
+.leiho-driver-fields .leiho-driver-fields > .leiho-row:first-child {
 	padding-top: 16px;
-	border-top: 1px solid var(--okno-line);
+	border-top: 1px solid var(--leiho-line);
 }
 
-.okno-secret-state {
+.leiho-secret-state {
 	display: inline-flex;
 	margin-left: 8px;
 	vertical-align: middle;
 }
 
-.okno-inline-check {
+.leiho-inline-check {
 	display: inline-flex;
 	align-items: center;
 	gap: 6px;
 	margin-top: 8px;
-	font-size: var(--okno-text-base, 14px);
-	color: var(--okno-muted);
+	font-size: var(--leiho-text-base, 14px);
+	color: var(--leiho-muted);
 }
 
-.okno-savebar {
+.leiho-savebar {
 	position: sticky;
 	bottom: 0;
 	display: flex;
@@ -990,102 +990,102 @@
 	gap: 16px;
 	margin-top: 16px;
 	padding: 14px 20px;
-	border: 1px solid var(--okno-line);
-	border-radius: var(--okno-radius);
+	border: 1px solid var(--leiho-line);
+	border-radius: var(--leiho-radius);
 	background: rgba( 255, 255, 255, 0.92 );
 	backdrop-filter: blur( 6px );
 }
 
 /* ── Notices ───────────────────────────────────────────────────────── */
 
-.okno-notice {
+.leiho-notice {
 	display: flex;
 	align-items: flex-start;
 	gap: 12px;
 	margin-bottom: 16px;
 	padding: 14px 18px;
-	border: 1px solid var(--okno-line);
-	border-radius: var(--okno-radius);
-	background: var(--okno-bg);
+	border: 1px solid var(--leiho-line);
+	border-radius: var(--leiho-radius);
+	background: var(--leiho-bg);
 }
 
-.okno-notice .okno-dot {
+.leiho-notice .leiho-dot {
 	margin-top: 7px;
 }
 
-.okno-notice--ok {
+.leiho-notice--ok {
 	border-color: #b8e2cb;
-	background: var(--okno-ok-soft);
+	background: var(--leiho-ok-soft);
 }
 
-.okno-notice--warn {
+.leiho-notice--warn {
 	border-color: #f1d9a0;
-	background: var(--okno-warn-soft);
+	background: var(--leiho-warn-soft);
 }
 
-.okno-notice--error {
+.leiho-notice--error {
 	border-color: #f4c3bd;
-	background: var(--okno-error-soft);
+	background: var(--leiho-error-soft);
 }
 
-.okno-notice ul {
+.leiho-notice ul {
 	margin: 6px 0 0;
 	padding: 0;
 	list-style: none;
 }
 
-.okno-notice li {
+.leiho-notice li {
 	display: flex;
 	gap: 8px;
 	margin: 4px 0;
 	font-size: 13px;
 }
 
-.okno-notice strong {
-	color: var(--okno-ink);
+.leiho-notice strong {
+	color: var(--leiho-ink);
 }
 
 /* ── Tableau (Publications) ────────────────────────────────────────── */
 
-.okno-table {
+.leiho-table {
 	width: 100%;
 	border-collapse: collapse;
 	font-size: 13px;
 }
 
-.okno-table th {
+.leiho-table th {
 	padding: 12px 24px;
-	border-bottom: 1px solid var(--okno-line);
-	color: var(--okno-muted);
-	font-size: var(--okno-text-sm, 13px);
+	border-bottom: 1px solid var(--leiho-line);
+	color: var(--leiho-muted);
+	font-size: var(--leiho-text-sm, 13px);
 	font-weight: 650;
 	letter-spacing: 0.06em;
 	text-align: left;
 	text-transform: uppercase;
 }
 
-.okno-table td {
+.leiho-table td {
 	padding: 14px 24px;
-	border-bottom: 1px solid var(--okno-line);
+	border-bottom: 1px solid var(--leiho-line);
 	vertical-align: top;
 }
 
-.okno-table tr:last-child td {
+.leiho-table tr:last-child td {
 	border-bottom: 0;
 }
 
-.okno-table__message {
-	color: var(--okno-muted);
-	font-size: var(--okno-text-base, 14px);
+.leiho-table__message {
+	color: var(--leiho-muted);
+	font-size: var(--leiho-text-base, 14px);
 }
 
 /* ── Utilitaires ───────────────────────────────────────────────────── */
 
-.okno-muted {
-	color: var(--okno-muted);
+.leiho-muted {
+	color: var(--leiho-muted);
 }
 
-.okno-split {
+.leiho-split {
 	display: grid;
 	grid-template-columns: 1fr 1fr;
 	gap: 16px;
@@ -1093,51 +1093,51 @@
 }
 
 @media ( max-width: 782px ) {
-	.okno-admin {
+	.leiho-admin {
 		margin-left: -10px;
 	}
 
-	.okno-bar,
-	.okno-page {
+	.leiho-bar,
+	.leiho-page {
 		padding-left: 16px;
 		padding-right: 16px;
 	}
 
-	.okno-card,
-	.okno-form-section {
+	.leiho-card,
+	.leiho-form-section {
 		padding: 22px 20px;
 	}
 
-	.okno-step {
+	.leiho-step {
 		padding: 20px 20px 20px 64px;
 	}
 
-	.okno-step::before {
+	.leiho-step::before {
 		left: 18px;
 	}
 
-	.okno-row {
+	.leiho-row {
 		grid-template-columns: 1fr;
 	}
 
-	.okno-row > label,
-	.okno-row > .okno-row__label {
+	.leiho-row > label,
+	.leiho-row > .leiho-row__label {
 		padding-top: 0;
 	}
 
-	.okno-diff {
+	.leiho-diff {
 		grid-template-columns: 1fr;
 	}
 
-	.okno-diff__arrow {
+	.leiho-diff__arrow {
 		transform: rotate( 90deg );
 	}
 
-	.okno-split {
+	.leiho-split {
 		grid-template-columns: 1fr;
 	}
 
-	.okno-log__head {
+	.leiho-log__head {
 		flex-direction: column;
 	}
 }

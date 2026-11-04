@@ -1,15 +1,15 @@
 /*
- * Okno — application plein écran.
+ * Leiho — application plein écran.
  *
- * La page admin.php?page=okno masque toute l'interface WordPress (menu,
+ * La page admin.php?page=leiho masque toute l'interface WordPress (menu,
  * barre d'admin, pied de page, notices) et affiche sa propre coque : rail de
  * navigation à gauche, barre du haut de 40 px, vue courante. Tout est limité
- * au body .okno-app-body : les autres écrans de wp-admin ne changent pas.
+ * au body .leiho-app-body : les autres écrans de wp-admin ne changent pas.
  *
  * Interface d'application de bureau, dense et neutre : sombre par défaut,
  * clair dérivé (mêmes densités). Collections est en trois volets (types de
  * contenu, entrées ou champs, entrée éditée ou réglages du champ).
- * L'accent reste celui d'Okno (#C5FF3E), le violet marque les collections.
+ * L'accent reste celui d'Leiho (#C5FF3E), le violet marque les collections.
  *
  * Portions derived from Stacki (https://github.com/flowtricks/stacki),
  * Copyright (c) 2026 Timothy Ricks, MIT License — see licenses/stacki-MIT.txt.
@@ -19,33 +19,33 @@
 
 /* ── Interface WordPress retirée ───────────────────────────────────── */
 
-html.wp-toolbar:has( body.okno-app-body ),
-html.okno-app-html {
+html.wp-toolbar:has( body.leiho-app-body ),
+html.leiho-app-html {
 	padding-top: 0 !important;
 }
 
-body.okno-app-body {
+body.leiho-app-body {
 	overflow: hidden;
 	background: #111111;
 }
 
-body.okno-app-body #wpadminbar,
-body.okno-app-body #adminmenumain,
-body.okno-app-body #adminmenuback,
-body.okno-app-body #adminmenuwrap,
-body.okno-app-body #wpfooter,
-body.okno-app-body #screen-meta,
-body.okno-app-body #screen-meta-links,
-body.okno-app-body #wpbody-content > .notice,
-body.okno-app-body #wpbody-content > .error,
-body.okno-app-body #wpbody-content > .updated,
-body.okno-app-body #wpbody-content > .update-nag,
-body.okno-app-body .wrap > .notice {
+body.leiho-app-body #wpadminbar,
+body.leiho-app-body #adminmenumain,
+body.leiho-app-body #adminmenuback,
+body.leiho-app-body #adminmenuwrap,
+body.leiho-app-body #wpfooter,
+body.leiho-app-body #screen-meta,
+body.leiho-app-body #screen-meta-links,
+body.leiho-app-body #wpbody-content > .notice,
+body.leiho-app-body #wpbody-content > .error,
+body.leiho-app-body #wpbody-content > .updated,
+body.leiho-app-body #wpbody-content > .update-nag,
+body.leiho-app-body .wrap > .notice {
 	display: none !important;
 }
 
-body.okno-app-body #wpcontent,
-body.okno-app-body #wpbody-content {
+body.leiho-app-body #wpcontent,
+body.leiho-app-body #wpbody-content {
 	margin-left: 0 !important;
 	padding: 0 !important;
 }
@@ -54,158 +54,158 @@ body.okno-app-body #wpbody-content {
 
 /*
  * Mêmes noms que l'éditeur (editor.css) et les pages PHP (admin.css) :
- * redéfinis ici pour toute l'application, y compris dans .okno-admin et
- * .okno-editor, qui portent leurs propres valeurs hors de la coque.
+ * redéfinis ici pour toute l'application, y compris dans .leiho-admin et
+ * .leiho-editor, qui portent leurs propres valeurs hors de la coque.
  */
-.okno-app,
-.okno-app .okno-admin,
-.okno-app .okno-editor {
-	--okno-bg: #ffffff;
-	--okno-panel: #f7f7f7;
-	--okno-surface: #ffffff;
-	--okno-elevated: #ffffff;
-	--okno-canvas: #f0f0f0;
-	--okno-input: rgba( 0, 0, 0, 0.05 );
-	--okno-hover: rgba( 0, 0, 0, 0.04 );
-	--okno-active: rgba( 0, 0, 0, 0.075 );
-	--okno-line: rgba( 0, 0, 0, 0.09 );
-	--okno-line-strong: rgba( 0, 0, 0, 0.16 );
-	--okno-ink: #171717;
-	--okno-body: #262626;
-	--okno-muted: #555555;
-	--okno-faint: #666666;
-	--okno-accent: #c5ff3e;
-	--okno-accent-hover: #b4f01f;
-	--okno-accent-ink: #3d6b00;
-	--okno-on-accent: #0a0a0a;
-	--okno-accent-soft: rgba( 134, 196, 0, 0.16 );
-	--okno-accent-line: #86c400;
-	--okno-subtle: var(--okno-input);
-	--okno-purple: #6d4bd8;
-	--okno-purple-soft: rgba( 109, 75, 216, 0.1 );
-	--okno-ok: #17784a;
-	--okno-ok-soft: rgba( 23, 120, 74, 0.1 );
-	--okno-warn: #845400;
-	--okno-warn-soft: rgba( 214, 150, 0, 0.14 );
-	--okno-error: #c4271b;
-	--okno-error-soft: rgba( 196, 39, 27, 0.09 );
-	--okno-pending: #ff9f0a;
-	--okno-shadow: 0 8px 24px rgba( 0, 0, 0, 0.12 );
-	--okno-shadow-modal: 0 24px 64px rgba( 0, 0, 0, 0.22 );
-	--okno-backdrop: rgba( 0, 0, 0, 0.32 );
-	--okno-radius: 8px;
-	--okno-font: -apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", system-ui, sans-serif;
-	--okno-mono: "SF Mono", ui-monospace, "Cascadia Code", Menlo, Consolas, monospace;
-	--okno-nav: 224px;
-	--okno-nav-collapsed: 56px;
+.leiho-app,
+.leiho-app .leiho-admin,
+.leiho-app .leiho-editor {
+	--leiho-bg: #ffffff;
+	--leiho-panel: #f7f7f7;
+	--leiho-surface: #ffffff;
+	--leiho-elevated: #ffffff;
+	--leiho-canvas: #f0f0f0;
+	--leiho-input: rgba( 0, 0, 0, 0.05 );
+	--leiho-hover: rgba( 0, 0, 0, 0.04 );
+	--leiho-active: rgba( 0, 0, 0, 0.075 );
+	--leiho-line: rgba( 0, 0, 0, 0.09 );
+	--leiho-line-strong: rgba( 0, 0, 0, 0.16 );
+	--leiho-ink: #171717;
+	--leiho-body: #262626;
+	--leiho-muted: #555555;
+	--leiho-faint: #666666;
+	--leiho-accent: #c5ff3e;
+	--leiho-accent-hover: #b4f01f;
+	--leiho-accent-ink: #3d6b00;
+	--leiho-on-accent: #0a0a0a;
+	--leiho-accent-soft: rgba( 134, 196, 0, 0.16 );
+	--leiho-accent-line: #86c400;
+	--leiho-subtle: var(--leiho-input);
+	--leiho-purple: #6d4bd8;
+	--leiho-purple-soft: rgba( 109, 75, 216, 0.1 );
+	--leiho-ok: #17784a;
+	--leiho-ok-soft: rgba( 23, 120, 74, 0.1 );
+	--leiho-warn: #845400;
+	--leiho-warn-soft: rgba( 214, 150, 0, 0.14 );
+	--leiho-error: #c4271b;
+	--leiho-error-soft: rgba( 196, 39, 27, 0.09 );
+	--leiho-pending: #ff9f0a;
+	--leiho-shadow: 0 8px 24px rgba( 0, 0, 0, 0.12 );
+	--leiho-shadow-modal: 0 24px 64px rgba( 0, 0, 0, 0.22 );
+	--leiho-backdrop: rgba( 0, 0, 0, 0.32 );
+	--leiho-radius: 8px;
+	--leiho-font: -apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", system-ui, sans-serif;
+	--leiho-mono: "SF Mono", ui-monospace, "Cascadia Code", Menlo, Consolas, monospace;
+	--leiho-nav: 224px;
+	--leiho-nav-collapsed: 56px;
 	/* Échelle (1.0.0-beta.9) : texte de base 14 px, contrôles de 36 px. */
-	--okno-text-2xs: 11px;
-	--okno-text-xs: 12px;
-	--okno-text-sm: 13px;
-	--okno-text-base: 14px;
-	--okno-text-md: 15px;
-	--okno-text-lg: 16px;
-	--okno-text-xl: 17px;
-	--okno-text-2xl: 20px;
-	--okno-control-xs: 28px;
-	--okno-control-sm: 30px;
-	--okno-control: 36px;
-	--okno-row: 38px;
-	--okno-bar: 48px;
-	--okno-icon: 18px;
-	--okno-pane-nav: 264px;
-	--okno-pane-list: 300px;
-	--okno-pane-entries: 360px;
-	--okno-pane-aside: 340px;
-	--okno-form-width: 720px;
+	--leiho-text-2xs: 11px;
+	--leiho-text-xs: 12px;
+	--leiho-text-sm: 13px;
+	--leiho-text-base: 14px;
+	--leiho-text-md: 15px;
+	--leiho-text-lg: 16px;
+	--leiho-text-xl: 17px;
+	--leiho-text-2xl: 20px;
+	--leiho-control-xs: 28px;
+	--leiho-control-sm: 30px;
+	--leiho-control: 36px;
+	--leiho-row: 38px;
+	--leiho-bar: 48px;
+	--leiho-icon: 18px;
+	--leiho-pane-nav: 264px;
+	--leiho-pane-list: 300px;
+	--leiho-pane-entries: 360px;
+	--leiho-pane-aside: 340px;
+	--leiho-form-width: 720px;
 	color-scheme: light;
 }
 
-.okno-app[data-theme="dark"],
-.okno-app[data-theme="dark"] .okno-admin,
-.okno-app[data-theme="dark"] .okno-editor {
-	--okno-bg: #111111;
-	--okno-panel: #111111;
-	--okno-surface: #1a1a1a;
-	--okno-elevated: #1d1d1d;
-	--okno-canvas: #191919;
-	--okno-input: rgba( 255, 255, 255, 0.06 );
-	--okno-hover: rgba( 255, 255, 255, 0.05 );
-	--okno-active: rgba( 255, 255, 255, 0.09 );
-	--okno-line: rgba( 255, 255, 255, 0.08 );
-	--okno-line-strong: rgba( 255, 255, 255, 0.14 );
-	--okno-ink: #f5f5f5;
-	--okno-body: #e6e6e6;
-	--okno-muted: #a3a3a3;
-	--okno-faint: #8a8a8a; /* ≥ 4,5:1 sur #111 et #1d1d1d. */
-	--okno-accent: #c5ff3e;
-	--okno-accent-hover: #d4ff6b;
-	--okno-accent-ink: #c5ff3e;
-	--okno-on-accent: #0a0a0a;
-	--okno-accent-soft: rgba( 197, 255, 62, 0.13 );
-	--okno-accent-line: rgba( 197, 255, 62, 0.5 );
-	--okno-purple: #c4afff;
-	--okno-purple-soft: rgba( 196, 175, 255, 0.16 );
-	--okno-ok: #4cd07d;
-	--okno-ok-soft: rgba( 48, 193, 88, 0.16 );
-	--okno-warn: #ffd60a;
-	--okno-warn-soft: rgba( 255, 214, 10, 0.13 );
-	--okno-error: #ff6259;
-	--okno-error-soft: rgba( 255, 69, 58, 0.14 );
-	--okno-shadow: 0 8px 24px rgba( 0, 0, 0, 0.6 );
-	--okno-shadow-modal: 0 24px 64px rgba( 0, 0, 0, 0.6 );
-	--okno-backdrop: rgba( 0, 0, 0, 0.55 );
+.leiho-app[data-theme="dark"],
+.leiho-app[data-theme="dark"] .leiho-admin,
+.leiho-app[data-theme="dark"] .leiho-editor {
+	--leiho-bg: #111111;
+	--leiho-panel: #111111;
+	--leiho-surface: #1a1a1a;
+	--leiho-elevated: #1d1d1d;
+	--leiho-canvas: #191919;
+	--leiho-input: rgba( 255, 255, 255, 0.06 );
+	--leiho-hover: rgba( 255, 255, 255, 0.05 );
+	--leiho-active: rgba( 255, 255, 255, 0.09 );
+	--leiho-line: rgba( 255, 255, 255, 0.08 );
+	--leiho-line-strong: rgba( 255, 255, 255, 0.14 );
+	--leiho-ink: #f5f5f5;
+	--leiho-body: #e6e6e6;
+	--leiho-muted: #a3a3a3;
+	--leiho-faint: #8a8a8a; /* ≥ 4,5:1 sur #111 et #1d1d1d. */
+	--leiho-accent: #c5ff3e;
+	--leiho-accent-hover: #d4ff6b;
+	--leiho-accent-ink: #c5ff3e;
+	--leiho-on-accent: #0a0a0a;
+	--leiho-accent-soft: rgba( 197, 255, 62, 0.13 );
+	--leiho-accent-line: rgba( 197, 255, 62, 0.5 );
+	--leiho-purple: #c4afff;
+	--leiho-purple-soft: rgba( 196, 175, 255, 0.16 );
+	--leiho-ok: #4cd07d;
+	--leiho-ok-soft: rgba( 48, 193, 88, 0.16 );
+	--leiho-warn: #ffd60a;
+	--leiho-warn-soft: rgba( 255, 214, 10, 0.13 );
+	--leiho-error: #ff6259;
+	--leiho-error-soft: rgba( 255, 69, 58, 0.14 );
+	--leiho-shadow: 0 8px 24px rgba( 0, 0, 0, 0.6 );
+	--leiho-shadow-modal: 0 24px 64px rgba( 0, 0, 0, 0.6 );
+	--leiho-backdrop: rgba( 0, 0, 0, 0.55 );
 	color-scheme: dark;
 }
 
 /* ── Coque ─────────────────────────────────────────────────────────── */
 
-.okno-app {
+.leiho-app {
 	position: fixed;
 	inset: 0;
 	z-index: 100000; /* Au-dessus de tout ce que wp-admin pourrait encore afficher. */
 	display: flex;
-	background: var(--okno-panel);
-	color: var(--okno-body);
-	font-family: var(--okno-font);
-	font-size: var(--okno-text-base, 14px);
+	background: var(--leiho-panel);
+	color: var(--leiho-body);
+	font-family: var(--leiho-font);
+	font-size: var(--leiho-text-base, 14px);
 	line-height: 1.5;
 	-webkit-font-smoothing: antialiased;
 }
 
-.okno-app *,
-.okno-app *::before,
-.okno-app *::after {
+.leiho-app *,
+.leiho-app *::before,
+.leiho-app *::after {
 	box-sizing: border-box;
 }
 
-.okno-app [hidden] {
+.leiho-app [hidden] {
 	display: none !important;
 }
 
-.okno-app a {
-	color: var(--okno-accent-ink);
+.leiho-app a {
+	color: var(--leiho-accent-ink);
 }
 
-.okno-app :focus-visible {
-	outline: 2px solid var(--okno-accent-ink);
+.leiho-app :focus-visible {
+	outline: 2px solid var(--leiho-accent-ink);
 	outline-offset: 1px;
 }
 
-.okno-app button,
-.okno-app input,
-.okno-app select,
-.okno-app textarea {
+.leiho-app button,
+.leiho-app input,
+.leiho-app select,
+.leiho-app textarea {
 	font-family: inherit;
 }
 
-.okno-app .okno-icon {
+.leiho-app .leiho-icon {
 	flex: 0 0 auto;
 	display: block;
 }
 
-.okno-sr,
-.okno-app .screen-reader-text {
+.leiho-sr,
+.leiho-app .screen-reader-text {
 	position: absolute !important;
 	width: 1px;
 	height: 1px;
@@ -218,24 +218,24 @@ body.okno-app-body #wpbody-content {
 	white-space: nowrap;
 }
 
-.okno-skip {
+.leiho-skip {
 	position: absolute;
 	top: -100px;
 	left: 12px;
 	z-index: 10;
 	padding: 7px 14px;
 	border-radius: 6px;
-	background: var(--okno-accent);
-	color: var(--okno-on-accent) !important;
+	background: var(--leiho-accent);
+	color: var(--leiho-on-accent) !important;
 	font-weight: 600;
 	text-decoration: none;
 }
 
-.okno-skip:focus {
+.leiho-skip:focus {
 	top: 8px;
 }
 
-.okno-app__main {
+.leiho-app__main {
 	position: relative;
 	display: flex;
 	flex-direction: column;
@@ -244,55 +244,55 @@ body.okno-app-body #wpbody-content {
 	min-height: 0;
 }
 
-.okno-view {
+.leiho-view {
 	position: relative;
 	flex: 1 1 auto;
 	min-height: 0;
 	overflow-y: auto;
 	outline: none;
-	background: var(--okno-panel);
+	background: var(--leiho-panel);
 }
 
 /* ── Rail de navigation ────────────────────────────────────────────── */
 
-.okno-nav {
+.leiho-nav {
 	display: flex;
 	flex-direction: column;
-	flex: 0 0 var(--okno-nav);
-	width: var(--okno-nav);
+	flex: 0 0 var(--leiho-nav);
+	width: var(--leiho-nav);
 	padding: 0 7px 10px;
-	background: var(--okno-panel);
-	border-right: 1px solid var(--okno-line);
+	background: var(--leiho-panel);
+	border-right: 1px solid var(--leiho-line);
 	transition: flex-basis 0.16s ease, width 0.16s ease;
 	overflow: hidden auto;
 }
 
-.okno-nav__brand {
+.leiho-nav__brand {
 	display: flex;
 	align-items: center;
 	gap: 10px;
-	flex: 0 0 var(--okno-bar, 48px);
-	height: var(--okno-bar, 48px);
+	flex: 0 0 var(--leiho-bar, 48px);
+	height: var(--leiho-bar, 48px);
 	padding: 0 8px;
 	margin: 0 -7px 7px;
-	border-bottom: 1px solid var(--okno-line);
+	border-bottom: 1px solid var(--leiho-line);
 }
 
-.okno-nav__brand img {
+.leiho-nav__brand img {
 	display: block;
 	flex: 0 0 auto;
-	width: var(--okno-control-xs, 28px);
-	height: var(--okno-control-xs, 28px);
+	width: var(--leiho-control-xs, 28px);
+	height: var(--leiho-control-xs, 28px);
 	margin-left: 7px;
 }
 
-.okno-nav__name {
-	color: var(--okno-ink);
-	font-size: var(--okno-text-md, 15px);
+.leiho-nav__name {
+	color: var(--leiho-ink);
+	font-size: var(--leiho-text-md, 15px);
 	font-weight: 600;
 }
 
-.okno-nav__list {
+.leiho-nav__list {
 	display: flex;
 	flex-direction: column;
 	gap: 1px;
@@ -301,22 +301,22 @@ body.okno-app-body #wpbody-content {
 	list-style: none;
 }
 
-.okno-nav__list li {
+.leiho-nav__list li {
 	margin: 0;
 }
 
-.okno-nav__link {
+.leiho-nav__link {
 	display: flex;
 	align-items: center;
 	gap: 12px;
 	width: 100%;
-	height: var(--okno-row, 38px);
+	height: var(--leiho-row, 38px);
 	padding: 0 12px;
 	border: 0;
 	border-radius: 6px;
 	background: transparent;
-	color: var(--okno-muted) !important;
-	font-size: var(--okno-text-base, 14px);
+	color: var(--leiho-muted) !important;
+	font-size: var(--leiho-text-base, 14px);
 	font-weight: 500;
 	text-align: left;
 	text-decoration: none;
@@ -325,23 +325,23 @@ body.okno-app-body #wpbody-content {
 	transition: background 0.1s ease, color 0.1s ease;
 }
 
-.okno-nav__link .okno-icon {
+.leiho-nav__link .leiho-icon {
 	width: 18px;
 	height: 18px;
 }
 
-.okno-nav__link:hover {
-	background: var(--okno-hover);
-	color: var(--okno-ink) !important;
+.leiho-nav__link:hover {
+	background: var(--leiho-hover);
+	color: var(--leiho-ink) !important;
 }
 
-.okno-nav__link[aria-current="page"] {
+.leiho-nav__link[aria-current="page"] {
 	position: relative;
-	background: var(--okno-active);
-	color: var(--okno-ink) !important;
+	background: var(--leiho-active);
+	color: var(--leiho-ink) !important;
 }
 
-.okno-nav__link[aria-current="page"]::before {
+.leiho-nav__link[aria-current="page"]::before {
 	content: "";
 	position: absolute;
 	top: 8px;
@@ -349,189 +349,189 @@ body.okno-app-body #wpbody-content {
 	left: -6px;
 	width: 2px;
 	border-radius: 0 2px 2px 0;
-	background: var(--okno-accent);
+	background: var(--leiho-accent);
 }
 
-.okno-nav__foot {
+.leiho-nav__foot {
 	display: flex;
 	flex-direction: column;
 	gap: 1px;
 	margin-top: auto;
 	padding-top: 7px;
-	border-top: 1px solid var(--okno-line);
+	border-top: 1px solid var(--leiho-line);
 }
 
-.okno-app--collapsed .okno-nav {
-	flex-basis: var(--okno-nav-collapsed);
-	width: var(--okno-nav-collapsed);
+.leiho-app--collapsed .leiho-nav {
+	flex-basis: var(--leiho-nav-collapsed);
+	width: var(--leiho-nav-collapsed);
 }
 
-.okno-app--collapsed .okno-nav__label,
-.okno-app--collapsed .okno-nav__name {
+.leiho-app--collapsed .leiho-nav__label,
+.leiho-app--collapsed .leiho-nav__name {
 	display: none;
 }
 
-.okno-app--collapsed .okno-nav__link {
+.leiho-app--collapsed .leiho-nav__link {
 	justify-content: center;
 	padding: 0;
 }
 
-.okno-app--collapsed .okno-nav__brand {
+.leiho-app--collapsed .leiho-nav__brand {
 	justify-content: center;
 	padding: 0;
 }
 
-.okno-app--collapsed .okno-nav__brand img {
+.leiho-app--collapsed .leiho-nav__brand img {
 	margin: 0;
 }
 
-.okno-app--collapsed .okno-nav__collapse .okno-icon {
+.leiho-app--collapsed .leiho-nav__collapse .leiho-icon {
 	transform: scaleX( -1 );
 }
 
 /* ── Barre du haut (40 px) ─────────────────────────────────────────── */
 
-.okno-topbar {
+.leiho-topbar {
 	display: flex;
 	align-items: center;
 	gap: 14px;
-	flex: 0 0 var(--okno-bar, 48px);
-	height: var(--okno-bar, 48px);
+	flex: 0 0 var(--leiho-bar, 48px);
+	height: var(--leiho-bar, 48px);
 	padding: 0 10px 0 17px;
-	background: var(--okno-panel);
-	border-bottom: 1px solid var(--okno-line);
+	background: var(--leiho-panel);
+	border-bottom: 1px solid var(--leiho-line);
 }
 
-.okno-topbar__menu {
+.leiho-topbar__menu {
 	display: none !important;
 }
 
-.okno-topbar__site {
+.leiho-topbar__site {
 	display: flex;
 	align-items: center;
 	gap: 10px;
 	min-width: 0;
 }
 
-.okno-topbar__site strong {
+.leiho-topbar__site strong {
 	overflow: hidden;
-	color: var(--okno-ink);
-	font-size: var(--okno-text-base, 14px);
+	color: var(--leiho-ink);
+	font-size: var(--leiho-text-base, 14px);
 	font-weight: 600;
 	white-space: nowrap;
 	text-overflow: ellipsis;
 }
 
-.okno-topbar__visit {
+.leiho-topbar__visit {
 	display: inline-flex;
 	align-items: center;
 	gap: 5px;
-	height: var(--okno-control-xs, 28px);
+	height: var(--leiho-control-xs, 28px);
 	padding: 0 10px;
 	border-radius: 6px;
-	background: var(--okno-input);
-	color: var(--okno-muted) !important;
-	font-size: var(--okno-text-sm, 13px);
+	background: var(--leiho-input);
+	color: var(--leiho-muted) !important;
+	font-size: var(--leiho-text-sm, 13px);
 	text-decoration: none;
 	white-space: nowrap;
 }
 
-.okno-topbar__visit:hover {
-	background: var(--okno-active);
-	color: var(--okno-ink) !important;
+.leiho-topbar__visit:hover {
+	background: var(--leiho-active);
+	color: var(--leiho-ink) !important;
 }
 
-.okno-topbar__end {
+.leiho-topbar__end {
 	display: flex;
 	align-items: center;
 	gap: 5px;
 	margin-left: auto;
 }
 
-.okno-topbar__status {
+.leiho-topbar__status {
 	margin-right: 7px;
-	color: var(--okno-muted);
-	font-size: var(--okno-text-sm, 13px);
+	color: var(--leiho-muted);
+	font-size: var(--leiho-text-sm, 13px);
 	white-space: nowrap;
 }
 
-.okno-topbar__status.is-ok {
-	color: var(--okno-ok);
+.leiho-topbar__status.is-ok {
+	color: var(--leiho-ok);
 }
 
-.okno-topbar__status.is-error {
-	color: var(--okno-error);
+.leiho-topbar__status.is-error {
+	color: var(--leiho-error);
 }
 
-.okno-topbar__status.is-busy::before {
+.leiho-topbar__status.is-busy::before {
 	content: "";
 	display: inline-block;
 	width: 7px;
 	height: 7px;
 	margin-right: 7px;
 	border-radius: 50%;
-	background: var(--okno-accent);
-	animation: okno-pulse 1.2s ease-in-out infinite;
+	background: var(--leiho-accent);
+	animation: leiho-pulse 1.2s ease-in-out infinite;
 }
 
-@keyframes okno-pulse {
+@keyframes leiho-pulse {
 	50% {
 		opacity: 0.3;
 	}
 }
 
-.okno-app .okno-topbar__publish {
+.leiho-app .leiho-topbar__publish {
 	position: relative;
 	margin-right: 5px;
 }
 
 /* Point « modifications à publier » posé sur le bouton lime : l'orange
    jurait avec le vert ; il prend la couleur du texte du bouton. */
-.okno-pending-dot {
+.leiho-pending-dot {
 	width: 7px;
 	height: 7px;
 	border-radius: 50%;
-	background: var(--okno-on-accent, #111);
+	background: var(--leiho-on-accent, #111);
 }
 
-.okno-user {
+.leiho-user {
 	position: relative;
 }
 
-.okno-user__button {
+.leiho-user__button {
 	display: flex;
 	align-items: center;
 	gap: 8px;
-	height: var(--okno-control, 36px);
+	height: var(--leiho-control, 36px);
 	padding: 0 10px 0 4px;
 	border: 0;
 	border-radius: 8px;
 	background: transparent;
-	color: var(--okno-ink);
-	font-size: var(--okno-text-base, 14px);
+	color: var(--leiho-ink);
+	font-size: var(--leiho-text-base, 14px);
 	font-weight: 500;
 	cursor: pointer;
 }
 
-.okno-user__button:hover,
-.okno-user__button[aria-expanded="true"] {
-	background: var(--okno-hover);
+.leiho-user__button:hover,
+.leiho-user__button[aria-expanded="true"] {
+	background: var(--leiho-hover);
 }
 
-.okno-app .okno-avatar {
+.leiho-app .leiho-avatar {
 	display: inline-flex;
 	align-items: center;
 	justify-content: center;
-	width: var(--okno-control-xs, 28px);
-	height: var(--okno-control-xs, 28px);
+	width: var(--leiho-control-xs, 28px);
+	height: var(--leiho-control-xs, 28px);
 	border-radius: 50%;
-	background: var(--okno-active);
-	color: var(--okno-ink);
-	font-size: var(--okno-text-xs, 12px);
+	background: var(--leiho-active);
+	color: var(--leiho-ink);
+	font-size: var(--leiho-text-xs, 12px);
 	font-weight: 600;
 }
 
-.okno-user__menu {
+.leiho-user__menu {
 	position: absolute;
 	top: calc( 100% + 6px );
 	right: 0;
@@ -540,44 +540,44 @@ body.okno-app-body #wpbody-content {
 	gap: 2px;
 	min-width: 180px;
 	padding: 7px;
-	border: 1px solid var(--okno-line-strong);
+	border: 1px solid var(--leiho-line-strong);
 	border-radius: 8px;
-	background: var(--okno-elevated);
-	box-shadow: var(--okno-shadow);
+	background: var(--leiho-elevated);
+	box-shadow: var(--leiho-shadow);
 }
 
-.okno-user__menu a {
+.leiho-user__menu a {
 	display: flex;
 	align-items: center;
 	gap: 10px;
-	height: var(--okno-control, 36px);
+	height: var(--leiho-control, 36px);
 	padding: 0 10px;
 	border-radius: 6px;
-	color: var(--okno-ink) !important;
-	font-size: var(--okno-text-base, 14px);
+	color: var(--leiho-ink) !important;
+	font-size: var(--leiho-text-base, 14px);
 	text-decoration: none;
 }
 
-.okno-user__menu a:hover,
-.okno-user__menu a:focus {
-	background: var(--okno-hover);
+.leiho-user__menu a:hover,
+.leiho-user__menu a:focus {
+	background: var(--leiho-hover);
 }
 
 /* ── Boutons ───────────────────────────────────────────────────────── */
 
-.okno-app .okno-btn {
+.leiho-app .leiho-btn {
 	display: inline-flex;
 	align-items: center;
 	justify-content: center;
 	gap: 7px;
-	height: var(--okno-control, 36px);
+	height: var(--leiho-control, 36px);
 	min-height: 0;
 	padding: 0 14px;
 	border: 1px solid transparent;
 	border-radius: 8px;
-	background: var(--okno-accent);
-	color: var(--okno-on-accent);
-	font-size: var(--okno-text-base, 14px);
+	background: var(--leiho-accent);
+	color: var(--leiho-on-accent);
+	font-size: var(--leiho-text-base, 14px);
 	font-weight: 600;
 	line-height: 1;
 	text-decoration: none;
@@ -586,141 +586,141 @@ body.okno-app-body #wpbody-content {
 	transition: background 0.1s ease;
 }
 
-.okno-app .okno-btn .okno-icon {
+.leiho-app .leiho-btn .leiho-icon {
 	width: 16px;
 	height: 16px;
 }
 
-.okno-app .okno-btn:hover {
-	background: var(--okno-accent-hover);
-	color: var(--okno-on-accent);
+.leiho-app .leiho-btn:hover {
+	background: var(--leiho-accent-hover);
+	color: var(--leiho-on-accent);
 }
 
-.okno-app .okno-btn:disabled,
-.okno-app .okno-btn[aria-disabled="true"] {
+.leiho-app .leiho-btn:disabled,
+.leiho-app .leiho-btn[aria-disabled="true"] {
 	opacity: 0.4;
 	cursor: not-allowed;
 }
 
-.okno-app .okno-btn--quiet {
+.leiho-app .leiho-btn--quiet {
 	border-color: transparent;
-	background: var(--okno-input);
-	color: var(--okno-ink);
+	background: var(--leiho-input);
+	color: var(--leiho-ink);
 	font-weight: 500;
 }
 
-.okno-app .okno-btn--quiet:hover {
+.leiho-app .leiho-btn--quiet:hover {
 	border-color: transparent;
-	background: var(--okno-active);
-	color: var(--okno-ink);
+	background: var(--leiho-active);
+	color: var(--leiho-ink);
 }
 
-.okno-app .okno-btn--danger {
+.leiho-app .leiho-btn--danger {
 	border-color: transparent;
-	background: var(--okno-input);
-	color: var(--okno-error);
+	background: var(--leiho-input);
+	color: var(--leiho-error);
 	font-weight: 500;
 }
 
-.okno-app .okno-btn--danger:hover {
+.leiho-app .leiho-btn--danger:hover {
 	border-color: transparent;
-	background: var(--okno-error-soft);
-	color: var(--okno-error);
+	background: var(--leiho-error-soft);
+	color: var(--leiho-error);
 }
 
-.okno-app .okno-dialog .okno-btn--danger {
+.leiho-app .leiho-dialog .leiho-btn--danger {
 	background: #ff453a;
 	color: #ffffff;
 	font-weight: 600;
 }
 
-.okno-app .okno-dialog .okno-btn--danger:hover {
+.leiho-app .leiho-dialog .leiho-btn--danger:hover {
 	background: #ff5a50;
 	color: #ffffff;
 }
 
-.okno-app .okno-btn--small {
-	height: var(--okno-control-sm, 30px);
+.leiho-app .leiho-btn--small {
+	height: var(--leiho-control-sm, 30px);
 	padding: 0 11px;
 	border-radius: 6px;
-	font-size: var(--okno-text-sm, 13px);
+	font-size: var(--leiho-text-sm, 13px);
 }
 
 /* Bouton fantôme (icône seule) : 28 × 28, discret jusqu'au survol. */
-.okno-app .okno-icon-btn {
+.leiho-app .leiho-icon-btn {
 	display: inline-flex;
 	align-items: center;
 	justify-content: center;
 	flex: 0 0 auto;
-	width: var(--okno-control, 36px);
-	height: var(--okno-control, 36px);
+	width: var(--leiho-control, 36px);
+	height: var(--leiho-control, 36px);
 	padding: 0;
 	border: 0;
 	border-radius: 6px;
 	background: transparent;
-	color: var(--okno-muted);
+	color: var(--leiho-muted);
 	text-decoration: none;
 	cursor: pointer;
 }
 
-.okno-app .okno-icon-btn .okno-icon {
+.leiho-app .leiho-icon-btn .leiho-icon {
 	width: 17px;
 	height: 17px;
 }
 
-.okno-app .okno-icon-btn:hover {
-	background: var(--okno-hover);
-	color: var(--okno-ink);
+.leiho-app .leiho-icon-btn:hover {
+	background: var(--leiho-hover);
+	color: var(--leiho-ink);
 }
 
-.okno-app .okno-icon-btn:disabled {
+.leiho-app .leiho-icon-btn:disabled {
 	opacity: 0.35;
 	cursor: default;
 }
 
-.okno-app .okno-icon-btn:disabled:hover {
+.leiho-app .leiho-icon-btn:disabled:hover {
 	background: transparent;
-	color: var(--okno-muted);
+	color: var(--leiho-muted);
 }
 
-.okno-app .okno-icon-btn--danger:hover {
-	color: var(--okno-error);
+.leiho-app .leiho-icon-btn--danger:hover {
+	color: var(--leiho-error);
 }
 
-.okno-app .okno-icon-btn--small {
-	width: var(--okno-control-xs, 28px);
-	height: var(--okno-control-xs, 28px);
+.leiho-app .leiho-icon-btn--small {
+	width: var(--leiho-control-xs, 28px);
+	height: var(--leiho-control-xs, 28px);
 	border-radius: 5px;
 }
 
-.okno-app .okno-icon-btn--small .okno-icon {
+.leiho-app .leiho-icon-btn--small .leiho-icon {
 	width: 15px;
 	height: 15px;
 }
 
 /* ── Champs ────────────────────────────────────────────────────────── */
 
-.okno-app .okno-input {
+.leiho-app .leiho-input {
 	width: 100%;
 	min-height: 0;
-	height: var(--okno-control, 36px);
+	height: var(--leiho-control, 36px);
 	padding: 6px 11px;
 	border: 1px solid transparent;
 	border-radius: 6px;
-	background: var(--okno-input);
-	color: var(--okno-ink);
-	font-size: var(--okno-text-base, 14px);
+	background: var(--leiho-input);
+	color: var(--leiho-ink);
+	font-size: var(--leiho-text-base, 14px);
 	line-height: 1.4;
 	box-shadow: none;
 	transition: border-color 0.1s ease, background 0.1s ease;
 }
 
-.okno-app .okno-input::placeholder {
-	color: var(--okno-faint);
+.leiho-app .leiho-input::placeholder {
+	color: var(--leiho-faint);
 	opacity: 1;
 }
 
-.okno-app select.okno-input {
+.leiho-app select.leiho-input {
 	padding-right: 31px;
 	-webkit-appearance: none;
 	appearance: none;
@@ -730,12 +730,12 @@ body.okno-app-body #wpbody-content {
 	cursor: pointer;
 }
 
-.okno-app select.okno-input option {
-	background: var(--okno-elevated);
-	color: var(--okno-ink);
+.leiho-app select.leiho-input option {
+	background: var(--leiho-elevated);
+	color: var(--leiho-ink);
 }
 
-.okno-app textarea.okno-input {
+.leiho-app textarea.leiho-input {
 	height: auto;
 	min-height: 72px;
 	padding: 8px 11px;
@@ -743,183 +743,183 @@ body.okno-app-body #wpbody-content {
 	resize: vertical;
 }
 
-.okno-app .okno-input:focus {
-	border-color: var(--okno-accent-ink);
-	background: var(--okno-input);
+.leiho-app .leiho-input:focus {
+	border-color: var(--leiho-accent-ink);
+	background: var(--leiho-input);
 	box-shadow: none;
 	outline: none;
 }
 
-.okno-app .okno-input[aria-invalid="true"] {
-	border-color: var(--okno-error);
+.leiho-app .leiho-input[aria-invalid="true"] {
+	border-color: var(--leiho-error);
 }
 
-.okno-app .okno-input[readonly] {
-	color: var(--okno-muted);
+.leiho-app .leiho-input[readonly] {
+	color: var(--leiho-muted);
 }
 
-.okno-app .okno-input--small {
+.leiho-app .leiho-input--small {
 	max-width: 140px;
 }
 
-.okno-app input[type="checkbox"],
-.okno-app input[type="radio"] {
-	accent-color: var(--okno-accent);
+.leiho-app input[type="checkbox"],
+.leiho-app input[type="radio"] {
+	accent-color: var(--leiho-accent);
 }
 
-.okno-app .okno-mono,
-.okno-app-view .okno-input.okno-mono {
-	font-family: var(--okno-mono);
-	font-size: var(--okno-text-sm, 13px);
+.leiho-app .leiho-mono,
+.leiho-app-view .leiho-input.leiho-mono {
+	font-family: var(--leiho-mono);
+	font-size: var(--leiho-text-sm, 13px);
 }
 
-.okno-app code {
+.leiho-app code {
 	padding: 1px 6px;
 	border-radius: 4px;
-	background: var(--okno-input);
-	color: var(--okno-ink);
-	font-family: var(--okno-mono);
-	font-size: var(--okno-text-xs, 12px);
+	background: var(--leiho-input);
+	color: var(--leiho-ink);
+	font-family: var(--leiho-mono);
+	font-size: var(--leiho-text-xs, 12px);
 }
 
-.okno-app .okno-label {
+.leiho-app .leiho-label {
 	display: block;
 	margin: 0 0 6px;
-	color: var(--okno-muted);
-	font-size: var(--okno-text-sm, 13px);
+	color: var(--leiho-muted);
+	font-size: var(--leiho-text-sm, 13px);
 	font-weight: 500;
 }
 
-.okno-app .okno-help {
+.leiho-app .leiho-help {
 	display: block;
 	margin: 6px 0 0;
-	color: var(--okno-faint);
-	font-size: var(--okno-text-sm, 13px);
+	color: var(--leiho-faint);
+	font-size: var(--leiho-text-sm, 13px);
 	line-height: 1.45;
 }
 
-.okno-app .okno-error {
+.leiho-app .leiho-error {
 	margin: 6px 0 0;
-	color: var(--okno-error);
-	font-size: var(--okno-text-sm, 13px);
+	color: var(--leiho-error);
+	font-size: var(--leiho-text-sm, 13px);
 	font-weight: 500;
 }
 
-.okno-app .okno-muted {
-	color: var(--okno-muted);
+.leiho-app .leiho-muted {
+	color: var(--leiho-muted);
 }
 
 /* Pastilles. */
-.okno-app .okno-pill {
+.leiho-app .leiho-pill {
 	display: inline-flex;
 	align-items: center;
 	height: 20px;
 	padding: 0 8px;
 	border-radius: 99px;
-	background: var(--okno-input);
-	color: var(--okno-muted);
-	font-size: var(--okno-text-xs, 12px);
+	background: var(--leiho-input);
+	color: var(--leiho-muted);
+	font-size: var(--leiho-text-xs, 12px);
 	font-weight: 600;
 	white-space: nowrap;
 }
 
-.okno-app .okno-pill--ok {
-	background: var(--okno-ok-soft);
-	color: var(--okno-ok);
+.leiho-app .leiho-pill--ok {
+	background: var(--leiho-ok-soft);
+	color: var(--leiho-ok);
 }
 
-.okno-app .okno-pill--warn {
-	background: var(--okno-warn-soft);
-	color: var(--okno-warn);
+.leiho-app .leiho-pill--warn {
+	background: var(--leiho-warn-soft);
+	color: var(--leiho-warn);
 }
 
-.okno-app .okno-pill--error {
-	background: var(--okno-error-soft);
-	color: var(--okno-error);
+.leiho-app .leiho-pill--error {
+	background: var(--leiho-error-soft);
+	color: var(--leiho-error);
 }
 
-.okno-app .okno-pill--accent {
-	background: var(--okno-accent-soft);
-	color: var(--okno-accent-ink);
+.leiho-app .leiho-pill--accent {
+	background: var(--leiho-accent-soft);
+	color: var(--leiho-accent-ink);
 }
 
-.okno-app .okno-pill--purple {
-	background: var(--okno-purple-soft);
-	color: var(--okno-purple);
+.leiho-app .leiho-pill--purple {
+	background: var(--leiho-purple-soft);
+	color: var(--leiho-purple);
 }
 
 /* Point de statut dans les listes. */
-.okno-status-dot {
+.leiho-status-dot {
 	flex: 0 0 auto;
 	width: 6px;
 	height: 6px;
 	border-radius: 50%;
-	background: var(--okno-faint);
+	background: var(--leiho-faint);
 }
 
-.okno-status-dot--ok {
-	background: var(--okno-ok);
+.leiho-status-dot--ok {
+	background: var(--leiho-ok);
 }
 
-.okno-status-dot--warn {
-	background: var(--okno-warn);
+.leiho-status-dot--warn {
+	background: var(--leiho-warn);
 }
 
-.okno-status-dot--error {
-	background: var(--okno-error);
+.leiho-status-dot--error {
+	background: var(--leiho-error);
 }
 
-.okno-app .okno-notice {
+.leiho-app .leiho-notice {
 	margin: 0 0 17px;
 	padding: 11px 14px;
 	border-radius: 8px;
-	font-size: var(--okno-text-base, 14px);
+	font-size: var(--leiho-text-base, 14px);
 }
 
-.okno-app .okno-notice p {
+.leiho-app .leiho-notice p {
 	margin: 0;
 }
 
-.okno-app .okno-notice p + p {
+.leiho-app .leiho-notice p + p {
 	margin-top: 5px;
 }
 
-.okno-app .okno-notice--error {
-	background: var(--okno-error-soft);
-	color: var(--okno-error);
+.leiho-app .leiho-notice--error {
+	background: var(--leiho-error-soft);
+	color: var(--leiho-error);
 }
 
-.okno-app .okno-notice--warn {
-	background: var(--okno-warn-soft);
-	color: var(--okno-warn);
+.leiho-app .leiho-notice--warn {
+	background: var(--leiho-warn-soft);
+	color: var(--leiho-warn);
 }
 
 /* Interrupteur (case à cocher stylée). */
-.okno-switch {
+.leiho-switch {
 	position: relative;
 	display: inline-flex;
 	align-items: center;
 	gap: 10px;
-	color: var(--okno-ink);
-	font-size: var(--okno-text-base, 14px);
+	color: var(--leiho-ink);
+	font-size: var(--leiho-text-base, 14px);
 	cursor: pointer;
 }
 
-.okno-switch input {
+.leiho-switch input {
 	position: relative;
 	flex: 0 0 auto;
 	width: 32px;
 	height: 18px;
 	margin: 0;
 	border-radius: 99px;
-	background: var(--okno-active);
+	background: var(--leiho-active);
 	-webkit-appearance: none;
 	appearance: none;
 	cursor: pointer;
 	transition: background 0.12s ease;
 }
 
-.okno-switch input::after {
+.leiho-switch input::after {
 	content: "";
 	position: absolute;
 	top: 2px;
@@ -932,58 +932,58 @@ body.okno-app-body #wpbody-content {
 	transition: transform 0.12s ease;
 }
 
-.okno-switch input:checked {
-	background: var(--okno-accent);
+.leiho-switch input:checked {
+	background: var(--leiho-accent);
 }
 
-.okno-switch input:checked::after {
+.leiho-switch input:checked::after {
 	background: #0a0a0a;
 	transform: translateX( 10px );
 }
 
 /* Contrôle segmenté. */
-.okno-segment {
+.leiho-segment {
 	display: inline-flex;
 	gap: 2px;
 	padding: 2px;
 	border-radius: 8px;
-	background: var(--okno-input);
+	background: var(--leiho-input);
 }
 
-.okno-segment button {
-	height: var(--okno-control-xs, 28px);
+.leiho-segment button {
+	height: var(--leiho-control-xs, 28px);
 	padding: 0 11px;
 	border: 0;
 	border-radius: 6px;
 	background: transparent;
-	color: var(--okno-muted);
-	font-size: var(--okno-text-sm, 13px);
+	color: var(--leiho-muted);
+	font-size: var(--leiho-text-sm, 13px);
 	font-weight: 500;
 	cursor: pointer;
 }
 
-.okno-segment button:hover {
-	color: var(--okno-ink);
+.leiho-segment button:hover {
+	color: var(--leiho-ink);
 }
 
-.okno-segment button[aria-pressed="true"] {
-	background: var(--okno-active);
-	color: var(--okno-ink);
+.leiho-segment button[aria-pressed="true"] {
+	background: var(--leiho-active);
+	color: var(--leiho-ink);
 }
 
 /* ── Volets (Collections, Médias) ──────────────────────────────────── */
 
-.okno-app .okno-view--media {
+.leiho-app .leiho-view--media {
 	overflow: hidden;
 }
 
-.okno-app-view {
+.leiho-app-view {
 	max-width: 1240px;
 	margin: 0 auto;
 	padding: 29px 34px 77px;
 }
 
-.okno-app-view.okno-panes {
+.leiho-app-view.leiho-panes {
 	display: flex;
 	max-width: none;
 	height: 100%;
@@ -991,77 +991,77 @@ body.okno-app-body #wpbody-content {
 	padding: 0;
 }
 
-.okno-app-loading {
+.leiho-app-loading {
 	padding: 19px;
-	color: var(--okno-muted);
+	color: var(--leiho-muted);
 }
 
-.okno-pane {
+.leiho-pane {
 	position: relative;
 	display: flex;
 	flex-direction: column;
 	min-width: 0;
 	min-height: 0;
-	background: var(--okno-panel);
-	border-right: 1px solid var(--okno-line);
+	background: var(--leiho-panel);
+	border-right: 1px solid var(--leiho-line);
 }
 
-.okno-pane--nav {
-	flex: 0 0 var(--okno-pane-nav, 264px);
-	width: var(--okno-pane-nav, 264px);
+.leiho-pane--nav {
+	flex: 0 0 var(--leiho-pane-nav, 264px);
+	width: var(--leiho-pane-nav, 264px);
 }
 
-.okno-pane--list {
-	flex: 0 0 var(--okno-pane-list, 300px);
-	width: var(--okno-pane-list, 300px);
+.leiho-pane--list {
+	flex: 0 0 var(--leiho-pane-list, 300px);
+	width: var(--leiho-pane-list, 300px);
 }
 
-.okno-pane--detail {
+.leiho-pane--detail {
 	flex: 1 1 auto;
 	border-right: 0;
 }
 
-.okno-pane--aside {
-	flex: 0 0 var(--okno-pane-aside, 340px);
-	width: var(--okno-pane-aside, 340px);
+.leiho-pane--aside {
+	flex: 0 0 var(--leiho-pane-aside, 340px);
+	width: var(--leiho-pane-aside, 340px);
 	border-right: 0;
-	border-left: 1px solid var(--okno-line);
+	border-left: 1px solid var(--leiho-line);
 }
 
-.okno-pane__head {
+.leiho-pane__head {
 	display: flex;
 	align-items: center;
 	justify-content: space-between;
 	gap: 7px;
 	flex: 0 0 auto;
-	min-height: var(--okno-bar, 48px);
+	min-height: var(--leiho-bar, 48px);
 	padding: 14px 10px 10px 14px;
 }
 
-.okno-pane__title {
+.leiho-pane__title {
 	min-width: 0;
 	margin: 0;
 	overflow: hidden;
-	color: var(--okno-ink);
-	font-size: var(--okno-text-base, 14px);
+	color: var(--leiho-ink);
+	font-size: var(--leiho-text-base, 14px);
 	font-weight: 600;
 	letter-spacing: 0.01em;
 	white-space: nowrap;
 	text-overflow: ellipsis;
 }
 
-.okno-pane--list .okno-pane__title {
-	font-size: var(--okno-text-md, 15px);
+.leiho-pane--list .leiho-pane__title {
+	font-size: var(--leiho-text-md, 15px);
 }
 
-.okno-pane__tools {
+.leiho-pane__tools {
 	display: flex;
 	align-items: center;
 	gap: 0;
 	flex: 0 0 auto;
 }
 
-.okno-pane__search {
+.leiho-pane__search {
 	position: relative;
 	display: flex;
 	gap: 7px;
@@ -1069,27 +1069,27 @@ body.okno-app-body #wpbody-content {
 	padding: 0 14px 10px;
 }
 
-.okno-pane__search .okno-input {
-	height: var(--okno-control, 36px);
+.leiho-pane__search .leiho-input {
+	height: var(--leiho-control, 36px);
 	padding: 5px 10px 5px 32px;
-	font-size: var(--okno-text-base, 14px);
+	font-size: var(--leiho-text-base, 14px);
 }
 
-.okno-pane__search select.okno-input {
+.leiho-pane__search select.leiho-input {
 	flex: 0 0 104px;
 	width: 104px;
 	padding-left: 10px;
 }
 
-.okno-pane__search .okno-input-icon {
+.leiho-pane__search .leiho-input-icon {
 	position: absolute;
 	top: 7px;
 	left: 20px;
-	color: var(--okno-faint);
+	color: var(--leiho-faint);
 	pointer-events: none;
 }
 
-.okno-pane__body {
+.leiho-pane__body {
 	flex: 1 1 auto;
 	min-height: 0;
 	padding: 2px 10px 14px;
@@ -1097,33 +1097,33 @@ body.okno-app-body #wpbody-content {
 	scrollbar-gutter: stable;
 }
 
-.okno-pane__foot {
+.leiho-pane__foot {
 	flex: 0 0 auto;
 	padding: 10px 14px;
-	border-top: 1px solid var(--okno-line);
-	color: var(--okno-faint);
-	font-size: var(--okno-text-sm, 13px);
+	border-top: 1px solid var(--leiho-line);
+	color: var(--leiho-faint);
+	font-size: var(--leiho-text-sm, 13px);
 }
 
-.okno-pane__foot .okno-pager {
+.leiho-pane__foot .leiho-pager {
 	justify-content: space-between;
 	margin: 0;
 }
 
-.okno-group-label {
+.leiho-group-label {
 	margin: 0;
 	padding: 12px 10px 5px;
-	color: var(--okno-faint);
-	font-size: var(--okno-text-xs, 12px);
+	color: var(--leiho-faint);
+	font-size: var(--leiho-text-xs, 12px);
 	font-weight: 500;
 	letter-spacing: 0.02em;
 }
 
-.okno-group-label:first-child {
+.leiho-group-label:first-child {
 	padding-top: 2px;
 }
 
-.okno-rows {
+.leiho-rows {
 	display: grid;
 	grid-template-columns: minmax( 0, 1fr );
 	gap: 1px;
@@ -1132,12 +1132,12 @@ body.okno-app-body #wpbody-content {
 	list-style: none;
 }
 
-.okno-rows > li {
+.leiho-rows > li {
 	margin: 0;
 }
 
 /* Ligne de la liste des types / collections (34 px). */
-.okno-coll {
+.leiho-coll {
 	display: flex;
 	align-items: center;
 	gap: 10px;
@@ -1147,40 +1147,40 @@ body.okno-app-body #wpbody-content {
 	border: 0;
 	border-radius: 6px;
 	background: transparent;
-	color: var(--okno-muted) !important;
-	font-size: var(--okno-text-base, 14px);
+	color: var(--leiho-muted) !important;
+	font-size: var(--leiho-text-base, 14px);
 	text-align: left;
 	text-decoration: none;
 	cursor: pointer;
 }
 
-.okno-coll:hover {
-	background: var(--okno-hover);
-	color: var(--okno-ink) !important;
+.leiho-coll:hover {
+	background: var(--leiho-hover);
+	color: var(--leiho-ink) !important;
 }
 
-.okno-coll.is-active,
-.okno-coll[aria-current="page"],
-.okno-coll[aria-current="true"] {
-	background: var(--okno-active);
-	color: var(--okno-ink) !important;
+.leiho-coll.is-active,
+.leiho-coll[aria-current="page"],
+.leiho-coll[aria-current="true"] {
+	background: var(--leiho-active);
+	color: var(--leiho-ink) !important;
 }
 
-.okno-coll__icon {
+.leiho-coll__icon {
 	display: inline-flex;
 	align-items: center;
 	justify-content: center;
 	flex: 0 0 auto;
 	width: 18px;
-	color: var(--okno-faint);
+	color: var(--leiho-faint);
 }
 
-.okno-coll__icon--collection,
-.okno-coll__icon--singleton {
-	color: var(--okno-purple);
+.leiho-coll__icon--collection,
+.leiho-coll__icon--singleton {
+	color: var(--leiho-purple);
 }
 
-.okno-coll__name {
+.leiho-coll__name {
 	flex: 1 1 auto;
 	min-width: 0;
 	overflow: hidden;
@@ -1189,63 +1189,63 @@ body.okno-app-body #wpbody-content {
 	text-overflow: ellipsis;
 }
 
-.okno-coll__count {
+.leiho-coll__count {
 	flex: 0 0 auto;
-	color: var(--okno-faint);
-	font-size: var(--okno-text-xs, 12px);
+	color: var(--leiho-faint);
+	font-size: var(--leiho-text-xs, 12px);
 	font-variant-numeric: tabular-nums;
 }
 
-.okno-coll .okno-pill {
+.leiho-coll .leiho-pill {
 	height: 18px;
 	padding: 0 7px;
-	font-size: var(--okno-text-2xs, 11px);
+	font-size: var(--leiho-text-2xs, 11px);
 }
 
 /* Ligne d'entrée (32 px). */
-.okno-item {
+.leiho-item {
 	position: relative;
 	display: flex;
 	align-items: center;
 	gap: 7px;
-	height: var(--okno-row, 38px);
+	height: var(--leiho-row, 38px);
 	padding: 0 5px 0 10px;
 	border-top: 1px solid transparent;
 	border-bottom: 1px solid transparent;
 	border-radius: 6px;
-	color: var(--okno-muted);
-	font-size: var(--okno-text-base, 14px);
+	color: var(--leiho-muted);
+	font-size: var(--leiho-text-base, 14px);
 	cursor: pointer;
 }
 
-.okno-item:hover,
-.okno-item:focus-within {
-	background: var(--okno-hover);
-	color: var(--okno-ink);
+.leiho-item:hover,
+.leiho-item:focus-within {
+	background: var(--leiho-hover);
+	color: var(--leiho-ink);
 }
 
-.okno-item.is-active {
-	background: var(--okno-active);
-	color: var(--okno-ink);
+.leiho-item.is-active {
+	background: var(--leiho-active);
+	color: var(--leiho-ink);
 }
 
-.okno-item.has-error {
-	color: var(--okno-error);
+.leiho-item.has-error {
+	color: var(--leiho-error);
 }
 
-.okno-item.is-dragging {
+.leiho-item.is-dragging {
 	opacity: 0.4;
 }
 
-.okno-item.drop-before {
-	border-top-color: var(--okno-accent-ink);
+.leiho-item.drop-before {
+	border-top-color: var(--leiho-accent-ink);
 }
 
-.okno-item.drop-after {
-	border-bottom-color: var(--okno-accent-ink);
+.leiho-item.drop-after {
+	border-bottom-color: var(--leiho-accent-ink);
 }
 
-.okno-item__link {
+.leiho-item__link {
 	display: flex;
 	align-items: center;
 	gap: 10px;
@@ -1262,11 +1262,11 @@ body.okno-app-body #wpbody-content {
 	cursor: pointer;
 }
 
-.okno-item__link:focus-visible {
+.leiho-item__link:focus-visible {
 	outline-offset: -2px;
 }
 
-.okno-item__title {
+.leiho-item__title {
 	flex: 1 1 auto;
 	min-width: 0;
 	overflow: hidden;
@@ -1275,71 +1275,71 @@ body.okno-app-body #wpbody-content {
 	text-overflow: ellipsis;
 }
 
-.okno-item__title.is-blank {
-	color: var(--okno-faint);
+.leiho-item__title.is-blank {
+	color: var(--leiho-faint);
 }
 
-.okno-item__meta {
+.leiho-item__meta {
 	flex: 0 0 auto;
-	color: var(--okno-faint);
-	font-size: var(--okno-text-xs, 12px);
+	color: var(--leiho-faint);
+	font-size: var(--leiho-text-xs, 12px);
 	white-space: nowrap;
 }
 
-.okno-item__actions {
+.leiho-item__actions {
 	display: none;
 	flex: 0 0 auto;
 	align-items: center;
 }
 
-.okno-item:hover .okno-item__actions,
-.okno-item:focus-within .okno-item__actions {
+.leiho-item:hover .leiho-item__actions,
+.leiho-item:focus-within .leiho-item__actions {
 	display: flex;
 }
 
-.okno-item:hover .okno-item__meta,
-.okno-item:focus-within .okno-item__meta {
+.leiho-item:hover .leiho-item__meta,
+.leiho-item:focus-within .leiho-item__meta {
 	display: none;
 }
 
-.okno-item__actions .okno-icon-btn {
-	width: var(--okno-control-xs, 28px);
-	height: var(--okno-control-xs, 28px);
+.leiho-item__actions .leiho-icon-btn {
+	width: var(--leiho-control-xs, 28px);
+	height: var(--leiho-control-xs, 28px);
 	border-radius: 5px;
-	color: var(--okno-faint);
+	color: var(--leiho-faint);
 }
 
-.okno-item__actions .okno-icon-btn:hover {
-	background: var(--okno-active);
-	color: var(--okno-ink);
+.leiho-item__actions .leiho-icon-btn:hover {
+	background: var(--leiho-active);
+	color: var(--leiho-ink);
 }
 
-.okno-item__actions .okno-icon-btn .okno-icon {
+.leiho-item__actions .leiho-icon-btn .leiho-icon {
 	width: 15px;
 	height: 15px;
 }
 
-.okno-grip {
+.leiho-grip {
 	display: inline-flex;
 	flex: 0 0 auto;
 	padding: 2px 0;
-	color: var(--okno-faint);
+	color: var(--leiho-faint);
 	opacity: 0;
 	cursor: grab;
 	touch-action: none;
 }
 
-.okno-item:hover .okno-grip,
-.okno-item:focus-within .okno-grip,
-.okno-item.is-dragging .okno-grip {
+.leiho-item:hover .leiho-grip,
+.leiho-item:focus-within .leiho-grip,
+.leiho-item.is-dragging .leiho-grip {
 	opacity: 1;
 }
 
-.okno-item.is-dragging .okno-grip {
+.leiho-item.is-dragging .leiho-grip {
 	cursor: grabbing;
 }
 
-.okno-type-tag {
+.leiho-type-tag {
 	display: inline-flex;
 	align-items: center;
 	justify-content: center;
@@ -1347,68 +1347,68 @@ body.okno-app-body #wpbody-content {
 	width: 20px;
 	height: 20px;
 	border-radius: 4px;
-	background: var(--okno-input);
-	color: var(--okno-muted);
-	font-family: var(--okno-mono);
-	font-size: var(--okno-text-2xs, 11px);
+	background: var(--leiho-input);
+	color: var(--leiho-muted);
+	font-family: var(--leiho-mono);
+	font-size: var(--leiho-text-2xs, 11px);
 	font-weight: 600;
 }
 
-.okno-list-empty {
+.leiho-list-empty {
 	padding: 29px 19px;
-	color: var(--okno-faint);
-	font-size: var(--okno-text-sm, 13px);
+	color: var(--leiho-faint);
+	font-size: var(--leiho-text-sm, 13px);
 	line-height: 1.5;
 	text-align: center;
 }
 
-.okno-list-empty .okno-btn {
+.leiho-list-empty .leiho-btn {
 	margin-top: 12px;
 }
 
 /* Détail : en-tête 10 / 14 px et colonne de 640 px. */
-.okno-detail__head {
+.leiho-detail__head {
 	display: flex;
 	align-items: center;
 	gap: 10px;
 	flex: 0 0 auto;
 	min-height: 49px;
 	padding: 7px 12px 7px 17px;
-	border-bottom: 1px solid var(--okno-line);
+	border-bottom: 1px solid var(--leiho-line);
 }
 
-.okno-detail__icon {
+.leiho-detail__icon {
 	display: flex;
-	color: var(--okno-muted);
+	color: var(--leiho-muted);
 }
 
-.okno-detail__icon--purple {
-	color: var(--okno-purple);
+.leiho-detail__icon--purple {
+	color: var(--leiho-purple);
 }
 
-.okno-detail__title {
+.leiho-detail__title {
 	min-width: 0;
 	margin: 0;
 	overflow: hidden;
-	color: var(--okno-ink);
-	font-size: var(--okno-text-md, 15px);
+	color: var(--leiho-ink);
+	font-size: var(--leiho-text-md, 15px);
 	font-weight: 600;
 	white-space: nowrap;
 	text-overflow: ellipsis;
 }
 
-.okno-detail__path {
+.leiho-detail__path {
 	flex: 0 1 auto;
 	min-width: 0;
 	overflow: hidden;
-	color: var(--okno-faint);
-	font-family: var(--okno-mono);
-	font-size: var(--okno-text-xs, 12px);
+	color: var(--leiho-faint);
+	font-family: var(--leiho-mono);
+	font-size: var(--leiho-text-xs, 12px);
 	white-space: nowrap;
 	text-overflow: ellipsis;
 }
 
-.okno-detail__actions {
+.leiho-detail__actions {
 	display: flex;
 	align-items: center;
 	gap: 7px;
@@ -1416,56 +1416,56 @@ body.okno-app-body #wpbody-content {
 	margin-left: auto;
 }
 
-.okno-detail__body {
+.leiho-detail__body {
 	flex: 1 1 auto;
 	min-height: 0;
 	padding: 24px 29px 72px;
 	overflow-y: auto;
 }
 
-.okno-detail__card {
-	max-width: var(--okno-form-width, 720px);
+.leiho-detail__card {
+	max-width: var(--leiho-form-width, 720px);
 }
 
-.okno-detail__card + .okno-detail__card {
+.leiho-detail__card + .leiho-detail__card {
 	margin-top: 34px;
 	padding-top: 26px;
-	border-top: 1px solid var(--okno-line);
+	border-top: 1px solid var(--leiho-line);
 }
 
-.okno-detail__card > h3,
-.okno-section-title {
+.leiho-detail__card > h3,
+.leiho-section-title {
 	margin: 0 0 17px;
-	color: var(--okno-ink);
-	font-size: var(--okno-text-xl, 17px);
+	color: var(--leiho-ink);
+	font-size: var(--leiho-text-xl, 17px);
 	font-weight: 600;
 }
 
-.okno-detail__card > p.okno-muted {
+.leiho-detail__card > p.leiho-muted {
 	margin: -10px 0 17px;
-	font-size: var(--okno-text-base, 14px);
+	font-size: var(--leiho-text-base, 14px);
 }
 
-.okno-dirty-note {
+.leiho-dirty-note {
 	display: inline-flex;
 	align-items: center;
 	gap: 6px;
-	color: var(--okno-warn);
-	font-size: var(--okno-text-sm, 13px);
+	color: var(--leiho-warn);
+	font-size: var(--leiho-text-sm, 13px);
 	font-weight: 500;
 	white-space: nowrap;
 }
 
-.okno-dirty-note::before {
+.leiho-dirty-note::before {
 	content: "";
 	width: 6px;
 	height: 6px;
 	border-radius: 50%;
-	background: var(--okno-pending);
+	background: var(--leiho-pending);
 }
 
 /* État vide d'un volet de détail. */
-.okno-empty-state {
+.leiho-empty-state {
 	display: flex;
 	flex-direction: column;
 	align-items: center;
@@ -1474,13 +1474,13 @@ body.okno-app-body #wpbody-content {
 	min-height: 60%;
 	margin: 0 auto;
 	padding: 48px 19px;
-	color: var(--okno-faint);
-	font-size: var(--okno-text-base, 14px);
+	color: var(--leiho-faint);
+	font-size: var(--leiho-text-base, 14px);
 	line-height: 1.5;
 	text-align: center;
 }
 
-.okno-empty-state__icon {
+.leiho-empty-state__icon {
 	display: flex;
 	align-items: center;
 	justify-content: center;
@@ -1488,299 +1488,299 @@ body.okno-app-body #wpbody-content {
 	height: 56px;
 	margin: 0 auto 24px;
 	border-radius: 12px;
-	background: var(--okno-active);
-	color: var(--okno-muted);
+	background: var(--leiho-active);
+	color: var(--leiho-muted);
 }
 
-.okno-empty-state h3 {
+.leiho-empty-state h3 {
 	margin: 0 0 5px;
-	color: var(--okno-ink);
-	font-size: var(--okno-text-lg, 16px);
+	color: var(--leiho-ink);
+	font-size: var(--leiho-text-lg, 16px);
 	font-weight: 600;
 }
 
-.okno-empty-state p {
+.leiho-empty-state p {
 	margin: 0;
 }
 
-.okno-empty-state .okno-btn {
+.leiho-empty-state .leiho-btn {
 	margin-top: 19px;
 }
 
 /* Propriétés (définition) dans un détail. */
-.okno-props {
+.leiho-props {
 	display: grid;
 	grid-template-columns: 120px minmax( 0, 1fr );
 	gap: 0;
 	margin: 0;
-	font-size: var(--okno-text-base, 14px);
+	font-size: var(--leiho-text-base, 14px);
 }
 
-.okno-props dt,
-.okno-props dd {
+.leiho-props dt,
+.leiho-props dd {
 	margin: 0;
 	padding: 8px 0;
-	border-bottom: 1px solid var(--okno-line);
+	border-bottom: 1px solid var(--leiho-line);
 }
 
-.okno-props dt {
-	color: var(--okno-muted);
+.leiho-props dt {
+	color: var(--leiho-muted);
 }
 
-.okno-props dd {
+.leiho-props dd {
 	min-width: 0;
 	overflow: hidden;
-	color: var(--okno-ink);
+	color: var(--leiho-ink);
 	text-overflow: ellipsis;
 }
 
 /* ── Réglages (formulaires des volets de détail) ───────────────────── */
 
-.okno-settings-grid {
+.leiho-settings-grid {
 	display: grid;
 	grid-template-columns: repeat( 2, minmax( 0, 1fr ) );
 	gap: 17px 19px;
 }
 
-.okno-setting {
+.leiho-setting {
 	min-width: 0;
 	margin: 0;
 	padding: 0;
 	border: 0;
 }
 
-.okno-setting > .okno-input,
-.okno-setting > textarea.okno-input {
-	font-size: var(--okno-text-md, 15px);
+.leiho-setting > .leiho-input,
+.leiho-setting > textarea.leiho-input {
+	font-size: var(--leiho-text-md, 15px);
 }
 
-.okno-setting--wide,
-.okno-radios,
-.okno-checks-inline {
+.leiho-setting--wide,
+.leiho-radios,
+.leiho-checks-inline {
 	grid-column: 1 / -1;
 }
 
-.okno-setting.has-error .okno-input {
-	border-color: var(--okno-error);
+.leiho-setting.has-error .leiho-input {
+	border-color: var(--leiho-error);
 }
 
-.okno-radios {
+.leiho-radios {
 	display: grid;
 	grid-template-columns: repeat( 2, minmax( 0, 1fr ) );
 	gap: 10px;
 }
 
-.okno-radios legend {
+.leiho-radios legend {
 	margin-bottom: 6px;
 	padding: 0;
 }
 
-.okno-radio {
+.leiho-radio {
 	display: flex;
 	align-items: flex-start;
 	gap: 11px;
 	padding: 12px;
 	border: 1px solid transparent;
 	border-radius: 8px;
-	background: var(--okno-input);
+	background: var(--leiho-input);
 	cursor: pointer;
 }
 
-.okno-radio:hover {
-	background: var(--okno-active);
+.leiho-radio:hover {
+	background: var(--leiho-active);
 }
 
-.okno-radio:has( input:checked ) {
-	border-color: var(--okno-accent-line);
-	background: var(--okno-accent-soft);
+.leiho-radio:has( input:checked ) {
+	border-color: var(--leiho-accent-line);
+	background: var(--leiho-accent-soft);
 }
 
-.okno-radio input {
+.leiho-radio input {
 	margin: 2px 0 0;
 }
 
-.okno-radio strong {
+.leiho-radio strong {
 	display: block;
-	color: var(--okno-ink);
-	font-size: var(--okno-text-base, 14px);
+	color: var(--leiho-ink);
+	font-size: var(--leiho-text-base, 14px);
 	font-weight: 500;
 }
 
-.okno-radio .okno-help {
+.leiho-radio .leiho-help {
 	margin-top: 2px;
 }
 
-.okno-checks-inline {
+.leiho-checks-inline {
 	display: flex;
 	flex-wrap: wrap;
 	gap: 12px 26px;
 }
 
-.okno-checks-inline legend {
+.leiho-checks-inline legend {
 	width: 100%;
 	margin-bottom: 6px;
 	padding: 0;
 }
 
-.okno-check {
+.leiho-check {
 	display: inline-flex;
 	align-items: center;
 	gap: 10px;
-	color: var(--okno-ink);
-	font-size: var(--okno-text-base, 14px);
+	color: var(--leiho-ink);
+	font-size: var(--leiho-text-base, 14px);
 	cursor: pointer;
 }
 
-.okno-check input {
+.leiho-check input {
 	margin: 0;
 }
 
-.okno-check code {
-	font-size: var(--okno-text-xs, 12px);
+.leiho-check code {
+	font-size: var(--leiho-text-xs, 12px);
 }
 
 /* Réglages d'un champ : options avancées repliées. */
-.okno-field-settings {
+.leiho-field-settings {
 	display: grid;
 	gap: 22px;
 }
 
-.okno-disclosure {
+.leiho-disclosure {
 	display: grid;
 	gap: 14px;
 }
 
-.okno-disclosure > summary {
+.leiho-disclosure > summary {
 	display: inline-flex;
 	align-items: center;
 	gap: 7px;
 	justify-self: start;
-	color: var(--okno-muted);
-	font-size: var(--okno-text-base, 14px);
+	color: var(--leiho-muted);
+	font-size: var(--leiho-text-base, 14px);
 	font-weight: 500;
 	list-style: none;
 	cursor: pointer;
 }
 
-.okno-disclosure > summary::-webkit-details-marker {
+.leiho-disclosure > summary::-webkit-details-marker {
 	display: none;
 }
 
-.okno-disclosure > summary .okno-icon {
+.leiho-disclosure > summary .leiho-icon {
 	transition: transform 0.12s ease;
 }
 
-.okno-disclosure[open] > summary .okno-icon {
+.leiho-disclosure[open] > summary .leiho-icon {
 	transform: rotate( 90deg );
 }
 
-.okno-disclosure > summary:hover {
-	color: var(--okno-ink);
+.leiho-disclosure > summary:hover {
+	color: var(--leiho-ink);
 }
 
-.okno-disclosure__body {
+.leiho-disclosure__body {
 	display: grid;
 	grid-template-columns: repeat( 2, minmax( 0, 1fr ) );
 	gap: 17px 19px;
 	align-items: start;
 	padding: 19px;
 	border-radius: 8px;
-	background: var(--okno-canvas);
+	background: var(--leiho-canvas);
 }
 
-.okno-app[data-theme="dark"] .okno-disclosure__body {
+.leiho-app[data-theme="dark"] .leiho-disclosure__body {
 	background: rgba( 255, 255, 255, 0.025 );
 }
 
-.okno-field-settings__required {
+.leiho-field-settings__required {
 	padding-top: 17px;
-	border-top: 1px solid var(--okno-line);
+	border-top: 1px solid var(--leiho-line);
 }
 
-.okno-key-note {
+.leiho-key-note {
 	word-break: break-all;
 }
 
-.okno-type-badge {
+.leiho-type-badge {
 	flex: 0 0 auto;
 	padding: 1px 7px;
 	border-radius: 4px;
-	background: var(--okno-input);
-	color: var(--okno-muted);
-	font-size: var(--okno-text-xs, 12px);
+	background: var(--leiho-input);
+	color: var(--leiho-muted);
+	font-size: var(--leiho-text-xs, 12px);
 	font-weight: 500;
 	white-space: nowrap;
 }
 
 /* Liste de champs imbriquée (sous-champs, champs d'un bloc). */
-.okno-list-field {
+.leiho-list-field {
 	margin-top: 2px;
 	overflow: hidden;
-	border: 1px solid var(--okno-line-strong);
+	border: 1px solid var(--leiho-line-strong);
 	border-radius: 10px;
 }
 
-.okno-list-field__empty {
+.leiho-list-field__empty {
 	padding: 8px 12px;
-	color: var(--okno-faint);
-	font-size: var(--okno-text-base, 14px);
+	color: var(--leiho-faint);
+	font-size: var(--leiho-text-base, 14px);
 }
 
-.okno-fields {
+.leiho-fields {
 	margin: 0;
 	padding: 0;
 	list-style: none;
 }
 
-.okno-fieldrow {
+.leiho-fieldrow {
 	margin: 0;
 }
 
-.okno-fieldrow + .okno-fieldrow {
-	border-top: 1px solid var(--okno-line);
+.leiho-fieldrow + .leiho-fieldrow {
+	border-top: 1px solid var(--leiho-line);
 }
 
-.okno-fieldrow.has-error > .okno-fieldrow__head {
-	color: var(--okno-error);
+.leiho-fieldrow.has-error > .leiho-fieldrow__head {
+	color: var(--leiho-error);
 }
 
-.okno-fieldrow.is-dragging {
+.leiho-fieldrow.is-dragging {
 	opacity: 0.4;
 }
 
-.okno-fieldrow.drop-before {
-	box-shadow: inset 0 1px 0 0 var(--okno-accent-ink);
+.leiho-fieldrow.drop-before {
+	box-shadow: inset 0 1px 0 0 var(--leiho-accent-ink);
 }
 
-.okno-fieldrow.drop-after {
-	box-shadow: inset 0 -1px 0 0 var(--okno-accent-ink);
+.leiho-fieldrow.drop-after {
+	box-shadow: inset 0 -1px 0 0 var(--leiho-accent-ink);
 }
 
-.okno-fieldrow__head {
+.leiho-fieldrow__head {
 	display: flex;
 	align-items: center;
 	gap: 5px;
 	min-width: 0;
-	height: var(--okno-control, 36px);
+	height: var(--leiho-control, 36px);
 	padding: 0 7px 0 5px;
-	font-size: var(--okno-text-base, 14px);
+	font-size: var(--leiho-text-base, 14px);
 }
 
-.okno-fieldrow__head:hover,
-.okno-fieldrow.is-open > .okno-fieldrow__head {
-	background: var(--okno-hover);
+.leiho-fieldrow__head:hover,
+.leiho-fieldrow.is-open > .leiho-fieldrow__head {
+	background: var(--leiho-hover);
 }
 
-.okno-fieldrow__head .okno-grip {
+.leiho-fieldrow__head .leiho-grip {
 	padding: 0 2px;
 }
 
-.okno-fieldrow__head:hover .okno-grip,
-.okno-fieldrow__head:focus-within .okno-grip {
+.leiho-fieldrow__head:hover .leiho-grip,
+.leiho-fieldrow__head:focus-within .leiho-grip {
 	opacity: 1;
 }
 
-.okno-fieldrow__toggle {
+.leiho-fieldrow__toggle {
 	display: flex;
 	align-items: center;
 	gap: 10px;
@@ -1790,210 +1790,210 @@ body.okno-app-body #wpbody-content {
 	padding: 0 5px;
 	border: 0;
 	background: transparent;
-	color: var(--okno-ink);
-	font-size: var(--okno-text-base, 14px);
+	color: var(--leiho-ink);
+	font-size: var(--leiho-text-base, 14px);
 	text-align: left;
 	cursor: pointer;
 }
 
-.okno-fieldrow__toggle > .okno-icon {
-	color: var(--okno-faint);
+.leiho-fieldrow__toggle > .leiho-icon {
+	color: var(--leiho-faint);
 	transition: transform 0.12s ease;
 }
 
-.okno-fieldrow__toggle[aria-expanded="true"] > .okno-icon {
+.leiho-fieldrow__toggle[aria-expanded="true"] > .leiho-icon {
 	transform: rotate( 90deg );
 }
 
-.okno-fieldrow__label {
+.leiho-fieldrow__label {
 	overflow: hidden;
 	font-weight: 500;
 	white-space: nowrap;
 	text-overflow: ellipsis;
 }
 
-.okno-fieldrow__name {
+.leiho-fieldrow__name {
 	flex: 0 1 auto;
 	min-width: 0;
 	overflow: hidden;
 	padding: 0;
 	background: transparent;
-	color: var(--okno-faint);
+	color: var(--leiho-faint);
 	white-space: nowrap;
 	text-overflow: ellipsis;
 }
 
-.okno-fieldrow__actions {
+.leiho-fieldrow__actions {
 	display: flex;
 	flex: 0 0 auto;
 	gap: 0;
 	opacity: 0;
 }
 
-.okno-fieldrow__head:hover .okno-fieldrow__actions,
-.okno-fieldrow__head:focus-within .okno-fieldrow__actions {
+.leiho-fieldrow__head:hover .leiho-fieldrow__actions,
+.leiho-fieldrow__head:focus-within .leiho-fieldrow__actions {
 	opacity: 1;
 }
 
-.okno-fieldrow__actions .okno-icon-btn {
-	width: var(--okno-control-xs, 28px);
-	height: var(--okno-control-xs, 28px);
+.leiho-fieldrow__actions .leiho-icon-btn {
+	width: var(--leiho-control-xs, 28px);
+	height: var(--leiho-control-xs, 28px);
 	border-radius: 4px;
-	color: var(--okno-faint);
+	color: var(--leiho-faint);
 }
 
-.okno-fieldrow__actions .okno-icon-btn .okno-icon {
+.leiho-fieldrow__actions .leiho-icon-btn .leiho-icon {
 	width: 14px;
 	height: 14px;
 }
 
-.okno-fieldrow__actions .okno-icon-btn--danger:hover {
-	color: var(--okno-error);
-	background: var(--okno-active);
+.leiho-fieldrow__actions .leiho-icon-btn--danger:hover {
+	color: var(--leiho-error);
+	background: var(--leiho-active);
 }
 
-.okno-fieldrow__body {
+.leiho-fieldrow__body {
 	display: grid;
 	gap: 17px;
 	padding: 17px 17px 19px;
-	border-top: 1px solid var(--okno-line);
-	background: var(--okno-hover);
+	border-top: 1px solid var(--leiho-line);
+	background: var(--leiho-hover);
 }
 
-.okno-list-field__add,
-.okno-app .okno-add-field {
+.leiho-list-field__add,
+.leiho-app .leiho-add-field {
 	display: flex;
 	align-items: center;
 	justify-content: flex-start;
 	gap: 7px;
 	width: 100%;
-	height: var(--okno-control, 36px);
+	height: var(--leiho-control, 36px);
 	padding: 0 12px;
 	border: 0;
-	border-top: 1px solid var(--okno-line);
+	border-top: 1px solid var(--leiho-line);
 	border-radius: 0;
 	background: transparent;
-	color: var(--okno-muted);
-	font-size: var(--okno-text-base, 14px);
+	color: var(--leiho-muted);
+	font-size: var(--leiho-text-base, 14px);
 	font-weight: 500;
 	text-align: left;
 	cursor: pointer;
 }
 
-.okno-list-field__add .okno-icon,
-.okno-app .okno-add-field .okno-icon {
+.leiho-list-field__add .leiho-icon,
+.leiho-app .leiho-add-field .leiho-icon {
 	width: 15px;
 	height: 15px;
 }
 
-.okno-list-field__add:hover,
-.okno-app .okno-add-field:hover {
-	background: var(--okno-hover);
-	color: var(--okno-ink);
+.leiho-list-field__add:hover,
+.leiho-app .leiho-add-field:hover {
+	background: var(--leiho-hover);
+	color: var(--leiho-ink);
 }
 
-.okno-subfields {
+.leiho-subfields {
 	display: grid;
 	gap: 6px;
 }
 
-.okno-subfields h4 {
+.leiho-subfields h4 {
 	margin: 0;
-	color: var(--okno-muted);
-	font-size: var(--okno-text-sm, 13px);
+	color: var(--leiho-muted);
+	font-size: var(--leiho-text-sm, 13px);
 	font-weight: 500;
 }
 
-.okno-blocktype {
+.leiho-blocktype {
 	padding: 14px;
-	border: 1px solid var(--okno-line-strong);
+	border: 1px solid var(--leiho-line-strong);
 	border-radius: 10px;
 }
 
-.okno-blocktype + .okno-blocktype {
+.leiho-blocktype + .leiho-blocktype {
 	margin-top: 7px;
 }
 
-.okno-blocktype.has-error {
-	border-color: var(--okno-error);
+.leiho-blocktype.has-error {
+	border-color: var(--leiho-error);
 }
 
-.okno-blocktype__head {
+.leiho-blocktype__head {
 	display: flex;
 	align-items: center;
 	justify-content: space-between;
 	gap: 10px;
 	margin-bottom: 12px;
-	color: var(--okno-ink);
-	font-size: var(--okno-text-base, 14px);
+	color: var(--leiho-ink);
+	font-size: var(--leiho-text-base, 14px);
 }
 
-.okno-blocktype__head strong {
+.leiho-blocktype__head strong {
 	font-weight: 600;
 }
 
-.okno-blocktype .okno-fieldrow__actions {
+.leiho-blocktype .leiho-fieldrow__actions {
 	opacity: 1;
 }
 
-.okno-blocktype .okno-subfields {
+.leiho-blocktype .leiho-subfields {
 	margin-top: 14px;
 }
 
-.okno-danger-zone {
+.leiho-danger-zone {
 	display: flex;
 	align-items: center;
 	justify-content: space-between;
 	gap: 19px;
 	padding: 14px 17px;
-	border: 1px solid var(--okno-error-soft);
+	border: 1px solid var(--leiho-error-soft);
 	border-radius: 8px;
 }
 
-.okno-danger-zone h3 {
+.leiho-danger-zone h3 {
 	margin: 0 0 2px;
-	color: var(--okno-ink);
-	font-size: var(--okno-text-base, 14px);
+	color: var(--leiho-ink);
+	font-size: var(--leiho-text-base, 14px);
 	font-weight: 600;
 }
 
-.okno-danger-zone p {
+.leiho-danger-zone p {
 	margin: 0;
-	font-size: var(--okno-text-sm, 13px);
+	font-size: var(--leiho-text-sm, 13px);
 }
 
 /* ── Tableaux ──────────────────────────────────────────────────────── */
 
-.okno-app-view .okno-table {
+.leiho-app-view .leiho-table {
 	width: 100%;
 	border-collapse: collapse;
-	font-size: var(--okno-text-base, 14px);
+	font-size: var(--leiho-text-base, 14px);
 }
 
-.okno-app-view .okno-table th {
+.leiho-app-view .leiho-table th {
 	padding: 7px 12px;
-	border-bottom: 1px solid var(--okno-line);
-	color: var(--okno-faint);
-	font-size: var(--okno-text-xs, 12px);
+	border-bottom: 1px solid var(--leiho-line);
+	color: var(--leiho-faint);
+	font-size: var(--leiho-text-xs, 12px);
 	font-weight: 500;
 	text-align: left;
 	white-space: nowrap;
 }
 
-.okno-app-view .okno-table td {
+.leiho-app-view .leiho-table td {
 	padding: 8px 12px;
-	border-bottom: 1px solid var(--okno-line);
-	color: var(--okno-body);
+	border-bottom: 1px solid var(--leiho-line);
+	color: var(--leiho-body);
 	vertical-align: middle;
 }
 
-.okno-app-view .okno-table tr:last-child td {
+.leiho-app-view .leiho-table tr:last-child td {
 	border-bottom: 0;
 }
 
 /* ── Boîtes de dialogue, toasts ────────────────────────────────────── */
 
-.okno-backdrop {
+.leiho-backdrop {
 	position: fixed;
 	inset: 0;
 	z-index: 50;
@@ -2001,162 +2001,162 @@ body.okno-app-body #wpbody-content {
 	align-items: center;
 	justify-content: center;
 	padding: 19px;
-	background: var(--okno-backdrop);
+	background: var(--leiho-backdrop);
 }
 
-.okno-dialog {
+.leiho-dialog {
 	display: flex;
 	flex-direction: column;
 	width: 420px;
 	max-width: calc( 100vw - 48px );
 	max-height: 90vh;
 	overflow: hidden;
-	border: 1px solid var(--okno-line-strong);
+	border: 1px solid var(--leiho-line-strong);
 	border-radius: 12px;
-	background: var(--okno-elevated);
-	box-shadow: var(--okno-shadow-modal);
-	font-size: var(--okno-text-base, 14px);
+	background: var(--leiho-elevated);
+	box-shadow: var(--leiho-shadow-modal);
+	font-size: var(--leiho-text-base, 14px);
 }
 
-.okno-dialog--wide {
+.leiho-dialog--wide {
 	width: 560px;
 }
 
-/* Import ACF → Okno : aperçu, progression, résultat (échelle de l'app). */
-.okno-dialog--import {
+/* Import ACF → Leiho : aperçu, progression, résultat (échelle de l'app). */
+.leiho-dialog--import {
 	width: 880px;
 }
 
-.okno-acf-group .okno-group-label {
+.leiho-acf-group .leiho-group-label {
 	display: flex;
 	align-items: center;
 	gap: 10px;
 	padding: 0 0 8px;
-	color: var(--okno-ink);
-	font-size: var(--okno-text-sm, 13px);
+	color: var(--leiho-ink);
+	font-size: var(--leiho-text-sm, 13px);
 	font-weight: 600;
 }
 
-.okno-acf-map,
-.okno-acf-lost,
-.okno-acf-issues {
+.leiho-acf-map,
+.leiho-acf-lost,
+.leiho-acf-issues {
 	margin: 0;
 	padding: 0;
 	list-style: none;
 }
 
-.okno-acf-map {
-	border: 1px solid var(--okno-line);
-	border-radius: var(--okno-radius);
+.leiho-acf-map {
+	border: 1px solid var(--leiho-line);
+	border-radius: var(--leiho-radius);
 }
 
-.okno-acf-map__row {
+.leiho-acf-map__row {
 	display: grid;
 	grid-template-columns: minmax( 0, 1.2fr ) minmax( 0, 1fr ) minmax( 0, 1.3fr );
 	gap: 12px;
 	align-items: center;
-	min-height: var(--okno-control, 36px);
+	min-height: var(--leiho-control, 36px);
 	padding: 7px 12px;
-	border-bottom: 1px solid var(--okno-line);
-	font-size: var(--okno-text-sm, 13px);
+	border-bottom: 1px solid var(--leiho-line);
+	font-size: var(--leiho-text-sm, 13px);
 }
 
-.okno-acf-map__row:last-child {
+.leiho-acf-map__row:last-child {
 	border-bottom: 0;
 }
 
-.okno-acf-map__row--dropped .okno-acf-map__name code {
+.leiho-acf-map__row--dropped .leiho-acf-map__name code {
 	text-decoration: line-through;
 }
 
-.okno-acf-map__name,
-.okno-acf-map__types,
-.okno-acf-map__status {
+.leiho-acf-map__name,
+.leiho-acf-map__types,
+.leiho-acf-map__status {
 	display: flex;
 	align-items: center;
 	gap: 8px;
 	min-width: 0;
 }
 
-.okno-acf-map__name {
+.leiho-acf-map__name {
 	padding-left: calc( var(--depth, 0) * 18px );
 }
 
-.okno-acf-map__name code {
+.leiho-acf-map__name code {
 	overflow: hidden;
-	color: var(--okno-ink);
-	font-family: var(--okno-mono);
+	color: var(--leiho-ink);
+	font-family: var(--leiho-mono);
 	text-overflow: ellipsis;
 	white-space: nowrap;
 }
 
-.okno-acf-map__name .okno-muted {
+.leiho-acf-map__name .leiho-muted {
 	overflow: hidden;
 	text-overflow: ellipsis;
 	white-space: nowrap;
 }
 
-.okno-acf-map__notes {
-	color: var(--okno-muted);
-	font-size: var(--okno-text-xs, 12px);
+.leiho-acf-map__notes {
+	color: var(--leiho-muted);
+	font-size: var(--leiho-text-xs, 12px);
 	line-height: 1.4;
 }
 
-.okno-acf-lost li,
-.okno-acf-issues li {
+.leiho-acf-lost li,
+.leiho-acf-issues li {
 	padding: 5px 0;
 	line-height: 1.55;
 }
 
-.okno-acf-lost li::before {
+.leiho-acf-lost li::before {
 	content: "–";
 	margin-right: 8px;
-	color: var(--okno-faint);
+	color: var(--leiho-faint);
 }
 
-.okno-acf-result {
+.leiho-acf-result {
 	display: flex;
 	flex-wrap: wrap;
 	gap: 8px;
 }
 
-.okno-acf-diff {
+.leiho-acf-diff {
 	display: flex;
 	flex-direction: column;
 	margin-top: 3px;
-	color: var(--okno-muted);
-	font-size: var(--okno-text-xs, 12px);
+	color: var(--leiho-muted);
+	font-size: var(--leiho-text-xs, 12px);
 	word-break: break-all;
 }
 
-.okno-app .okno-progress {
+.leiho-app .leiho-progress {
 	width: 100%;
 	height: 10px;
 	overflow: hidden;
 	border: 0;
 	border-radius: 99px;
-	background: var(--okno-input);
-	accent-color: var(--okno-accent-line);
+	background: var(--leiho-input);
+	accent-color: var(--leiho-accent-line);
 	appearance: none;
 }
 
-.okno-app .okno-progress::-webkit-progress-bar {
+.leiho-app .leiho-progress::-webkit-progress-bar {
 	border-radius: 99px;
-	background: var(--okno-input);
+	background: var(--leiho-input);
 }
 
-.okno-app .okno-progress::-webkit-progress-value {
+.leiho-app .leiho-progress::-webkit-progress-value {
 	border-radius: 99px;
-	background: var(--okno-accent-line);
+	background: var(--leiho-accent-line);
 	transition: width 0.2s ease;
 }
 
-.okno-app .okno-progress::-moz-progress-bar {
+.leiho-app .leiho-progress::-moz-progress-bar {
 	border-radius: 99px;
-	background: var(--okno-accent-line);
+	background: var(--leiho-accent-line);
 }
 
-.okno-fields-note .okno-actions {
+.leiho-fields-note .leiho-actions {
 	display: flex;
 	flex-wrap: wrap;
 	justify-content: center;
@@ -2164,13 +2164,13 @@ body.okno-app-body #wpbody-content {
 }
 
 @media ( max-width: 700px ) {
-	.okno-acf-map__row {
+	.leiho-acf-map__row {
 		grid-template-columns: 1fr;
 		gap: 2px;
 	}
 }
 
-.okno-dialog__head {
+.leiho-dialog__head {
 	display: flex;
 	align-items: center;
 	justify-content: space-between;
@@ -2178,50 +2178,50 @@ body.okno-app-body #wpbody-content {
 	padding: 14px 12px 0 19px;
 }
 
-.okno-dialog__head h2 {
+.leiho-dialog__head h2 {
 	margin: 0;
-	color: var(--okno-ink);
-	font-size: var(--okno-text-md, 15px);
+	color: var(--leiho-ink);
+	font-size: var(--leiho-text-md, 15px);
 	font-weight: 600;
 }
 
-.okno-dialog__body {
+.leiho-dialog__body {
 	display: flex;
 	flex-direction: column;
 	gap: 14px;
 	padding: 14px 19px 17px;
 	overflow-y: auto;
-	color: var(--okno-body);
+	color: var(--leiho-body);
 }
 
-.okno-dialog__body > p {
+.leiho-dialog__body > p {
 	margin: 0;
 	line-height: 1.55;
 }
 
-.okno-dialog__body .okno-label {
+.leiho-dialog__body .leiho-label {
 	margin-bottom: 6px;
-	font-size: var(--okno-text-sm, 13px);
+	font-size: var(--leiho-text-sm, 13px);
 }
 
-.okno-dialog__actions {
+.leiho-dialog__actions {
 	display: flex;
 	justify-content: flex-end;
 	gap: 10px;
 	padding: 14px 19px;
-	border-top: 1px solid var(--okno-line);
+	border-top: 1px solid var(--leiho-line);
 }
 
-.okno-form-grid {
+.leiho-form-grid {
 	display: grid;
 	gap: 0;
 }
 
-.okno-form-grid .okno-label:not( :first-child ) {
+.leiho-form-grid .leiho-label:not( :first-child ) {
 	margin-top: 14px;
 }
 
-.okno-toasts {
+.leiho-toasts {
 	position: fixed;
 	right: 16px;
 	bottom: 16px;
@@ -2233,62 +2233,62 @@ body.okno-app-body #wpbody-content {
 	pointer-events: none;
 }
 
-.okno-toast {
+.leiho-toast {
 	max-width: 400px;
 	padding: 11px 16px;
-	border: 1px solid var(--okno-line-strong);
+	border: 1px solid var(--leiho-line-strong);
 	border-radius: 8px;
-	background: var(--okno-elevated);
-	color: var(--okno-ink);
-	box-shadow: var(--okno-shadow);
-	font-size: var(--okno-text-base, 14px);
+	background: var(--leiho-elevated);
+	color: var(--leiho-ink);
+	box-shadow: var(--leiho-shadow);
+	font-size: var(--leiho-text-base, 14px);
 	pointer-events: auto;
-	animation: okno-toast-in 0.18s ease-out;
+	animation: leiho-toast-in 0.18s ease-out;
 	transition: opacity 0.3s ease, transform 0.3s ease;
 }
 
-.okno-toast--error {
+.leiho-toast--error {
 	border-color: rgba( 255, 69, 58, 0.5 );
-	color: var(--okno-error);
+	color: var(--leiho-error);
 }
 
-.okno-toast.is-leaving {
+.leiho-toast.is-leaving {
 	opacity: 0;
 	transform: translateY( 6px );
 }
 
-@keyframes okno-toast-in {
+@keyframes leiho-toast-in {
 	from {
 		opacity: 0;
 		transform: translateY( 8px );
 	}
 }
 
-.okno-plan {
+.leiho-plan {
 	margin: 0;
 	padding: 0;
 	list-style: none;
 }
 
-.okno-plan li {
+.leiho-plan li {
 	display: flex;
 	align-items: flex-start;
 	gap: 10px;
 	padding: 8px 0;
-	border-bottom: 1px solid var(--okno-line);
+	border-bottom: 1px solid var(--leiho-line);
 }
 
-.okno-plan li .okno-icon {
+.leiho-plan li .leiho-icon {
 	margin-top: 2px;
-	color: var(--okno-ok);
+	color: var(--leiho-ok);
 }
 
-.okno-plan li.is-warn .okno-icon {
-	color: var(--okno-warn);
+.leiho-plan li.is-warn .leiho-icon {
+	color: var(--leiho-warn);
 }
 
 /* Choix du type d'un champ : tuiles. */
-.okno-type-grid {
+.leiho-type-grid {
 	display: grid;
 	grid-template-columns: repeat( 4, minmax( 0, 1fr ) );
 	gap: 10px;
@@ -2297,12 +2297,12 @@ body.okno-app-body #wpbody-content {
 	list-style: none;
 }
 
-.okno-type-grid li {
+.leiho-type-grid li {
 	display: flex;
 	margin: 0;
 }
 
-.okno-type-card {
+.leiho-type-card {
 	display: flex;
 	flex-direction: column;
 	align-items: flex-start;
@@ -2311,31 +2311,31 @@ body.okno-app-body #wpbody-content {
 	padding: 12px;
 	border: 1px solid transparent;
 	border-radius: 8px;
-	background: var(--okno-input);
-	color: var(--okno-muted);
+	background: var(--leiho-input);
+	color: var(--leiho-muted);
 	text-align: left;
 	cursor: pointer;
 }
 
-.okno-type-card strong {
-	color: var(--okno-ink);
-	font-size: var(--okno-text-base, 14px);
+.leiho-type-card strong {
+	color: var(--leiho-ink);
+	font-size: var(--leiho-text-base, 14px);
 	font-weight: 500;
 }
 
-.okno-type-card span {
-	color: var(--okno-faint);
-	font-size: var(--okno-text-xs, 12px);
+.leiho-type-card span {
+	color: var(--leiho-faint);
+	font-size: var(--leiho-text-xs, 12px);
 	line-height: 1.4;
 }
 
-.okno-type-card:hover,
-.okno-type-card:focus-visible {
-	border-color: var(--okno-line-strong);
-	background: var(--okno-active);
+.leiho-type-card:hover,
+.leiho-type-card:focus-visible {
+	border-color: var(--leiho-line-strong);
+	background: var(--leiho-active);
 }
 
-.okno-type-card .okno-type-card__icon {
+.leiho-type-card .leiho-type-card__icon {
 	display: inline-flex;
 	align-items: center;
 	justify-content: center;
@@ -2343,35 +2343,35 @@ body.okno-app-body #wpbody-content {
 	height: 32px;
 	margin-bottom: 6px;
 	border-radius: 8px;
-	background: var(--okno-panel);
-	color: var(--okno-accent-ink);
+	background: var(--leiho-panel);
+	color: var(--leiho-accent-ink);
 }
 
-.okno-type-card:hover .okno-type-card__icon,
-.okno-type-card:focus-visible .okno-type-card__icon {
-	background: var(--okno-accent-soft);
+.leiho-type-card:hover .leiho-type-card__icon,
+.leiho-type-card:focus-visible .leiho-type-card__icon {
+	background: var(--leiho-accent-soft);
 }
 
 /* ── Pagination ────────────────────────────────────────────────────── */
 
-.okno-pager {
+.leiho-pager {
 	display: flex;
 	align-items: center;
 	justify-content: center;
 	gap: 12px;
 	margin-top: 14px;
-	color: var(--okno-faint);
-	font-size: var(--okno-text-sm, 13px);
+	color: var(--leiho-faint);
+	font-size: var(--leiho-text-sm, 13px);
 }
 
 /* ── Médias ────────────────────────────────────────────────────────── */
 
-.okno-media-main {
+.leiho-media-main {
 	flex: 1 1 auto;
 	border-right: 0;
 }
 
-.okno-media-grid {
+.leiho-media-grid {
 	display: grid;
 	grid-template-columns: repeat( auto-fill, minmax( 120px, 1fr ) );
 	gap: 14px;
@@ -2380,11 +2380,11 @@ body.okno-app-body #wpbody-content {
 	list-style: none;
 }
 
-.okno-media-grid li {
+.leiho-media-grid li {
 	margin: 0;
 }
 
-.okno-media-tile {
+.leiho-media-tile {
 	display: flex;
 	flex-direction: column;
 	gap: 6px;
@@ -2392,12 +2392,12 @@ body.okno-app-body #wpbody-content {
 	padding: 0;
 	border: 0;
 	background: transparent;
-	color: var(--okno-muted);
+	color: var(--leiho-muted);
 	cursor: pointer;
 }
 
-.okno-media-tile img,
-.okno-media-file {
+.leiho-media-tile img,
+.leiho-media-file {
 	display: flex;
 	flex-direction: column;
 	align-items: center;
@@ -2407,57 +2407,57 @@ body.okno-app-body #wpbody-content {
 	aspect-ratio: 4 / 3;
 	object-fit: cover;
 	border-radius: 6px;
-	background: var(--okno-input);
-	color: var(--okno-faint);
-	font-size: var(--okno-text-xs, 12px);
+	background: var(--leiho-input);
+	color: var(--leiho-faint);
+	font-size: var(--leiho-text-xs, 12px);
 	text-transform: uppercase;
-	box-shadow: 0 0 0 1px var(--okno-line);
+	box-shadow: 0 0 0 1px var(--leiho-line);
 }
 
-.okno-media-tile__name {
+.leiho-media-tile__name {
 	overflow: hidden;
 	padding: 0 2px;
-	font-size: var(--okno-text-sm, 13px);
+	font-size: var(--leiho-text-sm, 13px);
 	white-space: nowrap;
 	text-overflow: ellipsis;
 	text-align: left;
 }
 
-.okno-media-tile:hover img,
-.okno-media-tile:hover .okno-media-file {
-	box-shadow: 0 0 0 1px var(--okno-line-strong);
+.leiho-media-tile:hover img,
+.leiho-media-tile:hover .leiho-media-file {
+	box-shadow: 0 0 0 1px var(--leiho-line-strong);
 }
 
-.okno-media-tile.is-selected img,
-.okno-media-tile.is-selected .okno-media-file {
-	box-shadow: 0 0 0 2px var(--okno-accent);
+.leiho-media-tile.is-selected img,
+.leiho-media-tile.is-selected .leiho-media-file {
+	box-shadow: 0 0 0 2px var(--leiho-accent);
 }
 
-.okno-media-tile.is-selected .okno-media-tile__name {
-	color: var(--okno-ink);
+.leiho-media-tile.is-selected .leiho-media-tile__name {
+	color: var(--leiho-ink);
 }
 
-.okno-media-tile:focus-visible {
+.leiho-media-tile:focus-visible {
 	outline: none;
 }
 
-.okno-media-tile:focus-visible img,
-.okno-media-tile:focus-visible .okno-media-file {
-	box-shadow: 0 0 0 2px var(--okno-accent-ink);
+.leiho-media-tile:focus-visible img,
+.leiho-media-tile:focus-visible .leiho-media-file {
+	box-shadow: 0 0 0 2px var(--leiho-accent-ink);
 }
 
-.okno-media-empty {
+.leiho-media-empty {
 	grid-column: 1 / -1;
 	padding: 58px;
-	color: var(--okno-faint);
+	color: var(--leiho-faint);
 	text-align: center;
 }
 
-.okno-media-empty .okno-icon {
+.leiho-media-empty .leiho-icon {
 	margin: 0 auto 10px;
 }
 
-.okno-media-details__body {
+.leiho-media-details__body {
 	display: grid;
 	gap: 17px;
 	align-content: start;
@@ -2465,43 +2465,43 @@ body.okno-app-body #wpbody-content {
 	overflow-y: auto;
 }
 
-.okno-media-details__preview {
+.leiho-media-details__preview {
 	display: block;
 	width: 100%;
 	max-height: 200px;
 	border-radius: 6px;
-	background: var(--okno-input);
+	background: var(--leiho-input);
 	object-fit: contain;
 }
 
-.okno-media-details__meta {
+.leiho-media-details__meta {
 	margin: -7px 0 0;
-	color: var(--okno-faint);
-	font-size: var(--okno-text-sm, 13px);
+	color: var(--leiho-faint);
+	font-size: var(--leiho-text-sm, 13px);
 }
 
-.okno-media-details .okno-setting .okno-btn {
+.leiho-media-details .leiho-setting .leiho-btn {
 	margin-top: 7px;
 }
 
-.okno-media-details .okno-actions {
+.leiho-media-details .leiho-actions {
 	display: flex;
 	gap: 7px;
 	flex-wrap: wrap;
 }
 
-.okno-media-progress:empty {
+.leiho-media-progress:empty {
 	display: none;
 }
 
-.okno-media-progress {
+.leiho-media-progress {
 	margin: 0;
 	padding: 0 14px 10px;
-	color: var(--okno-muted);
-	font-size: var(--okno-text-sm, 13px);
+	color: var(--leiho-muted);
+	font-size: var(--leiho-text-sm, 13px);
 }
 
-.okno-media-drop {
+.leiho-media-drop {
 	position: fixed;
 	inset: 12px;
 	z-index: 40;
@@ -2510,24 +2510,24 @@ body.okno-app-body #wpbody-content {
 	align-items: center;
 	justify-content: center;
 	gap: 10px;
-	border: 1px dashed var(--okno-accent-line);
+	border: 1px dashed var(--leiho-accent-line);
 	border-radius: 12px;
 	background: rgba( 197, 255, 62, 0.08 );
-	color: var(--okno-ink);
-	font-size: var(--okno-text-lg, 16px);
+	color: var(--leiho-ink);
+	font-size: var(--leiho-text-lg, 16px);
 	font-weight: 600;
 	pointer-events: none;
 }
 
 /* ── Accueil ───────────────────────────────────────────────────────── */
 
-.okno-home {
+.leiho-home {
 	display: grid;
 	grid-template-columns: minmax( 0, 1fr ) 300px;
 	min-height: 100%;
 }
 
-.okno-home__main {
+.leiho-home__main {
 	width: 100%;
 	max-width: 880px;
 	min-width: 0;
@@ -2535,12 +2535,12 @@ body.okno-app-body #wpbody-content {
 	padding: 24px 29px 72px;
 }
 
-.okno-home__side {
+.leiho-home__side {
 	padding: 24px 19px 48px;
-	border-left: 1px solid var(--okno-line);
+	border-left: 1px solid var(--leiho-line);
 }
 
-.okno-home__intro {
+.leiho-home__intro {
 	display: flex;
 	align-items: center;
 	justify-content: space-between;
@@ -2550,48 +2550,48 @@ body.okno-app-body #wpbody-content {
 	margin-bottom: 26px;
 }
 
-.okno-home__intro h2 {
+.leiho-home__intro h2 {
 	margin: 0 0 2px;
-	color: var(--okno-ink);
-	font-size: var(--okno-text-xl, 17px);
+	color: var(--leiho-ink);
+	font-size: var(--leiho-text-xl, 17px);
 	font-weight: 600;
 }
 
-.okno-home__intro p {
+.leiho-home__intro p {
 	margin: 0;
-	color: var(--okno-muted);
-	font-size: var(--okno-text-base, 14px);
+	color: var(--leiho-muted);
+	font-size: var(--leiho-text-base, 14px);
 }
 
-.okno-home__section {
+.leiho-home__section {
 	max-width: 760px;
 }
 
-.okno-home__section + .okno-home__section {
+.leiho-home__section + .leiho-home__section {
 	margin-top: 29px;
 }
 
-.okno-home__label {
+.leiho-home__label {
 	display: flex;
 	align-items: center;
 	justify-content: space-between;
 	margin: 0 0 7px;
 	padding: 0 2px;
-	color: var(--okno-faint);
-	font-size: var(--okno-text-xs, 12px);
+	color: var(--leiho-faint);
+	font-size: var(--leiho-text-xs, 12px);
 	font-weight: 500;
 	letter-spacing: 0.02em;
 }
 
-.okno-home__side .okno-home__label {
+.leiho-home__side .leiho-home__label {
 	padding: 0 10px;
 }
 
-.okno-home__side .okno-home__section + .okno-home__section {
+.leiho-home__side .leiho-home__section + .leiho-home__section {
 	margin-top: 24px;
 }
 
-.okno-status-list {
+.leiho-status-list {
 	display: grid;
 	gap: 1px;
 	margin: 0;
@@ -2599,7 +2599,7 @@ body.okno-app-body #wpbody-content {
 	list-style: none;
 }
 
-.okno-status-list li {
+.leiho-status-list li {
 	display: flex;
 	align-items: flex-start;
 	gap: 11px;
@@ -2608,327 +2608,327 @@ body.okno-app-body #wpbody-content {
 	border-radius: 6px;
 }
 
-.okno-status-list .okno-dot {
+.leiho-status-list .leiho-dot {
 	margin-top: 6px;
 }
 
-.okno-status-list__text {
+.leiho-status-list__text {
 	display: grid;
 	min-width: 0;
 }
 
-.okno-status-list__text strong {
-	color: var(--okno-ink);
-	font-size: var(--okno-text-base, 14px);
+.leiho-status-list__text strong {
+	color: var(--leiho-ink);
+	font-size: var(--leiho-text-base, 14px);
 	font-weight: 500;
 }
 
-.okno-status-list__text span {
-	color: var(--okno-faint);
-	font-size: var(--okno-text-sm, 13px);
+.leiho-status-list__text span {
+	color: var(--leiho-faint);
+	font-size: var(--leiho-text-sm, 13px);
 }
 
 /* ── Vues PHP (Accueil, Réglages, Publications, Démarrer) ──────────── */
 
-.okno-app .okno-admin--app {
+.leiho-app .leiho-admin--app {
 	margin: 0;
 	min-height: 100%;
-	background: var(--okno-panel);
-	color: var(--okno-body);
-	font-family: var(--okno-font);
-	font-size: var(--okno-text-base, 14px);
+	background: var(--leiho-panel);
+	color: var(--leiho-body);
+	font-family: var(--leiho-font);
+	font-size: var(--leiho-text-base, 14px);
 	line-height: 1.55;
 }
 
-.okno-app .okno-admin--app .okno-page {
+.leiho-app .leiho-admin--app .leiho-page {
 	max-width: 880px;
 	margin-top: 0;
 	padding: 0 34px 77px;
 }
 
-.okno-app .okno-admin--app .okno-page--narrow {
+.leiho-app .leiho-admin--app .leiho-page--narrow {
 	max-width: 760px;
 }
 
-.okno-app .okno-admin--app .okno-page--head {
+.leiho-app .leiho-admin--app .leiho-page--head {
 	display: flex;
 	align-items: center;
 	min-height: 49px;
 	margin: 0 0 24px;
 	padding: 7px 17px;
 	max-width: none;
-	border-bottom: 1px solid var(--okno-line);
+	border-bottom: 1px solid var(--leiho-line);
 }
 
-.okno-app .okno-admin--app .okno-view-title {
+.leiho-app .leiho-admin--app .leiho-view-title {
 	margin: 0;
-	color: var(--okno-ink);
-	font-size: var(--okno-text-md, 15px);
+	color: var(--leiho-ink);
+	font-size: var(--leiho-text-md, 15px);
 	font-weight: 600;
 	letter-spacing: 0;
 }
 
-.okno-app-view-home .okno-admin--app .okno-page--head {
+.leiho-app-view-home .leiho-admin--app .leiho-page--head {
 	margin-bottom: 0;
 }
 
-.okno-app .okno-admin--app .okno-card {
+.leiho-app .leiho-admin--app .leiho-card {
 	padding: 19px 22px;
-	border: 1px solid var(--okno-line);
+	border: 1px solid var(--leiho-line);
 	border-radius: 10px;
-	background: var(--okno-surface);
+	background: var(--leiho-surface);
 	box-shadow: none;
 }
 
-.okno-app .okno-admin--app .okno-card--flush {
+.leiho-app .leiho-admin--app .leiho-card--flush {
 	padding: 0;
 }
 
-.okno-app .okno-admin--app .okno-card h2 {
-	font-size: var(--okno-text-lg, 16px);
+.leiho-app .leiho-admin--app .leiho-card h2 {
+	font-size: var(--leiho-text-lg, 16px);
 }
 
-.okno-app .okno-admin--app .okno-heading {
-	color: var(--okno-faint);
-	font-size: var(--okno-text-xs, 12px);
+.leiho-app .leiho-admin--app .leiho-heading {
+	color: var(--leiho-faint);
+	font-size: var(--leiho-text-xs, 12px);
 	font-weight: 500;
 	letter-spacing: 0.02em;
 	text-transform: none;
 }
 
-.okno-app .okno-admin--app .okno-eyebrow {
-	color: var(--okno-faint);
-	font-size: var(--okno-text-xs, 12px);
+.leiho-app .leiho-admin--app .leiho-eyebrow {
+	color: var(--leiho-faint);
+	font-size: var(--leiho-text-xs, 12px);
 	letter-spacing: 0.02em;
 }
 
-.okno-app .okno-admin--app h1:not( .okno-view-title ) {
-	color: var(--okno-ink);
-	font-size: var(--okno-text-2xl, 20px);
+.leiho-app .leiho-admin--app h1:not( .leiho-view-title ) {
+	color: var(--leiho-ink);
+	font-size: var(--leiho-text-2xl, 20px);
 	font-weight: 600;
 }
 
-.okno-app .okno-admin--app .okno-lead {
-	color: var(--okno-muted);
-	font-size: var(--okno-text-md, 15px);
+.leiho-app .leiho-admin--app .leiho-lead {
+	color: var(--leiho-muted);
+	font-size: var(--leiho-text-md, 15px);
 }
 
-.okno-app .okno-admin--app .okno-btn {
-	height: var(--okno-control, 36px);
+.leiho-app .leiho-admin--app .leiho-btn {
+	height: var(--leiho-control, 36px);
 	min-height: 0;
 	padding: 0 14px;
 	border-radius: 8px;
-	font-size: var(--okno-text-base, 14px);
+	font-size: var(--leiho-text-base, 14px);
 }
 
-.okno-app .okno-admin--app .okno-btn--quiet {
+.leiho-app .leiho-admin--app .leiho-btn--quiet {
 	border-color: transparent;
-	background: var(--okno-input);
-	color: var(--okno-ink);
+	background: var(--leiho-input);
+	color: var(--leiho-ink);
 }
 
-.okno-app .okno-admin--app .okno-btn--quiet:hover {
-	background: var(--okno-active);
+.leiho-app .leiho-admin--app .leiho-btn--quiet:hover {
+	background: var(--leiho-active);
 }
 
-.okno-app .okno-admin--app .okno-btn--small {
-	height: var(--okno-control-sm, 30px);
+.leiho-app .leiho-admin--app .leiho-btn--small {
+	height: var(--leiho-control-sm, 30px);
 	padding: 0 11px;
-	font-size: var(--okno-text-sm, 13px);
+	font-size: var(--leiho-text-sm, 13px);
 }
 
-.okno-app .okno-admin--app input[type="text"],
-.okno-app .okno-admin--app input[type="url"],
-.okno-app .okno-admin--app input[type="password"],
-.okno-app .okno-admin--app input[type="number"],
-.okno-app .okno-admin--app input[type="email"],
-.okno-app .okno-admin--app select,
-.okno-app .okno-admin--app textarea {
-	min-height: var(--okno-control, 36px);
+.leiho-app .leiho-admin--app input[type="text"],
+.leiho-app .leiho-admin--app input[type="url"],
+.leiho-app .leiho-admin--app input[type="password"],
+.leiho-app .leiho-admin--app input[type="number"],
+.leiho-app .leiho-admin--app input[type="email"],
+.leiho-app .leiho-admin--app select,
+.leiho-app .leiho-admin--app textarea {
+	min-height: var(--leiho-control, 36px);
 	padding: 6px 11px;
 	border: 1px solid transparent;
 	border-radius: 6px;
-	background-color: var(--okno-input);
-	color: var(--okno-ink);
-	font-size: var(--okno-text-base, 14px);
+	background-color: var(--leiho-input);
+	color: var(--leiho-ink);
+	font-size: var(--leiho-text-base, 14px);
 	box-shadow: none;
 }
 
-.okno-app .okno-admin--app input:focus,
-.okno-app .okno-admin--app select:focus,
-.okno-app .okno-admin--app textarea:focus {
-	border-color: var(--okno-accent-ink);
+.leiho-app .leiho-admin--app input:focus,
+.leiho-app .leiho-admin--app select:focus,
+.leiho-app .leiho-admin--app textarea:focus {
+	border-color: var(--leiho-accent-ink);
 	box-shadow: none;
 	outline: none;
 }
 
-.okno-app .okno-admin--app .okno-form-section {
-	border-color: var(--okno-line);
+.leiho-app .leiho-admin--app .leiho-form-section {
+	border-color: var(--leiho-line);
 	background: transparent;
 }
 
-.okno-app .okno-admin--app .okno-form-section > h2 {
-	font-size: var(--okno-text-xl, 17px);
+.leiho-app .leiho-admin--app .leiho-form-section > h2 {
+	font-size: var(--leiho-text-xl, 17px);
 	font-weight: 600;
 }
 
-.okno-app .okno-admin--app .okno-row {
-	border-color: var(--okno-line);
+.leiho-app .leiho-admin--app .leiho-row {
+	border-color: var(--leiho-line);
 }
 
-.okno-app .okno-admin--app .okno-row__label {
-	color: var(--okno-muted);
-	font-size: var(--okno-text-base, 14px);
+.leiho-app .leiho-admin--app .leiho-row__label {
+	color: var(--leiho-muted);
+	font-size: var(--leiho-text-base, 14px);
 	font-weight: 500;
 }
 
-.okno-app .okno-admin--app .okno-help {
-	color: var(--okno-faint);
-	font-size: var(--okno-text-sm, 13px);
+.leiho-app .leiho-admin--app .leiho-help {
+	color: var(--leiho-faint);
+	font-size: var(--leiho-text-sm, 13px);
 }
 
-.okno-app .okno-admin--app .okno-choice,
-.okno-app .okno-admin--app .okno-checks label {
+.leiho-app .leiho-admin--app .leiho-choice,
+.leiho-app .leiho-admin--app .leiho-checks label {
 	border-color: transparent;
-	background: var(--okno-input);
+	background: var(--leiho-input);
 }
 
-.okno-app .okno-admin--app .okno-choice:has( input:checked ),
-.okno-app .okno-admin--app .okno-checks label:has( input:checked ) {
-	border-color: var(--okno-accent-line);
-	background: var(--okno-accent-soft);
+.leiho-app .leiho-admin--app .leiho-choice:has( input:checked ),
+.leiho-app .leiho-admin--app .leiho-checks label:has( input:checked ) {
+	border-color: var(--leiho-accent-line);
+	background: var(--leiho-accent-soft);
 }
 
-.okno-app .okno-admin--app .okno-savebar {
-	border-color: var(--okno-line);
-	background: var(--okno-panel);
+.leiho-app .leiho-admin--app .leiho-savebar {
+	border-color: var(--leiho-line);
+	background: var(--leiho-panel);
 }
 
-.okno-app .okno-admin--app .okno-code,
-.okno-app .okno-admin--app .okno-code pre,
-.okno-app .okno-admin--app .okno-instructions {
-	border-color: var(--okno-line);
-	background: var(--okno-canvas);
-	color: var(--okno-ink);
-	font-family: var(--okno-mono);
-	font-size: var(--okno-text-sm, 13px);
+.leiho-app .leiho-admin--app .leiho-code,
+.leiho-app .leiho-admin--app .leiho-code pre,
+.leiho-app .leiho-admin--app .leiho-instructions {
+	border-color: var(--leiho-line);
+	background: var(--leiho-canvas);
+	color: var(--leiho-ink);
+	font-family: var(--leiho-mono);
+	font-size: var(--leiho-text-sm, 13px);
 }
 
-.okno-app .okno-admin--app .okno-segmented {
+.leiho-app .leiho-admin--app .leiho-segmented {
 	border: 0;
-	background: var(--okno-input);
+	background: var(--leiho-input);
 }
 
-.okno-app .okno-admin--app .okno-segmented button[aria-selected="true"] {
-	background: var(--okno-active);
-	color: var(--okno-ink);
+.leiho-app .leiho-admin--app .leiho-segmented button[aria-selected="true"] {
+	background: var(--leiho-active);
+	color: var(--leiho-ink);
 	box-shadow: none;
 }
 
-.okno-app .okno-admin--app .okno-table th {
+.leiho-app .leiho-admin--app .leiho-table th {
 	background: transparent;
-	color: var(--okno-faint);
-	font-size: var(--okno-text-xs, 12px);
+	color: var(--leiho-faint);
+	font-size: var(--leiho-text-xs, 12px);
 	font-weight: 500;
 }
 
-.okno-app .okno-admin--app .okno-table td,
-.okno-app .okno-admin--app .okno-table th {
-	border-color: var(--okno-line);
+.leiho-app .leiho-admin--app .leiho-table td,
+.leiho-app .leiho-admin--app .leiho-table th {
+	border-color: var(--leiho-line);
 }
 
-.okno-app .okno-admin--app .okno-log__item {
-	border-color: var(--okno-line);
+.leiho-app .leiho-admin--app .leiho-log__item {
+	border-color: var(--leiho-line);
 }
 
-.okno-app .okno-admin--app .okno-diff__value {
-	border-color: var(--okno-line);
-	background: var(--okno-canvas);
+.leiho-app .leiho-admin--app .leiho-diff__value {
+	border-color: var(--leiho-line);
+	background: var(--leiho-canvas);
 }
 
-.okno-app .okno-admin--app .okno-avatar {
-	background: var(--okno-active);
-	color: var(--okno-ink);
+.leiho-app .leiho-admin--app .leiho-avatar {
+	background: var(--leiho-active);
+	color: var(--leiho-ink);
 }
 
 /* Journal compact de l'accueil. */
-.okno-app .okno-home .okno-log {
+.leiho-app .leiho-home .leiho-log {
 	margin: 0;
 	padding: 0;
 	list-style: none;
 }
 
-.okno-app .okno-home .okno-log__item {
+.leiho-app .leiho-home .leiho-log__item {
 	padding: 12px 14px;
-	border-top: 1px solid var(--okno-line);
+	border-top: 1px solid var(--leiho-line);
 }
 
-.okno-app .okno-home .okno-log__item:first-child {
+.leiho-app .leiho-home .leiho-log__item:first-child {
 	border-top: 0;
 }
 
-.okno-app .okno-home .okno-log__field {
-	font-size: var(--okno-text-base, 14px);
+.leiho-app .leiho-home .leiho-log__field {
+	font-size: var(--leiho-text-base, 14px);
 	font-weight: 600;
 }
 
-.okno-app .okno-home .okno-log__meta {
-	font-size: var(--okno-text-sm, 13px);
+.leiho-app .leiho-home .leiho-log__meta {
+	font-size: var(--leiho-text-sm, 13px);
 }
 
-.okno-app .okno-home .okno-diff {
+.leiho-app .leiho-home .leiho-diff {
 	margin-top: 10px;
 	gap: 10px;
 }
 
-.okno-app .okno-home .okno-diff__value {
+.leiho-app .leiho-home .leiho-diff__value {
 	padding: 7px 11px;
 	border-radius: 6px;
-	font-size: var(--okno-text-sm, 13px);
+	font-size: var(--leiho-text-sm, 13px);
 }
 
-.okno-app .okno-home .okno-empty {
+.leiho-app .leiho-home .leiho-empty {
 	padding: 38px 19px;
-	font-size: var(--okno-text-base, 14px);
+	font-size: var(--leiho-text-base, 14px);
 }
 
-.okno-app .okno-home .okno-empty h3 {
-	font-size: var(--okno-text-md, 15px);
+.leiho-app .leiho-home .leiho-empty h3 {
+	font-size: var(--leiho-text-md, 15px);
 }
 
 /* ── Éditeur dans l'application ────────────────────────────────────── */
 
-.okno-app .okno-editor,
-.okno-app .okno-editor-setup {
+.leiho-app .leiho-editor,
+.leiho-app .leiho-editor-setup {
 	position: absolute;
 	inset: 0;
 	z-index: auto;
 }
 
-.okno-app .okno-view--editor,
-.okno-app .okno-view--collections {
+.leiho-app .leiho-view--editor,
+.leiho-app .leiho-view--collections {
 	overflow: hidden;
 }
 
 /* Collections : trois volets (types, entrées, entrée éditée), sans aperçu. */
-.okno-editor[data-mode="form"] .okno-sidebar,
-.okno-editor[data-mode="form"] .okno-stage,
-.okno-editor[data-mode="form"] .okno-toolbar-center {
+.leiho-editor[data-mode="form"] .leiho-sidebar,
+.leiho-editor[data-mode="form"] .leiho-stage,
+.leiho-editor[data-mode="form"] .leiho-toolbar-center {
 	display: none !important;
 }
 
-.okno-editor[data-mode="form"] .okno-main {
+.leiho-editor[data-mode="form"] .leiho-main {
 	justify-content: flex-start;
-	background: var(--okno-panel);
+	background: var(--leiho-panel);
 }
 
-.okno-form-browser {
+.leiho-form-browser {
 	display: flex;
 	flex: 0 0 auto;
 	min-height: 0;
 }
 
-.okno-editor[data-mode="form"] .okno-panel {
+.leiho-editor[data-mode="form"] .leiho-panel {
 	flex: 1 1 auto;
 	width: auto;
 	max-width: none;
@@ -2937,15 +2937,15 @@ body.okno-app-body #wpbody-content {
 	padding: 0;
 	overflow-y: auto;
 	border: 0;
-	background: var(--okno-panel);
-	font-size: var(--okno-text-base, 14px);
+	background: var(--leiho-panel);
+	font-size: var(--leiho-text-base, 14px);
 }
 
-.okno-editor[data-mode="form"] .okno-panel > * {
-	max-width: calc( var(--okno-form-width, 720px) + 56px ); /* Colonne de champs + les marges du volet. */
+.leiho-editor[data-mode="form"] .leiho-panel > * {
+	max-width: calc( var(--leiho-form-width, 720px) + 56px ); /* Colonne de champs + les marges du volet. */
 }
 
-.okno-editor[data-mode="form"] .okno-panel > .okno-inspector-head {
+.leiho-editor[data-mode="form"] .leiho-panel > .leiho-inspector-head {
 	position: sticky;
 	top: 0;
 	z-index: 2;
@@ -2953,53 +2953,53 @@ body.okno-app-body #wpbody-content {
 }
 
 /* Volet de l'entrée : barre d'outils, champs, historique à la demande. */
-.okno-entry {
+.leiho-entry {
 	display: flex;
 	flex-direction: column;
 	flex: 1 1 auto;
 	min-width: 0;
 	min-height: 0;
-	background: var(--okno-panel);
+	background: var(--leiho-panel);
 }
 
-.okno-entry__body {
+.leiho-entry__body {
 	display: flex;
 	flex: 1 1 auto;
 	min-height: 0;
 }
 
-.okno-app .okno-editor--collections .okno-toolbar {
+.leiho-app .leiho-editor--collections .leiho-toolbar {
 	grid-template-columns: minmax( 0, 1fr ) auto;
-	border-bottom: 1px solid var(--okno-line);
+	border-bottom: 1px solid var(--leiho-line);
 }
 
-.okno-editor--collections .okno-entry-back {
+.leiho-editor--collections .leiho-entry-back {
 	display: none;
 }
 
-.okno-editor--collections .okno-current-title:empty {
+.leiho-editor--collections .leiho-current-title:empty {
 	display: none;
 }
 
-.okno-editor--collections #okno-open-visual .okno-icon {
+.leiho-editor--collections #leiho-open-visual .leiho-icon {
 	width: 15px;
 	height: 15px;
 }
 
-.okno-editor--collections[data-mode="form"].is-history-open .okno-sidebar {
+.leiho-editor--collections[data-mode="form"].is-history-open .leiho-sidebar {
 	display: flex !important;
 	order: 2;
 	flex: 0 0 280px;
 	width: 280px;
 	border-right: 0;
-	border-left: 1px solid var(--okno-line);
+	border-left: 1px solid var(--leiho-line);
 }
 
-.okno-editor--collections .okno-sidebar-tabs {
+.leiho-editor--collections .leiho-sidebar-tabs {
 	display: none;
 }
 
-.okno-app .okno-editor--collections .okno-panel-empty--entry {
+.leiho-app .leiho-editor--collections .leiho-panel-empty--entry {
 	display: flex;
 	flex-direction: column;
 	align-items: center;
@@ -3008,100 +3008,100 @@ body.okno-app-body #wpbody-content {
 	margin: 18vh 29px 0;
 }
 
-.okno-panel-empty--entry strong {
-	color: var(--okno-ink);
-	font-size: var(--okno-text-md, 15px);
+.leiho-panel-empty--entry strong {
+	color: var(--leiho-ink);
+	font-size: var(--leiho-text-md, 15px);
 	font-weight: 600;
 }
 
 /* Filtres de la liste des entrées : statut et tri. */
-.okno-pane__filters {
+.leiho-pane__filters {
 	display: flex;
 	gap: 7px;
 	flex: 0 0 auto;
 	padding: 0 14px 10px;
 }
 
-.okno-pane__filters .okno-input {
+.leiho-pane__filters .leiho-input {
 	flex: 1 1 auto;
 	width: auto;
 	min-width: 0;
-	height: var(--okno-control-sm, 32px);
+	height: var(--leiho-control-sm, 32px);
 	padding: 2px 8px 2px 10px;
-	font-size: var(--okno-text-sm, 13px);
+	font-size: var(--leiho-text-sm, 13px);
 }
 
-.okno-pane__filters .okno-input,
-.okno-pane__filters .okno-input:first-of-type {
+.leiho-pane__filters .leiho-input,
+.leiho-pane__filters .leiho-input:first-of-type {
 	flex: 1 1 0;
 	width: auto;
 }
 
-.okno-app .okno-pane__filters select.okno-input {
+.leiho-app .leiho-pane__filters select.leiho-input {
 	padding-right: 24px;
 	background-position: right 3px top 50%;
 }
 
-.okno-form-browser .okno-pane--list {
-	flex-basis: var(--okno-pane-entries, 360px);
-	width: var(--okno-pane-entries, 360px);
+.leiho-form-browser .leiho-pane--list {
+	flex-basis: var(--leiho-pane-entries, 360px);
+	width: var(--leiho-pane-entries, 360px);
 }
 
-.okno-pane__search .okno-input:only-of-type {
+.leiho-pane__search .leiho-input:only-of-type {
 	flex: 1 1 auto;
 }
 
-.okno-coll-tabs {
+.leiho-coll-tabs {
 	margin-right: 2px;
 }
 
-.okno-coll--add,
-.okno-coll--add .okno-coll__icon {
-	color: var(--okno-faint) !important;
+.leiho-coll--add,
+.leiho-coll--add .leiho-coll__icon {
+	color: var(--leiho-faint) !important;
 }
 
-.okno-coll--add:hover,
-.okno-coll--add:hover .okno-coll__icon {
-	color: var(--okno-ink) !important;
+.leiho-coll--add:hover,
+.leiho-coll--add:hover .leiho-coll__icon {
+	color: var(--leiho-ink) !important;
 }
 
 /* Onglet Champs : le constructeur (ou la note ACF) remplace entrées et entrée. */
-.okno-editor--collections.is-fields .okno-form-browser .okno-pane--list,
-.okno-editor--collections.is-fields .okno-entry {
+.leiho-editor--collections.is-fields .leiho-form-browser .leiho-pane--list,
+.leiho-editor--collections.is-fields .leiho-entry {
 	display: none;
 }
 
-.okno-builder-host {
+.leiho-builder-host {
 	display: flex;
 	flex: 1 1 auto;
 	min-width: 0;
 	min-height: 0;
 }
 
-.okno-builder-host[hidden],
-.okno-fields-note[hidden] {
+.leiho-builder-host[hidden],
+.leiho-fields-note[hidden] {
 	display: none !important;
 }
 
-.okno-builder-host .okno-builder__editor > .okno-pane--detail {
+.leiho-builder-host .leiho-builder__editor > .leiho-pane--detail {
 	border-right: 0;
 }
 
 /* Boutons du constructeur dans l'éditeur (editor.css pose les siens après). */
-.okno-app .okno-editor .okno-btn--danger {
+.leiho-app .leiho-editor .leiho-btn--danger {
 	border-color: transparent;
-	background: var(--okno-input);
-	color: var(--okno-error);
+	background: var(--leiho-input);
+	color: var(--leiho-error);
 	font-weight: 500;
 }
 
-.okno-app .okno-editor .okno-btn--danger:hover:not(:disabled) {
-	background: var(--okno-error-soft);
-	color: var(--okno-error);
+.leiho-app .leiho-editor .leiho-btn--danger:hover:not(:disabled) {
+	background: var(--leiho-error-soft);
+	color: var(--leiho-error);
 }
 
-/* Assez large pour « Importer dans Okno » et « Ouvrir les groupes de champs ACF » côte à côte. */
-.okno-fields-note .okno-empty-state {
+/* Assez large pour « Importer dans Leiho » et « Ouvrir les groupes de champs ACF » côte à côte. */
+.leiho-fields-note .leiho-empty-state {
 	max-width: 520px;
 	margin: 12vh auto 0;
 }
@@ -3110,103 +3110,103 @@ body.okno-app-body #wpbody-content {
 
 /* Écrans de portable (1440 px) : volets un peu plus étroits, l'entrée garde la place. */
 @media ( max-width: 1600px ) {
-	.okno-app,
-	.okno-app .okno-admin,
-	.okno-app .okno-editor {
-		--okno-pane-nav: 232px;
-		--okno-pane-entries: 312px;
-		--okno-pane-aside: 310px;
+	.leiho-app,
+	.leiho-app .leiho-admin,
+	.leiho-app .leiho-editor {
+		--leiho-pane-nav: 232px;
+		--leiho-pane-entries: 312px;
+		--leiho-pane-aside: 310px;
 	}
 
-	.okno-app .okno-editor--collections #okno-open-visual span {
+	.leiho-app .leiho-editor--collections #leiho-open-visual span {
 		display: none;
 	}
 }
 
 @media ( max-width: 1280px ) {
-	.okno-pane--nav {
+	.leiho-pane--nav {
 		flex-basis: 200px;
 		width: 200px;
 	}
 
-	.okno-pane--list {
+	.leiho-pane--list {
 		flex-basis: 240px;
 		width: 240px;
 	}
 
-	.okno-pane--aside {
+	.leiho-pane--aside {
 		flex-basis: 270px;
 		width: 270px;
 	}
 
-	.okno-home {
+	.leiho-home {
 		grid-template-columns: minmax( 0, 1fr ) 260px;
 	}
 }
 
 @media ( max-width: 1100px ) {
-	.okno-settings-grid,
-	.okno-disclosure__body,
-	.okno-radios {
+	.leiho-settings-grid,
+	.leiho-disclosure__body,
+	.leiho-radios {
 		grid-template-columns: 1fr;
 	}
 
-	.okno-type-grid {
+	.leiho-type-grid {
 		grid-template-columns: repeat( 3, minmax( 0, 1fr ) );
 	}
 
-	.okno-detail__path {
+	.leiho-detail__path {
 		display: none;
 	}
 
 	/* Collections : volets plus étroits. */
-	.okno-form-browser .okno-pane--nav {
+	.leiho-form-browser .leiho-pane--nav {
 		flex-basis: 180px;
 		width: 180px;
 	}
 
-	.okno-form-browser .okno-pane--list {
+	.leiho-form-browser .leiho-pane--list {
 		flex-basis: 220px;
 		width: 220px;
 	}
 
-	.okno-app .okno-editor--collections #okno-open-visual span {
+	.leiho-app .leiho-editor--collections #leiho-open-visual span {
 		display: none;
 	}
 }
 
 @media ( max-width: 900px ) {
-	.okno-home {
+	.leiho-home {
 		grid-template-columns: 1fr;
 	}
 
-	.okno-home__side {
-		border-top: 1px solid var(--okno-line);
+	.leiho-home__side {
+		border-top: 1px solid var(--leiho-line);
 		border-left: 0;
 	}
 
 	/* Collections : la liste ou l'entrée, l'une après l'autre. */
-	.okno-editor--collections.has-entry:not( .is-fields ) .okno-form-browser,
-	.okno-editor--collections:not( .has-entry ) .okno-entry {
+	.leiho-editor--collections.has-entry:not( .is-fields ) .leiho-form-browser,
+	.leiho-editor--collections:not( .has-entry ) .leiho-entry {
 		display: none;
 	}
 
-	.okno-editor--collections .okno-form-browser {
+	.leiho-editor--collections .leiho-form-browser {
 		flex: 1 1 auto;
 	}
 
-	.okno-editor--collections .okno-form-browser .okno-pane--list {
+	.leiho-editor--collections .leiho-form-browser .leiho-pane--list {
 		flex: 1 1 auto;
 		width: auto;
 	}
 
-	.okno-editor--collections .okno-entry-back {
+	.leiho-editor--collections .leiho-entry-back {
 		display: inline-flex;
 	}
 }
 
 @media ( max-width: 782px ) {
-	.okno-nav {
+	.leiho-nav {
 		position: absolute;
 		top: 0;
 		bottom: 0;
@@ -3215,199 +3215,199 @@ body.okno-app-body #wpbody-content {
 		width: 240px !important;
 		transform: translateX( -100% );
 		transition: transform 0.2s ease;
-		box-shadow: var(--okno-shadow);
+		box-shadow: var(--leiho-shadow);
 	}
 
-	.okno-app--nav-open .okno-nav {
+	.leiho-app--nav-open .leiho-nav {
 		transform: none;
 	}
 
-	.okno-app--nav-open .okno-app__main::after {
+	.leiho-app--nav-open .leiho-app__main::after {
 		content: "";
 		position: absolute;
 		inset: 0;
 		z-index: 25;
-		background: var(--okno-backdrop);
+		background: var(--leiho-backdrop);
 	}
 
-	.okno-app--collapsed .okno-nav__label,
-	.okno-app--collapsed .okno-nav__name {
+	.leiho-app--collapsed .leiho-nav__label,
+	.leiho-app--collapsed .leiho-nav__name {
 		display: inline;
 	}
 
-	.okno-app--collapsed .okno-nav__link,
-	.okno-app--collapsed .okno-nav__brand {
+	.leiho-app--collapsed .leiho-nav__link,
+	.leiho-app--collapsed .leiho-nav__brand {
 		justify-content: flex-start;
 		padding: 0 12px;
 	}
 
-	.okno-nav__collapse {
+	.leiho-nav__collapse {
 		display: none !important;
 	}
 
 	/* Éditeur et formulaire n'ont pas de barre du haut : rail visible. */
-	.okno-app--embedded .okno-nav {
+	.leiho-app--embedded .leiho-nav {
 		position: static;
-		width: var(--okno-nav-collapsed) !important;
-		flex-basis: var(--okno-nav-collapsed);
+		width: var(--leiho-nav-collapsed) !important;
+		flex-basis: var(--leiho-nav-collapsed);
 		transform: none;
 		box-shadow: none;
 	}
 
-	.okno-app--embedded .okno-nav__label,
-	.okno-app--embedded .okno-nav__name {
+	.leiho-app--embedded .leiho-nav__label,
+	.leiho-app--embedded .leiho-nav__name {
 		display: none !important;
 	}
 
-	.okno-app--embedded .okno-nav__link,
-	.okno-app--embedded .okno-nav__brand {
+	.leiho-app--embedded .leiho-nav__link,
+	.leiho-app--embedded .leiho-nav__brand {
 		justify-content: center;
 		padding: 0;
 	}
 
-	.okno-topbar {
+	.leiho-topbar {
 		gap: 7px;
 		padding: 0 7px;
 	}
 
-	.okno-topbar__menu {
+	.leiho-topbar__menu {
 		display: inline-flex !important;
 	}
 
-	.okno-user__name,
-	.okno-topbar__visit,
-	.okno-topbar__status {
+	.leiho-user__name,
+	.leiho-topbar__visit,
+	.leiho-topbar__status {
 		display: none;
 	}
 
-	.okno-app-view {
+	.leiho-app-view {
 		padding: 19px 19px 58px;
 	}
 
 	/* Volets empilés : chacun garde sa hauteur naturelle. */
-	.okno-app .okno-view--media {
+	.leiho-app .leiho-view--media {
 		overflow-y: auto;
 	}
 
-	.okno-app-view.okno-panes {
+	.leiho-app-view.leiho-panes {
 		flex-direction: column;
 		height: auto;
 		min-height: 100%;
 	}
 
-	.okno-pane,
-	.okno-pane--nav,
-	.okno-pane--list,
-	.okno-pane--aside {
+	.leiho-pane,
+	.leiho-pane--nav,
+	.leiho-pane--list,
+	.leiho-pane--aside {
 		flex: 0 0 auto;
 		width: auto;
 		border-right: 0;
 		border-left: 0;
-		border-bottom: 1px solid var(--okno-line);
+		border-bottom: 1px solid var(--leiho-line);
 	}
 
-	.okno-pane__body {
+	.leiho-pane__body {
 		max-height: 50vh;
 	}
 
-	.okno-pane--detail .okno-detail__body,
-	.okno-pane--detail .okno-pane__body {
+	.leiho-pane--detail .leiho-detail__body,
+	.leiho-pane--detail .leiho-pane__body {
 		max-height: none;
 	}
 
-	.okno-detail__head {
+	.leiho-detail__head {
 		flex-wrap: wrap;
 	}
 
-	.okno-detail__body {
+	.leiho-detail__body {
 		padding: 19px 19px 58px;
 	}
 
-	.okno-type-grid {
+	.leiho-type-grid {
 		grid-template-columns: repeat( 2, minmax( 0, 1fr ) );
 	}
 
-	.okno-danger-zone {
+	.leiho-danger-zone {
 		flex-direction: column;
 		align-items: flex-start;
 	}
 
-	.okno-fieldrow__name {
+	.leiho-fieldrow__name {
 		display: none;
 	}
 }
 
 /* ── Constructeur de collections ───────────────────────────────────── */
 
-.okno-builder__editor {
+.leiho-builder__editor {
 	display: flex;
 	flex: 1 1 auto;
 	min-width: 0;
 	min-height: 0;
 }
 
-.okno-builder__fields {
+.leiho-builder__fields {
 	flex-basis: 280px;
 	width: 280px;
 }
 
-.okno-pane__hint {
+.leiho-pane__hint {
 	margin: 0;
 	padding: 12px 10px 0;
 }
 
-.okno-item--add {
+.leiho-item--add {
 	width: 100%;
 	border: 0;
 	background: transparent;
-	color: var(--okno-muted);
+	color: var(--leiho-muted);
 	font-weight: 500;
 	text-align: left;
 }
 
-.okno-app .okno-item--add.okno-add-field {
-	height: var(--okno-row, 38px);
+.leiho-app .leiho-item--add.leiho-add-field {
+	height: var(--leiho-row, 38px);
 	padding: 0 10px;
 	border-top: 0;
 	border-radius: 6px;
 }
 
-.okno-fieldrow .okno-item__actions {
+.leiho-fieldrow .leiho-item__actions {
 	display: flex;
 }
 
-.okno-fieldrow__body .okno-settings-grid,
-.okno-detail__card .okno-field-settings > .okno-settings-grid {
+.leiho-fieldrow__body .leiho-settings-grid,
+.leiho-detail__card .leiho-field-settings > .leiho-settings-grid {
 	grid-template-columns: repeat( 2, minmax( 0, 1fr ) );
 }
 
-.okno-fieldrow__body .okno-settings-grid {
+.leiho-fieldrow__body .leiho-settings-grid {
 	grid-template-columns: minmax( 0, 1fr );
 }
 
-.okno-archived-actions {
+.leiho-archived-actions {
 	margin-top: 14px;
 }
 
-.okno-builder__none {
+.leiho-builder__none {
 	padding-top: 0;
 }
 
-.okno-item > .okno-fieldrow__actions {
+.leiho-item > .leiho-fieldrow__actions {
 	display: none;
 	opacity: 1;
 }
 
-.okno-item:hover > .okno-fieldrow__actions,
-.okno-item:focus-within > .okno-fieldrow__actions {
+.leiho-item:hover > .leiho-fieldrow__actions,
+.leiho-item:focus-within > .leiho-fieldrow__actions {
 	display: flex;
 }
 
-.okno-app code.okno-item__meta,
-.okno-app code.okno-fieldrow__name {
+.leiho-app code.leiho-item__meta,
+.leiho-app code.leiho-fieldrow__name {
 	padding: 0;
 	background: transparent;
-	color: var(--okno-faint);
+	color: var(--leiho-faint);
 }
 
 /* ── Focus ─────────────────────────────────────────────────────────── */
@@ -3417,36 +3417,36 @@ body.okno-app-body #wpbody-content {
  * l'accent. wp-admin pose son propre cadre bleu au clic (a:focus,
  * .button:focus, input:focus : box-shadow #2271b1) : retiré dans l'app.
  */
-.okno-app a:focus,
-.okno-app button:focus,
-.okno-app .button:focus,
-.okno-app [role="button"]:focus,
-.okno-app [role="option"]:focus,
-.okno-app [role="listbox"]:focus,
-.okno-app summary:focus,
-.okno-app input[type="checkbox"]:focus,
-.okno-app input[type="radio"]:focus,
-.okno-app input[type="range"]:focus,
-.okno-app input[type="color"]:focus,
-.okno-app input[type="file"]:focus {
+.leiho-app a:focus,
+.leiho-app button:focus,
+.leiho-app .button:focus,
+.leiho-app [role="button"]:focus,
+.leiho-app [role="option"]:focus,
+.leiho-app [role="listbox"]:focus,
+.leiho-app summary:focus,
+.leiho-app input[type="checkbox"]:focus,
+.leiho-app input[type="radio"]:focus,
+.leiho-app input[type="range"]:focus,
+.leiho-app input[type="color"]:focus,
+.leiho-app input[type="file"]:focus {
 	box-shadow: none;
 }
 
-.okno-app :focus:not( :focus-visible ),
-.okno-app .button:focus:not( :focus-visible ) {
+.leiho-app :focus:not( :focus-visible ),
+.leiho-app .button:focus:not( :focus-visible ) {
 	outline: none;
 }
 
-.okno-app a:focus-visible,
-.okno-app button:focus-visible,
-.okno-app .button:focus-visible,
-.okno-app summary:focus-visible,
-.okno-app [tabindex]:focus-visible,
-.okno-app input[type="checkbox"]:focus-visible,
-.okno-app input[type="radio"]:focus-visible,
-.okno-app input[type="range"]:focus-visible,
-.okno-app input[type="file"]:focus-visible {
-	outline: 2px solid var(--okno-accent-ink);
+.leiho-app a:focus-visible,
+.leiho-app button:focus-visible,
+.leiho-app .button:focus-visible,
+.leiho-app summary:focus-visible,
+.leiho-app [tabindex]:focus-visible,
+.leiho-app input[type="checkbox"]:focus-visible,
+.leiho-app input[type="radio"]:focus-visible,
+.leiho-app input[type="range"]:focus-visible,
+.leiho-app input[type="file"]:focus-visible {
+	outline: 2px solid var(--leiho-accent-ink);
 	outline-offset: 2px;
 	box-shadow: none;
 }
@@ -3456,11 +3456,11 @@ body.okno-app-body #wpbody-content {
 /*
  * Une seule apparence partout dans l'application (vues, boîtes de dialogue,
  * éditeur, réglages PHP) : carré arrondi avec coche sur fond lime, cercle
- * avec point lime. Les interrupteurs (.okno-switch, .okno-toggle--switch)
+ * avec point lime. Les interrupteurs (.leiho-switch, .leiho-toggle--switch)
  * ont leurs propres règles.
  */
-.okno-app input[type="checkbox"]:not( .okno-switch input ):not( .okno-toggle--switch input ),
-.okno-app input[type="radio"] {
+.leiho-app input[type="checkbox"]:not( .leiho-switch input ):not( .leiho-toggle--switch input ),
+.leiho-app input[type="radio"] {
 	position: relative;
 	flex: 0 0 auto;
 	width: 18px;
@@ -3468,11 +3468,11 @@ body.okno-app-body #wpbody-content {
 	height: 18px;
 	margin: 0;
 	padding: 0;
-	border: 1.5px solid var(--okno-line-strong);
+	border: 1.5px solid var(--leiho-line-strong);
 	border-radius: 5px;
-	background: var(--okno-input);
+	background: var(--leiho-input);
 	box-shadow: none;
-	color: var(--okno-on-accent);
+	color: var(--leiho-on-accent);
 	-webkit-appearance: none;
 	appearance: none;
 	cursor: pointer;
@@ -3480,48 +3480,48 @@ body.okno-app-body #wpbody-content {
 	transition: background-color 0.12s ease, border-color 0.12s ease, box-shadow 0.12s ease;
 }
 
-.okno-app input[type="radio"] {
+.leiho-app input[type="radio"] {
 	border-radius: 50%;
 }
 
-.okno-app input[type="checkbox"]::before,
-.okno-app input[type="radio"]::before {
+.leiho-app input[type="checkbox"]::before,
+.leiho-app input[type="radio"]::before {
 	content: none;
 }
 
-.okno-app input[type="checkbox"]:not( .okno-switch input ):not( .okno-toggle--switch input ):hover:not( :disabled ),
-.okno-app input[type="radio"]:hover:not( :disabled ) {
-	border-color: var(--okno-muted);
+.leiho-app input[type="checkbox"]:not( .leiho-switch input ):not( .leiho-toggle--switch input ):hover:not( :disabled ),
+.leiho-app input[type="radio"]:hover:not( :disabled ) {
+	border-color: var(--leiho-muted);
 }
 
-.okno-app input[type="checkbox"]:not( .okno-switch input ):not( .okno-toggle--switch input ):checked,
-.okno-app input[type="checkbox"]:not( .okno-switch input ):not( .okno-toggle--switch input ):indeterminate {
-	border-color: var(--okno-accent-line);
-	background: var(--okno-accent) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%230a0a0a' stroke-width='3.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 12.5l4.5 4.5L19 7.5'/%3E%3C/svg%3E") no-repeat center / 12px;
+.leiho-app input[type="checkbox"]:not( .leiho-switch input ):not( .leiho-toggle--switch input ):checked,
+.leiho-app input[type="checkbox"]:not( .leiho-switch input ):not( .leiho-toggle--switch input ):indeterminate {
+	border-color: var(--leiho-accent-line);
+	background: var(--leiho-accent) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%230a0a0a' stroke-width='3.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 12.5l4.5 4.5L19 7.5'/%3E%3C/svg%3E") no-repeat center / 12px;
 }
 
-.okno-app input[type="checkbox"]:not( .okno-switch input ):not( .okno-toggle--switch input ):indeterminate {
+.leiho-app input[type="checkbox"]:not( .leiho-switch input ):not( .leiho-toggle--switch input ):indeterminate {
 	background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%230a0a0a' stroke-width='3.2' stroke-linecap='round'%3E%3Cpath d='M6 12h12'/%3E%3C/svg%3E");
 }
 
-.okno-app input[type="radio"]:checked {
-	border-color: var(--okno-accent-line);
-	background: radial-gradient( circle, var(--okno-accent) 0 4.5px, transparent 5px ), var(--okno-input);
+.leiho-app input[type="radio"]:checked {
+	border-color: var(--leiho-accent-line);
+	background: radial-gradient( circle, var(--leiho-accent) 0 4.5px, transparent 5px ), var(--leiho-input);
 }
 
-.okno-app[data-theme="light"] input[type="radio"]:checked {
-	background: radial-gradient( circle, var(--okno-accent-ink) 0 4.5px, transparent 5px ), var(--okno-surface);
+.leiho-app[data-theme="light"] input[type="radio"]:checked {
+	background: radial-gradient( circle, var(--leiho-accent-ink) 0 4.5px, transparent 5px ), var(--leiho-surface);
 }
 
-.okno-app input[type="checkbox"]:disabled,
-.okno-app input[type="radio"]:disabled {
+.leiho-app input[type="checkbox"]:disabled,
+.leiho-app input[type="radio"]:disabled {
 	opacity: 0.4;
 	cursor: not-allowed;
 }
 
 /* Interrupteur : booléens (vrai / faux) et options qui s'activent. */
-.okno-app .okno-toggle--switch input[type="checkbox"],
-.okno-app .okno-switch input[type="checkbox"] {
+.leiho-app .leiho-toggle--switch input[type="checkbox"],
+.leiho-app .leiho-switch input[type="checkbox"] {
 	position: relative;
 	flex: 0 0 auto;
 	width: 34px;
@@ -3531,21 +3531,21 @@ body.okno-app-body #wpbody-content {
 	padding: 0;
 	border: 0;
 	border-radius: 99px;
-	background: var(--okno-active);
-	box-shadow: inset 0 0 0 1px var(--okno-line-strong);
+	background: var(--leiho-active);
+	box-shadow: inset 0 0 0 1px var(--leiho-line-strong);
 	-webkit-appearance: none;
 	appearance: none;
 	cursor: pointer;
 	transition: background-color 0.15s ease, box-shadow 0.15s ease;
 }
 
-.okno-app .okno-toggle--switch input[type="checkbox"]::before,
-.okno-app .okno-switch input[type="checkbox"]::before {
+.leiho-app .leiho-toggle--switch input[type="checkbox"]::before,
+.leiho-app .leiho-switch input[type="checkbox"]::before {
 	content: none;
 }
 
-.okno-app .okno-toggle--switch input[type="checkbox"]::after,
-.okno-app .okno-switch input[type="checkbox"]::after {
+.leiho-app .leiho-toggle--switch input[type="checkbox"]::after,
+.leiho-app .leiho-switch input[type="checkbox"]::after {
 	content: "";
 	position: absolute;
 	top: 3px;
@@ -3558,99 +3558,99 @@ body.okno-app-body #wpbody-content {
 	transition: transform 0.15s ease, background-color 0.15s ease;
 }
 
-.okno-app .okno-toggle--switch input[type="checkbox"]:checked,
-.okno-app .okno-switch input[type="checkbox"]:checked {
-	background: var(--okno-accent);
-	box-shadow: inset 0 0 0 1px var(--okno-accent-line);
+.leiho-app .leiho-toggle--switch input[type="checkbox"]:checked,
+.leiho-app .leiho-switch input[type="checkbox"]:checked {
+	background: var(--leiho-accent);
+	box-shadow: inset 0 0 0 1px var(--leiho-accent-line);
 }
 
-.okno-app .okno-toggle--switch input[type="checkbox"]:checked::after,
-.okno-app .okno-switch input[type="checkbox"]:checked::after {
+.leiho-app .leiho-toggle--switch input[type="checkbox"]:checked::after,
+.leiho-app .leiho-switch input[type="checkbox"]:checked::after {
 	background: #0a0a0a;
 	transform: translateX( 14px );
 }
 
-.okno-app .okno-toggle--switch input[type="checkbox"]:disabled,
-.okno-app .okno-switch input[type="checkbox"]:disabled {
+.leiho-app .leiho-toggle--switch input[type="checkbox"]:disabled,
+.leiho-app .leiho-switch input[type="checkbox"]:disabled {
 	opacity: 0.4;
 	cursor: not-allowed;
 }
 
 @media ( prefers-reduced-motion: reduce ) {
-	.okno-app input[type="checkbox"],
-	.okno-app input[type="checkbox"]::after,
-	.okno-app input[type="radio"] {
+	.leiho-app input[type="checkbox"],
+	.leiho-app input[type="checkbox"]::after,
+	.leiho-app input[type="radio"] {
 		transition: none !important;
 	}
 }
 
 /* Cartes radio et cases en carte : état choisi net (bord, teinte, point). */
-.okno-app .okno-radio,
-.okno-app .okno-admin--app .okno-choice,
-.okno-app .okno-admin--app .okno-checks label {
-	border: 1px solid var(--okno-line);
+.leiho-app .leiho-radio,
+.leiho-app .leiho-admin--app .leiho-choice,
+.leiho-app .leiho-admin--app .leiho-checks label {
+	border: 1px solid var(--leiho-line);
 	transition: border-color 0.12s ease, background-color 0.12s ease;
 }
 
-.okno-app .okno-radio:hover,
-.okno-app .okno-admin--app .okno-choice:hover,
-.okno-app .okno-admin--app .okno-checks label:hover {
-	border-color: var(--okno-line-strong);
+.leiho-app .leiho-radio:hover,
+.leiho-app .leiho-admin--app .leiho-choice:hover,
+.leiho-app .leiho-admin--app .leiho-checks label:hover {
+	border-color: var(--leiho-line-strong);
 }
 
-.okno-app .okno-radio:has( input:checked ),
-.okno-app .okno-admin--app .okno-choice:has( input:checked ),
-.okno-app .okno-admin--app .okno-checks label:has( input:checked ) {
-	border-color: var(--okno-accent-line);
-	background: var(--okno-accent-soft);
-	box-shadow: inset 0 0 0 1px var(--okno-accent-line);
+.leiho-app .leiho-radio:has( input:checked ),
+.leiho-app .leiho-admin--app .leiho-choice:has( input:checked ),
+.leiho-app .leiho-admin--app .leiho-checks label:has( input:checked ) {
+	border-color: var(--leiho-accent-line);
+	background: var(--leiho-accent-soft);
+	box-shadow: inset 0 0 0 1px var(--leiho-accent-line);
 }
 
-.okno-app .okno-radio:has( input:focus-visible ),
-.okno-app .okno-admin--app .okno-choice:has( input:focus-visible ),
-.okno-app .okno-admin--app .okno-checks label:has( input:focus-visible ) {
-	outline: 2px solid var(--okno-accent-ink);
+.leiho-app .leiho-radio:has( input:focus-visible ),
+.leiho-app .leiho-admin--app .leiho-choice:has( input:focus-visible ),
+.leiho-app .leiho-admin--app .leiho-checks label:has( input:focus-visible ) {
+	outline: 2px solid var(--leiho-accent-ink);
 	outline-offset: 2px;
 }
 
-.okno-app .okno-radio:has( input:focus-visible ) input,
-.okno-app .okno-admin--app .okno-choice:has( input:focus-visible ) input,
-.okno-app .okno-admin--app .okno-checks label:has( input:focus-visible ) input {
+.leiho-app .leiho-radio:has( input:focus-visible ) input,
+.leiho-app .leiho-admin--app .leiho-choice:has( input:focus-visible ) input,
+.leiho-app .leiho-admin--app .leiho-checks label:has( input:focus-visible ) input {
 	outline: none;
 }
 
-.okno-app .okno-radio:has( input:disabled ) {
+.leiho-app .leiho-radio:has( input:disabled ) {
 	opacity: 0.5;
 	cursor: not-allowed;
 }
 
-/* ── Listes déroulantes (OknoUI.select) ────────────────────────────── */
+/* ── Listes déroulantes (LeihoUI.select) ────────────────────────────── */
 
 /*
  * Bouton + liste (role listbox) à la place du <select> natif, qui reste
  * dans la page, masqué, pour la valeur et les formulaires.
  */
-.okno-select-native {
+.leiho-select-native {
 	display: none !important;
 }
 
-.okno-select {
+.leiho-select {
 	display: inline-flex;
 	align-items: center;
 	gap: 8px;
 	width: 100%;
 	min-width: 0;
-	height: var(--okno-control, 36px);
+	height: var(--leiho-control, 36px);
 	min-height: 0;
 	margin: 0;
 	padding: 0 10px 0 12px;
 	border: 1px solid transparent;
 	border-radius: 6px;
-	background: var(--okno-input);
+	background: var(--leiho-input);
 	background-image: none !important;
-	color: var(--okno-ink);
+	color: var(--leiho-ink);
 	font: inherit;
-	font-size: var(--okno-text-base, 14px);
+	font-size: var(--leiho-text-base, 14px);
 	line-height: 1.2;
 	text-align: left;
 	box-shadow: none;
@@ -3658,22 +3658,22 @@ body.okno-app-body #wpbody-content {
 	transition: border-color 0.1s ease, background-color 0.1s ease;
 }
 
-.okno-select:hover:not( :disabled ) {
-	background-color: var(--okno-active);
+.leiho-select:hover:not( :disabled ) {
+	background-color: var(--leiho-active);
 }
 
-.okno-select[aria-expanded="true"],
-.okno-select:focus-visible {
-	border-color: var(--okno-accent-ink);
+.leiho-select[aria-expanded="true"],
+.leiho-select:focus-visible {
+	border-color: var(--leiho-accent-ink);
 	outline: none !important;
 }
 
-.okno-select:disabled {
+.leiho-select:disabled {
 	opacity: 0.5;
 	cursor: not-allowed;
 }
 
-.okno-select__label {
+.leiho-select__label {
 	flex: 1 1 auto;
 	min-width: 0;
 	overflow: hidden;
@@ -3681,69 +3681,69 @@ body.okno-app-body #wpbody-content {
 	white-space: nowrap;
 }
 
-.okno-select__label.is-placeholder {
-	color: var(--okno-faint);
+.leiho-select__label.is-placeholder {
+	color: var(--leiho-faint);
 }
 
-.okno-select__chevron {
+.leiho-select__chevron {
 	flex: 0 0 auto;
 	width: 14px;
 	height: 14px;
-	color: var(--okno-faint);
+	color: var(--leiho-faint);
 	transition: transform 0.12s ease;
 }
 
-.okno-select[aria-expanded="true"] .okno-select__chevron {
+.leiho-select[aria-expanded="true"] .leiho-select__chevron {
 	transform: rotate( 180deg );
 }
 
-.okno-select__dot,
-.okno-listbox__dot {
+.leiho-select__dot,
+.leiho-listbox__dot {
 	flex: 0 0 auto;
 	width: 8px;
 	height: 8px;
 	border-radius: 50%;
-	background: var(--okno-faint);
+	background: var(--leiho-faint);
 }
 
-[data-dot="ok"] > .okno-select__dot,
-[data-dot="ok"] > .okno-listbox__dot {
-	background: var(--okno-ok);
+[data-dot="ok"] > .leiho-select__dot,
+[data-dot="ok"] > .leiho-listbox__dot {
+	background: var(--leiho-ok);
 }
 
-[data-dot="warn"] > .okno-select__dot,
-[data-dot="warn"] > .okno-listbox__dot {
-	background: var(--okno-warn);
+[data-dot="warn"] > .leiho-select__dot,
+[data-dot="warn"] > .leiho-listbox__dot {
+	background: var(--leiho-warn);
 }
 
-[data-dot="pending"] > .okno-select__dot,
-[data-dot="pending"] > .okno-listbox__dot {
-	background: var(--okno-pending, #ff9f0a);
+[data-dot="pending"] > .leiho-select__dot,
+[data-dot="pending"] > .leiho-listbox__dot {
+	background: var(--leiho-pending, #ff9f0a);
 }
 
-[data-dot="error"] > .okno-select__dot,
-[data-dot="error"] > .okno-listbox__dot {
-	background: var(--okno-error);
+[data-dot="error"] > .leiho-select__dot,
+[data-dot="error"] > .leiho-listbox__dot {
+	background: var(--leiho-error);
 }
 
-[data-dot="purple"] > .okno-select__dot,
-[data-dot="purple"] > .okno-listbox__dot {
-	background: var(--okno-purple);
+[data-dot="purple"] > .leiho-select__dot,
+[data-dot="purple"] > .leiho-listbox__dot {
+	background: var(--leiho-purple);
 }
 
-[data-dot="accent"] > .okno-select__dot,
-[data-dot="accent"] > .okno-listbox__dot {
-	background: var(--okno-accent);
+[data-dot="accent"] > .leiho-select__dot,
+[data-dot="accent"] > .leiho-listbox__dot {
+	background: var(--leiho-accent);
 }
 
 /* Variante compacte : barre d'outils, filtres. */
-.okno-select--compact {
-	height: var(--okno-control-sm, 30px);
+.leiho-select--compact {
+	height: var(--leiho-control-sm, 30px);
 	padding: 0 8px 0 10px;
-	font-size: var(--okno-text-sm, 13px);
+	font-size: var(--leiho-text-sm, 13px);
 }
 
-.okno-listbox {
+.leiho-listbox {
 	position: fixed;
 	z-index: 160000;
 	min-width: 160px;
@@ -3752,19 +3752,19 @@ body.okno-app-body #wpbody-content {
 	padding: 5px;
 	overflow-y: auto;
 	overscroll-behavior: contain;
-	border: 1px solid var(--okno-line-strong);
+	border: 1px solid var(--leiho-line-strong);
 	border-radius: 9px;
-	background: var(--okno-elevated, #1d1d1d);
-	box-shadow: var(--okno-shadow);
-	color: var(--okno-ink);
-	font-family: var(--okno-font);
-	font-size: var(--okno-text-base, 14px);
+	background: var(--leiho-elevated, #1d1d1d);
+	box-shadow: var(--leiho-shadow);
+	color: var(--leiho-ink);
+	font-family: var(--leiho-font);
+	font-size: var(--leiho-text-base, 14px);
 	list-style: none;
 	outline: none;
-	animation: okno-listbox-in 0.1s ease-out;
+	animation: leiho-listbox-in 0.1s ease-out;
 }
 
-@keyframes okno-listbox-in {
+@keyframes leiho-listbox-in {
 	from {
 		opacity: 0;
 		transform: translateY( -3px );
@@ -3772,17 +3772,17 @@ body.okno-app-body #wpbody-content {
 }
 
 @media ( prefers-reduced-motion: reduce ) {
-	.okno-listbox {
+	.leiho-listbox {
 		animation: none;
 	}
 }
 
-.okno-app .okno-listbox:focus-visible,
-.okno-listbox:focus {
+.leiho-app .leiho-listbox:focus-visible,
+.leiho-listbox:focus {
 	outline: none;
 }
 
-.okno-listbox__option {
+.leiho-listbox__option {
 	display: flex;
 	align-items: center;
 	gap: 9px;
@@ -3790,38 +3790,38 @@ body.okno-app-body #wpbody-content {
 	margin: 0;
 	padding: 6px 10px 6px 8px;
 	border-radius: 6px;
-	color: var(--okno-ink);
+	color: var(--leiho-ink);
 	line-height: 1.3;
 	cursor: pointer;
 	user-select: none;
 }
 
-.okno-listbox__option.is-active {
-	background: var(--okno-active);
+.leiho-listbox__option.is-active {
+	background: var(--leiho-active);
 }
 
-.okno-listbox__option[aria-disabled="true"] {
-	color: var(--okno-faint);
+.leiho-listbox__option[aria-disabled="true"] {
+	color: var(--leiho-faint);
 	cursor: not-allowed;
 }
 
-.okno-listbox__check {
+.leiho-listbox__check {
 	flex: 0 0 auto;
 	width: 16px;
 	height: 16px;
-	color: var(--okno-accent-ink);
+	color: var(--leiho-accent-ink);
 	visibility: hidden;
 }
 
-.okno-listbox__option[aria-selected="true"] .okno-listbox__check {
+.leiho-listbox__option[aria-selected="true"] .leiho-listbox__check {
 	visibility: visible;
 }
 
-.okno-listbox__option[aria-selected="true"] {
+.leiho-listbox__option[aria-selected="true"] {
 	font-weight: 600;
 }
 
-.okno-listbox__text {
+.leiho-listbox__text {
 	flex: 1 1 auto;
 	min-width: 0;
 	overflow: hidden;
@@ -3829,66 +3829,66 @@ body.okno-app-body #wpbody-content {
 	white-space: nowrap;
 }
 
-.okno-listbox__group {
+.leiho-listbox__group {
 	padding: 8px 10px 4px 33px;
-	color: var(--okno-faint);
-	font-size: var(--okno-text-xs, 12px);
+	color: var(--leiho-faint);
+	font-size: var(--leiho-text-xs, 12px);
 	font-weight: 600;
 	letter-spacing: 0.02em;
 	text-transform: uppercase;
 }
 
-.okno-listbox__empty {
+.leiho-listbox__empty {
 	padding: 8px 10px;
-	color: var(--okno-faint);
-	font-size: var(--okno-text-sm, 13px);
+	color: var(--leiho-faint);
+	font-size: var(--leiho-text-sm, 13px);
 }
 
-.okno-listbox__option--create {
-	border-top: 1px solid var(--okno-line);
+.leiho-listbox__option--create {
+	border-top: 1px solid var(--leiho-line);
 	border-radius: 0 0 6px 6px;
-	color: var(--okno-accent-ink);
+	color: var(--leiho-accent-ink);
 	font-weight: 500;
 }
 
-/* ── Dates et heures (OknoUI.date) ─────────────────────────────────── */
+/* ── Dates et heures (LeihoUI.date) ─────────────────────────────────── */
 
 /*
  * Bouton au format d'un champ + calendrier (role dialog) à la place de
  * <input type="date|datetime-local|time">, qui reste dans la page, masqué,
  * pour la valeur.
  */
-.okno-date-native {
+.leiho-date-native {
 	display: none !important;
 }
 
-.okno-date {
+.leiho-date {
 	position: relative;
 	display: flex;
 	width: 100%;
 	min-width: 0;
 }
 
-.okno-date[hidden] {
+.leiho-date[hidden] {
 	display: none;
 }
 
-.okno-date__icon {
+.leiho-date__icon {
 	flex: 0 0 auto;
 	width: 16px;
 	height: 16px;
-	color: var(--okno-faint);
+	color: var(--leiho-faint);
 }
 
-.okno-date__trigger[aria-expanded="true"] .okno-date__icon {
-	color: var(--okno-accent-ink);
+.leiho-date__trigger[aria-expanded="true"] .leiho-date__icon {
+	color: var(--leiho-accent-ink);
 }
 
-.okno-date.is-clearable .okno-date__trigger {
+.leiho-date.is-clearable .leiho-date__trigger {
 	padding-right: 38px;
 }
 
-.okno-date__clear {
+.leiho-date__clear {
 	position: absolute;
 	top: 50%;
 	right: 5px;
@@ -3903,204 +3903,204 @@ body.okno-app-body #wpbody-content {
 	border: 0;
 	border-radius: 5px;
 	background: transparent;
-	color: var(--okno-faint);
+	color: var(--leiho-faint);
 	box-shadow: none;
 	cursor: pointer;
 	transform: translateY( -50% );
 }
 
-.okno-date__clear[hidden] {
+.leiho-date__clear[hidden] {
 	display: none;
 }
 
-.okno-date__clear:hover {
-	background: var(--okno-active);
-	color: var(--okno-ink);
+.leiho-date__clear:hover {
+	background: var(--leiho-active);
+	color: var(--leiho-ink);
 }
 
-.okno-date__clear svg {
+.leiho-date__clear svg {
 	width: 14px;
 	height: 14px;
 }
 
-.okno-datepicker {
+.leiho-datepicker {
 	position: fixed;
 	z-index: 160000; /* Comme les menus : sous la médiathèque (1000000). */
 	width: 300px;
 	max-width: calc( 100vw - 16px );
 	box-sizing: border-box;
 	padding: 10px;
-	border: 1px solid var(--okno-line-strong);
+	border: 1px solid var(--leiho-line-strong);
 	border-radius: 10px;
-	background: var(--okno-elevated, #1d1d1d);
-	box-shadow: var(--okno-shadow);
-	color: var(--okno-ink);
-	font-family: var(--okno-font);
-	font-size: var(--okno-text-base, 14px);
+	background: var(--leiho-elevated, #1d1d1d);
+	box-shadow: var(--leiho-shadow);
+	color: var(--leiho-ink);
+	font-family: var(--leiho-font);
+	font-size: var(--leiho-text-base, 14px);
 	line-height: 1.3;
-	animation: okno-listbox-in 0.1s ease-out;
+	animation: leiho-listbox-in 0.1s ease-out;
 }
 
 @media ( prefers-reduced-motion: reduce ) {
-	.okno-datepicker {
+	.leiho-datepicker {
 		animation: none;
 	}
 }
 
-.okno-datepicker button {
+.leiho-datepicker button {
 	font-family: inherit;
 }
 
-.okno-datepicker__head {
+.leiho-datepicker__head {
 	display: flex;
 	align-items: center;
 	gap: 4px;
 	margin-bottom: 6px;
 }
 
-.okno-datepicker__nav,
-.okno-datepicker__title {
+.leiho-datepicker__nav,
+.leiho-datepicker__title {
 	display: inline-flex;
 	align-items: center;
 	justify-content: center;
-	height: var(--okno-control-sm, 30px);
+	height: var(--leiho-control-sm, 30px);
 	min-height: 0;
 	margin: 0;
 	padding: 0;
 	border: 0;
 	border-radius: 6px;
 	background: transparent;
-	color: var(--okno-ink);
+	color: var(--leiho-ink);
 	box-shadow: none;
 	cursor: pointer;
 }
 
-.okno-datepicker__nav {
+.leiho-datepicker__nav {
 	flex: 0 0 auto;
-	width: var(--okno-control-sm, 30px);
-	color: var(--okno-muted);
+	width: var(--leiho-control-sm, 30px);
+	color: var(--leiho-muted);
 }
 
-.okno-datepicker__nav[hidden] {
+.leiho-datepicker__nav[hidden] {
 	display: none;
 }
 
-.okno-datepicker__nav svg {
+.leiho-datepicker__nav svg {
 	width: 16px;
 	height: 16px;
 }
 
-.okno-datepicker__title {
+.leiho-datepicker__title {
 	flex: 1 1 auto;
 	gap: 6px;
 	padding: 0 8px;
-	font-size: var(--okno-text-base, 14px);
+	font-size: var(--leiho-text-base, 14px);
 	font-weight: 600;
 }
 
-.okno-datepicker__title-chevron {
+.leiho-datepicker__title-chevron {
 	width: 14px;
 	height: 14px;
-	color: var(--okno-faint);
+	color: var(--leiho-faint);
 	transition: transform 0.12s ease;
 }
 
-.okno-datepicker__title[aria-expanded="true"] .okno-datepicker__title-chevron {
+.leiho-datepicker__title[aria-expanded="true"] .leiho-datepicker__title-chevron {
 	transform: rotate( 180deg );
 }
 
-.okno-datepicker__nav:hover,
-.okno-datepicker__title:hover {
-	background: var(--okno-hover);
-	color: var(--okno-ink);
+.leiho-datepicker__nav:hover,
+.leiho-datepicker__title:hover {
+	background: var(--leiho-hover);
+	color: var(--leiho-ink);
 }
 
-.okno-datepicker__grid {
+.leiho-datepicker__grid {
 	width: 100%;
 	border-collapse: collapse;
 	border-spacing: 0;
 	table-layout: fixed;
 }
 
-.okno-datepicker__grid th {
+.leiho-datepicker__grid th {
 	height: 28px;
 	padding: 0;
-	color: var(--okno-faint);
-	font-size: var(--okno-text-xs, 12px);
+	color: var(--leiho-faint);
+	font-size: var(--leiho-text-xs, 12px);
 	font-weight: 500;
 	text-align: center;
 	text-transform: lowercase;
 }
 
-.okno-datepicker__day {
+.leiho-datepicker__day {
 	height: 36px;
 	padding: 0;
 	border: 0;
 	border-radius: 7px;
-	color: var(--okno-ink);
-	font-size: var(--okno-text-sm, 13px);
+	color: var(--leiho-ink);
+	font-size: var(--leiho-text-sm, 13px);
 	font-variant-numeric: tabular-nums;
 	text-align: center;
 	cursor: pointer;
 	user-select: none;
 }
 
-.okno-datepicker__day:hover {
-	background: var(--okno-hover);
+.leiho-datepicker__day:hover {
+	background: var(--leiho-hover);
 }
 
-.okno-datepicker__day.is-outside {
-	color: var(--okno-faint);
+.leiho-datepicker__day.is-outside {
+	color: var(--leiho-faint);
 	opacity: 0.6;
 }
 
-.okno-datepicker__day.is-today {
-	box-shadow: inset 0 0 0 1px var(--okno-accent-line);
+.leiho-datepicker__day.is-today {
+	box-shadow: inset 0 0 0 1px var(--leiho-accent-line);
 	font-weight: 600;
 }
 
-.okno-datepicker__day[aria-selected="true"],
-.okno-datepicker__day[aria-selected="true"]:hover {
-	background: var(--okno-accent);
-	color: var(--okno-on-accent);
+.leiho-datepicker__day[aria-selected="true"],
+.leiho-datepicker__day[aria-selected="true"]:hover {
+	background: var(--leiho-accent);
+	color: var(--leiho-on-accent);
 	font-weight: 600;
 	opacity: 1;
 }
 
-.okno-datepicker__day[aria-disabled="true"] {
+.leiho-datepicker__day[aria-disabled="true"] {
 	background: none;
-	color: var(--okno-faint);
+	color: var(--leiho-faint);
 	opacity: 0.35;
 	text-decoration: line-through;
 	cursor: not-allowed;
 }
 
-.okno-app .okno-datepicker__day:focus-visible,
-.okno-app .okno-datepicker__choice:focus-visible {
-	outline: 2px solid var(--okno-accent-ink);
+.leiho-app .leiho-datepicker__day:focus-visible,
+.leiho-app .leiho-datepicker__choice:focus-visible {
+	outline: 2px solid var(--leiho-accent-ink);
 	outline-offset: -2px;
 }
 
-.okno-app .okno-datepicker__day[aria-selected="true"]:focus-visible {
-	outline-color: var(--okno-on-accent);
-	box-shadow: 0 0 0 2px var(--okno-accent);
+.leiho-app .leiho-datepicker__day[aria-selected="true"]:focus-visible {
+	outline-color: var(--leiho-on-accent);
+	box-shadow: 0 0 0 2px var(--leiho-accent);
 }
 
-.okno-datepicker__choices {
+.leiho-datepicker__choices {
 	display: grid;
 	grid-template-columns: repeat( 3, 1fr );
 	gap: 4px;
 	padding: 2px;
 }
 
-.okno-datepicker__years {
+.leiho-datepicker__years {
 	grid-template-columns: repeat( 4, 1fr );
 	max-height: 252px;
 	overflow-y: auto;
 	overscroll-behavior: contain;
 }
 
-.okno-datepicker__choice {
+.leiho-datepicker__choice {
 	height: 40px;
 	min-height: 0;
 	margin: 0;
@@ -4108,136 +4108,136 @@ body.okno-app-body #wpbody-content {
 	border: 0;
 	border-radius: 7px;
 	background: transparent;
-	color: var(--okno-ink);
+	color: var(--leiho-ink);
 	box-shadow: none;
-	font-size: var(--okno-text-sm, 13px);
+	font-size: var(--leiho-text-sm, 13px);
 	font-variant-numeric: tabular-nums;
 	cursor: pointer;
 }
 
-.okno-datepicker__choice:hover {
-	background: var(--okno-hover);
+.leiho-datepicker__choice:hover {
+	background: var(--leiho-hover);
 }
 
-.okno-datepicker__choice.is-today {
-	box-shadow: inset 0 0 0 1px var(--okno-accent-line);
+.leiho-datepicker__choice.is-today {
+	box-shadow: inset 0 0 0 1px var(--leiho-accent-line);
 }
 
-.okno-datepicker__choice[aria-pressed="true"],
-.okno-datepicker__choice[aria-pressed="true"]:hover {
-	background: var(--okno-accent);
-	color: var(--okno-on-accent);
+.leiho-datepicker__choice[aria-pressed="true"],
+.leiho-datepicker__choice[aria-pressed="true"]:hover {
+	background: var(--leiho-accent);
+	color: var(--leiho-on-accent);
 	font-weight: 600;
 }
 
-.okno-datepicker__choice:disabled {
+.leiho-datepicker__choice:disabled {
 	opacity: 0.35;
 	cursor: not-allowed;
 }
 
-.okno-datepicker__time {
+.leiho-datepicker__time {
 	display: flex;
 	align-items: center;
 	gap: 6px;
 	margin-top: 8px;
 	padding-top: 10px;
-	border-top: 1px solid var(--okno-line);
+	border-top: 1px solid var(--leiho-line);
 }
 
-.okno-datepicker--time .okno-datepicker__time {
+.leiho-datepicker--time .leiho-datepicker__time {
 	margin-top: 0;
 	padding-top: 0;
 	border-top: 0;
 }
 
-.okno-datepicker__time-label {
+.leiho-datepicker__time-label {
 	flex: 1 1 auto;
-	color: var(--okno-muted);
-	font-size: var(--okno-text-sm, 13px);
+	color: var(--leiho-muted);
+	font-size: var(--leiho-text-sm, 13px);
 	font-weight: 500;
 }
 
-.okno-datepicker__time .okno-select {
+.leiho-datepicker__time .leiho-select {
 	width: auto;
 	min-width: 64px;
 	font-variant-numeric: tabular-nums;
 }
 
-.okno-datepicker__colon {
-	color: var(--okno-faint);
+.leiho-datepicker__colon {
+	color: var(--leiho-faint);
 	font-weight: 600;
 }
 
-.okno-datepicker__foot {
+.leiho-datepicker__foot {
 	display: flex;
 	align-items: center;
 	gap: 6px;
 	margin-top: 10px;
 	padding-top: 10px;
-	border-top: 1px solid var(--okno-line);
+	border-top: 1px solid var(--leiho-line);
 }
 
-.okno-datepicker__action {
+.leiho-datepicker__action {
 	display: inline-flex;
 	align-items: center;
-	height: var(--okno-control-sm, 30px);
+	height: var(--leiho-control-sm, 30px);
 	min-height: 0;
 	margin: 0;
 	padding: 0 10px;
 	border: 0;
 	border-radius: 6px;
-	background: var(--okno-input);
-	color: var(--okno-ink);
+	background: var(--leiho-input);
+	color: var(--leiho-ink);
 	box-shadow: none;
-	font-size: var(--okno-text-sm, 13px);
+	font-size: var(--leiho-text-sm, 13px);
 	font-weight: 500;
 	cursor: pointer;
 }
 
-.okno-datepicker__action:hover {
-	background: var(--okno-active);
+.leiho-datepicker__action:hover {
+	background: var(--leiho-active);
 }
 
-.okno-datepicker__action[hidden] {
+.leiho-datepicker__action[hidden] {
 	display: none;
 }
 
-.okno-datepicker__action:disabled {
+.leiho-datepicker__action:disabled {
 	opacity: 0.4;
 	cursor: not-allowed;
 }
 
-.okno-datepicker__action--primary {
+.leiho-datepicker__action--primary {
 	margin-left: auto;
-	background: var(--okno-accent);
-	color: var(--okno-on-accent);
+	background: var(--leiho-accent);
+	color: var(--leiho-on-accent);
 	font-weight: 600;
 }
 
-.okno-datepicker__action--primary:hover {
-	background: var(--okno-accent-hover);
+.leiho-datepicker__action--primary:hover {
+	background: var(--leiho-accent-hover);
 }
 
-/* ── Choix multiples en pastilles (OknoUI.chips) ───────────────────── */
+/* ── Choix multiples en pastilles (LeihoUI.chips) ───────────────────── */
 
-.okno-chips {
+.leiho-chips {
 	display: flex;
 	flex-wrap: wrap;
 	align-items: center;
 	gap: 6px;
-	min-height: var(--okno-control, 36px);
+	min-height: var(--leiho-control, 36px);
 	padding: 4px 6px;
 	border: 1px solid transparent;
 	border-radius: 6px;
-	background: var(--okno-input);
+	background: var(--leiho-input);
 	cursor: text;
 }
 
-.okno-chips:focus-within {
-	border-color: var(--okno-accent-ink);
+.leiho-chips:focus-within {
+	border-color: var(--leiho-accent-ink);
 }
 
-.okno-chips__chip {
+.leiho-chips__chip {
 	display: inline-flex;
 	align-items: center;
 	gap: 2px;
@@ -4245,24 +4245,24 @@ body.okno-app-body #wpbody-content {
 	height: 26px;
 	padding: 0 2px 0 9px;
 	border-radius: 99px;
-	background: var(--okno-active);
-	color: var(--okno-ink);
-	font-size: var(--okno-text-sm, 13px);
+	background: var(--leiho-active);
+	color: var(--leiho-ink);
+	font-size: var(--leiho-text-sm, 13px);
 	font-weight: 500;
 }
 
-.okno-chips__chip.is-new {
-	background: var(--okno-accent-soft);
-	color: var(--okno-accent-ink);
+.leiho-chips__chip.is-new {
+	background: var(--leiho-accent-soft);
+	color: var(--leiho-accent-ink);
 }
 
-.okno-chips__chip span {
+.leiho-chips__chip span {
 	overflow: hidden;
 	text-overflow: ellipsis;
 	white-space: nowrap;
 }
 
-.okno-chips__remove {
+.leiho-chips__remove {
 	display: inline-flex;
 	align-items: center;
 	justify-content: center;
@@ -4272,21 +4272,21 @@ body.okno-app-body #wpbody-content {
 	border: 0;
 	border-radius: 50%;
 	background: transparent;
-	color: var(--okno-muted);
+	color: var(--leiho-muted);
 	cursor: pointer;
 }
 
-.okno-chips__remove:hover {
-	background: var(--okno-hover);
-	color: var(--okno-ink);
+.leiho-chips__remove:hover {
+	background: var(--leiho-hover);
+	color: var(--leiho-ink);
 }
 
-.okno-chips__remove svg {
+.leiho-chips__remove svg {
 	width: 12px;
 	height: 12px;
 }
 
-.okno-app .okno-chips input.okno-chips__input {
+.leiho-app .leiho-chips input.leiho-chips__input {
 	flex: 1 1 120px;
 	min-width: 120px;
 	height: 26px;
@@ -4295,92 +4295,92 @@ body.okno-app-body #wpbody-content {
 	padding: 0 4px;
 	border: 0 !important;
 	background: transparent !important;
-	color: var(--okno-ink);
-	font-size: var(--okno-text-base, 14px);
+	color: var(--leiho-ink);
+	font-size: var(--leiho-text-base, 14px);
 	box-shadow: none !important;
 	outline: none !important;
 }
 
 /* ── Champs natifs de l'entrée (contenu, extrait, adresse) ─────────── */
 
-.okno-slug-preview {
+.leiho-slug-preview {
 	display: block;
 	margin-top: 6px;
 	overflow: hidden;
-	color: var(--okno-faint);
-	font-size: var(--okno-text-sm, 13px);
+	color: var(--leiho-faint);
+	font-size: var(--leiho-text-sm, 13px);
 	text-overflow: ellipsis;
 	white-space: nowrap;
 }
 
-.okno-slug-preview strong {
-	color: var(--okno-ink);
+.leiho-slug-preview strong {
+	color: var(--leiho-ink);
 	font-weight: 500;
 }
 
-.okno-blocks-notice {
+.leiho-blocks-notice {
 	display: grid;
 	gap: 10px;
 	padding: 14px 16px;
-	border: 1px solid var(--okno-line);
+	border: 1px solid var(--leiho-line);
 	border-radius: 8px;
-	background: var(--okno-input);
-	color: var(--okno-body);
-	font-size: var(--okno-text-base, 14px);
+	background: var(--leiho-input);
+	color: var(--leiho-body);
+	font-size: var(--leiho-text-base, 14px);
 }
 
-.okno-blocks-notice p {
+.leiho-blocks-notice p {
 	margin: 0;
 }
 
-.okno-blocks-notice__excerpt {
+.leiho-blocks-notice__excerpt {
 	max-height: 120px;
 	overflow: hidden;
-	color: var(--okno-muted);
-	font-size: var(--okno-text-sm, 13px);
+	color: var(--leiho-muted);
+	font-size: var(--leiho-text-sm, 13px);
 	-webkit-mask-image: linear-gradient( to bottom, #000 60%, transparent );
 	mask-image: linear-gradient( to bottom, #000 60%, transparent );
 }
 
-.okno-blocks-notice .okno-btn {
+.leiho-blocks-notice .leiho-btn {
 	justify-self: start;
 }
 
-.okno-app .okno-field-help {
+.leiho-app .leiho-field-help {
 	margin: 6px 0 0;
-	color: var(--okno-faint);
-	font-size: var(--okno-text-sm, 13px);
+	color: var(--leiho-faint);
+	font-size: var(--leiho-text-sm, 13px);
 	line-height: 1.45;
 }
 
-.okno-field-row {
+.leiho-field-row {
 	display: grid;
 	grid-template-columns: repeat( 2, minmax( 0, 1fr ) );
 	gap: 14px;
 }
 
-.okno-subfields > .okno-btn {
+.leiho-subfields > .leiho-btn {
 	justify-self: start;
 }
 
-.okno-media-filters select.okno-input {
+.leiho-media-filters select.leiho-input {
 	flex-basis: 120px;
 	width: 120px;
 }
 
-.okno-media__main {
+.leiho-media__main {
 	padding: 5px 14px 19px;
 }
 
-.okno-app .okno-dot--accent {
-	background: var(--okno-accent);
+.leiho-app .leiho-dot--accent {
+	background: var(--leiho-accent);
 }
 
-.okno-editor[data-mode="form"] .okno-group + .okno-group {
+.leiho-editor[data-mode="form"] .leiho-group + .leiho-group {
 	border-top: 0;
 }
 
-.okno-app .okno-editor select.okno-status-select {
+.leiho-app .leiho-editor select.leiho-status-select {
 	max-width: 120px;
 }
 
@@ -4389,443 +4389,443 @@ body.okno-app-body #wpbody-content {
 /*
  * La fenêtre de la médiathèque (wp.media), celle des liens (wpLink) et les
  * fenêtres de TinyMCE sont ajoutées au <body>, hors de la coque : elles
- * reçoivent ici les couleurs d'Okno (clair et sombre, d'après le thème posé
+ * reçoivent ici les couleurs d'Leiho (clair et sombre, d'après le thème posé
  * sur <html>), le bouton principal lime et l'anneau de sélection d'accent.
  */
-html[data-okno-theme] body.okno-app-body {
-	--okno-m-bg: #ffffff;
-	--okno-m-panel: #f7f7f7;
-	--okno-m-input: rgba( 0, 0, 0, 0.05 );
-	--okno-m-hover: rgba( 0, 0, 0, 0.06 );
-	--okno-m-line: rgba( 0, 0, 0, 0.1 );
-	--okno-m-ink: #171717;
-	--okno-m-muted: #555555;
-	--okno-m-accent: #c5ff3e;
-	--okno-m-accent-hover: #b4f01f;
-	--okno-m-accent-ink: #3d6b00;
-	--okno-m-on-accent: #0a0a0a;
+html[data-leiho-theme] body.leiho-app-body {
+	--leiho-m-bg: #ffffff;
+	--leiho-m-panel: #f7f7f7;
+	--leiho-m-input: rgba( 0, 0, 0, 0.05 );
+	--leiho-m-hover: rgba( 0, 0, 0, 0.06 );
+	--leiho-m-line: rgba( 0, 0, 0, 0.1 );
+	--leiho-m-ink: #171717;
+	--leiho-m-muted: #555555;
+	--leiho-m-accent: #c5ff3e;
+	--leiho-m-accent-hover: #b4f01f;
+	--leiho-m-accent-ink: #3d6b00;
+	--leiho-m-on-accent: #0a0a0a;
 }
 
-html[data-okno-theme="dark"] body.okno-app-body {
-	--okno-m-bg: #1a1a1a;
-	--okno-m-panel: #141414;
-	--okno-m-input: rgba( 255, 255, 255, 0.07 );
-	--okno-m-hover: rgba( 255, 255, 255, 0.08 );
-	--okno-m-line: rgba( 255, 255, 255, 0.1 );
-	--okno-m-ink: #f5f5f5;
-	--okno-m-muted: #a3a3a3;
-	--okno-m-accent-hover: #d4ff6b;
-	--okno-m-accent-ink: #c5ff3e;
+html[data-leiho-theme="dark"] body.leiho-app-body {
+	--leiho-m-bg: #1a1a1a;
+	--leiho-m-panel: #141414;
+	--leiho-m-input: rgba( 255, 255, 255, 0.07 );
+	--leiho-m-hover: rgba( 255, 255, 255, 0.08 );
+	--leiho-m-line: rgba( 255, 255, 255, 0.1 );
+	--leiho-m-ink: #f5f5f5;
+	--leiho-m-muted: #a3a3a3;
+	--leiho-m-accent-hover: #d4ff6b;
+	--leiho-m-accent-ink: #c5ff3e;
 }
 
-body.okno-app-body .media-modal-backdrop,
-body.okno-app-body #wp-link-backdrop,
-body.okno-app-body #mce-modal-block.mce-in {
+body.leiho-app-body .media-modal-backdrop,
+body.leiho-app-body #wp-link-backdrop,
+body.leiho-app-body #mce-modal-block.mce-in {
 	background: #000000;
 	opacity: 0.55;
 }
 
-body.okno-app-body .media-modal {
+body.leiho-app-body .media-modal {
 	z-index: 1000000;
 }
 
-body.okno-app-body .media-modal-backdrop {
+body.leiho-app-body .media-modal-backdrop {
 	z-index: 999990;
 }
 
-body.okno-app-body .media-modal-content,
-body.okno-app-body .media-frame,
-body.okno-app-body .media-frame-content,
-body.okno-app-body .media-frame-router,
-body.okno-app-body .media-frame-title,
-body.okno-app-body .media-frame-toolbar .media-toolbar,
-body.okno-app-body .attachments-browser .media-toolbar,
-body.okno-app-body #wp-link-wrap,
-body.okno-app-body #wp-link .query-results,
-body.okno-app-body #wp-link-wrap #link-modal-title,
-body.okno-app-body #wp-link-wrap .submitbox {
-	border-color: var(--okno-m-line);
-	background: var(--okno-m-bg);
-	color: var(--okno-m-ink);
+body.leiho-app-body .media-modal-content,
+body.leiho-app-body .media-frame,
+body.leiho-app-body .media-frame-content,
+body.leiho-app-body .media-frame-router,
+body.leiho-app-body .media-frame-title,
+body.leiho-app-body .media-frame-toolbar .media-toolbar,
+body.leiho-app-body .attachments-browser .media-toolbar,
+body.leiho-app-body #wp-link-wrap,
+body.leiho-app-body #wp-link .query-results,
+body.leiho-app-body #wp-link-wrap #link-modal-title,
+body.leiho-app-body #wp-link-wrap .submitbox {
+	border-color: var(--leiho-m-line);
+	background: var(--leiho-m-bg);
+	color: var(--leiho-m-ink);
 }
 
-body.okno-app-body .media-modal-content {
+body.leiho-app-body .media-modal-content {
 	border-radius: 12px;
 	overflow: hidden;
 }
 
-body.okno-app-body .media-frame-menu,
-body.okno-app-body .media-menu,
-body.okno-app-body .media-sidebar,
-body.okno-app-body .attachment-details,
-body.okno-app-body .media-frame .media-frame-menu-heading {
-	border-color: var(--okno-m-line);
-	background: var(--okno-m-panel);
-	color: var(--okno-m-ink);
+body.leiho-app-body .media-frame-menu,
+body.leiho-app-body .media-menu,
+body.leiho-app-body .media-sidebar,
+body.leiho-app-body .attachment-details,
+body.leiho-app-body .media-frame .media-frame-menu-heading {
+	border-color: var(--leiho-m-line);
+	background: var(--leiho-m-panel);
+	color: var(--leiho-m-ink);
 }
 
-body.okno-app-body .media-frame h1,
-body.okno-app-body .media-frame h2,
-body.okno-app-body .media-frame h3,
-body.okno-app-body .media-modal .media-sidebar h2,
-body.okno-app-body .media-frame .filename,
-body.okno-app-body #wp-link-wrap #link-modal-title,
-body.okno-app-body #wp-link label span {
-	color: var(--okno-m-ink);
+body.leiho-app-body .media-frame h1,
+body.leiho-app-body .media-frame h2,
+body.leiho-app-body .media-frame h3,
+body.leiho-app-body .media-modal .media-sidebar h2,
+body.leiho-app-body .media-frame .filename,
+body.leiho-app-body #wp-link-wrap #link-modal-title,
+body.leiho-app-body #wp-link label span {
+	color: var(--leiho-m-ink);
 }
 
-body.okno-app-body .media-frame .description,
-body.okno-app-body .media-frame .media-uploader-status,
-body.okno-app-body .media-modal .attachment-info,
-body.okno-app-body .media-modal .attachment-info .uploaded,
-body.okno-app-body .media-modal .attachment-info .file-size,
-body.okno-app-body .media-modal .attachment-info .dimensions,
-body.okno-app-body .media-modal .setting .name,
-body.okno-app-body .media-modal .attachment-details .setting span,
-body.okno-app-body .media-frame .media-views-heading,
-body.okno-app-body #wp-link .howto,
-body.okno-app-body #wp-link .query-notice-default {
-	color: var(--okno-m-muted);
+body.leiho-app-body .media-frame .description,
+body.leiho-app-body .media-frame .media-uploader-status,
+body.leiho-app-body .media-modal .attachment-info,
+body.leiho-app-body .media-modal .attachment-info .uploaded,
+body.leiho-app-body .media-modal .attachment-info .file-size,
+body.leiho-app-body .media-modal .attachment-info .dimensions,
+body.leiho-app-body .media-modal .setting .name,
+body.leiho-app-body .media-modal .attachment-details .setting span,
+body.leiho-app-body .media-frame .media-views-heading,
+body.leiho-app-body #wp-link .howto,
+body.leiho-app-body #wp-link .query-notice-default {
+	color: var(--leiho-m-muted);
 }
 
 /* Onglets (Téléverser / Médiathèque) et menu de gauche. */
-body.okno-app-body .media-router .media-menu-item,
-body.okno-app-body .media-menu .media-menu-item {
+body.leiho-app-body .media-router .media-menu-item,
+body.leiho-app-body .media-menu .media-menu-item {
 	border: 0;
 	background: transparent;
-	color: var(--okno-m-muted);
+	color: var(--leiho-m-muted);
 	font-weight: 500;
 }
 
-body.okno-app-body .media-router .media-menu-item:hover,
-body.okno-app-body .media-menu .media-menu-item:hover {
-	color: var(--okno-m-ink);
+body.leiho-app-body .media-router .media-menu-item:hover,
+body.leiho-app-body .media-menu .media-menu-item:hover {
+	color: var(--leiho-m-ink);
 }
 
-body.okno-app-body .media-router .media-menu-item.active,
-body.okno-app-body .media-router .media-menu-item[aria-selected="true"],
-body.okno-app-body .media-router .media-menu-item:focus {
+body.leiho-app-body .media-router .media-menu-item.active,
+body.leiho-app-body .media-router .media-menu-item[aria-selected="true"],
+body.leiho-app-body .media-router .media-menu-item:focus {
 	background: transparent !important;
-	color: var(--okno-m-ink);
+	color: var(--leiho-m-ink);
 	box-shadow: none;
 }
 
-body.okno-app-body .attachment .filename {
-	background: var(--okno-m-panel);
-	color: var(--okno-m-ink);
-	box-shadow: inset 0 0 0 1px var(--okno-m-line);
+body.leiho-app-body .attachment .filename {
+	background: var(--leiho-m-panel);
+	color: var(--leiho-m-ink);
+	box-shadow: inset 0 0 0 1px var(--leiho-m-line);
 }
 
-body.okno-app-body .media-router .media-menu-item.active::after,
-body.okno-app-body .media-router .media-menu-item[aria-selected="true"]::after {
-	background: var(--okno-m-accent);
+body.leiho-app-body .media-router .media-menu-item.active::after,
+body.leiho-app-body .media-router .media-menu-item[aria-selected="true"]::after {
+	background: var(--leiho-m-accent);
 }
 
-body.okno-app-body .media-menu .media-menu-item.active {
-	background: var(--okno-m-hover);
-	color: var(--okno-m-ink);
+body.leiho-app-body .media-menu .media-menu-item.active {
+	background: var(--leiho-m-hover);
+	color: var(--leiho-m-ink);
 }
 
-body.okno-app-body .media-modal-close,
-body.okno-app-body #wp-link-close {
-	color: var(--okno-m-muted);
+body.leiho-app-body .media-modal-close,
+body.leiho-app-body #wp-link-close {
+	color: var(--leiho-m-muted);
 }
 
-body.okno-app-body .media-modal-close:hover,
-body.okno-app-body #wp-link-close:hover {
-	color: var(--okno-m-ink);
+body.leiho-app-body .media-modal-close:hover,
+body.leiho-app-body #wp-link-close:hover {
+	color: var(--leiho-m-ink);
 }
 
-body.okno-app-body .media-modal-close .media-modal-icon::before,
-body.okno-app-body #wp-link-close::before {
+body.leiho-app-body .media-modal-close .media-modal-icon::before,
+body.leiho-app-body #wp-link-close::before {
 	color: inherit;
 }
 
 /* Champs : filtres, recherche, détails de la pièce jointe, lien. */
-body.okno-app-body .media-modal input[type="text"],
-body.okno-app-body .media-modal input[type="search"],
-body.okno-app-body .media-modal input[type="url"],
-body.okno-app-body .media-modal input[type="number"],
-body.okno-app-body .media-modal textarea,
-body.okno-app-body .media-modal select,
-body.okno-app-body #wp-link-wrap input[type="text"],
-body.okno-app-body #wp-link-wrap input[type="search"] {
+body.leiho-app-body .media-modal input[type="text"],
+body.leiho-app-body .media-modal input[type="search"],
+body.leiho-app-body .media-modal input[type="url"],
+body.leiho-app-body .media-modal input[type="number"],
+body.leiho-app-body .media-modal textarea,
+body.leiho-app-body .media-modal select,
+body.leiho-app-body #wp-link-wrap input[type="text"],
+body.leiho-app-body #wp-link-wrap input[type="search"] {
 	min-height: 34px;
 	border: 1px solid transparent;
 	border-radius: 6px;
-	background-color: var(--okno-m-input);
-	color: var(--okno-m-ink);
+	background-color: var(--leiho-m-input);
+	color: var(--leiho-m-ink);
 	box-shadow: none;
 }
 
-body.okno-app-body .media-modal select {
+body.leiho-app-body .media-modal select {
 	padding-right: 28px;
 	background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23999' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
 	background-position: right 9px center;
 	background-size: 12px;
 }
 
-body.okno-app-body .media-modal select option {
-	background: var(--okno-m-bg);
-	color: var(--okno-m-ink);
+body.leiho-app-body .media-modal select option {
+	background: var(--leiho-m-bg);
+	color: var(--leiho-m-ink);
 }
 
-body.okno-app-body .media-modal input:focus,
-body.okno-app-body .media-modal textarea:focus,
-body.okno-app-body .media-modal select:focus,
-body.okno-app-body #wp-link-wrap input:focus {
-	border-color: var(--okno-m-accent-ink);
+body.leiho-app-body .media-modal input:focus,
+body.leiho-app-body .media-modal textarea:focus,
+body.leiho-app-body .media-modal select:focus,
+body.leiho-app-body #wp-link-wrap input:focus {
+	border-color: var(--leiho-m-accent-ink);
 	box-shadow: none;
 	outline: none;
 }
 
-body.okno-app-body .media-modal input[readonly],
-body.okno-app-body .media-modal textarea[readonly] {
-	color: var(--okno-m-muted);
+body.leiho-app-body .media-modal input[readonly],
+body.leiho-app-body .media-modal textarea[readonly] {
+	color: var(--leiho-m-muted);
 }
 
 /* Boutons : principal lime, secondaires neutres (plus de bleu wp-admin). */
-body.okno-app-body .media-modal .button,
-body.okno-app-body #wp-link-wrap .button,
-body.okno-app-body .mce-window .mce-btn {
+body.leiho-app-body .media-modal .button,
+body.leiho-app-body #wp-link-wrap .button,
+body.leiho-app-body .mce-window .mce-btn {
 	min-height: 34px;
 	border: 1px solid transparent;
 	border-radius: 7px;
-	background: var(--okno-m-input);
-	color: var(--okno-m-ink);
+	background: var(--leiho-m-input);
+	color: var(--leiho-m-ink);
 	box-shadow: none;
 	font-weight: 500;
 }
 
-body.okno-app-body .media-modal .button:hover,
-body.okno-app-body #wp-link-wrap .button:hover {
+body.leiho-app-body .media-modal .button:hover,
+body.leiho-app-body #wp-link-wrap .button:hover {
 	border-color: transparent;
-	background: var(--okno-m-hover);
-	color: var(--okno-m-ink);
+	background: var(--leiho-m-hover);
+	color: var(--leiho-m-ink);
 }
 
-body.okno-app-body .media-modal .button-primary,
-body.okno-app-body .media-modal .button.media-button-select,
-body.okno-app-body .media-modal .button.media-button-insert,
-body.okno-app-body .media-modal .button.media-button-gallery,
-body.okno-app-body #wp-link-wrap .button-primary,
-body.okno-app-body .mce-window .mce-btn.mce-primary {
+body.leiho-app-body .media-modal .button-primary,
+body.leiho-app-body .media-modal .button.media-button-select,
+body.leiho-app-body .media-modal .button.media-button-insert,
+body.leiho-app-body .media-modal .button.media-button-gallery,
+body.leiho-app-body #wp-link-wrap .button-primary,
+body.leiho-app-body .mce-window .mce-btn.mce-primary {
 	border-color: transparent;
-	background: var(--okno-m-accent);
-	color: var(--okno-m-on-accent);
+	background: var(--leiho-m-accent);
+	color: var(--leiho-m-on-accent);
 	font-weight: 600;
 }
 
-body.okno-app-body .media-modal .button-primary:hover,
-body.okno-app-body .media-modal .button.media-button-select:hover,
-body.okno-app-body #wp-link-wrap .button-primary:hover {
-	background: var(--okno-m-accent-hover);
-	color: var(--okno-m-on-accent);
+body.leiho-app-body .media-modal .button-primary:hover,
+body.leiho-app-body .media-modal .button.media-button-select:hover,
+body.leiho-app-body #wp-link-wrap .button-primary:hover {
+	background: var(--leiho-m-accent-hover);
+	color: var(--leiho-m-on-accent);
 }
 
-body.okno-app-body .media-modal .button-primary[disabled],
-body.okno-app-body .media-modal .button-primary:disabled,
-body.okno-app-body .media-modal .button.media-button-select[disabled] {
+body.leiho-app-body .media-modal .button-primary[disabled],
+body.leiho-app-body .media-modal .button-primary:disabled,
+body.leiho-app-body .media-modal .button.media-button-select[disabled] {
 	border-color: transparent !important;
-	background: var(--okno-m-accent) !important;
-	color: var(--okno-m-on-accent) !important;
+	background: var(--leiho-m-accent) !important;
+	color: var(--leiho-m-on-accent) !important;
 	opacity: 0.4;
 }
 
-body.okno-app-body .media-modal .button:focus,
-body.okno-app-body .media-modal .media-menu-item:focus,
-body.okno-app-body .media-modal .media-modal-close:focus,
-body.okno-app-body .media-modal .attachment:focus,
-body.okno-app-body #wp-link-wrap .button:focus {
+body.leiho-app-body .media-modal .button:focus,
+body.leiho-app-body .media-modal .media-menu-item:focus,
+body.leiho-app-body .media-modal .media-modal-close:focus,
+body.leiho-app-body .media-modal .attachment:focus,
+body.leiho-app-body #wp-link-wrap .button:focus {
 	box-shadow: none;
 	outline: none;
 }
 
-body.okno-app-body .media-modal .button:focus-visible,
-body.okno-app-body .media-modal .media-menu-item:focus-visible,
-body.okno-app-body .media-modal .media-modal-close:focus-visible,
-body.okno-app-body #wp-link-wrap .button:focus-visible {
-	outline: 2px solid var(--okno-m-accent-ink);
+body.leiho-app-body .media-modal .button:focus-visible,
+body.leiho-app-body .media-modal .media-menu-item:focus-visible,
+body.leiho-app-body .media-modal .media-modal-close:focus-visible,
+body.leiho-app-body #wp-link-wrap .button:focus-visible {
+	outline: 2px solid var(--leiho-m-accent-ink);
 	outline-offset: 2px;
 }
 
-body.okno-app-body .media-modal a,
-body.okno-app-body .media-modal .button-link,
-body.okno-app-body #wp-link-wrap a {
-	color: var(--okno-m-accent-ink);
+body.leiho-app-body .media-modal a,
+body.leiho-app-body .media-modal .button-link,
+body.leiho-app-body #wp-link-wrap a {
+	color: var(--leiho-m-accent-ink);
 }
 
-body.okno-app-body .media-modal .button-link.delete-attachment {
+body.leiho-app-body .media-modal .button-link.delete-attachment {
 	color: #ff6259;
 }
 
 /* Grille : vignettes, sélection et coche à l'accent. */
-body.okno-app-body .attachment .thumbnail,
-body.okno-app-body .attachment-preview {
-	background: var(--okno-m-input);
+body.leiho-app-body .attachment .thumbnail,
+body.leiho-app-body .attachment-preview {
+	background: var(--leiho-m-input);
 }
 
-body.okno-app-body .attachment .thumbnail::after {
-	box-shadow: inset 0 0 0 1px var(--okno-m-line);
+body.leiho-app-body .attachment .thumbnail::after {
+	box-shadow: inset 0 0 0 1px var(--leiho-m-line);
 }
 
-body.okno-app-body .attachment.details,
-body.okno-app-body .attachment.selected,
-body.okno-app-body .attachment:focus,
-body.okno-app-body .selected.attachment:focus,
-body.okno-app-body .attachment.details:focus {
-	box-shadow: inset 0 0 2px 3px var(--okno-m-bg), inset 0 0 0 7px var(--okno-m-accent);
+body.leiho-app-body .attachment.details,
+body.leiho-app-body .attachment.selected,
+body.leiho-app-body .attachment:focus,
+body.leiho-app-body .selected.attachment:focus,
+body.leiho-app-body .attachment.details:focus {
+	box-shadow: inset 0 0 2px 3px var(--leiho-m-bg), inset 0 0 0 7px var(--leiho-m-accent);
 }
 
-body.okno-app-body .attachment .check,
-body.okno-app-body .attachment.details .check,
-body.okno-app-body .attachment.selected .check:focus,
-body.okno-app-body .media-frame.mode-grid .attachment.selected .check {
-	background-color: var(--okno-m-accent);
-	box-shadow: 0 0 0 1px var(--okno-m-bg), 0 0 0 2px var(--okno-m-accent);
+body.leiho-app-body .attachment .check,
+body.leiho-app-body .attachment.details .check,
+body.leiho-app-body .attachment.selected .check:focus,
+body.leiho-app-body .media-frame.mode-grid .attachment.selected .check {
+	background-color: var(--leiho-m-accent);
+	box-shadow: 0 0 0 1px var(--leiho-m-bg), 0 0 0 2px var(--leiho-m-accent);
 }
 
-body.okno-app-body .attachment .check .media-modal-icon,
-body.okno-app-body .attachment.details .check .media-modal-icon {
+body.leiho-app-body .attachment .check .media-modal-icon,
+body.leiho-app-body .attachment.details .check .media-modal-icon {
 	filter: invert( 1 );
 }
 
-body.okno-app-body .attachment.details .check .media-modal-icon {
+body.leiho-app-body .attachment.details .check .media-modal-icon {
 	background-position: -21px 0;
 }
 
 /* Zone de dépôt. */
-body.okno-app-body .media-frame .uploader-inline,
-body.okno-app-body .uploader-window-content {
-	border-color: var(--okno-m-line);
-	background: var(--okno-m-bg);
-	color: var(--okno-m-ink);
+body.leiho-app-body .media-frame .uploader-inline,
+body.leiho-app-body .uploader-window-content {
+	border-color: var(--leiho-m-line);
+	background: var(--leiho-m-bg);
+	color: var(--leiho-m-ink);
 }
 
-body.okno-app-body .uploader-inline .has-upload-message .upload-instructions,
-body.okno-app-body .uploader-inline-content .upload-instructions {
-	color: var(--okno-m-ink);
+body.leiho-app-body .uploader-inline .has-upload-message .upload-instructions,
+body.leiho-app-body .uploader-inline-content .upload-instructions {
+	color: var(--leiho-m-ink);
 }
 
-body.okno-app-body .uploader-window {
+body.leiho-app-body .uploader-window {
 	background: rgba( 0, 0, 0, 0.6 );
 }
 
-body.okno-app-body .uploader-window-content {
-	border: 2px dashed var(--okno-m-accent);
+body.leiho-app-body .uploader-window-content {
+	border: 2px dashed var(--leiho-m-accent);
 	border-radius: 12px;
 }
 
-body.okno-app-body .media-progress-bar div {
-	background: var(--okno-m-accent);
+body.leiho-app-body .media-progress-bar div {
+	background: var(--leiho-m-accent);
 }
 
 /* Fenêtre des liens (wpLink). */
-body.okno-app-body #wp-link-wrap {
+body.leiho-app-body #wp-link-wrap {
 	border-radius: 12px;
 	box-shadow: 0 24px 64px rgba( 0, 0, 0, 0.45 );
 }
 
-body.okno-app-body #wp-link li,
-body.okno-app-body #wp-link .query-results li.alternate {
-	border-color: var(--okno-m-line);
+body.leiho-app-body #wp-link li,
+body.leiho-app-body #wp-link .query-results li.alternate {
+	border-color: var(--leiho-m-line);
 	background: transparent;
-	color: var(--okno-m-ink);
+	color: var(--leiho-m-ink);
 }
 
-body.okno-app-body #wp-link li:hover,
-body.okno-app-body #wp-link li.selected {
-	background: var(--okno-m-hover);
+body.leiho-app-body #wp-link li:hover,
+body.leiho-app-body #wp-link li.selected {
+	background: var(--leiho-m-hover);
 }
 
-body.okno-app-body #wp-link .item-title,
-body.okno-app-body #wp-link .item-info {
+body.leiho-app-body #wp-link .item-title,
+body.leiho-app-body #wp-link .item-info {
 	color: inherit;
 }
 
 /* Fenêtres et menus de TinyMCE (liste des formats). */
-body.okno-app-body .mce-window,
-body.okno-app-body .mce-window .mce-container-body,
-body.okno-app-body .mce-window .mce-foot,
-body.okno-app-body .mce-floatpanel.mce-menu {
-	border-color: var(--okno-m-line);
-	background: var(--okno-m-bg);
-	color: var(--okno-m-ink);
+body.leiho-app-body .mce-window,
+body.leiho-app-body .mce-window .mce-container-body,
+body.leiho-app-body .mce-window .mce-foot,
+body.leiho-app-body .mce-floatpanel.mce-menu {
+	border-color: var(--leiho-m-line);
+	background: var(--leiho-m-bg);
+	color: var(--leiho-m-ink);
 }
 
-body.okno-app-body .mce-menu .mce-menu-item .mce-text,
-body.okno-app-body .mce-window .mce-title,
-body.okno-app-body .mce-window .mce-label {
-	color: var(--okno-m-ink);
+body.leiho-app-body .mce-menu .mce-menu-item .mce-text,
+body.leiho-app-body .mce-window .mce-title,
+body.leiho-app-body .mce-window .mce-label {
+	color: var(--leiho-m-ink);
 }
 
-body.okno-app-body .mce-menu .mce-menu-item:hover,
-body.okno-app-body .mce-menu .mce-menu-item.mce-active,
-body.okno-app-body .mce-menu .mce-menu-item:focus {
-	background: var(--okno-m-hover);
+body.leiho-app-body .mce-menu .mce-menu-item:hover,
+body.leiho-app-body .mce-menu .mce-menu-item.mce-active,
+body.leiho-app-body .mce-menu .mce-menu-item:focus {
+	background: var(--leiho-m-hover);
 }
 
 /* L'éditeur de texte riche (TinyMCE) dans le formulaire. */
-.okno-app .wp-editor-wrap {
+.leiho-app .wp-editor-wrap {
 	border-radius: 8px;
 }
 
 /* wp.editor.initialize() place le conteneur dans .wp-editor-tools. */
-.okno-app .wp-editor-tools {
+.leiho-app .wp-editor-tools {
 	display: flow-root;
 	padding: 0;
 }
 
-.okno-app .wp-media-buttons {
+.leiho-app .wp-media-buttons {
 	float: left;
 	margin: 0 0 6px;
 }
 
-.okno-app .wp-editor-tools .wp-editor-tabs {
+.leiho-app .wp-editor-tools .wp-editor-tabs {
 	float: right;
 	margin: 0 0 6px;
 }
 
-.okno-app .wp-editor-tools .wp-editor-container {
+.leiho-app .wp-editor-tools .wp-editor-container {
 	clear: both;
 }
 
-.okno-app .wp-media-buttons .button.insert-media {
+.leiho-app .wp-media-buttons .button.insert-media {
 	display: inline-flex;
 	align-items: center;
 	gap: 6px;
-	height: var(--okno-control-sm, 30px);
+	height: var(--leiho-control-sm, 30px);
 	min-height: 0;
 	margin: 0;
 	padding: 0 11px;
 	border: 0;
 	border-radius: 6px;
-	background: var(--okno-input);
-	color: var(--okno-ink);
-	font-size: var(--okno-text-sm, 13px);
+	background: var(--leiho-input);
+	color: var(--leiho-ink);
+	font-size: var(--leiho-text-sm, 13px);
 	font-weight: 500;
 	box-shadow: none;
 }
 
-.okno-app .wp-media-buttons .button.insert-media:hover {
-	background: var(--okno-active);
-	color: var(--okno-ink);
+.leiho-app .wp-media-buttons .button.insert-media:hover {
+	background: var(--leiho-active);
+	color: var(--leiho-ink);
 }
 
-.okno-app .wp-media-buttons .wp-media-buttons-icon::before {
-	color: var(--okno-muted);
+.leiho-app .wp-media-buttons .wp-media-buttons-icon::before {
+	color: var(--leiho-muted);
 }
 
-.okno-app .wp-editor-tabs {
+.leiho-app .wp-editor-tabs {
 	display: inline-flex;
 	gap: 2px;
 	float: none;
 	padding: 2px;
 	border-radius: 8px;
-	background: var(--okno-input);
+	background: var(--leiho-input);
 }
 
-.okno-app .wp-switch-editor {
+.leiho-app .wp-switch-editor {
 	float: none;
 	height: 26px;
 	margin: 0;
@@ -4833,141 +4833,141 @@ body.okno-app-body .mce-menu .mce-menu-item:focus {
 	border: 0;
 	border-radius: 6px;
 	background: transparent;
-	color: var(--okno-muted);
-	font-size: var(--okno-text-sm, 13px);
+	color: var(--leiho-muted);
+	font-size: var(--leiho-text-sm, 13px);
 	line-height: 26px;
 }
 
-.okno-app .html-active .switch-html,
-.okno-app .tmce-active .switch-tmce {
-	background: var(--okno-active);
-	color: var(--okno-ink);
+.leiho-app .html-active .switch-html,
+.leiho-app .tmce-active .switch-tmce {
+	background: var(--leiho-active);
+	color: var(--leiho-ink);
 }
 
-.okno-app .wp-editor-container,
-.okno-app .wp-editor-container .mce-panel,
-.okno-app div.mce-toolbar-grp,
-.okno-app .quicktags-toolbar {
-	border-color: var(--okno-line) !important;
-	background: var(--okno-surface);
+.leiho-app .wp-editor-container,
+.leiho-app .wp-editor-container .mce-panel,
+.leiho-app div.mce-toolbar-grp,
+.leiho-app .quicktags-toolbar {
+	border-color: var(--leiho-line) !important;
+	background: var(--leiho-surface);
 }
 
-.okno-app .wp-editor-container {
+.leiho-app .wp-editor-container {
 	overflow: hidden;
-	border: 1px solid var(--okno-line);
+	border: 1px solid var(--leiho-line);
 	border-radius: 8px;
 }
 
-.okno-app div.mce-toolbar-grp > div {
+.leiho-app div.mce-toolbar-grp > div {
 	padding: 4px 6px;
 }
 
-.okno-app .mce-toolbar .mce-btn-group .mce-btn,
-.okno-app .qt-dfw {
+.leiho-app .mce-toolbar .mce-btn-group .mce-btn,
+.leiho-app .qt-dfw {
 	border-color: transparent;
 	background: transparent;
 	box-shadow: none;
 }
 
-.okno-app .mce-toolbar .mce-btn-group .mce-btn:hover,
-.okno-app .mce-toolbar .mce-btn-group .mce-btn.mce-active {
+.leiho-app .mce-toolbar .mce-btn-group .mce-btn:hover,
+.leiho-app .mce-toolbar .mce-btn-group .mce-btn.mce-active {
 	border-color: transparent;
-	background: var(--okno-hover);
+	background: var(--leiho-hover);
 	box-shadow: none;
 }
 
-.okno-app .mce-toolbar .mce-ico,
-.okno-app .mce-toolbar .mce-btn .mce-txt,
-.okno-app .mce-toolbar .mce-listbox button {
-	color: var(--okno-ink);
+.leiho-app .mce-toolbar .mce-ico,
+.leiho-app .mce-toolbar .mce-btn .mce-txt,
+.leiho-app .mce-toolbar .mce-listbox button {
+	color: var(--leiho-ink);
 }
 
-.okno-app .mce-toolbar .mce-listbox {
+.leiho-app .mce-toolbar .mce-listbox {
 	border-color: transparent;
-	background: var(--okno-input);
+	background: var(--leiho-input);
 	border-radius: 6px;
 }
 
-.okno-app .quicktags-toolbar input.button {
+.leiho-app .quicktags-toolbar input.button {
 	min-height: 26px;
 	border: 0;
 	border-radius: 5px;
-	background: var(--okno-input);
-	color: var(--okno-ink);
+	background: var(--leiho-input);
+	color: var(--leiho-ink);
 }
 
-.okno-app textarea.wp-editor-area {
+.leiho-app textarea.wp-editor-area {
 	border: 0;
-	background: var(--okno-surface);
-	color: var(--okno-ink);
-	font-family: var(--okno-mono);
-	font-size: var(--okno-text-sm, 13px);
+	background: var(--leiho-surface);
+	color: var(--leiho-ink);
+	font-family: var(--leiho-mono);
+	font-size: var(--leiho-text-sm, 13px);
 }
 
 /* Barre de lien en ligne de TinyMCE (wplink). */
-body.okno-app-body .mce-inline-toolbar-grp,
-body.okno-app-body div.wp-link-preview,
-body.okno-app-body .mce-inline-toolbar-grp .mce-container-body {
-	border-color: var(--okno-m-line);
-	background: var(--okno-m-bg);
-	color: var(--okno-m-ink);
+body.leiho-app-body .mce-inline-toolbar-grp,
+body.leiho-app-body div.wp-link-preview,
+body.leiho-app-body .mce-inline-toolbar-grp .mce-container-body {
+	border-color: var(--leiho-m-line);
+	background: var(--leiho-m-bg);
+	color: var(--leiho-m-ink);
 }
 
-body.okno-app-body .mce-inline-toolbar-grp {
+body.leiho-app-body .mce-inline-toolbar-grp {
 	border-radius: 8px;
 	box-shadow: 0 8px 24px rgba( 0, 0, 0, 0.35 );
 }
 
-body.okno-app-body .mce-inline-toolbar-grp.mce-arrow-up::after,
-body.okno-app-body .mce-inline-toolbar-grp.mce-arrow-up::before {
-	border-bottom-color: var(--okno-m-bg);
+body.leiho-app-body .mce-inline-toolbar-grp.mce-arrow-up::after,
+body.leiho-app-body .mce-inline-toolbar-grp.mce-arrow-up::before {
+	border-bottom-color: var(--leiho-m-bg);
 }
 
-body.okno-app-body .mce-inline-toolbar-grp.mce-arrow-down::after,
-body.okno-app-body .mce-inline-toolbar-grp.mce-arrow-down::before {
-	border-top-color: var(--okno-m-bg);
+body.leiho-app-body .mce-inline-toolbar-grp.mce-arrow-down::after,
+body.leiho-app-body .mce-inline-toolbar-grp.mce-arrow-down::before {
+	border-top-color: var(--leiho-m-bg);
 }
 
-body.okno-app-body div.wp-link-input input,
-body.okno-app-body .wp-link-input input {
+body.leiho-app-body div.wp-link-input input,
+body.leiho-app-body .wp-link-input input {
 	border: 1px solid transparent;
 	border-radius: 6px;
-	background: var(--okno-m-input);
-	color: var(--okno-m-ink);
+	background: var(--leiho-m-input);
+	color: var(--leiho-m-ink);
 	box-shadow: none;
 }
 
-body.okno-app-body div.wp-link-input input:focus {
-	border-color: var(--okno-m-accent-ink);
+body.leiho-app-body div.wp-link-input input:focus {
+	border-color: var(--leiho-m-accent-ink);
 	box-shadow: none;
 }
 
-body.okno-app-body .mce-inline-toolbar-grp .mce-btn,
-body.okno-app-body .mce-inline-toolbar-grp .mce-ico,
-body.okno-app-body .wp-link-preview a {
-	color: var(--okno-m-ink);
+body.leiho-app-body .mce-inline-toolbar-grp .mce-btn,
+body.leiho-app-body .mce-inline-toolbar-grp .mce-ico,
+body.leiho-app-body .wp-link-preview a {
+	color: var(--leiho-m-ink);
 }
 
-body.okno-app-body .mce-inline-toolbar-grp .mce-btn.mce-primary,
-body.okno-app-body .mce-inline-toolbar-grp .mce-btn.mce-primary .mce-ico {
+body.leiho-app-body .mce-inline-toolbar-grp .mce-btn.mce-primary,
+body.leiho-app-body .mce-inline-toolbar-grp .mce-btn.mce-primary .mce-ico {
 	border-color: transparent;
-	background: var(--okno-m-accent);
-	color: var(--okno-m-on-accent);
+	background: var(--leiho-m-accent);
+	color: var(--leiho-m-on-accent);
 }
 
-body.okno-app-body .ui-autocomplete.wplink-autocomplete {
+body.leiho-app-body .ui-autocomplete.wplink-autocomplete {
 	z-index: 1000001;
-	border-color: var(--okno-m-line);
-	background: var(--okno-m-bg);
-	color: var(--okno-m-ink);
+	border-color: var(--leiho-m-line);
+	background: var(--leiho-m-bg);
+	color: var(--leiho-m-ink);
 }
 
-body.okno-app-body .wplink-autocomplete .ui-state-focus {
-	background: var(--okno-m-hover);
+body.leiho-app-body .wplink-autocomplete .ui-state-focus {
+	background: var(--leiho-m-hover);
 }
 
-/* Médias : filtre par type (liste déroulante Okno) à sa largeur. */
-.okno-media-filters .okno-select {
+/* Médias : filtre par type (liste déroulante Leiho) à sa largeur. */
+.leiho-media-filters .leiho-select {
 	flex: 0 0 200px;
 	width: 200px;
 	padding-left: 12px;
@@ -4976,12 +4976,12 @@ body.okno-app-body .wplink-autocomplete .ui-state-focus {
 /* Cartes « Mise en ligne » (réglages) : la règle commune des boutons radio
    les remet dans le flux (position: relative) et le rond chevauchait le
    titre. On le ramène dans sa marge, à gauche du texte. */
-.okno-app .okno-admin--app .okno-choice {
+.leiho-app .leiho-admin--app .leiho-choice {
 	position: relative;
 	padding: 14px 16px 14px 48px;
 }
 
-.okno-app .okno-admin--app .okno-choice input[type="radio"] {
+.leiho-app .leiho-admin--app .leiho-choice input[type="radio"] {
 	position: absolute;
 	top: 15px;
 	left: 16px;
@@ -4991,142 +4991,142 @@ body.okno-app-body .wplink-autocomplete .ui-state-focus {
 
 /*
  * Bouton « IA » d'un champ texte, aligné à droite de son libellé ; menu
- * d'actions (liste flottante d'Okno) ; aperçu de la proposition avec
+ * d'actions (liste flottante d'Leiho) ; aperçu de la proposition avec
  * différences, passages interdits surlignés ; nouvelle entrée ; contexte
  * de marque dans les réglages. Couleurs : jetons de l'application, clair
  * et sombre.
  */
-.okno-app .okno-field.has-ai,
-.okno-app .okno-subfield.has-ai {
+.leiho-app .leiho-field.has-ai,
+.leiho-app .leiho-subfield.has-ai {
 	position: relative;
 }
 
-.okno-app .okno-field.has-ai > .okno-field-label,
-.okno-app .okno-subfield.has-ai > .okno-subfield-label {
+.leiho-app .leiho-field.has-ai > .leiho-field-label,
+.leiho-app .leiho-subfield.has-ai > .leiho-subfield-label {
 	padding-right: 56px;
 }
 
-.okno-app .okno-ai-trigger {
+.leiho-app .leiho-ai-trigger {
 	display: inline-flex;
 	align-items: center;
 	gap: 4px;
 	height: 22px;
 	padding: 0 7px 0 6px;
-	border: 1px solid var(--okno-line);
+	border: 1px solid var(--leiho-line);
 	border-radius: 999px;
 	background: transparent;
-	color: var(--okno-muted);
-	font-family: var(--okno-font);
-	font-size: var(--okno-text-xs, 12px);
+	color: var(--leiho-muted);
+	font-family: var(--leiho-font);
+	font-size: var(--leiho-text-xs, 12px);
 	font-weight: 600;
 	line-height: 1;
 	cursor: pointer;
 	transition: background 0.1s ease, color 0.1s ease, border-color 0.1s ease;
 }
 
-.okno-app .has-ai > .okno-ai-trigger {
+.leiho-app .has-ai > .leiho-ai-trigger {
 	position: absolute;
 	top: -3px;
 	right: 0;
 }
 
-.okno-app .okno-ai-trigger .okno-icon {
+.leiho-app .leiho-ai-trigger .leiho-icon {
 	width: 13px;
 	height: 13px;
-	color: var(--okno-accent-ink);
+	color: var(--leiho-accent-ink);
 }
 
-.okno-app[data-theme="dark"] .okno-ai-trigger .okno-icon {
-	color: var(--okno-accent);
+.leiho-app[data-theme="dark"] .leiho-ai-trigger .leiho-icon {
+	color: var(--leiho-accent);
 }
 
-.okno-app .okno-ai-trigger:hover,
-.okno-app .okno-ai-trigger[aria-expanded="true"] {
-	border-color: var(--okno-accent-line);
-	background: var(--okno-accent-soft);
-	color: var(--okno-ink);
+.leiho-app .leiho-ai-trigger:hover,
+.leiho-app .leiho-ai-trigger[aria-expanded="true"] {
+	border-color: var(--leiho-accent-line);
+	background: var(--leiho-accent-soft);
+	color: var(--leiho-ink);
 }
 
-.okno-app .okno-ai-new .okno-icon {
-	color: var(--okno-accent-ink);
+.leiho-app .leiho-ai-new .leiho-icon {
+	color: var(--leiho-accent-ink);
 }
 
-.okno-app[data-theme="dark"] .okno-ai-new .okno-icon {
-	color: var(--okno-accent);
+.leiho-app[data-theme="dark"] .leiho-ai-new .leiho-icon {
+	color: var(--leiho-accent);
 }
 
 /* Menu d'actions. */
-.okno-ai-menu {
+.leiho-ai-menu {
 	min-width: 236px;
 }
 
-.okno-ai-menu__item,
-.okno-app a.okno-ai-menu__item,
-.okno-app a.okno-ai-menu__item:hover,
-.okno-app a.okno-ai-menu__item:focus {
-	color: var(--okno-ink);
+.leiho-ai-menu__item,
+.leiho-app a.leiho-ai-menu__item,
+.leiho-app a.leiho-ai-menu__item:hover,
+.leiho-app a.leiho-ai-menu__item:focus {
+	color: var(--leiho-ink);
 	text-decoration: none;
 }
 
-.okno-ai-menu__note {
+.leiho-ai-menu__note {
 	padding: 6px 10px 4px;
-	color: var(--okno-muted);
-	font-size: var(--okno-text-sm, 13px);
+	color: var(--leiho-muted);
+	font-size: var(--leiho-text-sm, 13px);
 }
 
-.okno-ai-menu__item .okno-icon {
+.leiho-ai-menu__item .leiho-icon {
 	flex: 0 0 auto;
 	width: 15px;
 	height: 15px;
-	color: var(--okno-muted);
+	color: var(--leiho-muted);
 }
 
-.okno-ai-menu__item:focus {
+.leiho-ai-menu__item:focus {
 	outline: none;
 }
 
-.okno-ai-menu__item:focus-visible {
-	box-shadow: inset 0 0 0 2px var(--okno-accent-line);
+.leiho-ai-menu__item:focus-visible {
+	box-shadow: inset 0 0 0 2px var(--leiho-accent-line);
 }
 
-.okno-ai-menu__item[aria-disabled="true"] {
-	color: var(--okno-faint);
+.leiho-ai-menu__item[aria-disabled="true"] {
+	color: var(--leiho-faint);
 	cursor: not-allowed;
 }
 
-.okno-ai-menu__item[aria-disabled="true"] .okno-icon {
+.leiho-ai-menu__item[aria-disabled="true"] .leiho-icon {
 	opacity: 0.6;
 }
 
-.okno-ai-menu__hint {
+.leiho-ai-menu__hint {
 	margin-left: auto;
 	padding-left: 12px;
-	color: var(--okno-faint);
-	font-size: var(--okno-text-xs, 12px);
+	color: var(--leiho-faint);
+	font-size: var(--leiho-text-xs, 12px);
 	white-space: nowrap;
 }
 
-.okno-ai-menu__sep {
+.leiho-ai-menu__sep {
 	height: 1px;
 	margin: 5px 4px;
-	background: var(--okno-line);
+	background: var(--leiho-line);
 }
 
 /* Boîte de dialogue : saisie, attente, aperçu. */
-.okno-app .okno-dialog.okno-ai-dialog {
+.leiho-app .leiho-dialog.leiho-ai-dialog {
 	width: 640px;
 }
 
-.okno-app .okno-dialog.okno-ai-dialog--entry {
+.leiho-app .leiho-dialog.leiho-ai-dialog--entry {
 	width: 780px;
 }
 
-.okno-ai-dialog .okno-form-grid {
+.leiho-ai-dialog .leiho-form-grid {
 	display: grid;
 	gap: 8px;
 }
 
-.okno-ai-dialog textarea.okno-input {
+.leiho-ai-dialog textarea.leiho-input {
 	min-height: 0;
 	height: auto;
 	padding: 9px 11px;
@@ -5134,27 +5134,27 @@ body.okno-app-body .wplink-autocomplete .ui-state-focus {
 	resize: vertical;
 }
 
-.okno-ai-loading {
+.leiho-ai-loading {
 	display: flex;
 	align-items: center;
 	justify-content: center;
 	gap: 12px;
 	min-height: 120px;
-	color: var(--okno-muted);
-	font-size: var(--okno-text-base, 14px);
+	color: var(--leiho-muted);
+	font-size: var(--leiho-text-base, 14px);
 }
 
-.okno-ai-loading__spark {
+.leiho-ai-loading__spark {
 	display: inline-flex;
-	color: var(--okno-accent-ink);
-	animation: okno-ai-spark 1.4s ease-in-out infinite;
+	color: var(--leiho-accent-ink);
+	animation: leiho-ai-spark 1.4s ease-in-out infinite;
 }
 
-.okno-app[data-theme="dark"] .okno-ai-loading__spark {
-	color: var(--okno-accent);
+.leiho-app[data-theme="dark"] .leiho-ai-loading__spark {
+	color: var(--leiho-accent);
 }
 
-@keyframes okno-ai-spark {
+@keyframes leiho-ai-spark {
 	0%,
 	100% {
 		opacity: 0.45;
@@ -5167,210 +5167,210 @@ body.okno-app-body .wplink-autocomplete .ui-state-focus {
 }
 
 @media ( prefers-reduced-motion: reduce ) {
-	.okno-ai-loading__spark {
+	.leiho-ai-loading__spark {
 		animation: none;
 	}
 }
 
-.okno-ai-warnings {
+.leiho-ai-warnings {
 	display: flex;
 	align-items: flex-start;
 	gap: 10px;
 }
 
-.okno-ai-warnings ul {
+.leiho-ai-warnings ul {
 	margin: 0;
 	padding: 0;
 	list-style: none;
 }
 
-.okno-ai-warnings li + li {
+.leiho-ai-warnings li + li {
 	margin-top: 6px;
 }
 
-.okno-ai-warnings__icon {
+.leiho-ai-warnings__icon {
 	display: inline-flex;
 	flex: 0 0 auto;
 	margin-top: 2px;
 }
 
-.okno-ai-compare__head {
+.leiho-ai-compare__head {
 	display: flex;
 	align-items: baseline;
 	justify-content: space-between;
 	margin-bottom: 6px;
 }
 
-.okno-ai-count {
-	color: var(--okno-faint);
-	font-size: var(--okno-text-xs, 12px);
+.leiho-ai-count {
+	color: var(--leiho-faint);
+	font-size: var(--leiho-text-xs, 12px);
 	font-variant-numeric: tabular-nums;
 }
 
-.okno-ai-count.is-over {
-	color: var(--okno-error);
+.leiho-ai-count.is-over {
+	color: var(--leiho-error);
 	font-weight: 600;
 }
 
-.okno-ai-diff {
+.leiho-ai-diff {
 	max-height: 46vh;
 	overflow: auto;
 	padding: 12px 14px;
-	border: 1px solid var(--okno-line);
-	border-radius: var(--okno-radius);
-	background: var(--okno-surface);
-	color: var(--okno-ink);
-	font-size: var(--okno-text-md, 15px);
+	border: 1px solid var(--leiho-line);
+	border-radius: var(--leiho-radius);
+	background: var(--leiho-surface);
+	color: var(--leiho-ink);
+	font-size: var(--leiho-text-md, 15px);
 	line-height: 1.6;
 	white-space: pre-wrap;
 	overflow-wrap: anywhere;
 }
 
-.okno-ai-diff del {
+.leiho-ai-diff del {
 	margin-right: 3px;
 	border-radius: 3px;
-	background: var(--okno-error-soft);
-	color: var(--okno-muted);
-	text-decoration-color: var(--okno-error);
+	background: var(--leiho-error-soft);
+	color: var(--leiho-muted);
+	text-decoration-color: var(--leiho-error);
 }
 
-.okno-ai-diff ins {
+.leiho-ai-diff ins {
 	border-radius: 3px;
-	background: var(--okno-accent-soft);
-	color: var(--okno-ink);
+	background: var(--leiho-accent-soft);
+	color: var(--leiho-ink);
 	text-decoration: none;
-	box-shadow: inset 0 -1px 0 var(--okno-accent-line);
+	box-shadow: inset 0 -1px 0 var(--leiho-accent-line);
 }
 
-mark.okno-ai-flag {
+mark.leiho-ai-flag {
 	padding: 0 1px;
 	border-radius: 3px;
-	background: var(--okno-warn-soft);
-	color: var(--okno-warn);
+	background: var(--leiho-warn-soft);
+	color: var(--leiho-warn);
 	font-weight: 600;
-	text-decoration: underline wavy var(--okno-error);
+	text-decoration: underline wavy var(--leiho-error);
 	text-underline-offset: 3px;
 }
 
-.okno-app[data-theme="dark"] mark.okno-ai-flag {
+.leiho-app[data-theme="dark"] mark.leiho-ai-flag {
 	color: #ffcf5c;
 }
 
-.okno-ai-details {
+.leiho-ai-details {
 	margin-top: 12px;
 }
 
-.okno-ai-details summary {
-	color: var(--okno-muted);
-	font-size: var(--okno-text-sm, 13px);
+.leiho-ai-details summary {
+	color: var(--leiho-muted);
+	font-size: var(--leiho-text-sm, 13px);
 	cursor: pointer;
 }
 
-.okno-ai-rendered {
+.leiho-ai-rendered {
 	padding: 4px 0;
-	color: var(--okno-body);
-	font-size: var(--okno-text-base, 14px);
+	color: var(--leiho-body);
+	font-size: var(--leiho-text-base, 14px);
 	line-height: 1.6;
 }
 
-.okno-ai-rendered > :first-child {
+.leiho-ai-rendered > :first-child {
 	margin-top: 0;
 }
 
-.okno-ai-rendered > :last-child {
+.leiho-ai-rendered > :last-child {
 	margin-bottom: 0;
 }
 
-.okno-ai-chips {
+.leiho-ai-chips {
 	display: flex;
 	flex-wrap: wrap;
 	gap: 6px;
 }
 
-.okno-app .okno-ai-chip {
-	height: var(--okno-control-sm, 30px);
+.leiho-app .leiho-ai-chip {
+	height: var(--leiho-control-sm, 30px);
 	padding: 0 12px;
-	border: 1px solid var(--okno-line-strong);
+	border: 1px solid var(--leiho-line-strong);
 	border-radius: 999px;
 	background: transparent;
-	color: var(--okno-ink);
-	font-size: var(--okno-text-sm, 13px);
+	color: var(--leiho-ink);
+	font-size: var(--leiho-text-sm, 13px);
 	cursor: pointer;
 }
 
-.okno-app .okno-ai-chip:hover {
-	background: var(--okno-hover);
+.leiho-app .leiho-ai-chip:hover {
+	background: var(--leiho-hover);
 }
 
-.okno-app .okno-ai-chip[aria-pressed="true"] {
-	border-color: var(--okno-accent-line);
-	background: var(--okno-accent-soft);
+.leiho-app .leiho-ai-chip[aria-pressed="true"] {
+	border-color: var(--leiho-accent-line);
+	background: var(--leiho-accent-soft);
 	font-weight: 600;
 }
 
 /* Nouvelle entrée : aperçu champ par champ. */
-.okno-ai-entry {
+.leiho-ai-entry {
 	margin: 0;
-	border: 1px solid var(--okno-line);
-	border-radius: var(--okno-radius);
+	border: 1px solid var(--leiho-line);
+	border-radius: var(--leiho-radius);
 }
 
-.okno-ai-entry__row {
+.leiho-ai-entry__row {
 	display: grid;
 	grid-template-columns: minmax( 120px, 0.32fr ) minmax( 0, 1fr );
 	gap: 14px;
 	padding: 10px 14px;
-	border-bottom: 1px solid var(--okno-line);
+	border-bottom: 1px solid var(--leiho-line);
 }
 
-.okno-ai-entry__row:last-child {
+.leiho-ai-entry__row:last-child {
 	border-bottom: 0;
 }
 
-.okno-ai-entry__row.has-flag {
-	background: var(--okno-warn-soft);
+.leiho-ai-entry__row.has-flag {
+	background: var(--leiho-warn-soft);
 }
 
-.okno-ai-entry dt {
-	color: var(--okno-muted);
-	font-size: var(--okno-text-sm, 13px);
+.leiho-ai-entry dt {
+	color: var(--leiho-muted);
+	font-size: var(--leiho-text-sm, 13px);
 	font-weight: 600;
 }
 
-.okno-ai-entry dd {
+.leiho-ai-entry dd {
 	min-width: 0;
 	margin: 0;
-	color: var(--okno-ink);
-	font-size: var(--okno-text-base, 14px);
+	color: var(--leiho-ink);
+	font-size: var(--leiho-text-base, 14px);
 	line-height: 1.55;
 	white-space: pre-wrap;
 	overflow-wrap: anywhere;
 }
 
-.okno-ai-entry dd .okno-ai-rendered {
+.leiho-ai-entry dd .leiho-ai-rendered {
 	white-space: normal;
 }
 
-.okno-ai-entry__note {
+.leiho-ai-entry__note {
 	display: block;
-	color: var(--okno-faint);
-	font-size: var(--okno-text-xs, 12px);
+	color: var(--leiho-faint);
+	font-size: var(--leiho-text-xs, 12px);
 	font-weight: 400;
 }
 
-.okno-ai-entry--nested {
+.leiho-ai-entry--nested {
 	border: 0;
-	border-left: 2px solid var(--okno-line-strong);
+	border-left: 2px solid var(--leiho-line-strong);
 	border-radius: 0;
 }
 
-.okno-ai-entry--nested .okno-ai-entry__row {
+.leiho-ai-entry--nested .leiho-ai-entry__row {
 	grid-template-columns: minmax( 90px, 0.3fr ) minmax( 0, 1fr );
 	padding: 5px 0 5px 12px;
 	border-bottom: 0;
 }
 
-.okno-ai-rows {
+.leiho-ai-rows {
 	display: grid;
 	gap: 10px;
 	margin: 0;
@@ -5379,52 +5379,52 @@ mark.okno-ai-flag {
 	white-space: normal;
 }
 
-.okno-ai-rows__title {
+.leiho-ai-rows__title {
 	display: block;
 	margin-bottom: 4px;
-	color: var(--okno-faint);
-	font-size: var(--okno-text-xs, 12px);
+	color: var(--leiho-faint);
+	font-size: var(--leiho-text-xs, 12px);
 	font-weight: 600;
 }
 
 /* Texte alternatif (champ image, détails d'un média). */
-.okno-app .okno-ai-alt .okno-icon {
+.leiho-app .leiho-ai-alt .leiho-icon {
 	width: 14px;
 	height: 14px;
-	color: var(--okno-accent-ink);
+	color: var(--leiho-accent-ink);
 }
 
-.okno-app[data-theme="dark"] .okno-ai-alt .okno-icon {
-	color: var(--okno-accent);
+.leiho-app[data-theme="dark"] .leiho-ai-alt .leiho-icon {
+	color: var(--leiho-accent);
 }
 
-.okno-setting__head {
+.leiho-setting__head {
 	display: flex;
 	align-items: center;
 	justify-content: space-between;
 	gap: 8px;
 }
 
-.okno-setting__head .okno-label {
+.leiho-setting__head .leiho-label {
 	margin-bottom: 0;
 }
 
 /* Contexte d'une collection (réglages de la collection). */
-.okno-ai-card h3 {
+.leiho-ai-card h3 {
 	display: flex;
 	align-items: center;
 	gap: 6px;
 }
 
-.okno-ai-card h3 .okno-icon {
-	color: var(--okno-accent-ink);
+.leiho-ai-card h3 .leiho-icon {
+	color: var(--leiho-accent-ink);
 }
 
-.okno-app[data-theme="dark"] .okno-ai-card h3 .okno-icon {
-	color: var(--okno-accent);
+.leiho-app[data-theme="dark"] .leiho-ai-card h3 .leiho-icon {
+	color: var(--leiho-accent);
 }
 
-.okno-ai-card textarea.okno-input {
+.leiho-ai-card textarea.leiho-input {
 	height: auto;
 	min-height: 0;
 	padding: 8px 11px;
@@ -5432,7 +5432,7 @@ mark.okno-ai-flag {
 	resize: vertical;
 }
 
-.okno-ai-card__foot {
+.leiho-ai-card__foot {
 	display: flex;
 	align-items: center;
 	gap: 12px;
@@ -5440,48 +5440,48 @@ mark.okno-ai-flag {
 }
 
 /* Journal : action d'IA. */
-.okno-log__ai,
-.okno-timeline-ai {
+.leiho-log__ai,
+.leiho-timeline-ai {
 	display: flex;
 	align-items: center;
 	gap: 6px;
 	margin: 6px 0 0;
-	color: var(--okno-muted);
-	font-size: var(--okno-text-sm, 13px);
+	color: var(--leiho-muted);
+	font-size: var(--leiho-text-sm, 13px);
 }
 
-.okno-log__ai .okno-icon,
-.okno-timeline-ai .okno-icon {
-	color: var(--okno-accent-ink);
+.leiho-log__ai .leiho-icon,
+.leiho-timeline-ai .leiho-icon {
+	color: var(--leiho-accent-ink);
 }
 
-.okno-app[data-theme="dark"] .okno-log__ai .okno-icon,
-.okno-app[data-theme="dark"] .okno-timeline-ai .okno-icon {
-	color: var(--okno-accent);
+.leiho-app[data-theme="dark"] .leiho-log__ai .leiho-icon,
+.leiho-app[data-theme="dark"] .leiho-timeline-ai .leiho-icon {
+	color: var(--leiho-accent);
 }
 
 /* Réglages : contexte de marque. */
-.okno-brand-samples {
+.leiho-brand-samples {
 	display: grid;
 	gap: 8px;
 }
 
-.okno-brand-tools {
+.leiho-brand-tools {
 	display: flex;
 	flex-wrap: wrap;
 	align-items: center;
 	gap: 8px;
 }
 
-.okno-brand-tools .okno-help {
+.leiho-brand-tools .leiho-help {
 	flex-basis: 100%;
 }
 
-.okno-ai-privacy {
+.leiho-ai-privacy {
 	margin-top: 8px;
 }
 
-.okno-app .okno-admin--app [data-okno-brand] textarea {
+.leiho-app .leiho-admin--app [data-leiho-brand] textarea {
 	display: block;
 	width: 100%;
 	max-width: 480px;

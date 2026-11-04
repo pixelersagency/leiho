@@ -1,19 +1,19 @@
 /**
- * Okno — vue Collections : tous les contenus éditables, quel que soit leur
+ * Leiho — vue Collections : tous les contenus éditables, quel que soit leur
  * moteur (pages et articles WordPress, types ACF ou déclarés par le thème,
- * collections et pages uniques Okno), en trois volets :
+ * collections et pages uniques Leiho), en trois volets :
  *
- * - à gauche, les types de contenu groupés (Site, Collections Okno, Pages
+ * - à gauche, les types de contenu groupés (Site, Collections Leiho, Pages
  *   uniques) avec leur nombre d'entrées, et « Nouvelle collection » ;
  * - au milieu, les entrées du type choisi (recherche, statut, tri, actions
  *   au survol) ;
  * - à droite, l'entrée choisie, éditée sur place par l'éditeur en mode
- *   formulaire (editor.js, window.OknoEditor) : mêmes champs, annuler /
+ *   formulaire (editor.js, window.LeihoEditor) : mêmes champs, annuler /
  *   rétablir, brouillons locaux, protection des conflits, historique.
  *
- * L'onglet « Champs » d'une collection Okno remplace les deux volets de
+ * L'onglet « Champs » d'une collection Leiho remplace les deux volets de
  * droite par le constructeur de schéma (app-collections.js,
- * window.OknoBuilder) ; les types ACF y renvoient vers ACF.
+ * window.LeihoBuilder) ; les types ACF y renvoient vers ACF.
  *
  * Liens profonds : view=collections&type=<post_type>&id=<post_id>
  * (&panel=fields pour les champs).
@@ -26,39 +26,39 @@
 ( function () {
 	'use strict';
 
-	var App = window.OknoApp;
+	var App = window.LeihoApp;
 	var __ = wp.i18n.__, _n = wp.i18n._n, sprintf = wp.i18n.sprintf;
 
-	var browser = document.getElementById( 'okno-form-browser' );
+	var browser = document.getElementById( 'leiho-form-browser' );
 	if ( ! App || ! browser ) {
 		return;
 	}
 
-	var Editor = window.OknoEditor || null;
-	var Builder = window.OknoBuilder || null;
-	var editorRoot = document.getElementById( 'okno-editor' );
-	var builderHost = document.getElementById( 'okno-builder' );
-	var entryBack = document.getElementById( 'okno-entry-back' );
+	var Editor = window.LeihoEditor || null;
+	var Builder = window.LeihoBuilder || null;
+	var editorRoot = document.getElementById( 'leiho-editor' );
+	var builderHost = document.getElementById( 'leiho-builder' );
+	var entryBack = document.getElementById( 'leiho-entry-back' );
 
 	var h = App.h, icon = App.icon, cfg = App.cfg;
 	var PER_PAGE = 50;
 
 	var STATUSES = {
-		publish: __( 'Published', 'okno' ),
-		future: __( 'Scheduled', 'okno' ),
-		draft: __( 'Draft', 'okno' ),
-		pending: __( 'Pending review', 'okno' ),
-		private: __( 'Private', 'okno' ),
-		trash: __( 'Trash', 'okno' ),
+		publish: __( 'Published', 'leiho' ),
+		future: __( 'Scheduled', 'leiho' ),
+		draft: __( 'Draft', 'leiho' ),
+		pending: __( 'Pending review', 'leiho' ),
+		private: __( 'Private', 'leiho' ),
+		trash: __( 'Trash', 'leiho' ),
 	};
 
-	// Couleur du point de chaque statut dans les menus (OknoUI.select).
+	// Couleur du point de chaque statut dans les menus (LeihoUI.select).
 	var STATUS_DOTS = { publish: 'ok', future: 'accent', draft: 'warn', pending: 'pending', private: 'purple', trash: 'error' };
 
 	var SORTS = {
-		modified: __( 'Last modified', 'okno' ),
-		date: __( 'Newest first', 'okno' ),
-		title: __( 'Title (A–Z)', 'okno' ),
+		modified: __( 'Last modified', 'leiho' ),
+		date: __( 'Newest first', 'leiho' ),
+		title: __( 'Title (A–Z)', 'leiho' ),
 	};
 
 	var params = new URLSearchParams( window.location.search );
@@ -69,13 +69,13 @@
 	} );
 
 	var GROUPS = [
-		{ id: 'site', title: __( 'Site', 'okno' ), test: function ( t ) {
+		{ id: 'site', title: __( 'Site', 'leiho' ), test: function ( t ) {
 			return ! t.collection;
 		} },
-		{ id: 'collections', title: __( 'Okno collections', 'okno' ), test: function ( t ) {
+		{ id: 'collections', title: __( 'Leiho collections', 'leiho' ), test: function ( t ) {
 			return t.collection && ! t.singleton;
 		} },
-		{ id: 'singletons', title: __( 'Single pages', 'okno' ), test: function ( t ) {
+		{ id: 'singletons', title: __( 'Single pages', 'leiho' ), test: function ( t ) {
 			return t.singleton;
 		} },
 	];
@@ -117,7 +117,7 @@
 		return typeIndex[ state.type ] || null;
 	}
 
-	/** Collection Okno dont le constructeur gère les champs. */
+	/** Collection Leiho dont le constructeur gère les champs. */
 	function isNative( t ) {
 		return !! ( t && t.collection );
 	}
@@ -166,13 +166,13 @@
 		}
 		var post = Editor.current();
 		return App.confirm( {
-			title: __( 'Discard your changes?', 'okno' ),
+			title: __( 'Discard your changes?', 'leiho' ),
 			message: post && post.title
 				? /* translators: %s: entry title. */
-				  sprintf( __( '“%s” has unsaved changes. If you continue, they are lost.', 'okno' ), post.title )
-				: __( 'This entry has unsaved changes. If you continue, they are lost.', 'okno' ),
-			confirmLabel: __( 'Discard changes', 'okno' ),
-			cancelLabel: __( 'Keep editing', 'okno' ),
+				  sprintf( __( '“%s” has unsaved changes. If you continue, they are lost.', 'leiho' ), post.title )
+				: __( 'This entry has unsaved changes. If you continue, they are lost.', 'leiho' ),
+			confirmLabel: __( 'Discard changes', 'leiho' ),
+			cancelLabel: __( 'Keep editing', 'leiho' ),
 			danger: true,
 		} ).then( function ( ok ) {
 			if ( ok ) {
@@ -201,18 +201,18 @@
 	var statusId = App.uid( 'status' );
 	var sortId = App.uid( 'sort' );
 
-	var typeList = h( 'div', { class: 'okno-pane__body' } );
-	var navTools = h( 'div', { class: 'okno-pane__tools' } );
+	var typeList = h( 'div', { class: 'leiho-pane__body' } );
+	var navTools = h( 'div', { class: 'leiho-pane__tools' } );
 	if ( cfg.canCollections && Builder ) {
 		App.append( navTools, [
-			h( 'button', { type: 'button', class: 'okno-icon-btn', title: __( 'Export the schema', 'okno' ), 'aria-label': __( 'Export the schema (okno.schema.json)', 'okno' ), onClick: Builder.exportSchema }, icon( 'download' ) ),
-			h( 'button', { type: 'button', class: 'okno-icon-btn', title: __( 'Import a schema', 'okno' ), 'aria-label': __( 'Import a schema (okno.schema.json)', 'okno' ), onClick: Builder.importSchema }, icon( 'upload' ) ),
-			h( 'button', { type: 'button', class: 'okno-icon-btn', title: __( 'New collection', 'okno' ), 'aria-label': __( 'New collection', 'okno' ), onClick: newCollection }, icon( 'plus' ) ),
+			h( 'button', { type: 'button', class: 'leiho-icon-btn', title: __( 'Export the schema', 'leiho' ), 'aria-label': __( 'Export the schema (leiho.schema.json)', 'leiho' ), onClick: Builder.exportSchema }, icon( 'download' ) ),
+			h( 'button', { type: 'button', class: 'leiho-icon-btn', title: __( 'Import a schema', 'leiho' ), 'aria-label': __( 'Import a schema (leiho.schema.json)', 'leiho' ), onClick: Builder.importSchema }, icon( 'upload' ) ),
+			h( 'button', { type: 'button', class: 'leiho-icon-btn', title: __( 'New collection', 'leiho' ), 'aria-label': __( 'New collection', 'leiho' ), onClick: newCollection }, icon( 'plus' ) ),
 		] );
 	}
-	var navPane = h( 'nav', { class: 'okno-pane okno-pane--nav', 'aria-label': __( 'Content types', 'okno' ) }, [
-		h( 'div', { class: 'okno-pane__head' }, [
-			h( 'h1', { class: 'okno-pane__title', text: __( 'Collections', 'okno' ) } ),
+	var navPane = h( 'nav', { class: 'leiho-pane leiho-pane--nav', 'aria-label': __( 'Content types', 'leiho' ) }, [
+		h( 'div', { class: 'leiho-pane__head' }, [
+			h( 'h1', { class: 'leiho-pane__title', text: __( 'Collections', 'leiho' ) } ),
 			navTools,
 		] ),
 		typeList,
@@ -221,14 +221,14 @@
 	var searchInput = h( 'input', {
 		type: 'search',
 		id: searchId,
-		class: 'okno-input',
+		class: 'leiho-input',
 		value: state.search,
-		placeholder: __( 'Search by title…', 'okno' ),
+		placeholder: __( 'Search by title…', 'leiho' ),
 	} );
 	var statusSelect = h(
 		'select',
-		{ id: statusId, class: 'okno-input', title: __( 'Status', 'okno' ) },
-		[ h( 'option', { value: '', text: __( 'All statuses', 'okno' ) } ) ].concat(
+		{ id: statusId, class: 'leiho-input', title: __( 'Status', 'leiho' ) },
+		[ h( 'option', { value: '', text: __( 'All statuses', 'leiho' ) } ) ].concat(
 			Object.keys( STATUSES ).map( function ( key ) {
 				return h( 'option', { value: key, text: STATUSES[ key ], selected: key === state.status, dataset: { dot: STATUS_DOTS[ key ] || 'neutral' } } );
 			} )
@@ -236,36 +236,36 @@
 	);
 	var sortSelect = h(
 		'select',
-		{ id: sortId, class: 'okno-input', title: __( 'Sort', 'okno' ) },
+		{ id: sortId, class: 'leiho-input', title: __( 'Sort', 'leiho' ) },
 		Object.keys( SORTS ).map( function ( key ) {
 			return h( 'option', { value: key, text: SORTS[ key ], selected: key === state.orderby } );
 		} )
 	);
 
-	var listTitle = h( 'h2', { class: 'okno-pane__title' } );
-	var listTools = h( 'div', { class: 'okno-pane__tools' } );
-	var list = h( 'ul', { class: 'okno-rows okno-entries', 'aria-busy': 'true' } );
+	var listTitle = h( 'h2', { class: 'leiho-pane__title' } );
+	var listTools = h( 'div', { class: 'leiho-pane__tools' } );
+	var list = h( 'ul', { class: 'leiho-rows leiho-entries', 'aria-busy': 'true' } );
 	var summary = h( 'span', { 'aria-live': 'polite' } );
-	var pager = h( 'nav', { class: 'okno-pager', 'aria-label': __( 'Pagination', 'okno' ) } );
-	var listPane = h( 'section', { class: 'okno-pane okno-pane--list', 'aria-label': __( 'Entries', 'okno' ) }, [
-		h( 'div', { class: 'okno-pane__head' }, [ listTitle, listTools ] ),
-		h( 'div', { class: 'okno-pane__search', role: 'search' }, [
-			h( 'label', { for: searchId, class: 'okno-sr', text: __( 'Search', 'okno' ) } ),
-			h( 'span', { class: 'okno-input-icon' }, icon( 'search', 14 ) ),
+	var pager = h( 'nav', { class: 'leiho-pager', 'aria-label': __( 'Pagination', 'leiho' ) } );
+	var listPane = h( 'section', { class: 'leiho-pane leiho-pane--list', 'aria-label': __( 'Entries', 'leiho' ) }, [
+		h( 'div', { class: 'leiho-pane__head' }, [ listTitle, listTools ] ),
+		h( 'div', { class: 'leiho-pane__search', role: 'search' }, [
+			h( 'label', { for: searchId, class: 'leiho-sr', text: __( 'Search', 'leiho' ) } ),
+			h( 'span', { class: 'leiho-input-icon' }, icon( 'search', 14 ) ),
 			searchInput,
 		] ),
-		h( 'div', { class: 'okno-pane__filters' }, [
-			h( 'label', { for: statusId, class: 'okno-sr', text: __( 'Status', 'okno' ) } ),
+		h( 'div', { class: 'leiho-pane__filters' }, [
+			h( 'label', { for: statusId, class: 'leiho-sr', text: __( 'Status', 'leiho' ) } ),
 			statusSelect,
-			h( 'label', { for: sortId, class: 'okno-sr', text: __( 'Sort', 'okno' ) } ),
+			h( 'label', { for: sortId, class: 'leiho-sr', text: __( 'Sort', 'leiho' ) } ),
 			sortSelect,
 		] ),
-		h( 'div', { class: 'okno-pane__body' }, list ),
-		h( 'div', { class: 'okno-pane__foot' }, [ summary, pager ] ),
+		h( 'div', { class: 'leiho-pane__body' }, list ),
+		h( 'div', { class: 'leiho-pane__foot' }, [ summary, pager ] ),
 	] );
 
-	// Champs d'un type qui n'est pas une collection Okno (ACF, thème).
-	var notePane = h( 'section', { class: 'okno-pane okno-pane--detail okno-fields-note', hidden: true, 'aria-label': __( 'Fields', 'okno' ) } );
+	// Champs d'un type qui n'est pas une collection Leiho (ACF, thème).
+	var notePane = h( 'section', { class: 'leiho-pane leiho-pane--detail leiho-fields-note', hidden: true, 'aria-label': __( 'Fields', 'leiho' ) } );
 
 	App.append( App.clear( browser ), [ navPane, listPane ] );
 	if ( builderHost ) {
@@ -301,13 +301,13 @@
 			return null;
 		}
 		var t = currentType();
-		return h( 'span', { class: 'okno-segment okno-coll-tabs', role: 'group', 'aria-label': t ? t.label : __( 'Collection', 'okno' ) }, [
+		return h( 'span', { class: 'leiho-segment leiho-coll-tabs', role: 'group', 'aria-label': t ? t.label : __( 'Collection', 'leiho' ) }, [
 			h( 'button', { type: 'button', 'aria-pressed': 'entries' === state.panel ? 'true' : 'false', onClick: function () {
 				setPanel( 'entries' );
-			} }, __( 'Entries', 'okno' ) ),
+			} }, __( 'Entries', 'leiho' ) ),
 			h( 'button', { type: 'button', 'aria-pressed': 'fields' === state.panel ? 'true' : 'false', onClick: function () {
 				setPanel( 'fields' );
-			} }, __( 'Fields', 'okno' ) ),
+			} }, __( 'Fields', 'leiho' ) ),
 		] );
 	}
 
@@ -316,8 +316,8 @@
 		if ( ! t || ! t.canCreate || t.singleton ) {
 			return null;
 		}
-		var label = __( 'New entry', 'okno' );
-		return h( 'button', { type: 'button', class: 'okno-icon-btn', title: label, 'aria-label': label, onClick: function () {
+		var label = __( 'New entry', 'leiho' );
+		return h( 'button', { type: 'button', class: 'leiho-icon-btn', title: label, 'aria-label': label, onClick: function () {
 			openCreate( t.name );
 		} }, icon( 'plus' ) );
 	}
@@ -325,10 +325,10 @@
 	/** Nouvelle entrée écrite par l'IA (ai.js), créée en brouillon puis ouverte. */
 	function aiEntryButton() {
 		var t = currentType();
-		if ( ! t || ! t.canCreate || t.singleton || ! window.OknoAI ) {
+		if ( ! t || ! t.canCreate || t.singleton || ! window.LeihoAI ) {
 			return null;
 		}
-		return window.OknoAI.newEntryButton( t, function ( post ) {
+		return window.LeihoAI.newEntryButton( t, function ( post ) {
 			guardEntry().then( function ( ok ) {
 				if ( ok ) {
 					showCreated( post, t.name );
@@ -378,23 +378,23 @@
 	function renderNote( t ) {
 		var acf = !! cfg.acf;
 		App.append( App.clear( notePane ), [
-			h( 'div', { class: 'okno-pane__head okno-fields-note__head' }, [
-				h( 'h2', { class: 'okno-pane__title', text: t ? t.label : '' } ),
-				h( 'div', { class: 'okno-pane__tools' }, tabsControl() ),
+			h( 'div', { class: 'leiho-pane__head leiho-fields-note__head' }, [
+				h( 'h2', { class: 'leiho-pane__title', text: t ? t.label : '' } ),
+				h( 'div', { class: 'leiho-pane__tools' }, tabsControl() ),
 			] ),
-			h( 'div', { class: 'okno-detail__body' }, h( 'div', { class: 'okno-empty-state' }, [
-				h( 'span', { class: 'okno-empty-state__icon' }, icon( 'settings', 22 ) ),
-				h( 'h3', { text: acf ? __( 'Fields managed in ACF', 'okno' ) : __( 'Fields managed by WordPress', 'okno' ) } ),
+			h( 'div', { class: 'leiho-detail__body' }, h( 'div', { class: 'leiho-empty-state' }, [
+				h( 'span', { class: 'leiho-empty-state__icon' }, icon( 'settings', 22 ) ),
+				h( 'h3', { text: acf ? __( 'Fields managed in ACF', 'leiho' ) : __( 'Fields managed by WordPress', 'leiho' ) } ),
 				h( 'p', { text: acf
-					? __( 'This content type and its fields are defined in Advanced Custom Fields (or by the theme). Okno edits their values; change the fields themselves in ACF.', 'okno' )
-					: __( 'This content type and its fields are defined by WordPress, the theme or a plugin. Okno edits their values.', 'okno' ) } ),
+					? __( 'This content type and its fields are defined in Advanced Custom Fields (or by the theme). Leiho edits their values; change the fields themselves in ACF.', 'leiho' )
+					: __( 'This content type and its fields are defined by WordPress, the theme or a plugin. Leiho edits their values.', 'leiho' ) } ),
 				canImport( t )
-					? h( 'p', { class: 'okno-muted', text: __( 'You can also move these fields into Okno: Okno then defines and stores them, and ACF is no longer needed for this content type. Nothing is deleted from ACF, and you can go back.', 'okno' ) } )
+					? h( 'p', { class: 'leiho-muted', text: __( 'You can also move these fields into Leiho: Leiho then defines and stores them, and ACF is no longer needed for this content type. Nothing is deleted from ACF, and you can go back.', 'leiho' ) } )
 					: null,
-				h( 'div', { class: 'okno-actions' }, [
+				h( 'div', { class: 'leiho-actions' }, [
 					canImport( t ) ? importButton( t, true ) : null,
 					acf && cfg.acfUrl
-						? h( 'a', { class: 'okno-btn okno-btn--quiet', href: cfg.acfUrl }, [ icon( 'external' ), __( 'Open the ACF field groups', 'okno' ) ] )
+						? h( 'a', { class: 'leiho-btn leiho-btn--quiet', href: cfg.acfUrl }, [ icon( 'external' ), __( 'Open the ACF field groups', 'leiho' ) ] )
 						: null,
 				] ),
 			] ) ),
@@ -402,57 +402,57 @@
 	}
 
 	/* ------------------------------------------------------------------ *
-	 * Import ACF → Okno Collections (administrateurs)
+	 * Import ACF → Leiho Collections (administrateurs)
 	 * ------------------------------------------------------------------ */
 
-	var IMPORT_API = '/okno/v1/collections/import-acf';
+	var IMPORT_API = '/leiho/v1/collections/import-acf';
 
-	var OKNO_TYPES = {
-		text: __( 'Text', 'okno' ),
-		richtext: __( 'Rich text', 'okno' ),
-		number: __( 'Number', 'okno' ),
-		boolean: __( 'Yes / no', 'okno' ),
-		date: __( 'Date', 'okno' ),
-		datetime: __( 'Date and time', 'okno' ),
-		select: __( 'Choice', 'okno' ),
-		email: __( 'Email', 'okno' ),
-		url: __( 'URL', 'okno' ),
-		color: __( 'Color', 'okno' ),
-		image: __( 'Image', 'okno' ),
-		file: __( 'File', 'okno' ),
-		gallery: __( 'Gallery', 'okno' ),
-		link: __( 'Link', 'okno' ),
-		reference: __( 'Reference', 'okno' ),
-		list: __( 'List', 'okno' ),
-		blocks: __( 'Blocks', 'okno' ),
-		group: __( 'Group', 'okno' ),
-		block: __( 'Block type', 'okno' ),
+	var LEIHO_TYPES = {
+		text: __( 'Text', 'leiho' ),
+		richtext: __( 'Rich text', 'leiho' ),
+		number: __( 'Number', 'leiho' ),
+		boolean: __( 'Yes / no', 'leiho' ),
+		date: __( 'Date', 'leiho' ),
+		datetime: __( 'Date and time', 'leiho' ),
+		select: __( 'Choice', 'leiho' ),
+		email: __( 'Email', 'leiho' ),
+		url: __( 'URL', 'leiho' ),
+		color: __( 'Color', 'leiho' ),
+		image: __( 'Image', 'leiho' ),
+		file: __( 'File', 'leiho' ),
+		gallery: __( 'Gallery', 'leiho' ),
+		link: __( 'Link', 'leiho' ),
+		reference: __( 'Reference', 'leiho' ),
+		list: __( 'List', 'leiho' ),
+		blocks: __( 'Blocks', 'leiho' ),
+		group: __( 'Group', 'leiho' ),
+		block: __( 'Block type', 'leiho' ),
 	};
 
 	var IMPORT_NOTES = {
-		layout: __( 'Screen layout only, no value', 'okno' ),
-		name: __( 'Name not usable in the API', 'okno' ),
-		clone: __( 'Clone field', 'okno' ),
-		clone_group: __( 'Clone kept as a group', 'okno' ),
-		unsupported: __( 'No Okno equivalent', 'okno' ),
-		no_choices: __( 'No choices declared', 'okno' ),
-		empty: __( 'Nothing left inside', 'okno' ),
-		conditional: __( 'Conditional logic dropped', 'okno' ),
-		default: __( 'Default value dropped', 'okno' ),
-		media_rules: __( 'Media restrictions dropped', 'okno' ),
-		custom_choices: __( 'Values outside the choices refused', 'okno' ),
-		filters: __( 'Taxonomy filter dropped', 'okno' ),
-		bidirectional: __( 'No longer bidirectional', 'okno' ),
-		pro: __( 'Collapsed rows / pagination dropped', 'okno' ),
-		oembed: __( 'Kept as its URL', 'okno' ),
-		time_picker: __( 'Kept as text (HH:MM:SS)', 'okno' ),
+		layout: __( 'Screen layout only, no value', 'leiho' ),
+		name: __( 'Name not usable in the API', 'leiho' ),
+		clone: __( 'Clone field', 'leiho' ),
+		clone_group: __( 'Clone kept as a group', 'leiho' ),
+		unsupported: __( 'No Leiho equivalent', 'leiho' ),
+		no_choices: __( 'No choices declared', 'leiho' ),
+		empty: __( 'Nothing left inside', 'leiho' ),
+		conditional: __( 'Conditional logic dropped', 'leiho' ),
+		default: __( 'Default value dropped', 'leiho' ),
+		media_rules: __( 'Media restrictions dropped', 'leiho' ),
+		custom_choices: __( 'Values outside the choices refused', 'leiho' ),
+		filters: __( 'Taxonomy filter dropped', 'leiho' ),
+		bidirectional: __( 'No longer bidirectional', 'leiho' ),
+		pro: __( 'Collapsed rows / pagination dropped', 'leiho' ),
+		oembed: __( 'Kept as its URL', 'leiho' ),
+		time_picker: __( 'Kept as text (HH:MM:SS)', 'leiho' ),
 	};
 
 	var IMPORT_STATUS = {
-		ok: [ 'ok', __( 'Same', 'okno' ) ],
-		changed: [ 'warn', __( 'Adapted', 'okno' ) ],
-		dropped: [ 'error', __( 'Not carried over', 'okno' ) ],
-		ignored: [ '', __( 'Ignored', 'okno' ) ],
+		ok: [ 'ok', __( 'Same', 'leiho' ) ],
+		changed: [ 'warn', __( 'Adapted', 'leiho' ) ],
+		dropped: [ 'error', __( 'Not carried over', 'leiho' ) ],
+		ignored: [ '', __( 'Ignored', 'leiho' ) ],
 	};
 
 	/** Un type ACF (pas encore une collection) dont l'administrateur peut importer les champs. */
@@ -462,24 +462,24 @@
 
 	function importButton( t, withLabel ) {
 		var running = t.acfImport && 'running' === t.acfImport.status;
-		var label = running ? __( 'Resume the import into Okno', 'okno' ) : __( 'Import into Okno', 'okno' );
+		var label = running ? __( 'Resume the import into Leiho', 'leiho' ) : __( 'Import into Leiho', 'leiho' );
 		if ( withLabel ) {
-			return h( 'button', { type: 'button', class: 'okno-btn', onClick: function () {
+			return h( 'button', { type: 'button', class: 'leiho-btn', onClick: function () {
 				openImport( t );
 			} }, [ icon( 'download' ), label ] );
 		}
-		return h( 'button', { type: 'button', class: 'okno-icon-btn okno-import-btn', title: label, 'aria-label': label, onClick: function () {
+		return h( 'button', { type: 'button', class: 'leiho-icon-btn leiho-import-btn', title: label, 'aria-label': label, onClick: function () {
 			openImport( t );
 		} }, icon( 'download' ) );
 	}
 
 	function setActions( dialog, actions ) {
-		var footer = dialog.el.querySelector( '.okno-dialog__actions' );
+		var footer = dialog.el.querySelector( '.leiho-dialog__actions' );
 		App.clear( footer );
 		actions.forEach( function ( action ) {
 			footer.appendChild( h( 'button', {
 				type: 'button',
-				class: 'okno-btn' + ( action.primary ? '' : action.danger ? ' okno-btn--danger' : ' okno-btn--quiet' ),
+				class: 'leiho-btn' + ( action.primary ? '' : action.danger ? ' leiho-btn--danger' : ' leiho-btn--quiet' ),
 				disabled: !! action.disabled,
 				onClick: action.onClick,
 			}, action.label ) );
@@ -488,24 +488,24 @@
 
 	function mapRow( node, depth ) {
 		var pill = IMPORT_STATUS[ node.status ] || IMPORT_STATUS.ok;
-		var target = node.okno ? ( OKNO_TYPES[ node.okno ] || node.okno ) : '—';
+		var target = node.leiho ? ( LEIHO_TYPES[ node.leiho ] || node.leiho ) : '—';
 		var notes = ( node.notes || [] ).map( function ( n ) {
 			return IMPORT_NOTES[ n ] || n;
 		} ).join( ' · ' );
-		var rows = [ h( 'li', { class: 'okno-acf-map__row okno-acf-map__row--' + node.status, style: depth ? '--depth:' + depth : null }, [
-			h( 'span', { class: 'okno-acf-map__name' }, [
+		var rows = [ h( 'li', { class: 'leiho-acf-map__row leiho-acf-map__row--' + node.status, style: depth ? '--depth:' + depth : null }, [
+			h( 'span', { class: 'leiho-acf-map__name' }, [
 				h( 'code', { text: node.name || '·' } ),
-				node.label && node.label !== node.name ? h( 'span', { class: 'okno-muted', text: node.label } ) : null,
+				node.label && node.label !== node.name ? h( 'span', { class: 'leiho-muted', text: node.label } ) : null,
 			] ),
-			h( 'span', { class: 'okno-acf-map__types' }, [
-				h( 'span', { class: 'okno-mono', text: node.acf } ),
+			h( 'span', { class: 'leiho-acf-map__types' }, [
+				h( 'span', { class: 'leiho-mono', text: node.acf } ),
 				h( 'span', { 'aria-hidden': 'true', text: ' → ' } ),
-				h( 'span', { class: 'okno-sr', text: ' ' + __( 'becomes', 'okno' ) + ' ' } ),
+				h( 'span', { class: 'leiho-sr', text: ' ' + __( 'becomes', 'leiho' ) + ' ' } ),
 				h( 'strong', { text: target } ),
 			] ),
-			h( 'span', { class: 'okno-acf-map__status' }, [
-				h( 'span', { class: 'okno-pill' + ( pill[ 0 ] ? ' okno-pill--' + pill[ 0 ] : '' ), text: pill[ 1 ] } ),
-				notes ? h( 'span', { class: 'okno-acf-map__notes', text: notes } ) : null,
+			h( 'span', { class: 'leiho-acf-map__status' }, [
+				h( 'span', { class: 'leiho-pill' + ( pill[ 0 ] ? ' leiho-pill--' + pill[ 0 ] : '' ), text: pill[ 1 ] } ),
+				notes ? h( 'span', { class: 'leiho-acf-map__notes', text: notes } ) : null,
 			] ),
 		] ) ];
 		( node.fields || [] ).forEach( function ( child ) {
@@ -519,13 +519,13 @@
 		var out = [
 			h( 'p', { text: sprintf(
 				/* translators: 1: content type, 2: number of entries, 3: number of fields, 4: number of stored values. */
-				__( 'Okno creates the collection “%1$s” from its ACF fields, then copies %2$s entries (%3$s fields, %4$s stored values) with the same checks as the editor. The front end keeps receiving the same JSON; each entry is checked after the copy.', 'okno' ),
+				__( 'Leiho creates the collection “%1$s” from its ACF fields, then copies %2$s entries (%3$s fields, %4$s stored values) with the same checks as the editor. The front end keeps receiving the same JSON; each entry is checked after the copy.', 'leiho' ),
 				p.label, counts.entries, counts.fields, counts.values
 			) } ),
 		];
 		if ( ! p.importable ) {
-			out.push( h( 'div', { class: 'okno-notice okno-notice--error', role: 'alert' }, [
-				h( 'p', { text: p.reason || __( 'The Okno collection built from these ACF fields is invalid.', 'okno' ) } ),
+			out.push( h( 'div', { class: 'leiho-notice leiho-notice--error', role: 'alert' }, [
+				h( 'p', { text: p.reason || __( 'The Leiho collection built from these ACF fields is invalid.', 'leiho' ) } ),
 			].concat( ( p.errors || [] ).map( function ( e ) {
 				return h( 'p', { text: ( e.path ? e.path + ' : ' : '' ) + e.message } );
 			} ) ) ) );
@@ -535,22 +535,22 @@
 			g.fields.forEach( function ( f ) {
 				rows = rows.concat( mapRow( f, 0 ) );
 			} );
-			out.push( h( 'section', { class: 'okno-acf-group' }, [
-				h( 'h3', { class: 'okno-group-label' }, [
+			out.push( h( 'section', { class: 'leiho-acf-group' }, [
+				h( 'h3', { class: 'leiho-group-label' }, [
 					/* translators: %s: ACF field group title. */
-					sprintf( __( 'Field group “%s”', 'okno' ), g.title ),
-					g.conditional ? h( 'span', { class: 'okno-pill okno-pill--warn', text: __( 'Extra location rules', 'okno' ) } ) : null,
+					sprintf( __( 'Field group “%s”', 'leiho' ), g.title ),
+					g.conditional ? h( 'span', { class: 'leiho-pill leiho-pill--warn', text: __( 'Extra location rules', 'leiho' ) } ) : null,
 				] ),
-				h( 'ul', { class: 'okno-acf-map' }, rows ),
+				h( 'ul', { class: 'leiho-acf-map' }, rows ),
 			] ) );
 		} );
 		if ( p.lost && p.lost.length ) {
-			out.push( h( 'section', { class: 'okno-acf-group' }, [
-				h( 'h3', { class: 'okno-group-label', text: __( 'What doesn’t carry over', 'okno' ) } ),
-				h( 'ul', { class: 'okno-acf-lost' }, p.lost.map( function ( l ) {
+			out.push( h( 'section', { class: 'leiho-acf-group' }, [
+				h( 'h3', { class: 'leiho-group-label', text: __( 'What doesn’t carry over', 'leiho' ) } ),
+				h( 'ul', { class: 'leiho-acf-lost' }, p.lost.map( function ( l ) {
 					return h( 'li', {}, [
 						h( 'span', { text: l.message } ),
-						l.items && l.items.length ? h( 'span', { class: 'okno-mono okno-muted', text: ' ' + l.items.join( ', ' ) } ) : null,
+						l.items && l.items.length ? h( 'span', { class: 'leiho-mono leiho-muted', text: ' ' + l.items.join( ', ' ) } ) : null,
 					] );
 				} ) ),
 			] ) );
@@ -563,14 +563,14 @@
 		return [
 			h( 'p', { text: sprintf(
 				/* translators: 1: entries copied, 2: total entries. */
-				__( 'Copying the entries: %1$s of %2$s. You can close this window: the import resumes where it stopped.', 'okno' ),
+				__( 'Copying the entries: %1$s of %2$s. You can close this window: the import resumes where it stopped.', 'leiho' ),
 				rec.done || 0, rec.total || 0
 			) } ),
-			h( 'progress', { class: 'okno-progress', max: total, value: Math.min( rec.done || 0, total ), 'aria-label': __( 'Import progress', 'okno' ) } ),
+			h( 'progress', { class: 'leiho-progress', max: total, value: Math.min( rec.done || 0, total ), 'aria-label': __( 'Import progress', 'leiho' ) } ),
 			rec.failed || rec.different
-				? h( 'p', { class: 'okno-muted', text: sprintf(
+				? h( 'p', { class: 'leiho-muted', text: sprintf(
 					/* translators: 1: number of failures, 2: number of differences. */
-					__( 'So far: %1$s failures, %2$s differences.', 'okno' ),
+					__( 'So far: %1$s failures, %2$s differences.', 'leiho' ),
 					rec.failed || 0, rec.different || 0
 				) } )
 				: null,
@@ -583,29 +583,29 @@
 
 	function resultBody( type, rec ) {
 		var out = [
-			h( 'div', { class: 'okno-acf-result' }, [
-				h( 'span', { class: 'okno-pill okno-pill--ok', text: sprintf( _n( '%d entry imported', '%d entries imported', rec.imported, 'okno' ), rec.imported ) } ),
-				h( 'span', { class: 'okno-pill' + ( rec.failed ? ' okno-pill--error' : '' ), text: sprintf( _n( '%d failure', '%d failures', rec.failed, 'okno' ), rec.failed ) } ),
-				h( 'span', { class: 'okno-pill' + ( rec.different ? ' okno-pill--warn' : '' ), text: sprintf( _n( '%d difference', '%d differences', rec.different, 'okno' ), rec.different ) } ),
+			h( 'div', { class: 'leiho-acf-result' }, [
+				h( 'span', { class: 'leiho-pill leiho-pill--ok', text: sprintf( _n( '%d entry imported', '%d entries imported', rec.imported, 'leiho' ), rec.imported ) } ),
+				h( 'span', { class: 'leiho-pill' + ( rec.failed ? ' leiho-pill--error' : '' ), text: sprintf( _n( '%d failure', '%d failures', rec.failed, 'leiho' ), rec.failed ) } ),
+				h( 'span', { class: 'leiho-pill' + ( rec.different ? ' leiho-pill--warn' : '' ), text: sprintf( _n( '%d difference', '%d differences', rec.different, 'leiho' ), rec.different ) } ),
 			] ),
 			h( 'p', { text: rec.failed || rec.different
-				? __( 'The content type is now served by Okno. The values below were refused or changed by Okno’s checks; ACF still holds the originals. Correct them in Okno.', 'okno' )
-				: __( 'The content type is now served by Okno, and every entry gives the front end the same values as before.', 'okno' ) } ),
+				? __( 'The content type is now served by Leiho. The values below were refused or changed by Leiho’s checks; ACF still holds the originals. Correct them in Leiho.', 'leiho' )
+				: __( 'The content type is now served by Leiho, and every entry gives the front end the same values as before.', 'leiho' ) } ),
 		];
 		if ( rec.failures && rec.failures.length ) {
-			out.push( h( 'h3', { class: 'okno-group-label', text: __( 'Failures', 'okno' ) } ) );
-			out.push( h( 'ul', { class: 'okno-acf-issues' }, rec.failures.map( function ( f ) {
+			out.push( h( 'h3', { class: 'leiho-group-label', text: __( 'Failures', 'leiho' ) } ) );
+			out.push( h( 'ul', { class: 'leiho-acf-issues' }, rec.failures.map( function ( f ) {
 				return h( 'li', {}, [ entryLink( type, f ), ' · ', h( 'code', { text: f.field } ), ' — ', f.message ] );
 			} ) ) );
 		}
 		if ( rec.diffs && rec.diffs.length ) {
-			out.push( h( 'h3', { class: 'okno-group-label', text: __( 'Values served differently', 'okno' ) } ) );
-			out.push( h( 'ul', { class: 'okno-acf-issues' }, rec.diffs.map( function ( d ) {
+			out.push( h( 'h3', { class: 'leiho-group-label', text: __( 'Values served differently', 'leiho' ) } ) );
+			out.push( h( 'ul', { class: 'leiho-acf-issues' }, rec.diffs.map( function ( d ) {
 				return h( 'li', {}, [
 					entryLink( type, d ), ' · ', h( 'code', { text: d.field } ),
-					h( 'div', { class: 'okno-acf-diff' }, [
-						h( 'span', { class: 'okno-mono', text: __( 'ACF:', 'okno' ) + ' ' + d.before } ),
-						h( 'span', { class: 'okno-mono', text: __( 'Okno:', 'okno' ) + ' ' + d.after } ),
+					h( 'div', { class: 'leiho-acf-diff' }, [
+						h( 'span', { class: 'leiho-mono', text: __( 'ACF:', 'leiho' ) + ' ' + d.before } ),
+						h( 'span', { class: 'leiho-mono', text: __( 'Leiho:', 'leiho' ) + ' ' + d.after } ),
 					] ),
 				] );
 			} ) ) );
@@ -621,16 +621,16 @@
 	function openImport( t ) {
 		var stopped = false;
 		var dialog = App.modal( {
-			title: sprintf( /* translators: %s: content type. */ __( 'Import “%s” into Okno', 'okno' ), t.label ),
+			title: sprintf( /* translators: %s: content type. */ __( 'Import “%s” into Leiho', 'leiho' ), t.label ),
 			wide: true,
 			sticky: true,
-			body: h( 'p', { class: 'okno-muted', text: __( 'Reading the ACF fields…', 'okno' ) } ),
-			actions: [ { label: __( 'Cancel', 'okno' ) } ],
+			body: h( 'p', { class: 'leiho-muted', text: __( 'Reading the ACF fields…', 'leiho' ) } ),
+			actions: [ { label: __( 'Cancel', 'leiho' ) } ],
 			onClose: function () {
 				stopped = true;
 			},
 		} );
-		dialog.el.classList.add( 'okno-dialog--import' );
+		dialog.el.classList.add( 'leiho-dialog--import' );
 
 		function show( nodes ) {
 			App.append( App.clear( dialog.body ), nodes );
@@ -638,8 +638,8 @@
 
 		function finish( rec ) {
 			show( resultBody( t.name, rec ) );
-			App.announce( __( 'Import finished.', 'okno' ) );
-			setActions( dialog, [ { label: __( 'Open the collection', 'okno' ), primary: true, onClick: function () {
+			App.announce( __( 'Import finished.', 'leiho' ) );
+			setActions( dialog, [ { label: __( 'Open the collection', 'leiho' ), primary: true, onClick: function () {
 				window.location.href = cfg.urls.collections + '&type=' + encodeURIComponent( t.name ) + '&panel=fields';
 			} } ] );
 		}
@@ -659,16 +659,16 @@
 
 		function start() {
 			show( progressBody( { done: 0, total: 0 } ) );
-			setActions( dialog, [ { label: __( 'Close', 'okno' ), onClick: function () {
+			setActions( dialog, [ { label: __( 'Close', 'leiho' ), onClick: function () {
 				dialog.close();
 			} } ] );
 			run().catch( function ( err ) {
-				show( h( 'div', { class: 'okno-notice okno-notice--error', role: 'alert' }, h( 'p', { text: App.errorMessage( err, __( 'The import stopped.', 'okno' ) ) } ) ) );
+				show( h( 'div', { class: 'leiho-notice leiho-notice--error', role: 'alert' }, h( 'p', { text: App.errorMessage( err, __( 'The import stopped.', 'leiho' ) ) } ) ) );
 				setActions( dialog, [
-					{ label: __( 'Close', 'okno' ), onClick: function () {
+					{ label: __( 'Close', 'leiho' ), onClick: function () {
 						dialog.close();
 					} },
-					{ label: __( 'Try again', 'okno' ), primary: true, onClick: start },
+					{ label: __( 'Try again', 'leiho' ), primary: true, onClick: start },
 				] );
 			} );
 		}
@@ -682,11 +682,11 @@
 			.then( function ( p ) {
 				show( previewBody( p ) );
 				setActions( dialog, [
-					{ label: __( 'Cancel', 'okno' ), onClick: function () {
+					{ label: __( 'Cancel', 'leiho' ), onClick: function () {
 						dialog.close();
 					} },
 					{
-						label: sprintf( _n( 'Import %d entry', 'Import %d entries', p.counts.entries, 'okno' ), p.counts.entries ),
+						label: sprintf( _n( 'Import %d entry', 'Import %d entries', p.counts.entries, 'leiho' ), p.counts.entries ),
 						primary: true,
 						disabled: ! p.importable,
 						onClick: start,
@@ -694,7 +694,7 @@
 				] );
 			} )
 			.catch( function ( err ) {
-				show( h( 'div', { class: 'okno-notice okno-notice--error', role: 'alert' }, h( 'p', { text: App.errorMessage( err, __( 'Couldn’t read the ACF fields.', 'okno' ) ) } ) ) );
+				show( h( 'div', { class: 'leiho-notice leiho-notice--error', role: 'alert' }, h( 'p', { text: App.errorMessage( err, __( 'Couldn’t read the ACF fields.', 'leiho' ) ) } ) ) );
 			} );
 	}
 
@@ -707,9 +707,9 @@
 	function rollbackImport( name, label ) {
 		App.confirm( {
 			/* translators: %s: content type. */
-			title: sprintf( __( 'Go back to ACF for “%s”?', 'okno' ), label || name ),
-			message: __( 'ACF serves the fields of this content type again, with the values they had on the import day. Values edited in Okno since the import are not written back to ACF: they are deleted with the Okno table of this collection.', 'okno' ),
-			confirmLabel: __( 'Go back to ACF', 'okno' ),
+			title: sprintf( __( 'Go back to ACF for “%s”?', 'leiho' ), label || name ),
+			message: __( 'ACF serves the fields of this content type again, with the values they had on the import day. Values edited in Leiho since the import are not written back to ACF: they are deleted with the Leiho table of this collection.', 'leiho' ),
+			confirmLabel: __( 'Go back to ACF', 'leiho' ),
 			danger: true,
 			typeToConfirm: name,
 		} ).then( function ( ok ) {
@@ -718,20 +718,20 @@
 			}
 			App.api( { path: IMPORT_API + '/rollback', method: 'POST', data: { post_type: name, confirm: name } } )
 				.then( function () {
-					App.toast( __( 'The content type is served by ACF again.', 'okno' ) );
+					App.toast( __( 'The content type is served by ACF again.', 'leiho' ) );
 					window.location.href = cfg.urls.collections + '&type=' + encodeURIComponent( name );
 				} )
 				.catch( function ( err ) {
-					App.toast( App.errorMessage( err, __( 'Couldn’t go back to ACF.', 'okno' ) ), true );
+					App.toast( App.errorMessage( err, __( 'Couldn’t go back to ACF.', 'leiho' ) ), true );
 				} );
 		} );
 	}
 
-	window.OknoAcfImport = { open: openImport, rollback: rollbackImport };
+	window.LeihoAcfImport = { open: openImport, rollback: rollbackImport };
 
 	function renderListHead() {
 		var t = currentType();
-		listTitle.textContent = t ? t.label : __( 'No content type', 'okno' );
+		listTitle.textContent = t ? t.label : __( 'No content type', 'leiho' );
 		App.append( App.clear( listTools ), [ canImport( t ) ? importButton( t, false ) : null, tabsControl(), aiEntryButton(), newEntryButton() ] );
 	}
 
@@ -771,12 +771,12 @@
 		var count = state.counts[ t.name ];
 		return h( 'li', {}, h( 'a', {
 			href: cfg.urls.collections + '&type=' + encodeURIComponent( t.name ),
-			class: 'okno-coll' + ( active ? ' is-active' : '' ),
+			class: 'leiho-coll' + ( active ? ' is-active' : '' ),
 			'aria-current': active ? 'page' : null,
 			'aria-label': undefined === count
 				? t.label
 				: /* translators: 1: content type, 2: number of entries. */
-				  sprintf( __( '%1$s, %2$s', 'okno' ), t.label, sprintf( _n( '%d entry', '%d entries', count, 'okno' ), count ) ),
+				  sprintf( __( '%1$s, %2$s', 'leiho' ), t.label, sprintf( _n( '%d entry', '%d entries', count, 'leiho' ), count ) ),
 			onClick: function ( event ) {
 				if ( event.metaKey || event.ctrlKey || event.shiftKey ) {
 					return;
@@ -785,9 +785,9 @@
 				selectType( t.name );
 			},
 		}, [
-			h( 'span', { class: 'okno-coll__icon' + ( t.collection ? ' okno-coll__icon--collection' : '' ) }, typeIcon( t ) ),
-			h( 'span', { class: 'okno-coll__name', text: t.label } ),
-			undefined === count ? null : h( 'span', { class: 'okno-coll__count', 'aria-hidden': 'true', text: String( count ) } ),
+			h( 'span', { class: 'leiho-coll__icon' + ( t.collection ? ' leiho-coll__icon--collection' : '' ) }, typeIcon( t ) ),
+			h( 'span', { class: 'leiho-coll__name', text: t.label } ),
+			undefined === count ? null : h( 'span', { class: 'leiho-coll__count', 'aria-hidden': 'true', text: String( count ) } ),
 		] ) );
 	}
 
@@ -797,24 +797,24 @@
 			var items = types.filter( group.test );
 			var rows = items.map( typeRow );
 			if ( 'collections' === group.id && 'new' === state.panel ) {
-				rows.push( h( 'li', {}, h( 'span', { class: 'okno-coll is-active', 'aria-current': 'true' }, [
-					h( 'span', { class: 'okno-coll__icon okno-coll__icon--collection' }, icon( 'plus', 15 ) ),
-					h( 'span', { class: 'okno-coll__name', text: __( 'New collection', 'okno' ) } ),
+				rows.push( h( 'li', {}, h( 'span', { class: 'leiho-coll is-active', 'aria-current': 'true' }, [
+					h( 'span', { class: 'leiho-coll__icon leiho-coll__icon--collection' }, icon( 'plus', 15 ) ),
+					h( 'span', { class: 'leiho-coll__name', text: __( 'New collection', 'leiho' ) } ),
 				] ) ) );
 			} else if ( 'collections' === group.id && cfg.canCollections && Builder ) {
-				rows.push( h( 'li', {}, h( 'button', { type: 'button', class: 'okno-coll okno-coll--add', onClick: newCollection }, [
-					h( 'span', { class: 'okno-coll__icon' }, icon( 'plus', 15 ) ),
-					h( 'span', { class: 'okno-coll__name', text: __( 'New collection', 'okno' ) } ),
+				rows.push( h( 'li', {}, h( 'button', { type: 'button', class: 'leiho-coll leiho-coll--add', onClick: newCollection }, [
+					h( 'span', { class: 'leiho-coll__icon' }, icon( 'plus', 15 ) ),
+					h( 'span', { class: 'leiho-coll__name', text: __( 'New collection', 'leiho' ) } ),
 				] ) ) );
 			}
 			if ( ! rows.length ) {
 				return;
 			}
-			typeList.appendChild( h( 'h2', { class: 'okno-group-label', text: group.title } ) );
-			typeList.appendChild( h( 'ul', { class: 'okno-rows' }, rows ) );
+			typeList.appendChild( h( 'h2', { class: 'leiho-group-label', text: group.title } ) );
+			typeList.appendChild( h( 'ul', { class: 'leiho-rows' }, rows ) );
 		} );
 		if ( ! types.length ) {
-			typeList.appendChild( h( 'p', { class: 'okno-list-empty', text: __( 'No content type is editable in Okno yet. Choose them in the settings.', 'okno' ) } ) );
+			typeList.appendChild( h( 'p', { class: 'leiho-list-empty', text: __( 'No content type is editable in Leiho yet. Choose them in the settings.', 'leiho' ) } ) );
 		}
 	}
 
@@ -849,7 +849,7 @@
 	function loadCounts() {
 		return Promise.all( types.map( function ( t ) {
 			var query = new URLSearchParams( { per_page: '1', page: '1', type: t.name } );
-			return App.api( { path: '/okno/v1/posts?' + query.toString(), parse: false } )
+			return App.api( { path: '/leiho/v1/posts?' + query.toString(), parse: false } )
 				.then( function ( response ) {
 					state.counts[ t.name ] = Number( response.headers.get( 'X-WP-Total' ) || 0 );
 				} )
@@ -867,7 +867,7 @@
 		options = options || {};
 		var request = ++state.request;
 		if ( ! state.type ) {
-			App.clear( list ).appendChild( h( 'li', { class: 'okno-list-empty', text: __( 'Nothing to show.', 'okno' ) } ) );
+			App.clear( list ).appendChild( h( 'li', { class: 'leiho-list-empty', text: __( 'Nothing to show.', 'leiho' ) } ) );
 			list.setAttribute( 'aria-busy', 'false' );
 			return Promise.resolve();
 		}
@@ -883,7 +883,7 @@
 			orderby: state.orderby,
 		} );
 
-		return App.api( { path: '/okno/v1/posts?' + query.toString(), parse: false } )
+		return App.api( { path: '/leiho/v1/posts?' + query.toString(), parse: false } )
 			.then( function ( response ) {
 				state.totalPages = Number( response.headers.get( 'X-WP-TotalPages' ) || 1 );
 				state.total = Number( response.headers.get( 'X-WP-Total' ) || 0 );
@@ -914,7 +914,7 @@
 				if ( request !== state.request ) {
 					return;
 				}
-				App.clear( list ).appendChild( h( 'li', { class: 'okno-list-empty', text: App.errorMessage( err, __( 'Couldn’t load the content list.', 'okno' ) ) } ) );
+				App.clear( list ).appendChild( h( 'li', { class: 'leiho-list-empty', text: App.errorMessage( err, __( 'Couldn’t load the content list.', 'leiho' ) ) } ) );
 			} )
 			.finally( function () {
 				if ( request === state.request ) {
@@ -933,19 +933,19 @@
 		App.clear( list );
 		summary.textContent = sprintf(
 			/* translators: %d: number of entries. */
-			_n( '%d entry', '%d entries', state.total, 'okno' ),
+			_n( '%d entry', '%d entries', state.total, 'leiho' ),
 			state.total
 		);
 
 		if ( ! state.items.length ) {
 			var t = currentType();
 			list.appendChild(
-				h( 'li', { class: 'okno-list-empty' }, [
-					h( 'p', { text: state.search || state.status ? __( 'Nothing matches these filters', 'okno' ) : __( 'No entries yet', 'okno' ) } ),
+				h( 'li', { class: 'leiho-list-empty' }, [
+					h( 'p', { text: state.search || state.status ? __( 'Nothing matches these filters', 'leiho' ) : __( 'No entries yet', 'leiho' ) } ),
 					t && t.canCreate && ! t.singleton && ! state.search
-						? h( 'button', { type: 'button', class: 'okno-btn okno-btn--quiet okno-btn--small', onClick: function () {
+						? h( 'button', { type: 'button', class: 'leiho-btn leiho-btn--quiet leiho-btn--small', onClick: function () {
 							openCreate( t.name );
-						} }, __( 'Create an entry', 'okno' ) )
+						} }, __( 'Create an entry', 'leiho' ) )
 						: null,
 				] )
 			);
@@ -966,39 +966,39 @@
 	function row( item ) {
 		var type = typeIndex[ item.type ];
 		var trashed = 'trash' === item.status;
-		var title = item.title || __( '(no title)', 'okno' );
+		var title = item.title || __( '(no title)', 'leiho' );
 		var statusText = STATUSES[ item.status ] || item.status;
 
-		var actions = h( 'div', { class: 'okno-item__actions' } );
+		var actions = h( 'div', { class: 'leiho-item__actions' } );
 		if ( trashed ) {
 			if ( item.can_delete ) {
-				actions.appendChild( actionBtn( 'restore', __( 'Restore', 'okno' ), title, function () {
+				actions.appendChild( actionBtn( 'restore', __( 'Restore', 'leiho' ), title, function () {
 					restore( item );
 				} ) );
 			}
 		} else {
 			if ( canUseEditor( item ) ) {
-				actions.appendChild( actionLink( 'edit', __( 'Visual editor', 'okno' ), title, editorUrl( item ) ) );
+				actions.appendChild( actionLink( 'edit', __( 'Visual editor', 'leiho' ), title, editorUrl( item ) ) );
 			}
 			if ( 'publish' === item.status ) {
 				if ( ! type || ! type.singleton ) {
-					actions.appendChild( actionBtn( 'draft', __( 'Back to draft', 'okno' ), title, function () {
+					actions.appendChild( actionBtn( 'draft', __( 'Back to draft', 'leiho' ), title, function () {
 						setStatus( item, 'draft' );
 					} ) );
 				}
 			} else if ( 'future' !== item.status && 'private' !== item.status ) {
 				var publishable = ! type || type.canPublish;
-				actions.appendChild( actionBtn( 'check', publishable ? __( 'Mark as published', 'okno' ) : __( 'Submit for review', 'okno' ), title, function () {
+				actions.appendChild( actionBtn( 'check', publishable ? __( 'Mark as published', 'leiho' ) : __( 'Submit for review', 'leiho' ), title, function () {
 					setStatus( item, publishable ? 'publish' : 'pending' );
 				} ) );
 			}
 			if ( type && type.canCreate && ! type.singleton ) {
-				actions.appendChild( actionBtn( 'copy', __( 'Duplicate', 'okno' ), title, function () {
+				actions.appendChild( actionBtn( 'copy', __( 'Duplicate', 'leiho' ), title, function () {
 					duplicate( item );
 				} ) );
 			}
 			if ( item.can_delete ) {
-				actions.appendChild( actionBtn( 'trash', __( 'Move to trash', 'okno' ), title, function () {
+				actions.appendChild( actionBtn( 'trash', __( 'Move to trash', 'leiho' ), title, function () {
 					trash( item );
 				} ) );
 			}
@@ -1006,17 +1006,17 @@
 
 		var active = state.current && item.id === state.current;
 		/* translators: 1: content title, 2: status (e.g. Draft), 3: content type. */
-		var label = sprintf( __( '%1$s — %2$s, %3$s', 'okno' ), title, statusText, type ? type.singular : item.type );
+		var label = sprintf( __( '%1$s — %2$s, %3$s', 'leiho' ), title, statusText, type ? type.singular : item.type );
 		var main = [
-			h( 'span', { class: 'okno-status-dot okno-status-dot--' + statusLevel( item.status ), title: statusText } ),
-			h( 'span', { class: 'okno-item__title' + ( item.title ? '' : ' is-blank' ), text: title } ),
+			h( 'span', { class: 'leiho-status-dot leiho-status-dot--' + statusLevel( item.status ), title: statusText } ),
+			h( 'span', { class: 'leiho-item__title' + ( item.title ? '' : ' is-blank' ), text: title } ),
 		];
 
-		return h( 'li', { class: 'okno-item' + ( active ? ' is-active' : '' ), dataset: { id: String( item.id ) } }, [
+		return h( 'li', { class: 'leiho-item' + ( active ? ' is-active' : '' ), dataset: { id: String( item.id ) } }, [
 			trashed
-				? h( 'span', { class: 'okno-item__link', 'aria-label': label }, main )
+				? h( 'span', { class: 'leiho-item__link', 'aria-label': label }, main )
 				: h( 'a', {
-					class: 'okno-item__link',
+					class: 'leiho-item__link',
 					href: entryHref( item ),
 					'aria-label': label,
 					'aria-current': active ? 'true' : null,
@@ -1028,16 +1028,16 @@
 						selectEntry( item );
 					},
 				}, main ),
-			h( 'time', { class: 'okno-item__meta', datetime: item.modified || '', title: item.modified ? new Date( item.modified ).toLocaleString() : '', text: App.formatDate( item.modified ) } ),
+			h( 'time', { class: 'leiho-item__meta', datetime: item.modified || '', title: item.modified ? new Date( item.modified ).toLocaleString() : '', text: App.formatDate( item.modified ) } ),
 			actions,
 		] );
 	}
 
 	function markActive() {
-		Array.prototype.forEach.call( list.querySelectorAll( '.okno-item' ), function ( li ) {
+		Array.prototype.forEach.call( list.querySelectorAll( '.leiho-item' ), function ( li ) {
 			var on = Number( li.dataset.id ) === state.current;
 			li.classList.toggle( 'is-active', on );
-			var link = li.querySelector( 'a.okno-item__link' );
+			var link = li.querySelector( 'a.leiho-item__link' );
 			if ( link ) {
 				if ( on ) {
 					link.setAttribute( 'aria-current', 'true' );
@@ -1054,14 +1054,14 @@
 
 	function actionLink( iconName, label, title, href ) {
 		/* translators: 1: action (e.g. Duplicate), 2: content title. */
-		var aria = sprintf( __( '%1$s: %2$s', 'okno' ), label, title );
-		return h( 'a', { class: 'okno-icon-btn', href: href, title: label, 'aria-label': aria }, icon( iconName ) );
+		var aria = sprintf( __( '%1$s: %2$s', 'leiho' ), label, title );
+		return h( 'a', { class: 'leiho-icon-btn', href: href, title: label, 'aria-label': aria }, icon( iconName ) );
 	}
 
 	function actionBtn( iconName, label, title, onClick ) {
 		/* translators: 1: action (e.g. Duplicate), 2: content title. */
-		var aria = sprintf( __( '%1$s: %2$s', 'okno' ), label, title );
-		return h( 'button', { type: 'button', class: 'okno-icon-btn' + ( 'trash' === iconName ? ' okno-icon-btn--danger' : '' ), title: label, 'aria-label': aria, onClick: onClick }, icon( iconName ) );
+		var aria = sprintf( __( '%1$s: %2$s', 'leiho' ), label, title );
+		return h( 'button', { type: 'button', class: 'leiho-icon-btn' + ( 'trash' === iconName ? ' leiho-icon-btn--danger' : '' ), title: label, 'aria-label': aria, onClick: onClick }, icon( iconName ) );
 	}
 
 	function renderPager() {
@@ -1070,17 +1070,17 @@
 			return;
 		}
 		App.append( pager, [
-			h( 'button', { type: 'button', class: 'okno-icon-btn okno-icon-btn--small', 'aria-label': __( 'Previous', 'okno' ), title: __( 'Previous', 'okno' ), disabled: state.page <= 1, onClick: function () {
+			h( 'button', { type: 'button', class: 'leiho-icon-btn leiho-icon-btn--small', 'aria-label': __( 'Previous', 'leiho' ), title: __( 'Previous', 'leiho' ), disabled: state.page <= 1, onClick: function () {
 				state.page -= 1;
 				load();
 			} }, icon( 'up' ) ),
 			h( 'span', {}, sprintf(
 				/* translators: 1: current page, 2: number of pages. */
-				__( 'Page %1$d of %2$d', 'okno' ),
+				__( 'Page %1$d of %2$d', 'leiho' ),
 				state.page,
 				state.totalPages
 			) ),
-			h( 'button', { type: 'button', class: 'okno-icon-btn okno-icon-btn--small', 'aria-label': __( 'Next', 'okno' ), title: __( 'Next', 'okno' ), disabled: state.page >= state.totalPages, onClick: function () {
+			h( 'button', { type: 'button', class: 'leiho-icon-btn leiho-icon-btn--small', 'aria-label': __( 'Next', 'leiho' ), title: __( 'Next', 'leiho' ), disabled: state.page >= state.totalPages, onClick: function () {
 				state.page += 1;
 				load();
 			} }, icon( 'down' ) ),
@@ -1107,7 +1107,7 @@
 			markActive();
 			syncUrl();
 			Editor.open( item ).catch( function ( err ) {
-				App.toast( App.errorMessage( err, __( 'Couldn’t open this entry.', 'okno' ) ), true );
+				App.toast( App.errorMessage( err, __( 'Couldn’t open this entry.', 'leiho' ) ), true );
 			} );
 		} );
 	}
@@ -1132,7 +1132,7 @@
 
 	// L'éditeur a enregistré l'entrée ou changé son statut : titre, pastille
 	// et date de la liste, nombres par type.
-	document.addEventListener( 'okno:entry-changed', function () {
+	document.addEventListener( 'leiho:entry-changed', function () {
 		App.notifyChanged();
 		reload();
 	} );
@@ -1142,46 +1142,46 @@
 	 * ------------------------------------------------------------------ */
 
 	function setStatus( item, status ) {
-		App.api( { path: '/okno/v1/posts/' + item.id + '/status', method: 'POST', data: { status: status } } )
+		App.api( { path: '/leiho/v1/posts/' + item.id + '/status', method: 'POST', data: { status: status } } )
 			.then( function ( fresh ) {
 				/* translators: 1: content title, 2: status (e.g. Published). */
-				App.toast( sprintf( __( '“%1$s”: %2$s.', 'okno' ), fresh.title, STATUSES[ fresh.status ] || fresh.status ) );
+				App.toast( sprintf( __( '“%1$s”: %2$s.', 'leiho' ), fresh.title, STATUSES[ fresh.status ] || fresh.status ) );
 				App.notifyChanged();
 				return reload();
 			} )
 			.catch( function ( err ) {
-				App.toast( App.errorMessage( err, __( 'Couldn’t change the status.', 'okno' ) ), true );
+				App.toast( App.errorMessage( err, __( 'Couldn’t change the status.', 'leiho' ) ), true );
 			} );
 	}
 
 	function duplicate( item ) {
-		App.api( { path: '/okno/v1/posts/' + item.id + '/duplicate', method: 'POST' } )
+		App.api( { path: '/leiho/v1/posts/' + item.id + '/duplicate', method: 'POST' } )
 			.then( function ( copy ) {
 				/* translators: %s: content title. */
-				App.toast( sprintf( __( '“%s” created as a draft.', 'okno' ), copy.title ) );
+				App.toast( sprintf( __( '“%s” created as a draft.', 'leiho' ), copy.title ) );
 				App.notifyChanged();
 				return reload();
 			} )
 			.catch( function ( err ) {
-				App.toast( App.errorMessage( err, __( 'Couldn’t duplicate this content.', 'okno' ) ), true );
+				App.toast( App.errorMessage( err, __( 'Couldn’t duplicate this content.', 'leiho' ) ), true );
 			} );
 	}
 
 	function trash( item ) {
 		App.confirm( {
-			title: __( 'Move to trash?', 'okno' ),
+			title: __( 'Move to trash?', 'leiho' ),
 			/* translators: %s: content title. */
-			message: sprintf( __( '“%s” will be moved to the trash. You can restore it from the Trash filter.', 'okno' ), item.title ),
-			confirmLabel: __( 'Move to trash', 'okno' ),
+			message: sprintf( __( '“%s” will be moved to the trash. You can restore it from the Trash filter.', 'leiho' ), item.title ),
+			confirmLabel: __( 'Move to trash', 'leiho' ),
 			danger: true,
 		} ).then( function ( ok ) {
 			if ( ! ok ) {
 				return;
 			}
-			App.api( { path: '/okno/v1/posts/' + item.id, method: 'DELETE' } )
+			App.api( { path: '/leiho/v1/posts/' + item.id, method: 'DELETE' } )
 				.then( function () {
 					/* translators: %s: content title. */
-					App.toast( sprintf( __( '“%s” moved to the trash.', 'okno' ), item.title ) );
+					App.toast( sprintf( __( '“%s” moved to the trash.', 'leiho' ), item.title ) );
 					App.notifyChanged();
 					// L'entrée ouverte part à la corbeille : le volet se vide.
 					if ( Editor && Editor.current() && Editor.current().id === item.id ) {
@@ -1193,21 +1193,21 @@
 					return reload();
 				} )
 				.catch( function ( err ) {
-					App.toast( App.errorMessage( err, __( 'Couldn’t delete this content.', 'okno' ) ), true );
+					App.toast( App.errorMessage( err, __( 'Couldn’t delete this content.', 'leiho' ) ), true );
 				} );
 		} );
 	}
 
 	function restore( item ) {
-		App.api( { path: '/okno/v1/posts/' + item.id + '/restore', method: 'POST' } )
+		App.api( { path: '/leiho/v1/posts/' + item.id + '/restore', method: 'POST' } )
 			.then( function () {
 				/* translators: %s: content title. */
-				App.toast( sprintf( __( '“%s” restored as a draft.', 'okno' ), item.title ) );
+				App.toast( sprintf( __( '“%s” restored as a draft.', 'leiho' ), item.title ) );
 				App.notifyChanged();
 				return reload();
 			} )
 			.catch( function ( err ) {
-				App.toast( App.errorMessage( err, __( 'Couldn’t restore this content.', 'okno' ) ), true );
+				App.toast( App.errorMessage( err, __( 'Couldn’t restore this content.', 'leiho' ) ), true );
 			} );
 	}
 
@@ -1225,33 +1225,33 @@
 		}
 		var titleId = App.uid( 'new-title' );
 		var typeFieldId = App.uid( 'new-type' );
-		var title = h( 'input', { type: 'text', id: titleId, class: 'okno-input', required: true, autofocus: true } );
+		var title = h( 'input', { type: 'text', id: titleId, class: 'leiho-input', required: true, autofocus: true } );
 		var typeSelect = fixed
 			? null
-			: h( 'select', { id: typeFieldId, class: 'okno-input' }, creatable.map( function ( t ) {
+			: h( 'select', { id: typeFieldId, class: 'leiho-input' }, creatable.map( function ( t ) {
 				return h( 'option', { value: t.name, text: t.singular, selected: t.name === state.type } );
 			} ) );
-		var form = h( 'form', { class: 'okno-form-grid', onSubmit: function ( event ) {
+		var form = h( 'form', { class: 'leiho-form-grid', onSubmit: function ( event ) {
 			event.preventDefault();
 			submit();
 		} }, [
-			typeSelect ? h( 'label', { for: typeFieldId, class: 'okno-label', text: __( 'Type', 'okno' ) } ) : null,
+			typeSelect ? h( 'label', { for: typeFieldId, class: 'leiho-label', text: __( 'Type', 'leiho' ) } ) : null,
 			typeSelect,
-			h( 'label', { for: titleId, class: 'okno-label', text: __( 'Title', 'okno' ) } ),
+			h( 'label', { for: titleId, class: 'leiho-label', text: __( 'Title', 'leiho' ) } ),
 			title,
-			h( 'p', { class: 'okno-help', text: __( 'Created as a draft: nothing is visible on the site until you publish it.', 'okno' ) } ),
+			h( 'p', { class: 'leiho-help', text: __( 'Created as a draft: nothing is visible on the site until you publish it.', 'leiho' ) } ),
 			h( 'button', { type: 'submit', hidden: true } ),
 		] );
 
 		var dialog = App.modal( {
 			title: fixed
 				? /* translators: %s: content type (e.g. Services). */
-				  sprintf( __( 'New entry in %s', 'okno' ), fixed.label )
-				: __( 'New content', 'okno' ),
+				  sprintf( __( 'New entry in %s', 'leiho' ), fixed.label )
+				: __( 'New content', 'leiho' ),
 			body: form,
 			actions: [
-				{ label: __( 'Cancel', 'okno' ) },
-				{ label: __( 'Create and edit', 'okno' ), primary: true, onClick: function () {
+				{ label: __( 'Cancel', 'leiho' ) },
+				{ label: __( 'Create and edit', 'leiho' ), primary: true, onClick: function () {
 					submit();
 				} },
 			],
@@ -1275,14 +1275,14 @@
 					busy = false;
 					return;
 				}
-				App.api( { path: '/okno/v1/posts', method: 'POST', data: { post_type: postType, title: title.value.trim() } } )
+				App.api( { path: '/leiho/v1/posts', method: 'POST', data: { post_type: postType, title: title.value.trim() } } )
 					.then( function ( post ) {
 						dialog.close();
 						return showCreated( post, postType );
 					} )
 					.catch( function ( err ) {
 						busy = false;
-						App.toast( App.errorMessage( err, __( 'Couldn’t create this content.', 'okno' ) ), true );
+						App.toast( App.errorMessage( err, __( 'Couldn’t create this content.', 'leiho' ) ), true );
 					} );
 			} );
 		}
@@ -1331,7 +1331,7 @@
 			.catch( function () {
 				state.current = 0;
 				syncUrl();
-				App.toast( __( 'This content no longer exists or you’re not allowed to edit it.', 'okno' ), true );
+				App.toast( __( 'This content no longer exists or you’re not allowed to edit it.', 'leiho' ), true );
 			} );
 	}
 

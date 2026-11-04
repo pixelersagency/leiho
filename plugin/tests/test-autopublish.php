@@ -47,7 +47,7 @@ function wp_next_scheduled( $h ) { return isset( $GLOBALS['cron'][ $h ] ) ? $GLO
 function wp_schedule_single_event( $t, $h ) { $GLOBALS['cron'][ $h ] = $t; }
 function wp_clear_scheduled_hook( $h ) { unset( $GLOBALS['cron'][ $h ] ); }
 function apply_filters( $tag, $value, ...$args ) {
-	if ( 'okno_deploy_driver' === $tag && 'fake' === $args[0] ) {
+	if ( 'leiho_deploy_driver' === $tag && 'fake' === $args[0] ) {
 		return $GLOBALS['driver'];
 	}
 	return $value;
@@ -90,7 +90,7 @@ class Fake_Wpdb {
 }
 $GLOBALS['wpdb'] = new Fake_Wpdb();
 
-final class Okno_Plugin {
+final class Leiho_Plugin {
 	public static function settings() { return $GLOBALS['settings']; }
 	public static function bump_usage( $e ) {}
 }
@@ -115,7 +115,7 @@ class Fake_Driver {
 	}
 }
 
-require __DIR__ . '/../includes/deploy/class-okno-deploy-manager.php';
+require __DIR__ . '/../includes/deploy/class-leiho-deploy-manager.php';
 
 function check( $label, $cond, $dump = null ) {
 	echo ( $cond ? 'ok   ' : 'FAIL ' ) . $label . "\n";
@@ -136,14 +136,14 @@ function reset_state() {
 }
 
 function pend( $ago = 0 ) {
-	Okno_Deploy_Manager::mark_pending();
+	Leiho_Deploy_Manager::mark_pending();
 	if ( $ago ) {
-		$GLOBALS['options'][ Okno_Deploy_Manager::OPTION_PENDING ] = sprintf( '%.4F', microtime( true ) - $ago );
+		$GLOBALS['options'][ Leiho_Deploy_Manager::OPTION_PENDING ] = sprintf( '%.4F', microtime( true ) - $ago );
 	}
-	Okno_Deploy_Manager::reschedule_auto( 0 );
+	Leiho_Deploy_Manager::reschedule_auto( 0 );
 }
 
-$M = 'Okno_Deploy_Manager';
+$M = 'Leiho_Deploy_Manager';
 
 // Rien en attente : rien ne part.
 reset_state();
@@ -171,13 +171,13 @@ check( 'cron après vidage : pas de second deploy', 1 === $GLOBALS['driver']->ca
 reset_state();
 pend();
 $hb = $M::heartbeat( array() );
-check( 'heartbeat trop tôt : rien', 0 === $GLOBALS['driver']->calls && $hb['okno_autopublish']['pending'], $hb );
-check( 'heartbeat trop tôt : échéance', $hb['okno_autopublish']['due_in'] > 50, $hb );
+check( 'heartbeat trop tôt : rien', 0 === $GLOBALS['driver']->calls && $hb['leiho_autopublish']['pending'], $hb );
+check( 'heartbeat trop tôt : échéance', $hb['leiho_autopublish']['due_in'] > 50, $hb );
 $GLOBALS['options'][ $M::OPTION_PENDING ] = sprintf( '%.4F', microtime( true ) - 61 );
 $hb = $M::heartbeat( array() );
-check( 'heartbeat après le délai : publié', 1 === $GLOBALS['driver']->calls && ! $hb['okno_autopublish']['pending'] && ! empty( $hb['okno_autopublish']['deploy_id'] ), $hb );
+check( 'heartbeat après le délai : publié', 1 === $GLOBALS['driver']->calls && ! $hb['leiho_autopublish']['pending'] && ! empty( $hb['leiho_autopublish']['deploy_id'] ), $hb );
 $hb = $M::heartbeat( array() );
-check( 'heartbeat suivant : rien', 1 === $GLOBALS['driver']->calls && ! $hb['okno_autopublish']['pending'], $hb );
+check( 'heartbeat suivant : rien', 1 === $GLOBALS['driver']->calls && ! $hb['leiho_autopublish']['pending'], $hb );
 
 // Verrou tenu par un autre processus (cron en plein appel au driver).
 reset_state();
@@ -186,7 +186,7 @@ $GLOBALS['options'][ $M::OPTION_LOCK ] = (string) time();
 $out = $M::flush_pending( 0 );
 check( 'verrou tenu : en attente, pas de deploy', 'pending' === $out['state'] && 0 === $GLOBALS['driver']->calls, $out );
 $manual = $M::trigger();
-check( 'verrou tenu : Publier refusé (409)', is_wp_error( $manual ) && 'okno_deploy_in_progress' === $manual->get_error_code() );
+check( 'verrou tenu : Publier refusé (409)', is_wp_error( $manual ) && 'leiho_deploy_in_progress' === $manual->get_error_code() );
 $M::run_auto();
 check( 'verrou tenu : le cron se replanifie', 1 === get_option( $M::AUTO_ATTEMPTS ) && wp_next_scheduled( $M::AUTO_HOOK ) );
 check( 'verrou tenu : marqueur gardé', $M::pending_since() > 0 );
@@ -202,7 +202,7 @@ reset_state();
 pend();
 $inner = null;
 $GLOBALS['driver']->during = function () use ( &$inner ) {
-	$inner = Okno_Deploy_Manager::flush_pending( 0 );
+	$inner = Leiho_Deploy_Manager::flush_pending( 0 );
 };
 $out = $M::flush_pending( 0 );
 check( 'course : un seul deploy', 1 === $GLOBALS['driver']->calls, $GLOBALS['driver']->calls );
@@ -213,8 +213,8 @@ reset_state();
 pend();
 $GLOBALS['driver']->during = function () {
 	usleep( 1000 );
-	Okno_Deploy_Manager::mark_pending();
-	Okno_Deploy_Manager::reschedule_auto( 0 );
+	Leiho_Deploy_Manager::mark_pending();
+	Leiho_Deploy_Manager::reschedule_auto( 0 );
 };
 $out = $M::flush_pending( 0 );
 check( 'changement en cours de route : publié', 'published' === $out['state'] );
@@ -241,7 +241,7 @@ check( 'rate limit : cron de secours replanifié', (bool) wp_next_scheduled( $M:
 // et le cron retente, un nombre limité de fois.
 reset_state();
 pend();
-$GLOBALS['driver']->result = new WP_Error( 'okno_http', 'Service down' );
+$GLOBALS['driver']->result = new WP_Error( 'leiho_http', 'Service down' );
 $out = $M::flush_pending( 0 );
 check( 'service injoignable : en attente', 'pending' === $out['state'] && 1 === $GLOBALS['driver']->calls, $out );
 check( 'service injoignable : marqueur gardé, cron replanifié', $M::pending_since() > 0 && (bool) wp_next_scheduled( $M::AUTO_HOOK ) );
@@ -277,13 +277,13 @@ $M::run_auto();
 check( 'cron seul : publié', 1 === $GLOBALS['driver']->calls && 0 === $M::pending_since() );
 
 // Sans publication automatique : le marqueur alimente l'indicateur de la
-// barre d'Okno (« changements non publiés »), sans rien planifier.
+// barre d'Leiho (« changements non publiés »), sans rien planifier.
 function queue_and_shutdown() {
 	$GLOBALS['shutdown'] = array();
-	$flag = new ReflectionProperty( 'Okno_Deploy_Manager', 'auto_queued' );
+	$flag = new ReflectionProperty( 'Leiho_Deploy_Manager', 'auto_queued' );
 	$flag->setAccessible( true );
 	$flag->setValue( null, false );
-	Okno_Deploy_Manager::queue_auto();
+	Leiho_Deploy_Manager::queue_auto();
 	foreach ( $GLOBALS['shutdown'] as $cb ) {
 		call_user_func( $cb );
 	}

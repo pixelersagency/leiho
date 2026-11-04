@@ -6,11 +6,11 @@ const wpOrigin = import.meta.env.PUBLIC_WORDPRESS_URL;
   <head>
     <meta charset="utf-8" />
     <title>{title}</title>
-    <!-- Loads the bridge only inside Okno's editor: visitors get ~150 bytes. -->
+    <!-- Loads the bridge only inside Leiho's editor: visitors get ~150 bytes. -->
     <script is:inline define:vars={{ wpOrigin }}>
       if (window.self !== window.top) {
         var s = document.createElement('script');
-        s.src = '/okno-bridge.js';
+        s.src = '/leiho-bridge.js';
         s.setAttribute('data-wp-origin', wpOrigin);
         document.head.appendChild(s);
       }
