@@ -632,7 +632,7 @@ msgid "Saving failed."
 msgstr ""
 
 #: assets/admin/editor.js:3237 includes/admin/class-okno-admin.php:265
-#: includes/admin/class-okno-dashboard.php:657
+#: includes/admin/class-okno-dashboard.php:674
 msgid "Save"
 msgstr ""
 
@@ -961,7 +961,7 @@ msgid "Settings"
 msgstr ""
 
 #: includes/admin/class-okno-dashboard.php:34
-#: includes/admin/class-okno-dashboard.php:748
+#: includes/admin/class-okno-dashboard.php:824
 msgid "Deployments"
 msgstr ""
 
@@ -1353,145 +1353,241 @@ msgid "GitHub token"
 msgstr ""
 
 #: includes/admin/class-okno-dashboard.php:643
-msgid "Delay between deployments"
+#: includes/deploy/class-okno-deploy-manager.php:107
+msgid "Automatic publishing"
 msgstr ""
 
 #: includes/admin/class-okno-dashboard.php:645
+msgid "Publish on its own after each change"
+msgstr ""
+
+#. translators: %s: number input for the delay in seconds.
+#: includes/admin/class-okno-dashboard.php:650
+#, php-format
+msgid "Publishes %s seconds after the last change, so a series of edits gives a single deployment. Changes made in wp-admin count too."
+msgstr ""
+
+#: includes/admin/class-okno-dashboard.php:651
+msgid "Delay before automatic publishing, in seconds"
+msgstr ""
+
+#: includes/admin/class-okno-dashboard.php:658
+msgid "Delay between deployments"
+msgstr ""
+
+#: includes/admin/class-okno-dashboard.php:660
 msgid "seconds"
 msgstr ""
 
-#: includes/admin/class-okno-dashboard.php:652
+#: includes/admin/class-okno-dashboard.php:669
 msgid "Secrets are encrypted in the database with a key derived from the WordPress salts."
 msgstr ""
 
-#: includes/admin/class-okno-dashboard.php:655
+#: includes/admin/class-okno-dashboard.php:672
 msgid "Save and test GitHub"
 msgstr ""
 
-#: includes/admin/class-okno-dashboard.php:674
-msgid "Not set"
+#: includes/admin/class-okno-dashboard.php:692
+msgid "Content API"
 msgstr ""
 
-#: includes/admin/class-okno-dashboard.php:674
-msgid "Saved — leave empty to keep it"
+#: includes/admin/class-okno-dashboard.php:693
+msgid "Your front end reads its content here, in a single request at build time. WordPress stays the only source of truth."
 msgstr ""
 
-#: includes/admin/class-okno-dashboard.php:676
-msgid "This secret can’t be read anymore: the WordPress salts have changed (host or security plugin). Enter it again."
+#: includes/admin/class-okno-dashboard.php:696
+msgid "Endpoints"
 msgstr ""
 
-#: includes/admin/class-okno-dashboard.php:678
-msgid "Delete this secret"
+#: includes/admin/class-okno-dashboard.php:699
+msgid "All published content, cached and refreshed on every change. An unchanged build gets a 304."
 msgstr ""
 
-#: includes/admin/class-okno-dashboard.php:700
-msgid "Deployment history"
-msgstr ""
-
-#: includes/admin/class-okno-dashboard.php:705
-msgid "No deployments yet"
+#: includes/admin/class-okno-dashboard.php:701
+msgid "TypeScript types of that content, generated from your fields. In the front-end project: npx okno types."
 msgstr ""
 
 #: includes/admin/class-okno-dashboard.php:706
-msgid "Every click on “Publish” in the editor shows up here with its result."
+msgid "Access"
 msgstr ""
 
-#: includes/admin/class-okno-dashboard.php:712
-msgid "Date"
+#: includes/admin/class-okno-dashboard.php:708
+msgid "Public: published content only, as on the site"
 msgstr ""
 
-#: includes/admin/class-okno-dashboard.php:713
-msgid "By"
-msgstr ""
-
-#: includes/admin/class-okno-dashboard.php:714
-msgid "Method"
+#: includes/admin/class-okno-dashboard.php:709
+msgid "Restricted: the front end sends a token"
 msgstr ""
 
 #: includes/admin/class-okno-dashboard.php:715
-msgid "Result"
+msgid "Content token"
+msgstr ""
+
+#: includes/admin/class-okno-dashboard.php:718
+msgid "Generate a new token (the current one stops working)"
+msgstr ""
+
+#: includes/admin/class-okno-dashboard.php:719
+msgid "Set it as OKNO_TOKEN in the front end’s build environment. Sent in the X-Okno-Token header."
+msgstr ""
+
+#: includes/admin/class-okno-dashboard.php:726
+msgid "WordPress as a back office"
+msgstr ""
+
+#: includes/admin/class-okno-dashboard.php:727
+msgid "Your visitors use the front end. These options keep WordPress out of their way and out of search engines. wp-admin, login, the content API and draft previews are not affected."
 msgstr ""
 
 #: includes/admin/class-okno-dashboard.php:730
-msgid "View build"
+msgid "Protection"
 msgstr ""
 
-#: includes/admin/class-okno-dashboard.php:741
-msgid "Weekly activity"
+#: includes/admin/class-okno-dashboard.php:732
+msgid "Keep WordPress out of search engines (noindex, robots.txt, no sitemap)"
 msgstr ""
 
-#: includes/admin/class-okno-dashboard.php:746
-msgid "Week"
+#: includes/admin/class-okno-dashboard.php:733
+msgid "Redirect WordPress pages to the same page on the site"
 msgstr ""
 
-#: includes/admin/class-okno-dashboard.php:747
-msgid "Saves"
+#: includes/admin/class-okno-dashboard.php:734
+msgid "Lock down WordPress (XML-RPC off, user list hidden from visitors, version hidden)"
 msgstr ""
 
-#: includes/admin/class-okno-dashboard.php:779
-msgid "Live content"
+#: includes/admin/class-okno-dashboard.php:750
+msgid "Not set"
 msgstr ""
 
-#: includes/admin/class-okno-dashboard.php:780
-msgid "The site reads WordPress on every visit. Saving is enough, nothing to publish."
+#: includes/admin/class-okno-dashboard.php:750
+msgid "Saved — leave empty to keep it"
 msgstr ""
 
-#: includes/admin/class-okno-dashboard.php:783
-msgid "Build hook"
+#: includes/admin/class-okno-dashboard.php:752
+msgid "This secret can’t be read anymore: the WordPress salts have changed (host or security plugin). Enter it again."
 msgstr ""
 
-#: includes/admin/class-okno-dashboard.php:784
-msgid "Vercel, Netlify, Cloudflare Pages… Okno calls the rebuild URL."
+#: includes/admin/class-okno-dashboard.php:754
+msgid "Delete this secret"
 msgstr ""
 
-#: includes/admin/class-okno-dashboard.php:787
-msgid "GitHub Actions"
+#: includes/admin/class-okno-dashboard.php:776
+msgid "Deployment history"
+msgstr ""
+
+#: includes/admin/class-okno-dashboard.php:781
+msgid "No deployments yet"
+msgstr ""
+
+#: includes/admin/class-okno-dashboard.php:782
+msgid "Every click on “Publish” in the editor shows up here with its result."
 msgstr ""
 
 #: includes/admin/class-okno-dashboard.php:788
-msgid "Triggers a workflow and tracks the build live."
+msgid "Date"
+msgstr ""
+
+#: includes/admin/class-okno-dashboard.php:789
+msgid "By"
+msgstr ""
+
+#: includes/admin/class-okno-dashboard.php:790
+msgid "Method"
 msgstr ""
 
 #: includes/admin/class-okno-dashboard.php:791
-msgid "GitHub commit"
-msgstr ""
-
-#: includes/admin/class-okno-dashboard.php:792
-msgid "For hosts that deploy on every push."
-msgstr ""
-
-#: includes/admin/class-okno-dashboard.php:795
-msgid "Coolify"
-msgstr ""
-
-#: includes/admin/class-okno-dashboard.php:796
-msgid "Coolify deployment webhook."
+msgid "Result"
 msgstr ""
 
 #: includes/admin/class-okno-dashboard.php:806
+msgid "View build"
+msgstr ""
+
+#: includes/admin/class-okno-dashboard.php:817
+msgid "Weekly activity"
+msgstr ""
+
+#: includes/admin/class-okno-dashboard.php:822
+msgid "Week"
+msgstr ""
+
+#: includes/admin/class-okno-dashboard.php:823
+msgid "Saves"
+msgstr ""
+
+#: includes/admin/class-okno-dashboard.php:855
+msgid "Live content"
+msgstr ""
+
+#: includes/admin/class-okno-dashboard.php:856
+msgid "The site reads WordPress on every visit. Saving is enough, nothing to publish."
+msgstr ""
+
+#: includes/admin/class-okno-dashboard.php:859
+msgid "Build hook"
+msgstr ""
+
+#: includes/admin/class-okno-dashboard.php:860
+msgid "Vercel, Netlify, Cloudflare Pages… Okno calls the rebuild URL."
+msgstr ""
+
+#: includes/admin/class-okno-dashboard.php:863
+msgid "GitHub Actions"
+msgstr ""
+
+#: includes/admin/class-okno-dashboard.php:864
+msgid "Triggers a workflow and tracks the build live."
+msgstr ""
+
+#: includes/admin/class-okno-dashboard.php:867
+msgid "GitHub commit"
+msgstr ""
+
+#: includes/admin/class-okno-dashboard.php:868
+msgid "For hosts that deploy on every push."
+msgstr ""
+
+#: includes/admin/class-okno-dashboard.php:871
+msgid "Coolify"
+msgstr ""
+
+#: includes/admin/class-okno-dashboard.php:872
+msgid "Coolify deployment webhook."
+msgstr ""
+
+#: includes/admin/class-okno-dashboard.php:882
 msgid "Not set up"
 msgstr ""
 
-#: includes/admin/class-okno-dashboard.php:811
+#: includes/admin/class-okno-dashboard.php:887
 msgid "Pending"
 msgstr ""
 
-#: includes/admin/class-okno-dashboard.php:812
+#: includes/admin/class-okno-dashboard.php:888
 msgid "Building"
 msgstr ""
 
-#: includes/admin/class-okno-dashboard.php:813
+#: includes/admin/class-okno-dashboard.php:889
 msgid "Triggered"
 msgstr ""
 
-#: includes/admin/class-okno-dashboard.php:814
+#: includes/admin/class-okno-dashboard.php:890
 msgid "Live"
 msgstr ""
 
-#: includes/admin/class-okno-dashboard.php:815
+#: includes/admin/class-okno-dashboard.php:891
 msgid "Failed"
 msgstr ""
 
+#: includes/class-okno-content.php:154
+msgid "A valid Okno content token is required."
+msgstr ""
+
+#: includes/class-okno-content.php:265
+msgid "This content type is not served by Okno."
+msgstr ""
+
+#: includes/class-okno-content.php:312 includes/class-okno-content.php:316
 #: includes/class-okno-rest.php:237 includes/class-okno-rest.php:432
 #: includes/class-okno-rest.php:455 includes/class-okno-schema.php:29
 msgid "Content not found."
@@ -1597,29 +1693,29 @@ msgstr ""
 msgid "Coolify responded with %d."
 msgstr ""
 
-#: includes/deploy/class-okno-deploy-manager.php:56
+#: includes/deploy/class-okno-deploy-manager.php:61
 msgid "A save is in progress. Try again in a few seconds."
 msgstr ""
 
-#: includes/deploy/class-okno-deploy-manager.php:66
+#: includes/deploy/class-okno-deploy-manager.php:71
 msgid "A deployment is already in progress."
 msgstr ""
 
 #. translators: %d: number of seconds.
-#: includes/deploy/class-okno-deploy-manager.php:79
+#: includes/deploy/class-okno-deploy-manager.php:84
 #, php-format
 msgid "Please wait %d s between deployments."
 msgstr ""
 
-#: includes/deploy/class-okno-deploy-manager.php:88
+#: includes/deploy/class-okno-deploy-manager.php:93
 msgid "No deployment method set in Okno settings."
 msgstr ""
 
-#: includes/deploy/class-okno-deploy-manager.php:137
+#: includes/deploy/class-okno-deploy-manager.php:202
 msgid "Unknown deployment."
 msgstr ""
 
-#: includes/deploy/class-okno-deploy-manager.php:177
+#: includes/deploy/class-okno-deploy-manager.php:242
 msgid "No status after 30 minutes: deployment marked as lost."
 msgstr ""
 

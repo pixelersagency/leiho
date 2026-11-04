@@ -108,6 +108,27 @@ Dans wp-admin, **Okno → Démarrer → Tester la connexion** confirme que le br
 
 La documentation complète (champs pris en charge, sécurité, extensions, développement) est dans le [README anglais](README.md).
 
+## API de contenu
+
+Okno sert aussi le contenu au front : WordPress reste la seule source de vérité, le dépôt du front ne garde que le code.
+
+```ts
+import { loadOknoContent, indexOknoContent } from '@pixelersagency/okno-bridge/content';
+
+const { data } = await loadOknoContent( { url: 'https://cms.exemple.fr' } );
+const contenu = indexOknoContent( data );
+contenu.byPath( '/services/audit' );
+```
+
+- `GET /wp-json/okno/v1/export` : tout le contenu publié en une réponse, mis en cache, avec ETag (un build sans changement reçoit un 304). Une requête par build au lieu d'une par page : la base ne sature plus sur un mutualisé.
+- Instantané : chaque chargement réussi est écrit dans `.okno/content.json` ; si WordPress ne répond pas, le build continue avec le dernier contenu connu et le signale.
+- Types : `npx okno types --url https://cms.exemple.fr` écrit `src/okno.d.ts`, généré depuis les groupes de champs ACF.
+- Accès public par défaut (contenu publié seulement), ou restreint par jeton (`OKNO_TOKEN`).
+- Publication automatique après chaque modification, en option.
+- À la première installation, WordPress est durci pour le headless : pas d'indexation du CMS, pages publiques redirigées vers le front, XML-RPC coupé, liste des utilisateurs fermée aux visiteurs.
+
+Détails dans le [README anglais](README.md#content-api).
+
 ## Licence
 
 [GPL-2.0-or-later](LICENSE). Réalisé par [Pixelers](https://pixelers.fr).

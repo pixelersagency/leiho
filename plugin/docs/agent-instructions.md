@@ -167,6 +167,28 @@ Render them normally and wrap the smallest useful block in a managed region:
 - Mark as **required** whatever cannot be empty: Okno enforces it on save.
 - A link with a label = a `link` field (URL, text, new tab), not two text fields.
 
+## Load the content
+
+Read the content from Okno's content API, not from the WordPress REST API and not from
+JSON files in the repository: WordPress is the only source of truth.
+
+```js
+import { loadOknoContent, indexOknoContent } from '@pixelersagency/okno-bridge/content';
+
+const { data } = await loadOknoContent( { url: process.env.OKNO_URL } );
+const content = indexOknoContent( data );
+const page = content.byPath( Astro.url.pathname );
+```
+
+- One request per build (`/wp-json/okno/v1/export`). Load it once and share it between
+  pages (module-level cache), never once per page.
+- Fields are keyed by ACF field name, already shaped: `fields.hero.image.url`,
+  `fields.sections[0]._layout`. Never call ACF or `/wp/v2` for them.
+- Generate the types with `npx okno types --url $OKNO_URL` and type your components with
+  them. Regenerate after changing a field group.
+- Commit `src/okno.d.ts`, ignore `.okno/` (the snapshot is a build cache).
+- Restricted API: the token goes in the build environment as `OKNO_TOKEN`, never in the code.
+
 ## Publishing
 
 - Site that reads WordPress **on every visit** (on-demand server rendering, SPA that
@@ -188,6 +210,8 @@ Render them normally and wrap the smallest useful block in a managed region:
       tree, then save: the preview reflects the new structure.
 - [ ] Clicking an internal link in the preview switches the editor to the right page.
 - [ ] The public site works with the Okno plugin deactivated.
+- [ ] The build makes a single content request (`/okno/v1/export`) and survives WordPress
+      being down (snapshot in `.okno/`).
 
 ## Never do this
 

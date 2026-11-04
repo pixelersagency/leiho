@@ -44,6 +44,9 @@ require_once OKNO_DIR . 'includes/class-okno-url-mapper.php';
 require_once OKNO_DIR . 'includes/class-okno-activity.php';
 require_once OKNO_DIR . 'includes/class-okno-schema.php';
 require_once OKNO_DIR . 'includes/class-okno-rest.php';
+require_once OKNO_DIR . 'includes/class-okno-content.php';
+require_once OKNO_DIR . 'includes/class-okno-types.php';
+require_once OKNO_DIR . 'includes/class-okno-headless.php';
 require_once OKNO_DIR . 'includes/class-okno-updater.php';
 require_once OKNO_DIR . 'includes/admin/class-okno-icons.php';
 require_once OKNO_DIR . 'includes/admin/class-okno-dashboard.php';
@@ -91,7 +94,12 @@ final class Okno_Plugin {
 			}
 		);
 		add_action( 'rest_api_init', array( new Okno_Rest( $this ), 'register_routes' ) );
+		add_action( 'rest_api_init', array( new Okno_Content( $this ), 'register_routes' ) );
 		add_action( Okno_Deploy_Manager::CRON_HOOK, array( 'Okno_Deploy_Manager', 'cleanup_stale' ) );
+		add_action( Okno_Deploy_Manager::AUTO_HOOK, array( 'Okno_Deploy_Manager', 'run_auto' ) );
+		add_action( 'okno_content_changed', array( 'Okno_Deploy_Manager', 'queue_auto' ) );
+		Okno_Content::init();
+		Okno_Headless::init();
 		Okno_Activity::init();
 		Okno_Updater::init();
 
@@ -130,6 +138,14 @@ final class Okno_Plugin {
 			'gh_workflow'         => 'deploy.yml',
 			'gh_branch'           => 'main',
 			'min_deploy_interval' => 60, // secondes.
+			'auto_deploy'         => false, // Publier tout seul après chaque modification.
+			'auto_deploy_delay'   => 60, // secondes de calme avant de publier.
+			'content_access'      => 'public', // 'public' ou 'token'.
+			// Durcissement headless : activé d'office à la première installation
+			// (Okno_Headless::seed_defaults), éteint sur les sites déjà équipés.
+			'headless_noindex'    => false,
+			'headless_redirect'   => false,
+			'headless_lockdown'   => false,
 		);
 		$saved = get_option( self::OPTION_SETTINGS, array() );
 		return wp_parse_args( is_array( $saved ) ? $saved : array(), $defaults );
@@ -180,6 +196,7 @@ final class Okno_Plugin {
 
 add_action( 'plugins_loaded', array( 'Okno_Plugin', 'instance' ) );
 
+register_activation_hook( __FILE__, array( 'Okno_Headless', 'seed_defaults' ) );
 register_activation_hook( __FILE__, array( 'Okno_Deploy_Manager', 'schedule_cleanup' ) );
 register_activation_hook( __FILE__, array( 'Okno_Activity', 'install' ) );
 register_deactivation_hook( __FILE__, array( 'Okno_Deploy_Manager', 'unschedule_cleanup' ) );

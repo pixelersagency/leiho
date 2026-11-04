@@ -10,6 +10,11 @@ class Okno_Deploy_Manager {
 	const TRANSIENT_SAVE  = 'okno_saving';
 	const HISTORY_MAX     = 20;
 	const CRON_HOOK       = 'okno_cleanup_deploys';
+	const AUTO_HOOK       = 'okno_auto_deploy';
+	const AUTO_ATTEMPTS   = 'okno_auto_deploy_attempts';
+
+	/** Publication automatique déjà replanifiée dans cette requête. */
+	private static $auto_queued = false;
 
 	/** Au-delà, un deploy sans statut connu est considéré comme perdu. */
 	const STALE_AFTER = 1800;
@@ -97,6 +102,10 @@ class Okno_Deploy_Manager {
 		}
 
 		$user   = wp_get_current_user();
+		if ( ! $user->ID ) {
+			// Publication automatique (cron) : pas d'utilisateur derrière.
+			$user->display_name = __( 'Automatic publishing', 'okno' );
+		}
 		$record = array(
 			// G : identifiant non devinable (uniqid() est prévisible).
 			'id'        => 'dep_' . wp_generate_password( 16, false ),
@@ -123,6 +132,62 @@ class Okno_Deploy_Manager {
 		self::push_history( $result );
 		Okno_Plugin::bump_usage( 'publish' );
 		return $result;
+	}
+
+	/**
+	 * Contenu modifié : publie automatiquement après un délai de calme.
+	 *
+	 * Chaque modification repousse l'échéance : une série de changements
+	 * (un client qui retouche dix champs) donne un seul déploiement.
+	 *
+	 * @return void
+	 */
+	public static function queue_auto() {
+		$settings = Okno_Plugin::settings();
+		if ( empty( $settings['auto_deploy'] ) || '' === $settings['deploy_driver'] || self::$auto_queued ) {
+			return;
+		}
+		self::$auto_queued = true;
+
+		// Une seule replanification par requête, en fin de requête : un save
+		// ACF écrit des dizaines de métas, chacune signalerait un changement.
+		add_action(
+			'shutdown',
+			static function () {
+				Okno_Deploy_Manager::reschedule_auto( 0 );
+			}
+		);
+	}
+
+	/**
+	 * (Re)planifie la publication automatique.
+	 *
+	 * @param int $attempt Tentatives déjà faites pour ce lot de changements.
+	 * @return void
+	 */
+	public static function reschedule_auto( $attempt ) {
+		$settings = Okno_Plugin::settings();
+		wp_clear_scheduled_hook( self::AUTO_HOOK );
+		update_option( self::AUTO_ATTEMPTS, (int) $attempt, false );
+		wp_schedule_single_event( time() + max( 15, (int) $settings['auto_deploy_delay'] ), self::AUTO_HOOK );
+	}
+
+	/**
+	 * Cron : lance la publication automatique, ou la repousse si un build
+	 * tourne déjà (il ne contiendrait pas les derniers changements).
+	 *
+	 * @return void
+	 */
+	public static function run_auto() {
+		$attempt = (int) get_option( self::AUTO_ATTEMPTS, 0 );
+		$result  = self::trigger();
+		$retry   = array( 'okno_save_in_progress', 'okno_deploy_in_progress', 'okno_rate_limited' );
+
+		if ( is_wp_error( $result ) && in_array( $result->get_error_code(), $retry, true ) && $attempt < 20 ) {
+			self::reschedule_auto( $attempt + 1 );
+			return;
+		}
+		delete_option( self::AUTO_ATTEMPTS );
 	}
 
 	/**
@@ -222,6 +287,7 @@ class Okno_Deploy_Manager {
 		if ( $timestamp ) {
 			wp_unschedule_event( $timestamp, self::CRON_HOOK );
 		}
+		wp_clear_scheduled_hook( self::AUTO_HOOK );
 	}
 
 	/**

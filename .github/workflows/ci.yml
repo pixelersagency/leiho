@@ -27,6 +27,7 @@ jobs:
       - name: Tests
         run: |
           php plugin/tests/test-acf-adapter.php
+          php plugin/tests/test-content.php
           php plugin/tests/test-activity.php
           php plugin/tests/test-frame-verdict.php
           php plugin/tests/test-updater.php
@@ -43,6 +44,13 @@ jobs:
       - name: Build
         working-directory: bridge
         run: npm run build
+      - name: Content client tests
+        working-directory: bridge
+        run: npm test
+      - name: Generated TypeScript compiles
+        run: |
+          npm install -g typescript@5.6.3 > /dev/null
+          php plugin/tests/test-content.php
       - name: Built files are committed
         run: git diff --exit-code -- bridge/dist plugin/assets/bridge
       - name: Translations are complete and up to date
@@ -53,6 +61,7 @@ jobs:
         run: |
           node --check plugin/assets/admin/editor.js
           node --check plugin/assets/admin/admin.js
+          node --check bridge/bin/okno.js
 
   package:
     name: Package

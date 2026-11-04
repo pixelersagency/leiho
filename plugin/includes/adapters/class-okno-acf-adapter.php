@@ -15,7 +15,7 @@ defined( 'ABSPATH' ) || exit;
  * Ces chemins sont ceux que le bridge pose en data-wp-field : ils sont donc
  * aussi acceptés en écriture (patch ciblé), pas seulement en lecture.
  */
-class Okno_ACF_Adapter implements Okno_Adapter_Interface {
+class Okno_ACF_Adapter implements Okno_Adapter_Interface, Okno_Content_Adapter_Interface {
 
 	/**
 	 * Types éditables. Okno édite le contenu, pas la mise en forme : les
@@ -561,6 +561,293 @@ class Okno_ACF_Adapter implements Okno_Adapter_Interface {
 			$choices[ (string) $post->ID ] = Okno_Plugin::title( $post );
 		}
 		return $choices;
+	}
+
+	/* ---------------------------------------------------------------------
+	 * Contenu servi au front
+	 * ------------------------------------------------------------------- */
+
+	/** Types sans valeur (mise en forme de l'écran d'édition ACF). */
+	const LAYOUT_TYPES = array( 'tab', 'message', 'accordion' );
+
+	public function get_content( $post_id ) {
+		$out = array();
+		foreach ( $this->field_groups( $post_id ) as $group ) {
+			foreach ( $group['fields'] as $field ) {
+				if ( '' === (string) $field['name'] || in_array( $field['type'], self::LAYOUT_TYPES, true ) ) {
+					continue;
+				}
+				$out[ $field['name'] ] = $this->public_value( $field, get_field( $field['key'], $post_id, false ) );
+			}
+		}
+		return $out;
+	}
+
+	/**
+	 * Valeur d'un champ telle que le front la consomme.
+	 *
+	 * Lit la valeur brute (format=false), comme l'éditeur, puis la met en
+	 * forme une seule fois ici : le front n'a plus à connaître ACF (valeur
+	 * formatée ou brute, clés field_… ou noms, cache par requête).
+	 *
+	 * @param array $field Champ ACF brut.
+	 * @param mixed $raw   Valeur brute.
+	 * @return mixed
+	 */
+	public function public_value( $field, $raw ) {
+		$type = $field['type'];
+
+		switch ( $type ) {
+			case 'repeater':
+				$rows = array();
+				foreach ( is_array( $raw ) ? $raw : array() as $raw_row ) {
+					if ( is_array( $raw_row ) ) {
+						$rows[] = $this->public_row( isset( $field['sub_fields'] ) ? $field['sub_fields'] : array(), $raw_row );
+					}
+				}
+				return $rows;
+
+			case 'group':
+			case 'clone':
+				return $this->public_row( isset( $field['sub_fields'] ) ? $field['sub_fields'] : array(), is_array( $raw ) ? $raw : array() );
+
+			case 'flexible_content':
+				$layouts = array();
+				foreach ( (array) ( isset( $field['layouts'] ) ? $field['layouts'] : array() ) as $layout ) {
+					$layouts[ $layout['name'] ] = $layout;
+				}
+				$rows = array();
+				foreach ( is_array( $raw ) ? $raw : array() as $raw_row ) {
+					$name = is_array( $raw_row ) && isset( $raw_row['acf_fc_layout'] ) ? $raw_row['acf_fc_layout'] : '';
+					if ( ! isset( $layouts[ $name ] ) ) {
+						continue;
+					}
+					$rows[] = array_merge(
+						array( '_layout' => $name ),
+						$this->public_row( isset( $layouts[ $name ]['sub_fields'] ) ? $layouts[ $name ]['sub_fields'] : array(), $raw_row )
+					);
+				}
+				return $rows;
+
+			case 'image':
+			case 'file':
+				return Okno_Content::media( $raw ? absint( is_array( $raw ) && isset( $raw['ID'] ) ? $raw['ID'] : $raw ) : 0 );
+
+			case 'gallery':
+				$items = array();
+				foreach ( is_array( $raw ) ? $raw : array() as $item ) {
+					$media = Okno_Content::media( absint( is_array( $item ) && isset( $item['ID'] ) ? $item['ID'] : $item ) );
+					if ( $media ) {
+						$items[] = $media;
+					}
+				}
+				return $items;
+
+			case 'link':
+				$link = array(
+					'url'    => '',
+					'title'  => '',
+					'target' => '',
+				);
+				if ( is_array( $raw ) ) {
+					foreach ( array_keys( $link ) as $part ) {
+						$link[ $part ] = isset( $raw[ $part ] ) ? (string) $raw[ $part ] : '';
+					}
+				} elseif ( is_string( $raw ) ) {
+					$link['url'] = $raw;
+				}
+				return '' === $link['url'] ? null : $link;
+
+			case 'page_link':
+				if ( is_array( $raw ) ) {
+					$raw = reset( $raw );
+				}
+				if ( is_numeric( $raw ) ) {
+					$ref = Okno_Content::ref( absint( $raw ) );
+					return $ref ? $ref['path'] : '';
+				}
+				return null === $raw || false === $raw ? '' : (string) $raw;
+
+			case 'wysiwyg':
+				return Okno_Content::html( $raw ? (string) $raw : '', $field );
+
+			case 'true_false':
+				return (bool) $raw;
+
+			case 'number':
+			case 'range':
+				return is_numeric( $raw ) ? 0 + $raw : null;
+
+			case 'date_picker':
+				// Stockage ACF Ymd → ISO 8601, lisible par Date et par les humains.
+				$raw = (string) $raw;
+				return preg_match( '/^(\d{4})(\d{2})(\d{2})$/', $raw, $m ) ? $m[1] . '-' . $m[2] . '-' . $m[3] : $raw;
+
+			case 'post_object':
+			case 'relationship':
+				$ids  = is_array( $raw ) ? $raw : ( $raw ? array( $raw ) : array() );
+				$refs = array();
+				foreach ( $ids as $item ) {
+					$ref = Okno_Content::ref( absint( is_array( $item ) && isset( $item['ID'] ) ? $item['ID'] : $item ) );
+					if ( $ref ) {
+						$refs[] = $ref;
+					}
+				}
+				if ( 'post_object' === $type && empty( $field['multiple'] ) ) {
+					return $refs ? $refs[0] : null;
+				}
+				return $refs;
+
+			case 'taxonomy':
+				$ids   = is_array( $raw ) ? $raw : ( $raw ? array( $raw ) : array() );
+				$terms = array();
+				foreach ( $ids as $item ) {
+					$term = Okno_Content::term( absint( is_array( $item ) && isset( $item['term_id'] ) ? $item['term_id'] : $item ) );
+					if ( $term ) {
+						$terms[] = $term;
+					}
+				}
+				if ( ! self::taxonomy_is_multiple( $field ) ) {
+					return $terms ? $terms[0] : null;
+				}
+				return $terms;
+
+			case 'select':
+				if ( ! empty( $field['multiple'] ) ) {
+					return array_values( array_map( 'strval', (array) ( $raw ? $raw : array() ) ) );
+				}
+				return null === $raw || false === $raw ? '' : (string) $raw;
+
+			case 'checkbox':
+				return array_values( array_map( 'strval', (array) ( $raw ? $raw : array() ) ) );
+
+			default:
+				// Types simples (text, textarea, url, email…) et types inconnus
+				// d'Okno : la valeur brute, sans la tronquer en chaîne.
+				if ( null === $raw || false === $raw ) {
+					return in_array( $type, array( 'text', 'textarea', 'url', 'email', 'oembed', 'password', 'color_picker', 'radio', 'button_group', 'date_time_picker', 'time_picker' ), true ) ? '' : null;
+				}
+				return is_scalar( $raw ) ? (string) $raw : $raw;
+		}
+	}
+
+	/**
+	 * Ligne de conteneur en valeurs front, indexée par nom de sous-champ.
+	 *
+	 * @param array $subs    Sous-champs ACF bruts.
+	 * @param array $raw_row Ligne brute (clés field_… ou noms).
+	 * @return array<string,mixed>
+	 */
+	private function public_row( $subs, $raw_row ) {
+		$out = array();
+		foreach ( (array) $subs as $sub ) {
+			if ( '' === (string) $sub['name'] || in_array( $sub['type'], self::LAYOUT_TYPES, true ) ) {
+				continue;
+			}
+			$raw = null;
+			if ( array_key_exists( $sub['key'], $raw_row ) ) {
+				$raw = $raw_row[ $sub['key'] ];
+			} elseif ( array_key_exists( $sub['name'], $raw_row ) ) {
+				$raw = $raw_row[ $sub['name'] ];
+			}
+			$out[ $sub['name'] ] = $this->public_value( $sub, $raw );
+		}
+		return $out;
+	}
+
+	/**
+	 * Un champ taxonomie renvoie-t-il plusieurs termes ?
+	 *
+	 * @param array $field Champ ACF brut.
+	 * @return bool
+	 */
+	public static function taxonomy_is_multiple( $field ) {
+		return in_array( isset( $field['field_type'] ) ? $field['field_type'] : 'checkbox', array( 'checkbox', 'multi_select' ), true );
+	}
+
+	public function get_definitions( $post_type ) {
+		$out = array();
+		foreach ( acf_get_field_groups() as $group ) {
+			$target = self::targets( isset( $group['location'] ) ? $group['location'] : array(), $post_type );
+			if ( null === $target ) {
+				continue;
+			}
+			$fields = acf_get_fields( $group['key'] );
+			if ( empty( $fields ) ) {
+				continue;
+			}
+			$out[] = array(
+				'conditional' => $target,
+				'fields'      => $fields,
+			);
+		}
+		return $out;
+	}
+
+	/**
+	 * Le groupe s'applique-t-il à ce type de contenu, et sous condition ?
+	 *
+	 * Les règles ACF sont un OU de ET. Une branche vise le type si elle le
+	 * nomme (post_type ==), ou si elle ne porte que sur des critères propres
+	 * aux pages (modèle, parent…) ou aux articles (catégorie, format…). Elle
+	 * est inconditionnelle quand « post_type == type » est sa seule règle.
+	 *
+	 * @param array  $location  Règles ACF.
+	 * @param string $post_type Type de contenu.
+	 * @return bool|null null = ne s'applique pas ; true = sous condition ; false = toujours.
+	 */
+	public static function targets( $location, $post_type ) {
+		$page_params = array( 'page_template', 'page_type', 'page', 'page_parent' );
+		$post_params = array( 'post_category', 'post_format', 'post_taxonomy' );
+
+		$applies     = false;
+		$conditional = true;
+
+		foreach ( (array) $location as $branch ) {
+			$named   = null; // Type nommé par la branche (null = aucun).
+			$implied = null;
+			$other   = 0;
+			$valid   = true;
+
+			foreach ( (array) $branch as $rule ) {
+				$param    = isset( $rule['param'] ) ? $rule['param'] : '';
+				$operator = isset( $rule['operator'] ) ? $rule['operator'] : '==';
+				$value    = isset( $rule['value'] ) ? $rule['value'] : '';
+
+				if ( 'post_type' === $param ) {
+					if ( '==' === $operator ) {
+						$named = $value;
+					} elseif ( '!=' === $operator && $value === $post_type ) {
+						$valid = false;
+					} else {
+						$other++;
+					}
+				} elseif ( in_array( $param, $page_params, true ) ) {
+					$implied = 'page';
+					$other++;
+				} elseif ( in_array( $param, $post_params, true ) ) {
+					$implied = 'post';
+					$other++;
+				} elseif ( 'post_template' === $param || 'post_status' === $param || 'post' === $param ) {
+					$other++;
+				} else {
+					// Écran étranger au contenu (options, utilisateur, taxonomie…).
+					$valid = false;
+				}
+			}
+
+			$type = null !== $named ? $named : $implied;
+			if ( ! $valid || $type !== $post_type ) {
+				continue;
+			}
+
+			$applies = true;
+			if ( 0 === $other ) {
+				$conditional = false;
+			}
+		}
+
+		return $applies ? $conditional : null;
 	}
 
 	/* ---------------------------------------------------------------------

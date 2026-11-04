@@ -55,3 +55,35 @@ interface Okno_Adapter_Interface {
 	 */
 	public function save_values( $post_id, $values );
 }
+
+/**
+ * Optionnelle : un adapter qui sait aussi servir le contenu au front.
+ *
+ * L'API de contenu (/okno/v1/content, /okno/v1/export) et la génération de
+ * types (/okno/v1/types) n'utilisent que les adapters qui l'implémentent ;
+ * un adapter tiers sans elle reste utilisable dans l'éditeur.
+ */
+interface Okno_Content_Adapter_Interface {
+
+	/**
+	 * Valeurs prêtes pour le front, indexées par nom de champ.
+	 *
+	 * Contrairement à get_schema(), aucune option ni méta d'édition : une
+	 * image est un objet { id, url, alt, width, height… }, une relation une
+	 * référence { id, type, slug, title, path }, un wysiwyg son HTML rendu.
+	 *
+	 * @param int $post_id Post concerné.
+	 * @return array<string,mixed>
+	 */
+	public function get_content( $post_id );
+
+	/**
+	 * Définitions des champs d'un type de contenu, pour générer des types.
+	 *
+	 * @param string $post_type Type de contenu.
+	 * @return array<int,array{conditional:bool,fields:array}> Groupes de champs
+	 *         bruts ; conditional = le groupe ne s'affiche que sous condition
+	 *         (modèle de page, catégorie…), ses champs sont donc optionnels.
+	 */
+	public function get_definitions( $post_type );
+}

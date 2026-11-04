@@ -168,6 +168,28 @@ un champ. Rends-les normalement et entoure le plus petit bloc utile d'une régio
 - Marque **requis** ce qui ne peut pas être vide : Okno le fait respecter à l'enregistrement.
 - Un lien avec libellé = champ `link` (URL, texte, nouvel onglet), pas deux champs texte.
 
+## Charger le contenu
+
+Lis le contenu dans l'API de contenu d'Okno, pas dans l'API REST de WordPress ni dans des
+fichiers JSON du dépôt : WordPress est la seule source de vérité.
+
+```js
+import { loadOknoContent, indexOknoContent } from '@pixelersagency/okno-bridge/content';
+
+const { data } = await loadOknoContent( { url: process.env.OKNO_URL } );
+const contenu = indexOknoContent( data );
+const page = contenu.byPath( Astro.url.pathname );
+```
+
+- Une requête par build (`/wp-json/okno/v1/export`). Charge-la une fois et partage-la entre
+  les pages (cache au niveau du module), jamais une fois par page.
+- Les champs sont indexés par nom de champ ACF, déjà mis en forme : `fields.hero.image.url`,
+  `fields.sections[0]._layout`. N'appelle jamais ACF ni `/wp/v2` pour les lire.
+- Génère les types avec `npx okno types --url $OKNO_URL` et type les composants avec.
+  Régénère-les après chaque changement de groupe de champs.
+- Versionne `src/okno.d.ts`, ignore `.okno/` (l'instantané est un cache de build).
+- API restreinte : le jeton va dans l'environnement de build (`OKNO_TOKEN`), jamais dans le code.
+
 ## Publication
 
 - Site qui lit WordPress **à chaque visite** (rendu serveur à la demande, SPA qui interroge
@@ -189,6 +211,8 @@ un champ. Rends-les normalement et entoure le plus petit bloc utile d'une régio
       structure, enregistrer : l'aperçu reflète la nouvelle structure.
 - [ ] Cliquer un lien interne dans l'aperçu bascule l'éditeur sur la bonne page.
 - [ ] Le site public fonctionne avec le plugin Okno désactivé.
+- [ ] Le build ne fait qu'une requête de contenu (`/okno/v1/export`) et survit à une panne
+      de WordPress (instantané dans `.okno/`).
 
 ## À ne jamais faire
 

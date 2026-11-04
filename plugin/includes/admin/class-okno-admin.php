@@ -360,6 +360,12 @@ class Okno_Admin {
 		$settings['gh_workflow']         = sanitize_text_field( isset( $input['gh_workflow'] ) ? $input['gh_workflow'] : '' );
 		$settings['gh_branch']           = sanitize_text_field( isset( $input['gh_branch'] ) ? $input['gh_branch'] : '' );
 		$settings['min_deploy_interval'] = absint( isset( $input['min_deploy_interval'] ) ? $input['min_deploy_interval'] : 60 );
+		$settings['auto_deploy']         = ! empty( $input['auto_deploy'] );
+		$settings['auto_deploy_delay']   = max( 15, absint( isset( $input['auto_deploy_delay'] ) ? $input['auto_deploy_delay'] : 60 ) );
+		$settings['content_access']      = isset( $input['content_access'] ) && 'token' === $input['content_access'] ? 'token' : 'public';
+		foreach ( Okno_Headless::FLAGS as $flag ) {
+			$settings[ $flag ] = ! empty( $input[ $flag ] );
+		}
 
 		update_option( Okno_Plugin::OPTION_SETTINGS, $settings );
 
@@ -374,7 +380,14 @@ class Okno_Admin {
 			}
 		}
 
-		// Contrôle préalable GitHub (dépôt, branche, workflow, token) : sans lui,
+		// Jeton de l'API de contenu : créé au passage en accès restreint,
+		// renouvelé sur demande (l'ancien cesse aussitôt de fonctionner).
+		$token_status = Okno_Secrets::status( Okno_Content::SECRET_TOKEN );
+		if ( ! empty( $_POST['okno_regen_content_token'] ) || ( 'token' === $settings['content_access'] && 'ok' !== $token_status ) ) {
+			Okno_Secrets::set( Okno_Content::SECRET_TOKEN, wp_generate_password( 40, false ) );
+		}
+
+				// Contrôle préalable GitHub (dépôt, branche, workflow, token) : sans lui,
 		// un « Not Found » ne se découvre qu'au premier déploiement raté.
 		if ( 'github' === $settings['deploy_driver'] ) {
 			Okno_Github_Preflight::run_and_store( $settings['gh_repo'], $settings['gh_branch'], $settings['gh_workflow'] );

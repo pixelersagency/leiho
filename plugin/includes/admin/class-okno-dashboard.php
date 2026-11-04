@@ -640,6 +640,21 @@ class Okno_Dashboard {
 
 					<div class="okno-driver-fields" data-okno-driver-fields="build_hook coolify github github_commit">
 						<div class="okno-row">
+							<span class="okno-row__label"><?php esc_html_e( 'Automatic publishing', 'okno' ); ?></span>
+							<div>
+								<label class="okno-inline-check"><input type="checkbox" name="okno_settings[auto_deploy]" value="1" <?php checked( $settings['auto_deploy'] ); ?>> <?php esc_html_e( 'Publish on its own after each change', 'okno' ); ?></label>
+								<span class="okno-help">
+									<?php
+									printf(
+										/* translators: %s: number input for the delay in seconds. */
+										esc_html__( 'Publishes %s seconds after the last change, so a series of edits gives a single deployment. Changes made in wp-admin count too.', 'okno' ),
+										'<input type="number" name="okno_settings[auto_deploy_delay]" value="' . esc_attr( $settings['auto_deploy_delay'] ) . '" min="15" style="width:5em" aria-label="' . esc_attr__( 'Delay before automatic publishing, in seconds', 'okno' ) . '">'
+									);
+									?>
+								</span>
+							</div>
+						</div>
+						<div class="okno-row">
 							<label for="okno_min_interval"><?php esc_html_e( 'Delay between deployments', 'okno' ); ?></label>
 							<div>
 								<input type="number" id="okno_min_interval" name="okno_settings[min_deploy_interval]" value="<?php echo esc_attr( $settings['min_deploy_interval'] ); ?>" min="0"> <span class="okno-muted"><?php esc_html_e( 'seconds', 'okno' ); ?></span>
@@ -647,6 +662,8 @@ class Okno_Dashboard {
 						</div>
 					</div>
 				</section>
+
+				<?php self::render_content_api_settings( $settings ); ?>
 
 				<div class="okno-savebar">
 					<span class="okno-muted"><?php esc_html_e( 'Secrets are encrypted in the database with a key derived from the WordPress salts.', 'okno' ); ?></span>
@@ -659,6 +676,65 @@ class Okno_Dashboard {
 				</div>
 			</form>
 		</div>
+		<?php
+	}
+
+	/**
+	 * Réglages de l'API de contenu et du durcissement headless.
+	 *
+	 * @param array $settings Réglages.
+	 * @return void
+	 */
+	private static function render_content_api_settings( $settings ) {
+		$token = 'ok' === Okno_Secrets::status( Okno_Content::SECRET_TOKEN ) ? (string) Okno_Secrets::get( Okno_Content::SECRET_TOKEN ) : '';
+		?>
+		<section class="okno-form-section">
+			<h2><?php esc_html_e( 'Content API', 'okno' ); ?></h2>
+			<p class="okno-help"><?php esc_html_e( 'Your front end reads its content here, in a single request at build time. WordPress stays the only source of truth.', 'okno' ); ?></p>
+
+			<div class="okno-row">
+				<span class="okno-row__label"><?php esc_html_e( 'Endpoints', 'okno' ); ?></span>
+				<div>
+					<code><?php echo esc_html( rest_url( Okno_Rest::NS . '/export' ) ); ?></code>
+					<span class="okno-help"><?php esc_html_e( 'All published content, cached and refreshed on every change. An unchanged build gets a 304.', 'okno' ); ?></span>
+					<code><?php echo esc_html( rest_url( Okno_Rest::NS . '/types' ) ); ?></code>
+					<span class="okno-help"><?php esc_html_e( 'TypeScript types of that content, generated from your fields. In the front-end project: npx okno types.', 'okno' ); ?></span>
+				</div>
+			</div>
+
+			<div class="okno-row">
+				<span class="okno-row__label"><?php esc_html_e( 'Access', 'okno' ); ?></span>
+				<div class="okno-checks">
+					<label><input type="radio" name="okno_settings[content_access]" value="public" <?php checked( $settings['content_access'], 'public' ); ?>> <?php esc_html_e( 'Public: published content only, as on the site', 'okno' ); ?></label>
+					<label><input type="radio" name="okno_settings[content_access]" value="token" <?php checked( $settings['content_access'], 'token' ); ?>> <?php esc_html_e( 'Restricted: the front end sends a token', 'okno' ); ?></label>
+				</div>
+			</div>
+
+			<?php if ( '' !== $token ) : ?>
+				<div class="okno-row">
+					<label for="okno_content_token"><?php esc_html_e( 'Content token', 'okno' ); ?></label>
+					<div>
+						<input type="text" id="okno_content_token" value="<?php echo esc_attr( $token ); ?>" readonly onfocus="this.select()">
+						<label class="okno-inline-check"><input type="checkbox" name="okno_regen_content_token" value="1"> <?php esc_html_e( 'Generate a new token (the current one stops working)', 'okno' ); ?></label>
+						<span class="okno-help"><?php esc_html_e( 'Set it as OKNO_TOKEN in the front end’s build environment. Sent in the X-Okno-Token header.', 'okno' ); ?></span>
+					</div>
+				</div>
+			<?php endif; ?>
+		</section>
+
+		<section class="okno-form-section">
+			<h2><?php esc_html_e( 'WordPress as a back office', 'okno' ); ?></h2>
+			<p class="okno-help"><?php esc_html_e( 'Your visitors use the front end. These options keep WordPress out of their way and out of search engines. wp-admin, login, the content API and draft previews are not affected.', 'okno' ); ?></p>
+
+			<div class="okno-row">
+				<span class="okno-row__label"><?php esc_html_e( 'Protection', 'okno' ); ?></span>
+				<div class="okno-checks">
+					<label><input type="checkbox" name="okno_settings[headless_noindex]" value="1" <?php checked( $settings['headless_noindex'] ); ?>> <?php esc_html_e( 'Keep WordPress out of search engines (noindex, robots.txt, no sitemap)', 'okno' ); ?></label>
+					<label><input type="checkbox" name="okno_settings[headless_redirect]" value="1" <?php checked( $settings['headless_redirect'] ); ?>> <?php esc_html_e( 'Redirect WordPress pages to the same page on the site', 'okno' ); ?></label>
+					<label><input type="checkbox" name="okno_settings[headless_lockdown]" value="1" <?php checked( $settings['headless_lockdown'] ); ?>> <?php esc_html_e( 'Lock down WordPress (XML-RPC off, user list hidden from visitors, version hidden)', 'okno' ); ?></label>
+				</div>
+			</div>
+		</section>
 		<?php
 	}
 

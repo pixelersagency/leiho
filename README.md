@@ -153,9 +153,44 @@ Other field types show up read-only, with a link to the classic WordPress editor
 
 Tokens are encrypted in the database with a key derived from your WordPress salts. GitHub settings are checked when saved: repository, branch, workflow and token expiry.
 
+Publishing can also be automatic: tick **Publish on its own after each change** and Okno deploys once the edits stop (60 s by default), changes made in wp-admin included.
+
+## Content API
+
+Okno also serves your content to the front end, so WordPress is the only source of truth and the front-end repository holds code, not content.
+
+```ts
+// astro.config / build script — Node 18+
+import { loadOknoContent, indexOknoContent } from '@pixelersagency/okno-bridge/content';
+import type { OknoExport, Page } from './src/okno'; // npx okno types
+
+const { data } = await loadOknoContent( { url: 'https://cms.example.com' } );
+const content = indexOknoContent( data as OknoExport );
+const home = content.byPath( '/' ) as Page;
+home.fields.hero_title; // typed
+```
+
+| Endpoint | Returns |
+|---|---|
+| `GET /wp-json/okno/v1/export` | Every published item of the Okno content types, in one response. Cached until something changes, with an `ETag` (an unchanged build gets a `304`). |
+| `GET /wp-json/okno/v1/content?type=&path=&slug=` | A filtered, paginated list. |
+| `GET /wp-json/okno/v1/content/{id}` | One item (drafts for logged-in editors). |
+| `GET /wp-json/okno/v1/types` | TypeScript declarations of exactly that JSON, generated from your ACF field groups. |
+
+Each item carries `id`, `type`, `slug`, `path` (the front-end path from your URL settings), `title`, dates, `excerpt`, rendered `content`, `featured_image`, `terms` and `fields`. Fields are keyed by name and already shaped for a front end: an image is `{ id, url, alt, width, height, sizes }`, a relation is `{ id, type, slug, title, path }`, a WYSIWYG is rendered HTML, a flexible content row has a `_layout`.
+
+- **One request per build** instead of one per page: no more "Error establishing a database connection" on shared hosting.
+- **Snapshot fallback**: every successful load is written to `.okno/content.json`. If WordPress doesn't answer, the build carries on with the last known content and says so (`fallback: 'error'` to fail instead).
+- **Types**: `npx okno types --url https://cms.example.com` writes `src/okno.d.ts`. Regenerate it when you change fields.
+- **Access**: public by default (published content only, which is public anyway). Switch to *Restricted* in the settings and set `OKNO_TOKEN` in the build environment.
+
+### WordPress as a back office
+
+On a new install, Okno also hardens WordPress for headless use (Settings → *WordPress as a back office*): no indexing of the CMS (noindex header, `robots.txt`, no sitemap), public WordPress pages redirect to the same page on the front end, XML-RPC off, `/wp/v2/users` closed to visitors. wp-admin, login, the REST API and draft previews keep working. Sites updating from an earlier version keep their behavior until you tick the options.
+
 ## Security
 
-- No public REST endpoint. Every route checks a nonce and `edit_post` on the content. Publishing requires `publish_pages` (filter `okno_deploy_capability`), settings require `manage_options`.
+- Editing routes check a nonce and `edit_post` on the content. The content API only serves published items of the Okno content types; it can require a token (compared in constant time, sent in `X-Okno-Token`). Publishing requires `publish_pages` (filter `okno_deploy_capability`), settings require `manage_options`.
 - The bridge is inert outside the editor iframe and checks the origin of every message, in both directions. It makes no network request.
 - Values are sanitized per field type on write. `required` and `maxlength` are enforced server side. Attachments and related posts are checked for read access.
 - Use a fine-grained GitHub token limited to the deployment repository (`Actions: write`, or `Contents: write` for the commit mode).
@@ -167,6 +202,8 @@ Found a vulnerability? See [SECURITY.md](SECURITY.md).
 - **Other field plugins**: implement `Okno_Adapter_Interface` and register it with the `okno_adapters` filter (Meta Box, JetEngine, Pods…).
 - **Other deployment targets**: implement `Okno_Deploy_Driver_Interface` and plug it in with `okno_deploy_driver`.
 - **WYSIWYG preview**: `okno_wysiwyg_render` replaces `wpautop()` with your front end's actual rendering.
+- **Content API**: `okno_content_item` adds or removes data on each item (SEO, author…), `okno_content_post_types` changes the served types, `okno_content_html` the rendered HTML. An adapter implementing `Okno_Content_Adapter_Interface` feeds the content API and the types.
+- **Automatic publishing**: the `okno_content_changed` action fires when served content changes.
 
 ## Repository layout
 
@@ -182,10 +219,14 @@ scripts/    Release packaging
 ```bash
 # Plugin tests (no WordPress needed)
 php plugin/tests/test-acf-adapter.php
+php plugin/tests/test-content.php
 php plugin/tests/test-activity.php
 php plugin/tests/test-frame-verdict.php
 php plugin/tests/test-updater.php
 php plugin/tests/smoke-load.php
+
+# Content client tests
+cd bridge && npm test
 
 # Rebuild the bridge (also copies it into the plugin)
 cd bridge && npm run build

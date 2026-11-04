@@ -1,0 +1,170 @@
+/**
+ * Client de l'API de contenu Okno, pour le build du front (Node 18+).
+ *
+ *   import { loadOknoContent, indexOknoContent } from '@pixelersagency/okno-bridge/content';
+ *
+ *   const { data } = await loadOknoContent( { url: 'https://cms.example.com' } );
+ *   const content  = indexOknoContent( data );
+ *   content.byPath( '/services/audit' );
+ *
+ * Une seule requête (/wp-json/okno/v1/export), avec reprises. Chaque réponse
+ * réussie est gardée dans un instantané local : si WordPress ne répond pas
+ * (base saturée, maintenance), le build continue avec le dernier contenu
+ * connu au lieu d'échouer, et le signale. Un contenu inchangé renvoie un 304 :
+ * rien n'est retéléchargé.
+ *
+ * Le contenu vit dans WordPress et nulle part ailleurs : pas de JSON local qui
+ * le double, l'instantané n'est qu'un cache.
+ */
+
+const DEFAULT_SNAPSHOT = '.okno/content.json';
+
+/**
+ * URL de l'export depuis l'adresse du CMS (ou l'URL complète de l'endpoint).
+ *
+ * @param {string} url
+ * @returns {string}
+ */
+export function exportUrl( url ) {
+	if ( ! url ) {
+		throw new Error( 'Okno: missing CMS url (option `url` or OKNO_URL).' );
+	}
+	const clean = String( url ).replace( /\/+$/, '' );
+	if ( clean.includes( '/wp-json/' ) || clean.includes( 'rest_route=' ) ) {
+		return clean;
+	}
+	return clean + '/wp-json/okno/v1/export';
+}
+
+/**
+ * Charge tout le contenu publié.
+ *
+ * @param {object}   [options]
+ * @param {string}   [options.url]      Adresse du CMS. Défaut : process.env.OKNO_URL.
+ * @param {string}   [options.token]    Jeton (accès restreint). Défaut : process.env.OKNO_TOKEN.
+ * @param {string|false} [options.snapshot] Fichier d'instantané, false pour s'en passer.
+ * @param {'snapshot'|'error'} [options.fallback] Si WordPress ne répond pas : instantané (défaut) ou échec.
+ * @param {number}   [options.retries]  Tentatives (défaut 3).
+ * @param {number}   [options.timeout]  Délai par tentative en ms (défaut 30 000).
+ * @param {Function} [options.fetch]    fetch à utiliser (tests).
+ * @param {{warn:Function}} [options.logger]
+ * @returns {Promise<{data: object, source: 'network'|'unchanged'|'snapshot', stale: boolean}>}
+ */
+export async function loadOknoContent( options = {} ) {
+	const env = typeof process !== 'undefined' ? process.env : {};
+	const url = exportUrl( options.url || env.OKNO_URL );
+	const token = options.token ?? env.OKNO_TOKEN ?? '';
+	const snapshotPath = options.snapshot === false ? null : options.snapshot || DEFAULT_SNAPSHOT;
+	const fallback = options.fallback || 'snapshot';
+	const retries = Math.max( 1, options.retries ?? 3 );
+	const timeout = options.timeout ?? 30000;
+	const doFetch = options.fetch || globalThis.fetch;
+	const logger = options.logger || console;
+
+	const snapshot = snapshotPath ? await readSnapshot( snapshotPath ) : null;
+
+	const headers = { Accept: 'application/json' };
+	if ( token ) {
+		headers[ 'X-Okno-Token' ] = token;
+	}
+	if ( snapshot && snapshot.version ) {
+		headers[ 'If-None-Match' ] = '"' + snapshot.version + '"';
+	}
+
+	let lastError = null;
+	for ( let attempt = 1; attempt <= retries; attempt++ ) {
+		try {
+			const response = await doFetch( url, {
+				headers,
+				signal: typeof AbortSignal !== 'undefined' && AbortSignal.timeout ? AbortSignal.timeout( timeout ) : undefined,
+			} );
+
+			if ( response.status === 304 && snapshot ) {
+				return { data: snapshot, source: 'unchanged', stale: false };
+			}
+			if ( response.status === 401 || response.status === 403 ) {
+				// Inutile d'insister : le jeton est faux ou absent.
+				throw Object.assign( new Error( 'Okno: access refused (' + response.status + '). Check OKNO_TOKEN.' ), { fatal: true } );
+			}
+			if ( ! response.ok ) {
+				throw new Error( 'Okno: HTTP ' + response.status + ' on ' + url );
+			}
+
+			const data = await response.json();
+			if ( ! data || ! Array.isArray( data.items ) ) {
+				throw new Error( 'Okno: unexpected response from ' + url + ' (is Okno 1.0.0-beta.6+ active?)' );
+			}
+			if ( snapshotPath ) {
+				await writeSnapshot( snapshotPath, data );
+			}
+			return { data, source: 'network', stale: false };
+		} catch ( error ) {
+			lastError = error;
+			if ( error.fatal ) {
+				break;
+			}
+			if ( attempt < retries ) {
+				await sleep( 1000 * 2 ** ( attempt - 1 ) );
+			}
+		}
+	}
+
+	if ( snapshot && fallback === 'snapshot' && ! lastError?.fatal ) {
+		logger.warn(
+			'[okno] WordPress did not answer (' + ( lastError && lastError.message ) + '). ' +
+				'Using the snapshot from ' + ( snapshot.generated || 'an earlier build' ) + '.'
+		);
+		return { data: snapshot, source: 'snapshot', stale: true };
+	}
+	throw lastError || new Error( 'Okno: no content.' );
+}
+
+/**
+ * Index de recherche sur un export.
+ *
+ * @param {{items: Array<object>}} data
+ */
+export function indexOknoContent( data ) {
+	const items = ( data && data.items ) || [];
+	const byId = new Map();
+	const byPath = new Map();
+	for ( const item of items ) {
+		byId.set( item.id, item );
+		byPath.set( normalizePath( item.path ), item );
+	}
+	return {
+		items,
+		byId: ( id ) => byId.get( Number( id ) ) || null,
+		byPath: ( path ) => byPath.get( normalizePath( path ) ) || null,
+		byType: ( type ) => items.filter( ( item ) => item.type === type ),
+		bySlug: ( type, slug ) => items.find( ( item ) => item.type === type && item.slug === slug ) || null,
+	};
+}
+
+function normalizePath( path ) {
+	const clean = '/' + String( path || '' ).split( /[?#]/ )[ 0 ].replace( /^\/+|\/+$/g, '' );
+	return clean === '/' ? '/' : clean;
+}
+
+async function readSnapshot( file ) {
+	const fs = await import( 'node:fs/promises' );
+	try {
+		return JSON.parse( await fs.readFile( file, 'utf8' ) );
+	} catch {
+		return null;
+	}
+}
+
+async function writeSnapshot( file, data ) {
+	const fs = await import( 'node:fs/promises' );
+	const path = await import( 'node:path' );
+	await fs.mkdir( path.dirname( file ), { recursive: true } );
+	// Écriture atomique : un build interrompu ne laisse pas d'instantané tronqué.
+	const tmp = file + '.' + process.pid + '.tmp';
+	await fs.writeFile( tmp, JSON.stringify( data ) );
+	await fs.rename( tmp, file );
+}
+
+function sleep( ms ) {
+	return new Promise( ( resolve ) => setTimeout( resolve, ms ) );
+}
