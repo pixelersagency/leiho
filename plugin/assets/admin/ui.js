@@ -736,8 +736,15 @@
 					var name = input.value.trim();
 					add( { value: name, label: name, isNew: true } );
 					input.value = '';
+				} else if ( input.value.trim() && isSelected( item.value ) ) {
+					// Étiquette tapée alors qu'elle est déjà choisie : on la garde
+					// (la retirer se fait avec sa croix), on vide seulement la saisie.
+					input.value = '';
 				} else {
 					toggle( item );
+					if ( input.value.trim() ) {
+						input.value = '';
+					}
 				}
 				refresh();
 			},

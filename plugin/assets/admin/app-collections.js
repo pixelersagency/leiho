@@ -339,7 +339,7 @@
 
 		var fieldsPane = h( 'section', { class: 'leiho-pane leiho-pane--list leiho-builder__fields', 'aria-label': __( 'Fields', 'leiho' ) }, [
 			h( 'div', { class: 'leiho-pane__head' }, [
-				h( 'h2', { class: 'leiho-pane__title', text: title } ),
+				h( 'h2', { class: 'leiho-pane__title', text: title, title: title } ),
 				h( 'div', { class: 'leiho-pane__tools' }, [
 					cur.isNew ? null : hooks.headTools(),
 					h( 'button', { type: 'button', class: 'leiho-icon-btn', title: __( 'Add a field', 'leiho' ), 'aria-label': __( 'Add a field', 'leiho' ), onClick: function ( event ) {

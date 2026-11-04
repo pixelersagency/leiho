@@ -155,7 +155,7 @@ class Leiho_AI {
 			'client'        => $status['client'],
 			'canConfigure'  => $admin,
 			'connectorsUrl' => $admin && function_exists( 'wp_ai_client_prompt' ) ? self::connectors_url() : '',
-			'settingsUrl'   => $admin ? Leiho_App::url( 'settings' ) . '#leiho-brand' : '',
+			'settingsUrl'   => $admin ? Leiho_App::url( 'ai' ) : '',
 			'brandFilled'   => Leiho_AI_Brand::is_filled( $brand ),
 			'language'      => $brand['language'],
 			'canCollections' => class_exists( 'Leiho_Collections_Rest' ) && Leiho_Collections_Rest::can_manage(),

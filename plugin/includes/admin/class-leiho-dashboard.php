@@ -26,6 +26,9 @@ class Leiho_Dashboard {
 			case 'deploys':
 				self::render_deploys();
 				break;
+			case 'ai':
+				self::render_ai();
+				break;
 			default:
 				self::render_home();
 		}
@@ -75,6 +78,24 @@ class Leiho_Dashboard {
 							</a>
 						</div>
 					</div>
+				<?php endif; ?>
+
+				<?php
+				// Aperçu en direct de l'accueil du site, seulement quand le test de
+				// connexion a réussi : le site accepte alors d'être affiché ici.
+				$preview_url = '' !== $settings['preview_url'] ? $settings['preview_url'] : $settings['front_url'];
+				$front_page  = (int) get_option( 'page_on_front' );
+				?>
+				<?php if ( $configured && $connection && ! empty( $connection['ok'] ) ) : ?>
+					<section class="leiho-home__section">
+						<h2 class="leiho-home__label"><?php esc_html_e( 'Your site', 'leiho' ); ?></h2>
+						<a class="leiho-site-preview" href="<?php echo esc_url( Leiho_App::url( 'editor', $front_page ? array( 'post' => $front_page ) : array() ) ); ?>" aria-label="<?php esc_attr_e( 'Edit the home page in the visual editor', 'leiho' ); ?>">
+							<span class="leiho-site-preview__viewport" data-leiho-site-preview>
+								<iframe src="<?php echo esc_url( trailingslashit( $preview_url ) ); ?>" title="<?php esc_attr_e( 'Live preview of the site’s home page', 'leiho' ); ?>" tabindex="-1" loading="lazy" aria-hidden="true"></iframe>
+							</span>
+							<span class="leiho-site-preview__cta"><?php Leiho_Icons::render( 'edit', 14 ); ?> <?php esc_html_e( 'Edit this page', 'leiho' ); ?></span>
+						</a>
+					</section>
 				<?php endif; ?>
 
 				<section class="leiho-home__section">
@@ -651,8 +672,6 @@ class Leiho_Dashboard {
 					</div>
 				</section>
 
-				<?php self::render_brand_settings(); ?>
-
 				<?php self::render_content_api_settings( $settings ); ?>
 
 				<div class="leiho-savebar">
@@ -676,9 +695,8 @@ class Leiho_Dashboard {
 	 * @return void
 	 */
 	private static function render_brand_settings() {
-		$brand  = Leiho_AI_Brand::get();
-		$status = Leiho_AI::status();
-		$lines  = static function ( $items ) {
+		$brand = Leiho_AI_Brand::get();
+		$lines = static function ( $items ) {
 			return implode( "\n", (array) $items );
 		};
 		$fields = array(
@@ -689,31 +707,8 @@ class Leiho_Dashboard {
 		);
 		?>
 		<section class="leiho-form-section" id="leiho-brand" data-leiho-brand>
-			<h2><?php esc_html_e( 'Brand context (AI)', 'leiho' ); ?></h2>
+			<h2><?php esc_html_e( 'Brand context', 'leiho' ); ?></h2>
 			<p class="leiho-help"><?php esc_html_e( 'What the AI needs to know to write like you. It’s sent with every AI request, together with the entry being edited.', 'leiho' ); ?></p>
-
-			<div class="leiho-row">
-				<span class="leiho-row__label"><?php esc_html_e( 'AI provider', 'leiho' ); ?></span>
-				<div>
-					<?php if ( ! $status['client'] ) : ?>
-						<span class="leiho-pill leiho-pill--warn"><?php esc_html_e( 'Unavailable', 'leiho' ); ?></span>
-						<span class="leiho-help"><?php esc_html_e( 'AI in Leiho uses the AI client of WordPress 7.0 and later. Update WordPress to use it.', 'leiho' ); ?></span>
-					<?php elseif ( ! $status['text'] ) : ?>
-						<span class="leiho-pill leiho-pill--warn"><?php esc_html_e( 'Not configured', 'leiho' ); ?></span>
-						<span class="leiho-help"><?php esc_html_e( 'No AI provider is set up for text generation yet. Leiho never stores API keys: it uses the provider configured in WordPress.', 'leiho' ); ?></span>
-						<a class="leiho-btn leiho-btn--quiet" href="<?php echo esc_url( Leiho_AI::connectors_url() ); ?>"><?php Leiho_Icons::render( 'sparkle', 14 ); ?> <?php esc_html_e( 'Set up an AI provider', 'leiho' ); ?></a>
-					<?php else : ?>
-						<span class="leiho-pill leiho-pill--ok"><?php esc_html_e( 'Ready', 'leiho' ); ?></span>
-						<span class="leiho-help">
-							<?php
-							echo esc_html( $status['image'] ? __( 'Text generation and image descriptions (alternative text) are available.', 'leiho' ) : __( 'Text generation is available. The provider can’t read images, so alternative text isn’t offered.', 'leiho' ) );
-							?>
-							<a href="<?php echo esc_url( Leiho_AI::connectors_url() ); ?>"><?php esc_html_e( 'Settings → Connectors', 'leiho' ); ?></a>
-						</span>
-					<?php endif; ?>
-					<span class="leiho-help leiho-ai-privacy"><?php esc_html_e( 'Privacy: when someone uses an AI action, the brand context, the text of the field and the other fields of the entry (or the image, for alternative text) are sent to the provider configured in Settings → Connectors, under its terms. Leiho keeps a line in the change log (who, which field, which action), never the prompt.', 'leiho' ); ?></span>
-				</div>
-			</div>
 
 			<div class="leiho-row">
 				<label for="leiho_brand_name"><?php esc_html_e( 'Brand name', 'leiho' ); ?></label>
@@ -770,6 +765,123 @@ class Leiho_Dashboard {
 				</div>
 			</div>
 		</section>
+		<?php
+	}
+
+	/* =====================================================================
+	 * IA
+	 * =================================================================== */
+
+	/**
+	 * Écran IA : fournisseur, contexte de marque, contexte de chaque type de
+	 * contenu, actions récentes, outils offerts aux agents.
+	 *
+	 * @return void
+	 */
+	private static function render_ai() {
+		$status = Leiho_AI::status();
+		$types  = array_filter( Leiho_Content::post_types(), 'post_type_exists' );
+		?>
+		<div class="leiho-page">
+
+			<?php // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Simple drapeau d'affichage. ?>
+			<?php if ( isset( $_GET['leiho_saved'] ) ) : ?>
+				<div class="leiho-notice leiho-notice--ok" role="status">
+					<span class="leiho-dot leiho-dot--ok"></span>
+					<strong><?php esc_html_e( 'AI settings saved.', 'leiho' ); ?></strong>
+				</div>
+			<?php endif; ?>
+
+			<section class="leiho-form-section" id="leiho-ai-provider">
+				<h2><?php esc_html_e( 'AI provider', 'leiho' ); ?></h2>
+				<p class="leiho-help"><?php esc_html_e( 'Leiho writes with the AI provider set up in WordPress. It stores no API key and picks no provider.', 'leiho' ); ?></p>
+				<div class="leiho-row">
+					<span class="leiho-row__label"><?php esc_html_e( 'Status', 'leiho' ); ?></span>
+					<div>
+						<?php if ( ! $status['client'] ) : ?>
+							<span class="leiho-pill leiho-pill--warn"><?php esc_html_e( 'Unavailable', 'leiho' ); ?></span>
+							<span class="leiho-help"><?php esc_html_e( 'AI in Leiho uses the AI client of WordPress 7.0 and later. Update WordPress to use it.', 'leiho' ); ?></span>
+						<?php elseif ( ! $status['text'] ) : ?>
+							<span class="leiho-pill leiho-pill--warn"><?php esc_html_e( 'Not configured', 'leiho' ); ?></span>
+							<span class="leiho-help"><?php esc_html_e( 'No AI provider is set up for text generation yet. Leiho never stores API keys: it uses the provider configured in WordPress.', 'leiho' ); ?></span>
+							<a class="leiho-btn leiho-btn--quiet" href="<?php echo esc_url( Leiho_AI::connectors_url() ); ?>"><?php Leiho_Icons::render( 'sparkle', 14 ); ?> <?php esc_html_e( 'Set up an AI provider', 'leiho' ); ?></a>
+						<?php else : ?>
+							<span class="leiho-pill leiho-pill--ok"><?php esc_html_e( 'Ready', 'leiho' ); ?></span>
+							<span class="leiho-help">
+								<?php
+								echo esc_html( $status['image'] ? __( 'Text generation and image descriptions (alternative text) are available.', 'leiho' ) : __( 'Text generation is available. The provider can’t read images, so alternative text isn’t offered.', 'leiho' ) );
+								?>
+								<a href="<?php echo esc_url( Leiho_AI::connectors_url() ); ?>"><?php esc_html_e( 'Settings → Connectors', 'leiho' ); ?></a>
+							</span>
+						<?php endif; ?>
+						<span class="leiho-help leiho-ai-privacy"><?php esc_html_e( 'Privacy: when someone uses an AI action, the brand context, the text of the field and the other fields of the entry (or the image, for alternative text) are sent to the provider configured in Settings → Connectors, under its terms. Leiho keeps a line in the change log (who, which field, which action), never the prompt.', 'leiho' ); ?></span>
+					</div>
+				</div>
+
+			</section>
+
+			<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>">
+				<input type="hidden" name="action" value="leiho_save_ai">
+				<?php wp_nonce_field( 'leiho_save_ai' ); ?>
+
+				<?php self::render_brand_settings(); ?>
+
+				<section class="leiho-form-section" id="leiho-ai-types">
+					<h2><?php esc_html_e( 'Content types', 'leiho' ); ?></h2>
+					<p class="leiho-help"><?php esc_html_e( 'What each type of content is for, and who reads it. Sent with the brand context when the AI writes an entry of that type.', 'leiho' ); ?></p>
+					<?php if ( ! $types ) : ?>
+						<p class="leiho-muted"><?php esc_html_e( 'No content type is edited in Leiho yet. Choose them in Settings.', 'leiho' ); ?></p>
+					<?php endif; ?>
+					<?php foreach ( $types as $type ) : ?>
+						<?php $context = Leiho_AI_Brand::collection( $type ); ?>
+						<div class="leiho-row">
+							<span class="leiho-row__label"><?php echo esc_html( $context['label'] ); ?></span>
+							<div class="leiho-ai-type">
+								<textarea name="leiho_ai_types[<?php echo esc_attr( $type ); ?>][purpose]" rows="2" aria-label="<?php echo esc_attr( sprintf( /* translators: %s: content type name. */ __( 'Purpose of %s', 'leiho' ), $context['label'] ) ); ?>" placeholder="<?php esc_attr_e( 'Purpose: what these entries are for', 'leiho' ); ?>"><?php echo esc_textarea( $context['purpose'] ); ?></textarea>
+								<textarea name="leiho_ai_types[<?php echo esc_attr( $type ); ?>][audience]" rows="2" aria-label="<?php echo esc_attr( sprintf( /* translators: %s: content type name. */ __( 'Readers of %s', 'leiho' ), $context['label'] ) ); ?>" placeholder="<?php esc_attr_e( 'Readers: who they are written for', 'leiho' ); ?>"><?php echo esc_textarea( $context['audience'] ); ?></textarea>
+							</div>
+						</div>
+					<?php endforeach; ?>
+				</section>
+
+				<div class="leiho-savebar">
+					<span class="leiho-muted"><?php esc_html_e( 'Nothing written by the AI is saved until someone accepts it in the editor.', 'leiho' ); ?></span>
+					<button type="submit" class="leiho-btn"><?php esc_html_e( 'Save', 'leiho' ); ?></button>
+				</div>
+			</form>
+
+			<?php $actions = Leiho_Activity::recent_ai( 10 ); ?>
+			<section class="leiho-form-section" id="leiho-ai-log">
+				<h2><?php esc_html_e( 'Recent AI actions', 'leiho' ); ?></h2>
+				<?php if ( ! $actions ) : ?>
+					<p class="leiho-muted"><?php esc_html_e( 'No AI action yet. Each one is logged here: who, which field, which action. Prompts and texts are never kept.', 'leiho' ); ?></p>
+				<?php else : ?>
+					<ul class="leiho-log">
+						<?php
+						foreach ( $actions as $activity ) {
+							if ( current_user_can( 'edit_post', (int) $activity->post_id ) ) {
+								self::render_activity( $activity );
+							}
+						}
+						?>
+					</ul>
+				<?php endif; ?>
+			</section>
+
+			<section class="leiho-form-section" id="leiho-ai-agents">
+				<h2><?php esc_html_e( 'AI agents', 'leiho' ); ?></h2>
+				<?php if ( function_exists( 'wp_register_ability' ) ) : ?>
+					<p class="leiho-help"><?php esc_html_e( 'External agents (through the WordPress MCP adapter, for example) can use these abilities, with the rights of the user they connect as. They never publish.', 'leiho' ); ?></p>
+					<ul class="leiho-ai-abilities">
+						<?php foreach ( Leiho_AI_Abilities::definitions() as $name => $ability ) : ?>
+							<li><code><?php echo esc_html( $name ); ?></code> <span><?php echo esc_html( $ability['label'] ); ?></span></li>
+						<?php endforeach; ?>
+					</ul>
+				<?php else : ?>
+					<p class="leiho-muted"><?php esc_html_e( 'Leiho offers abilities to external AI agents from WordPress 6.9 (Abilities API).', 'leiho' ); ?></p>
+				<?php endif; ?>
+			</section>
+		</div>
 		<?php
 	}
 

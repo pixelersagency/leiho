@@ -20,6 +20,7 @@ class Leiho_Admin {
 		add_action( 'admin_menu', array( $this, 'register_menu' ) );
 		add_action( 'admin_enqueue_scripts', array( $this, 'enqueue' ) );
 		add_action( 'admin_post_leiho_save_settings', array( $this, 'handle_save_settings' ) );
+		add_action( 'admin_post_leiho_save_ai', array( $this, 'handle_save_ai' ) );
 		add_action( 'admin_bar_menu', array( $this, 'admin_bar' ), 80 );
 		add_filter( 'plugin_action_links_' . plugin_basename( LEIHO_FILE ), array( $this, 'action_links' ) );
 	}
@@ -169,10 +170,10 @@ class Leiho_Admin {
 			return;
 		}
 
-		if ( in_array( $view, array( 'home', 'start', 'settings', 'deploys' ), true ) ) {
+		if ( in_array( $view, array( 'home', 'start', 'settings', 'deploys', 'ai' ), true ) ) {
 			$this->enqueue_dashboard();
 			$this->enqueue_shell( $view );
-			if ( 'settings' === $view ) {
+			if ( 'ai' === $view ) {
 				// Contexte de marque : export / import JSON.
 				$this->enqueue_ai();
 			}
@@ -567,6 +568,34 @@ class Leiho_Admin {
 	 * Enregistrement des réglages
 	 * ------------------------------------------------------------------- */
 
+	/**
+	 * Écran IA : contexte de marque et contexte de chaque type de contenu.
+	 * Formulaire à part des réglages : l'enregistrer ne touche à rien d'autre.
+	 */
+	public function handle_save_ai() {
+		if ( ! current_user_can( 'manage_options' ) ) {
+			wp_die( esc_html__( 'Access denied.', 'leiho' ) );
+		}
+		check_admin_referer( 'leiho_save_ai' );
+
+		if ( isset( $_POST['leiho_brand'] ) && is_array( $_POST['leiho_brand'] ) ) {
+			Leiho_AI_Brand::save( wp_unslash( $_POST['leiho_brand'] ) ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Leiho_AI_Brand::normalize() nettoie chaque valeur.
+		}
+
+		// Contextes des types : seulement ceux que Leiho édite.
+		$types = isset( $_POST['leiho_ai_types'] ) && is_array( $_POST['leiho_ai_types'] ) ? wp_unslash( $_POST['leiho_ai_types'] ) : array(); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Leiho_AI_Brand::collection_normalize() nettoie chaque valeur.
+		$known = Leiho_Content::post_types();
+		foreach ( $types as $type => $context ) {
+			$type = sanitize_key( (string) $type );
+			if ( in_array( $type, $known, true ) && is_array( $context ) ) {
+				Leiho_AI_Brand::save_collection( $type, $context );
+			}
+		}
+
+		wp_safe_redirect( Leiho_App::url( 'ai', array( 'leiho_saved' => 1 ) ) );
+		exit;
+	}
+
 	public function handle_save_settings() {
 		if ( ! current_user_can( 'manage_options' ) ) {
 			wp_die( esc_html__( 'Access denied.', 'leiho' ) );
@@ -620,12 +649,6 @@ class Leiho_Admin {
 		}
 
 		update_option( Leiho_Plugin::OPTION_SETTINGS, $settings );
-
-		// Contexte de marque (IA) : ses propres champs, les contextes des
-		// collections sont gardés.
-		if ( isset( $_POST['leiho_brand'] ) && is_array( $_POST['leiho_brand'] ) ) {
-			Leiho_AI_Brand::save( wp_unslash( $_POST['leiho_brand'] ) ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Leiho_AI_Brand::normalize() nettoie chaque valeur.
-		}
 
 		// Secrets : champ vide = inchangé, valeur = remplacement.
 		$secrets = isset( $_POST['leiho_secret'] ) && is_array( $_POST['leiho_secret'] ) ? wp_unslash( $_POST['leiho_secret'] ) : array(); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized

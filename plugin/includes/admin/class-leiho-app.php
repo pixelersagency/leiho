@@ -82,6 +82,14 @@ class Leiho_App {
 				'icon'  => 'rocket',
 				'nav'   => true,
 			),
+			// Fournisseur, contexte de marque et des types, journal des actions
+			// d'IA, outils des agents (administrateurs).
+			'ai'          => array(
+				'label' => __( 'AI', 'leiho' ),
+				'cap'   => 'manage_options',
+				'icon'  => 'sparkle',
+				'nav'   => true,
+			),
 			'settings'    => array(
 				'label' => __( 'Settings', 'leiho' ),
 				'cap'   => 'manage_options',

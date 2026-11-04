@@ -171,6 +171,23 @@ class Leiho_Activity {
 	}
 
 	/**
+	 * Dernières actions d'IA (écran IA), plus récentes d'abord.
+	 *
+	 * @param int $limit Nombre maximal.
+	 * @return array<int,object>
+	 */
+	public static function recent_ai( $limit = 10 ) {
+		global $wpdb;
+
+		if ( self::DB_VERSION !== get_option( self::OPTION_DB_VERSION ) ) {
+			return array();
+		}
+		$table = self::table_name();
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery, WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Nom de table interne.
+		return (array) $wpdb->get_results( $wpdb->prepare( "SELECT * FROM {$table} WHERE field_type = %s ORDER BY created_at DESC, activity_id DESC LIMIT %d", self::TYPE_AI, min( 50, max( 1, (int) $limit ) ) ) );
+	}
+
+	/**
 	 * Dernières modifications, plus récentes d'abord.
 	 *
 	 * @param int $limit   Nombre maximal.

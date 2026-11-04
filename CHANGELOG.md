@@ -2,6 +2,20 @@
 
 All notable changes to Leiho (called Okno until 1.0.0-beta.11) are documented here. The project follows [Semantic Versioning](https://semver.org/). The plugin and the bridge package share one version number.
 
+## [1.0.0-beta.13] — 2026-11-05
+
+### Added
+
+- **AI screen** (navigation, administrators): the AI provider's status with its setup link and privacy note, the brand context (moved from Settings, with export and import), the **context of every content type** Leiho edits — ACF types and pages included, not only Leiho collections — the recent AI actions from the change log, and the abilities offered to external agents. It has its own form: saving it changes nothing else.
+- **Live preview of the site's home page** on Leiho's home, rendered at desktop width and scaled to the card; clicking it opens the home page in the visual editor. Shown once the connection test has succeeded, so the site is known to allow being displayed in wp-admin.
+
+### Fixed
+
+- Tags field: typing a tag that is already chosen and pressing Enter no longer removes it (removing is done with its ×); the typed text is cleared.
+- Entry list: the sort menu (« Dernière modification ») is no longer cut; filter menus take the width of their label and wrap in a narrow column. In French, the sort is now « Modifiés récemment ».
+- Field builder: a long collection name in the header wraps on two lines (full name on hover) instead of being cut.
+- « Go back to ACF » says that WordPress's own fields (title, content, excerpt, slug, categories, tags) changed after the import are not undone.
+
 ## [1.0.0-beta.12] — 2026-11-04
 
 ### Changed
@@ -215,6 +229,7 @@ First public release.
 - Managed regions (`data-okno-managed`) explain where to edit content Okno doesn't own.
 - Explicit sections (`data-okno-section`, `data-okno-layout`) take precedence over auto-detected ones.
 
+[1.0.0-beta.13]: https://github.com/pixelersagency/leiho/releases/tag/v1.0.0-beta.13
 [1.0.0-beta.12]: https://github.com/pixelersagency/leiho/releases/tag/v1.0.0-beta.12
 [1.0.0-beta.11]: https://github.com/pixelersagency/leiho/releases/tag/v1.0.0-beta.11
 [1.0.0-beta.10]: https://github.com/pixelersagency/leiho/releases/tag/v1.0.0-beta.10

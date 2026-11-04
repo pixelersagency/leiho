@@ -124,7 +124,7 @@ $nav = array_keys(
 		}
 	)
 );
-check( 'navigation : six vues, plus d\'onglet Contenus', array( 'home', 'editor', 'collections', 'media', 'deploys', 'settings' ) === $nav, $nav );
+check( 'navigation : sept vues (IA comprise), plus d\'onglet Contenus', array( 'home', 'editor', 'collections', 'media', 'deploys', 'ai', 'settings' ) === $nav, $nav );
 
 /* --- Contenus et Formulaire fondus dans Collections --- */
 

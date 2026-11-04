@@ -9,7 +9,7 @@ msgstr ""
 "X-Domain: leiho\n"
 
 #: assets/admin/admin.js:25 assets/admin/app-media.js:263
-#: includes/admin/class-leiho-admin.php:264
+#: includes/admin/class-leiho-admin.php:265
 msgid "Copied"
 msgstr "Copié"
 
@@ -23,7 +23,7 @@ msgid "Changes"
 msgstr "Modifications"
 
 #: assets/admin/ai.js:418 assets/admin/editor.js:3918
-#: includes/class-leiho-activity.php:170
+#: includes/admin/class-leiho-app.php:88 includes/class-leiho-activity.php:170
 msgid "AI"
 msgstr "IA"
 
@@ -31,11 +31,11 @@ msgstr "IA"
 msgid "AI isn’t set up on this site yet."
 msgstr "L’IA n’est pas encore configurée sur ce site."
 
-#: assets/admin/ai.js:442 includes/admin/class-leiho-dashboard.php:704
+#: assets/admin/ai.js:442 includes/admin/class-leiho-dashboard.php:807
 msgid "Set up an AI provider"
 msgstr "Configurer un fournisseur d’IA"
 
-#: assets/admin/ai.js:445 includes/admin/class-leiho-dashboard.php:711
+#: assets/admin/ai.js:445 includes/admin/class-leiho-dashboard.php:814
 msgid "Settings → Connectors"
 msgstr "Réglages → Connecteurs"
 
@@ -211,7 +211,7 @@ msgstr "Résultat mis en forme"
 msgid "Tip: fill in the brand context so the AI writes in your voice."
 msgstr "Astuce : remplissez le contexte de marque pour que l’IA écrive comme vous."
 
-#: assets/admin/ai.js:815
+#: assets/admin/ai.js:815 includes/admin/class-leiho-dashboard.php:710
 msgid "Brand context"
 msgstr "Contexte de marque"
 
@@ -343,12 +343,12 @@ msgid "Couldn’t create the draft."
 msgstr "Impossible de créer le brouillon."
 
 #: assets/admin/ai.js:1159 assets/admin/editor.js:3945
-#: includes/admin/class-leiho-dashboard.php:256
+#: includes/admin/class-leiho-dashboard.php:277
 msgid "No"
 msgstr "Non"
 
 #: assets/admin/ai.js:1159 assets/admin/editor.js:3945
-#: includes/admin/class-leiho-dashboard.php:256
+#: includes/admin/class-leiho-dashboard.php:277
 msgid "Yes"
 msgstr "Oui"
 
@@ -447,7 +447,7 @@ msgid "A day."
 msgstr "Un jour."
 
 #: assets/admin/app-collections.js:42 assets/admin/app-content.js:415
-#: includes/admin/class-leiho-dashboard.php:902
+#: includes/admin/class-leiho-dashboard.php:1014
 msgid "Date"
 msgstr "Date"
 
@@ -1186,7 +1186,7 @@ msgstr "Corbeille"
 
 #: assets/admin/app-content.js:59
 msgid "Last modified"
-msgstr "Dernière modification"
+msgstr "Modifiés récemment"
 
 #: assets/admin/app-content.js:60
 msgid "Newest first"
@@ -1241,12 +1241,13 @@ msgstr "Importer un schéma"
 msgid "Import a schema (leiho.schema.json)"
 msgstr "Importer un schéma (leiho.schema.json)"
 
-#: assets/admin/app-content.js:213 includes/admin/class-leiho-dashboard.php:522
+#: assets/admin/app-content.js:213 includes/admin/class-leiho-dashboard.php:543
+#: includes/admin/class-leiho-dashboard.php:830
 msgid "Content types"
 msgstr "Types de contenus"
 
 #: assets/admin/app-content.js:215 includes/admin/class-leiho-app.php:68
-#: includes/admin/class-leiho-dashboard.php:154
+#: includes/admin/class-leiho-dashboard.php:175
 msgid "Collections"
 msgstr "Collections"
 
@@ -1255,7 +1256,8 @@ msgid "Search by title…"
 msgstr "Rechercher par titre…"
 
 #: assets/admin/app-content.js:230 assets/admin/app-content.js:258
-#: includes/admin/class-leiho-admin.php:465
+#: includes/admin/class-leiho-admin.php:466
+#: includes/admin/class-leiho-dashboard.php:799
 msgid "Status"
 msgstr "Statut"
 
@@ -1524,8 +1526,8 @@ msgid "Go back to ACF for “%s”?"
 msgstr "Revenir à ACF pour « %s » ?"
 
 #: assets/admin/app-content.js:711
-msgid "ACF serves the fields of this content type again, with the values they had on the import day. Values edited in Leiho since the import are not written back to ACF: they are deleted with the Leiho table of this collection."
-msgstr "ACF sert de nouveau les champs de ce type de contenu, avec les valeurs du jour de l’import. Les valeurs modifiées dans Leiho depuis l’import ne sont pas réécrites dans ACF : elles sont supprimées avec la table Leiho de cette collection."
+msgid "ACF serves the fields of this content type again, with the values they had on the import day. Values edited in Leiho since the import are not written back to ACF: they are deleted with the Leiho table of this collection. WordPress’s own fields (title, content, excerpt, slug, categories and tags) keep their current values: they are not undone."
+msgstr "ACF sert de nouveau les champs de ce type de contenu, avec les valeurs du jour de l’import. Les valeurs modifiées dans Leiho depuis l’import ne sont pas réécrites dans ACF : elles sont supprimées avec la table Leiho de cette collection. Les champs propres à WordPress (titre, contenu, extrait, slug, catégories et étiquettes) gardent leurs valeurs actuelles : ils ne sont pas annulés."
 
 #: assets/admin/app-content.js:721
 msgid "The content type is served by ACF again."
@@ -1584,10 +1586,10 @@ msgstr "(sans titre)"
 msgid "Restore"
 msgstr "Restaurer"
 
-#: assets/admin/app-content.js:981 includes/admin/class-leiho-admin.php:484
-#: includes/admin/class-leiho-admin.php:486
+#: assets/admin/app-content.js:981 includes/admin/class-leiho-admin.php:485
+#: includes/admin/class-leiho-admin.php:487
 #: includes/admin/class-leiho-app.php:58
-#: includes/admin/class-leiho-dashboard.php:155
+#: includes/admin/class-leiho-dashboard.php:176
 msgid "Visual editor"
 msgstr "Éditeur visuel"
 
@@ -1698,7 +1700,7 @@ msgid "New entry in %s"
 msgstr "Nouvelle entrée dans %s"
 
 #: assets/admin/app-content.js:1250
-#: includes/admin/class-leiho-dashboard.php:153
+#: includes/admin/class-leiho-dashboard.php:174
 msgid "New content"
 msgstr "Nouveau contenu"
 
@@ -1752,7 +1754,7 @@ msgstr "Déposez les fichiers pour les envoyer"
 
 #: assets/admin/app-media.js:42 assets/admin/app-media.js:44
 #: includes/admin/class-leiho-app.php:74
-#: includes/admin/class-leiho-dashboard.php:156
+#: includes/admin/class-leiho-dashboard.php:177
 msgid "Media"
 msgstr "Médias"
 
@@ -1771,7 +1773,7 @@ msgstr "Impossible de charger la médiathèque."
 #. translators: %d: number of items.
 #. translators: %d: number of media items.
 #: assets/admin/app-media.js:141 assets/admin/editor.js:3952
-#: includes/admin/class-leiho-dashboard.php:274
+#: includes/admin/class-leiho-dashboard.php:295
 msgid "%d item"
 msgid_plural "%d items"
 msgstr[0] "%d élément"
@@ -1790,8 +1792,9 @@ msgid "Media saved."
 msgstr "Média enregistré."
 
 #: assets/admin/app-media.js:218 assets/admin/editor.js:3848
-#: includes/admin/class-leiho-admin.php:501
-#: includes/admin/class-leiho-dashboard.php:664
+#: includes/admin/class-leiho-admin.php:502
+#: includes/admin/class-leiho-dashboard.php:683
+#: includes/admin/class-leiho-dashboard.php:849
 msgid "Save"
 msgstr "Enregistrer"
 
@@ -1811,14 +1814,14 @@ msgstr "Décrit l’image pour les personnes qui ne la voient pas, et pour les m
 msgid "File URL"
 msgstr "URL du fichier"
 
-#: assets/admin/app-media.js:268 includes/admin/class-leiho-admin.php:265
-#: includes/admin/class-leiho-dashboard.php:344
+#: assets/admin/app-media.js:268 includes/admin/class-leiho-admin.php:266
 #: includes/admin/class-leiho-dashboard.php:365
-#: includes/admin/class-leiho-dashboard.php:375
+#: includes/admin/class-leiho-dashboard.php:386
+#: includes/admin/class-leiho-dashboard.php:396
 msgid "Copy"
 msgstr "Copier"
 
-#: assets/admin/app-media.js:272 includes/admin/class-leiho-dashboard.php:205
+#: assets/admin/app-media.js:272 includes/admin/class-leiho-dashboard.php:226
 msgid "Open"
 msgstr "Ouvrir"
 
@@ -1884,8 +1887,8 @@ msgid "Something went wrong."
 msgstr "Un problème est survenu."
 
 #: assets/admin/app.js:448 assets/admin/editor.js:4374
-#: includes/admin/class-leiho-admin.php:499
-#: includes/admin/class-leiho-app.php:541
+#: includes/admin/class-leiho-admin.php:500
+#: includes/admin/class-leiho-app.php:549
 msgid "Switch to dark theme"
 msgstr "Passer au thème sombre"
 
@@ -1893,8 +1896,8 @@ msgstr "Passer au thème sombre"
 msgid "Switch to light theme"
 msgstr "Passer au thème clair"
 
-#: assets/admin/app.js:483 includes/admin/class-leiho-app.php:486
-#: includes/admin/class-leiho-app.php:488
+#: assets/admin/app.js:483 includes/admin/class-leiho-app.php:494
+#: includes/admin/class-leiho-app.php:496
 msgid "Collapse the menu"
 msgstr "Replier le menu"
 
@@ -1906,7 +1909,7 @@ msgstr "Déplier le menu"
 msgid "Close the menu"
 msgstr "Fermer le menu"
 
-#: assets/admin/app.js:509 includes/admin/class-leiho-app.php:521
+#: assets/admin/app.js:509 includes/admin/class-leiho-app.php:529
 msgid "Open the menu"
 msgstr "Ouvrir le menu"
 
@@ -1922,8 +1925,8 @@ msgstr "Des modifications ne sont pas encore publiées."
 msgid "Everything is published"
 msgstr "Tout est publié"
 
-#: assets/admin/app.js:635 includes/admin/class-leiho-admin.php:502
-#: includes/admin/class-leiho-app.php:538
+#: assets/admin/app.js:635 includes/admin/class-leiho-admin.php:503
+#: includes/admin/class-leiho-app.php:546
 msgid "Publish"
 msgstr "Publier"
 
@@ -2059,7 +2062,7 @@ msgstr "Rechercher une page"
 msgid "Search pages…"
 msgstr "Rechercher une page…"
 
-#: assets/admin/editor.js:946 includes/admin/class-leiho-dashboard.php:518
+#: assets/admin/editor.js:946 includes/admin/class-leiho-dashboard.php:539
 msgid "Editable content"
 msgstr "Contenus éditables"
 
@@ -2554,7 +2557,7 @@ msgstr "Enregistré. Cliquez sur « Publier » pour mettre en ligne."
 msgid "Saving failed."
 msgstr "Échec de l’enregistrement."
 
-#: assets/admin/editor.js:3865 includes/admin/class-leiho-app.php:587
+#: assets/admin/editor.js:3865 includes/admin/class-leiho-app.php:595
 msgid "Loading…"
 msgstr "Chargement…"
 
@@ -2570,12 +2573,12 @@ msgstr "Impossible de charger l’historique."
 msgid "Show this field"
 msgstr "Afficher ce champ"
 
-#: assets/admin/editor.js:3910 includes/admin/class-leiho-dashboard.php:195
+#: assets/admin/editor.js:3910 includes/admin/class-leiho-dashboard.php:216
 msgid "Unknown user"
 msgstr "Utilisateur inconnu"
 
 #: assets/admin/editor.js:3926 assets/admin/editor.js:3928
-#: includes/admin/class-leiho-dashboard.php:236
+#: includes/admin/class-leiho-dashboard.php:257
 msgid "empty"
 msgstr "vide"
 
@@ -2642,304 +2645,305 @@ msgstr "Vos modifications enregistrées seront mises en ligne automatiquement. C
 msgid "Options"
 msgstr "Options"
 
-#: assets/admin/ui.js:802
+#: assets/admin/ui.js:809
 msgid "New: created when you save"
 msgstr "Nouvelle : créée à l’enregistrement"
 
 #. translators: %s: item name (e.g. a tag).
-#: assets/admin/ui.js:808
+#: assets/admin/ui.js:815
 msgid "Remove %s"
 msgstr "Retirer %s"
 
 #. translators: %s: name typed by the user (e.g. a new tag).
-#: assets/admin/ui.js:838
+#: assets/admin/ui.js:845
 msgid "Create “%s”"
 msgstr "Créer « %s »"
 
-#: assets/admin/ui.js:850
+#: assets/admin/ui.js:857
 msgid "No results"
 msgstr "Aucun résultat"
 
-#: assets/admin/ui.js:1126
+#: assets/admin/ui.js:1133
 msgid "Choose a time"
 msgstr "Choisir une heure"
 
-#: assets/admin/ui.js:1128
+#: assets/admin/ui.js:1135
 msgid "Choose a date"
 msgstr "Choisir une date"
 
-#: assets/admin/ui.js:1128
+#: assets/admin/ui.js:1135
 msgid "Choose a date and time"
 msgstr "Choisir une date et une heure"
 
-#: assets/admin/ui.js:1147 assets/admin/ui.js:1312
+#: assets/admin/ui.js:1154 assets/admin/ui.js:1319
 msgid "Clear"
 msgstr "Effacer"
 
 #. translators: %s: field label.
-#: assets/admin/ui.js:1147
+#: assets/admin/ui.js:1154
 msgid "Clear %s"
 msgstr "Effacer %s"
 
-#: assets/admin/ui.js:1309
+#: assets/admin/ui.js:1316
 msgid "Now"
 msgstr "Maintenant"
 
-#: assets/admin/ui.js:1309
+#: assets/admin/ui.js:1316
 msgid "Today"
 msgstr "Aujourd’hui"
 
-#: assets/admin/ui.js:1319
+#: assets/admin/ui.js:1326
 msgid "Done"
 msgstr "OK"
 
-#: assets/admin/ui.js:1338
+#: assets/admin/ui.js:1345
 msgid "Time"
 msgstr "Heure"
 
-#: assets/admin/ui.js:1340
+#: assets/admin/ui.js:1347
 msgid "Hour"
 msgstr "Heures"
 
-#: assets/admin/ui.js:1341
+#: assets/admin/ui.js:1348
 msgid "Minutes"
 msgstr "Minutes"
 
-#: assets/admin/ui.js:1352
+#: assets/admin/ui.js:1359
 msgid "AM or PM"
 msgstr "Matin ou après-midi"
 
 #. translators: %s: a month and its year (e.g. August 2026).
-#: assets/admin/ui.js:1494
+#: assets/admin/ui.js:1501
 msgid "%s, choose a month"
 msgstr "%s, choisir un mois"
 
-#: assets/admin/ui.js:1495
+#: assets/admin/ui.js:1502
 msgid "Previous month"
 msgstr "Mois précédent"
 
-#: assets/admin/ui.js:1496
+#: assets/admin/ui.js:1503
 msgid "Next month"
 msgstr "Mois suivant"
 
 #. translators: %s: a year.
-#: assets/admin/ui.js:1501
+#: assets/admin/ui.js:1508
 msgid "%s, choose a year"
 msgstr "%s, choisir une année"
 
-#: assets/admin/ui.js:1502
+#: assets/admin/ui.js:1509
 msgid "Previous year"
 msgstr "Année précédente"
 
-#: assets/admin/ui.js:1503
+#: assets/admin/ui.js:1510
 msgid "Next year"
 msgstr "Année suivante"
 
-#: assets/admin/ui.js:1507
+#: assets/admin/ui.js:1514
 msgid "Back to the calendar"
 msgstr "Revenir au calendrier"
 
-#: includes/admin/class-leiho-admin.php:95
+#: includes/admin/class-leiho-admin.php:96
 #: includes/collections/class-leiho-collections.php:577
 msgid "Edit with Leiho"
 msgstr "Modifier avec Leiho"
 
-#: includes/admin/class-leiho-admin.php:104
-#: includes/admin/class-leiho-app.php:92
-#: includes/admin/class-leiho-dashboard.php:56
+#: includes/admin/class-leiho-admin.php:105
+#: includes/admin/class-leiho-app.php:100
+#: includes/admin/class-leiho-dashboard.php:59
 msgid "Get started"
 msgstr "Démarrer"
 
-#: includes/admin/class-leiho-admin.php:266
+#: includes/admin/class-leiho-admin.php:267
 msgid "Checking…"
 msgstr "Vérification…"
 
-#: includes/admin/class-leiho-admin.php:267
+#: includes/admin/class-leiho-admin.php:268
 msgid "Connecting to the site…"
 msgstr "Connexion au site…"
 
 #. translators: 1: bridge version, 2: number of fields, 3: number of sections.
-#: includes/admin/class-leiho-admin.php:269
+#: includes/admin/class-leiho-admin.php:270
 msgid "Bridge v%1$s detected: %2$d annotated field(s) and %3$d section(s) on the home page. The editor is ready."
 msgstr "Bridge v%1$s détecté : %2$d champ(s) annoté(s) et %3$d section(s) sur la page d’accueil. L’éditeur est prêt."
 
-#: includes/admin/class-leiho-admin.php:270
+#: includes/admin/class-leiho-admin.php:271
 msgid "The bridge responds, but no field is annotated on the home page. Add data-wp-post and data-wp-field to your content elements."
 msgstr "Le bridge répond, mais aucun champ n’est annoté sur la page d’accueil. Ajoutez data-wp-post et data-wp-field aux éléments de contenu."
 
-#: includes/admin/class-leiho-admin.php:271
+#: includes/admin/class-leiho-admin.php:272
 msgid "The site didn’t respond within 10 seconds. Either the frame-ancestors header blocks display (step 2), or the bridge isn’t loaded (step 3)."
 msgstr "Le site n’a pas répondu en 10 secondes. Soit l’en-tête frame-ancestors bloque l’affichage (étape 2), soit le bridge n’est pas chargé (étape 3)."
 
-#: includes/admin/class-leiho-admin.php:272
+#: includes/admin/class-leiho-admin.php:273
 msgid "Can’t reach the site from the WordPress server."
 msgstr "Impossible de joindre le site depuis le serveur WordPress."
 
-#: includes/admin/class-leiho-admin.php:385
+#: includes/admin/class-leiho-admin.php:386
 msgid "Leiho isn’t connected to your site yet"
 msgstr "Leiho n’est pas encore connecté à votre site"
 
-#: includes/admin/class-leiho-admin.php:386
+#: includes/admin/class-leiho-admin.php:387
 msgid "Enter your site’s URL and install the bridge. The editor will then open right on your pages."
 msgstr "Indiquez l’adresse du site et installez le bridge : l’éditeur s’ouvrira ensuite directement sur vos pages."
 
-#: includes/admin/class-leiho-admin.php:388
+#: includes/admin/class-leiho-admin.php:389
 msgid "Connect the site"
 msgstr "Connecter le site"
 
-#: includes/admin/class-leiho-admin.php:390
+#: includes/admin/class-leiho-admin.php:391
 msgid "Ask the site administrator to finish the setup."
 msgstr "Demandez à l’administrateur du site de terminer la configuration."
 
-#: includes/admin/class-leiho-admin.php:405
+#: includes/admin/class-leiho-admin.php:406
 msgid "Selection fields"
 msgstr "Champs de la sélection"
 
-#: includes/admin/class-leiho-admin.php:425
+#: includes/admin/class-leiho-admin.php:426
 msgid "Entry"
 msgstr "Entrée"
 
-#: includes/admin/class-leiho-admin.php:428
+#: includes/admin/class-leiho-admin.php:429
 msgid "Entry fields"
 msgstr "Champs de l’entrée"
 
-#: includes/admin/class-leiho-admin.php:450
+#: includes/admin/class-leiho-admin.php:451
 msgid "Editor actions"
 msgstr "Actions de l’éditeur"
 
-#: includes/admin/class-leiho-admin.php:453
+#: includes/admin/class-leiho-admin.php:454
 msgid "Back to the entries"
 msgstr "Retour aux entrées"
 
-#: includes/admin/class-leiho-admin.php:457
+#: includes/admin/class-leiho-admin.php:458
 msgid "Back to Leiho home"
 msgstr "Retour à l’accueil de Leiho"
 
-#: includes/admin/class-leiho-admin.php:464
+#: includes/admin/class-leiho-admin.php:465
 msgid "No page open"
 msgstr "Aucune page ouverte"
 
-#: includes/admin/class-leiho-admin.php:474
+#: includes/admin/class-leiho-admin.php:475
 msgid "Preview width"
 msgstr "Largeur de l’aperçu"
 
-#: includes/admin/class-leiho-admin.php:475
+#: includes/admin/class-leiho-admin.php:476
 msgid "Desktop"
 msgstr "Bureau"
 
-#: includes/admin/class-leiho-admin.php:475
+#: includes/admin/class-leiho-admin.php:476
 msgid "Desktop preview"
 msgstr "Aperçu bureau"
 
-#: includes/admin/class-leiho-admin.php:476
+#: includes/admin/class-leiho-admin.php:477
 msgid "Tablet"
 msgstr "Tablette"
 
-#: includes/admin/class-leiho-admin.php:476
+#: includes/admin/class-leiho-admin.php:477
 msgid "Tablet preview"
 msgstr "Aperçu tablette"
 
-#: includes/admin/class-leiho-admin.php:477
+#: includes/admin/class-leiho-admin.php:478
 msgid "Mobile"
 msgstr "Mobile"
 
-#: includes/admin/class-leiho-admin.php:477
+#: includes/admin/class-leiho-admin.php:478
 msgid "Mobile preview"
 msgstr "Aperçu mobile"
 
-#: includes/admin/class-leiho-admin.php:488
+#: includes/admin/class-leiho-admin.php:489
 msgid "View on the site"
 msgstr "Voir sur le site"
 
-#: includes/admin/class-leiho-admin.php:488
+#: includes/admin/class-leiho-admin.php:489
 msgid "View on the site (new tab)"
 msgstr "Voir sur le site (nouvel onglet)"
 
-#: includes/admin/class-leiho-admin.php:491
-#: includes/admin/class-leiho-admin.php:525
+#: includes/admin/class-leiho-admin.php:492
+#: includes/admin/class-leiho-admin.php:526
 msgid "History"
 msgstr "Historique"
 
-#: includes/admin/class-leiho-admin.php:491
+#: includes/admin/class-leiho-admin.php:492
 msgid "Show the history of this entry"
 msgstr "Afficher l’historique de cette entrée"
 
-#: includes/admin/class-leiho-admin.php:495
+#: includes/admin/class-leiho-admin.php:496
 msgid "Undo and redo"
 msgstr "Annuler et rétablir"
 
-#: includes/admin/class-leiho-admin.php:496
+#: includes/admin/class-leiho-admin.php:497
 msgid "Undo (Ctrl+Z)"
 msgstr "Annuler (Ctrl+Z)"
 
-#: includes/admin/class-leiho-admin.php:496
+#: includes/admin/class-leiho-admin.php:497
 msgid "Undo the last change"
 msgstr "Annuler la dernière modification"
 
-#: includes/admin/class-leiho-admin.php:497
+#: includes/admin/class-leiho-admin.php:498
 msgid "Redo (Ctrl+Shift+Z)"
 msgstr "Rétablir (Ctrl+Maj+Z)"
 
-#: includes/admin/class-leiho-admin.php:497
+#: includes/admin/class-leiho-admin.php:498
 msgid "Redo the undone change"
 msgstr "Rétablir la modification annulée"
 
-#: includes/admin/class-leiho-admin.php:499
-#: includes/admin/class-leiho-app.php:541
+#: includes/admin/class-leiho-admin.php:500
+#: includes/admin/class-leiho-app.php:549
 msgid "Light or dark theme"
 msgstr "Thème clair ou sombre"
 
-#: includes/admin/class-leiho-admin.php:516
+#: includes/admin/class-leiho-admin.php:517
 msgid "Site navigation"
 msgstr "Navigation du site"
 
-#: includes/admin/class-leiho-admin.php:519
+#: includes/admin/class-leiho-admin.php:520
 msgid "Pages"
 msgstr "Pages"
 
-#: includes/admin/class-leiho-admin.php:522
+#: includes/admin/class-leiho-admin.php:523
 msgid "Structure"
 msgstr "Structure"
 
-#: includes/admin/class-leiho-admin.php:546
+#: includes/admin/class-leiho-admin.php:547
 msgid "Pick a page on the left to show it here."
 msgstr "Choisissez une page à gauche pour l’afficher ici."
 
-#: includes/admin/class-leiho-admin.php:548
+#: includes/admin/class-leiho-admin.php:549
 msgid "Site preview"
 msgstr "Aperçu du site"
 
-#: includes/admin/class-leiho-admin.php:551
+#: includes/admin/class-leiho-admin.php:552
 msgid "The site isn’t responding"
 msgstr "Le site ne répond pas"
 
-#: includes/admin/class-leiho-admin.php:552
+#: includes/admin/class-leiho-admin.php:553
 msgid "The preview loaded, but the Leiho bridge didn’t check in. Two possible causes:"
 msgstr "L’aperçu s’est chargé, mais le bridge Leiho ne s’est pas présenté. Deux causes possibles :"
 
-#: includes/admin/class-leiho-admin.php:554
+#: includes/admin/class-leiho-admin.php:555
 msgid "Its frame-ancestors header must allow this address."
 msgstr "Son en-tête frame-ancestors doit autoriser cette adresse."
 
-#: includes/admin/class-leiho-admin.php:554
+#: includes/admin/class-leiho-admin.php:555
 msgid "The site refuses to be displayed in wp-admin."
 msgstr "Le site refuse d’être affiché dans wp-admin."
 
-#: includes/admin/class-leiho-admin.php:555
+#: includes/admin/class-leiho-admin.php:556
 msgid "Check the installation."
 msgstr "Vérifiez l’installation."
 
-#: includes/admin/class-leiho-admin.php:555
+#: includes/admin/class-leiho-admin.php:556
 msgid "The bridge isn’t loaded on this page."
 msgstr "Le bridge n’est pas chargé sur cette page."
 
-#: includes/admin/class-leiho-admin.php:558
-#: includes/admin/class-leiho-dashboard.php:381
-#: includes/admin/class-leiho-dashboard.php:385
+#: includes/admin/class-leiho-admin.php:559
+#: includes/admin/class-leiho-dashboard.php:402
+#: includes/admin/class-leiho-dashboard.php:406
 msgid "Test the connection"
 msgstr "Tester la connexion"
 
-#: includes/admin/class-leiho-admin.php:572 includes/class-leiho-cache.php:520
+#: includes/admin/class-leiho-admin.php:577
+#: includes/admin/class-leiho-admin.php:601 includes/class-leiho-cache.php:520
 #: includes/class-leiho-rest.php:487
 msgid "Access denied."
 msgstr "Accès refusé."
@@ -2953,838 +2957,905 @@ msgctxt "navigation"
 msgid "Publishing"
 msgstr "Publications"
 
-#: includes/admin/class-leiho-app.php:86
+#: includes/admin/class-leiho-app.php:94
 msgid "Settings"
 msgstr "Réglages"
 
-#: includes/admin/class-leiho-app.php:456
+#: includes/admin/class-leiho-app.php:464
 msgid "Skip to content"
 msgstr "Aller au contenu"
 
-#: includes/admin/class-leiho-app.php:458
+#: includes/admin/class-leiho-app.php:466
 msgid "Leiho navigation"
 msgstr "Navigation de Leiho"
 
-#: includes/admin/class-leiho-app.php:481
-#: includes/admin/class-leiho-app.php:483
+#: includes/admin/class-leiho-app.php:489
+#: includes/admin/class-leiho-app.php:491
 msgid "Back to WordPress"
 msgstr "Retour à WordPress"
 
-#: includes/admin/class-leiho-app.php:525
-#: includes/admin/class-leiho-dashboard.php:499
+#: includes/admin/class-leiho-app.php:533
+#: includes/admin/class-leiho-dashboard.php:91
+#: includes/admin/class-leiho-dashboard.php:520
 msgid "Your site"
 msgstr "Votre site"
 
-#: includes/admin/class-leiho-app.php:528
-#: includes/admin/class-leiho-dashboard.php:69
+#: includes/admin/class-leiho-app.php:536
+#: includes/admin/class-leiho-dashboard.php:72
 msgid "View site"
 msgstr "Voir le site"
 
-#: includes/admin/class-leiho-app.php:552
+#: includes/admin/class-leiho-app.php:560
 msgid "Profile"
 msgstr "Profil"
 
-#: includes/admin/class-leiho-app.php:556
+#: includes/admin/class-leiho-app.php:564
 msgid "Log out"
 msgstr "Se déconnecter"
 
-#: includes/admin/class-leiho-app.php:588
+#: includes/admin/class-leiho-app.php:596
 msgid "Leiho needs JavaScript."
 msgstr "Leiho a besoin de JavaScript."
 
-#: includes/admin/class-leiho-dashboard.php:52
+#: includes/admin/class-leiho-dashboard.php:55
 msgid "Connect your site to Leiho"
 msgstr "Connectez votre site à Leiho"
 
-#: includes/admin/class-leiho-dashboard.php:53
+#: includes/admin/class-leiho-dashboard.php:56
 msgid "Enter your site’s URL, allow the editor to display it, install the bridge: four guided steps, each with a check."
 msgstr "Indiquez l’adresse du site, autorisez l’éditeur à l’afficher, installez le bridge : quatre étapes guidées, avec une vérification à chacune."
 
-#: includes/admin/class-leiho-dashboard.php:63
+#: includes/admin/class-leiho-dashboard.php:66
 msgid "Edit your site as you see it"
 msgstr "Modifiez votre site en le regardant"
 
-#: includes/admin/class-leiho-dashboard.php:64
+#: includes/admin/class-leiho-dashboard.php:67
 msgid "Click any text or image on your site to edit it. You see the result right away, before you save."
 msgstr "Cliquez sur un texte ou une image de votre site pour le modifier. Vous voyez le résultat immédiatement, avant de l’enregistrer."
 
-#: includes/admin/class-leiho-dashboard.php:74
+#: includes/admin/class-leiho-dashboard.php:77
 msgid "Open the editor"
 msgstr "Ouvrir l’éditeur"
 
-#: includes/admin/class-leiho-dashboard.php:81
+#: includes/admin/class-leiho-dashboard.php:92
+msgid "Edit the home page in the visual editor"
+msgstr "Modifier la page d’accueil dans l’éditeur visuel"
+
+#: includes/admin/class-leiho-dashboard.php:94
+msgid "Live preview of the site’s home page"
+msgstr "Aperçu en direct de la page d’accueil du site"
+
+#: includes/admin/class-leiho-dashboard.php:96
+msgid "Edit this page"
+msgstr "Modifier cette page"
+
+#: includes/admin/class-leiho-dashboard.php:102
 msgid "Recent changes"
 msgstr "Dernières modifications"
 
-#: includes/admin/class-leiho-dashboard.php:86
+#: includes/admin/class-leiho-dashboard.php:107
 msgid "No changes yet"
 msgstr "Aucune modification pour l’instant"
 
-#: includes/admin/class-leiho-dashboard.php:87
+#: includes/admin/class-leiho-dashboard.php:108
 msgid "Every save made in the editor shows up here: who changed which field, when, with the before and after values."
 msgstr "Chaque enregistrement fait depuis l’éditeur apparaîtra ici : qui a modifié quel champ, quand, avec la valeur avant et après."
 
-#: includes/admin/class-leiho-dashboard.php:107
-#: includes/admin/class-leiho-dashboard.php:558
+#: includes/admin/class-leiho-dashboard.php:128
+#: includes/admin/class-leiho-dashboard.php:579
 #: includes/class-leiho-native-fields.php:188
 msgid "Publishing"
 msgstr "Mise en ligne"
 
-#: includes/admin/class-leiho-dashboard.php:112
+#: includes/admin/class-leiho-dashboard.php:133
 msgid "Not tested yet"
 msgstr "Pas encore testée"
 
-#: includes/admin/class-leiho-dashboard.php:112
-#: includes/admin/class-leiho-dashboard.php:115
-#: includes/admin/class-leiho-dashboard.php:124
+#: includes/admin/class-leiho-dashboard.php:133
+#: includes/admin/class-leiho-dashboard.php:136
+#: includes/admin/class-leiho-dashboard.php:145
 msgid "Site connection"
 msgstr "Connexion au site"
 
-#: includes/admin/class-leiho-dashboard.php:116
+#: includes/admin/class-leiho-dashboard.php:137
 msgid "Working"
 msgstr "Opérationnelle"
 
 #. translators: %s: relative time (e.g. 5 mins).
-#: includes/admin/class-leiho-dashboard.php:119
+#: includes/admin/class-leiho-dashboard.php:140
 msgid "Checked %s ago"
 msgstr "Vérifiée il y a %s"
 
-#: includes/admin/class-leiho-dashboard.php:124
+#: includes/admin/class-leiho-dashboard.php:145
 msgid "Needs attention"
 msgstr "À vérifier"
 
-#: includes/admin/class-leiho-dashboard.php:124
+#: includes/admin/class-leiho-dashboard.php:145
 msgid "The last test failed."
 msgstr "Le dernier test a échoué."
 
 #. translators: 1: deployment status, 2: relative time (e.g. 5 mins).
-#: includes/admin/class-leiho-dashboard.php:135
+#: includes/admin/class-leiho-dashboard.php:156
 msgid "Last deployment: %1$s, %2$s ago"
 msgstr "Dernière publication : %1$s, il y a %2$s"
 
-#: includes/admin/class-leiho-dashboard.php:143
+#: includes/admin/class-leiho-dashboard.php:164
 msgid "Changes this week"
 msgstr "Modifications cette semaine"
 
-#: includes/admin/class-leiho-dashboard.php:149
+#: includes/admin/class-leiho-dashboard.php:170
 msgid "Quick links"
 msgstr "Raccourcis"
 
-#: includes/admin/class-leiho-dashboard.php:153
+#: includes/admin/class-leiho-dashboard.php:174
 msgid "A page, an article or a collection entry."
 msgstr "Une page, un article ou une entrée de collection."
 
-#: includes/admin/class-leiho-dashboard.php:154
+#: includes/admin/class-leiho-dashboard.php:175
 msgid "All your content, by type: search, edit, duplicate, restore."
 msgstr "Tous vos contenus, par type : rechercher, modifier, dupliquer, restaurer."
 
-#: includes/admin/class-leiho-dashboard.php:155
+#: includes/admin/class-leiho-dashboard.php:176
 msgid "Edit your pages as visitors see them."
 msgstr "Modifiez vos pages telles que les voient les visiteurs."
 
-#: includes/admin/class-leiho-dashboard.php:156
+#: includes/admin/class-leiho-dashboard.php:177
 msgid "Images and files of the site."
 msgstr "Les images et fichiers du site."
 
 #. translators: 1: author, 2: content title, 3: relative time (e.g. 5 mins).
-#: includes/admin/class-leiho-dashboard.php:194
+#: includes/admin/class-leiho-dashboard.php:215
 msgid "%1$s · %2$s · %3$s ago"
 msgstr "%1$s · %2$s · il y a %3$s"
 
-#: includes/admin/class-leiho-dashboard.php:196
+#: includes/admin/class-leiho-dashboard.php:217
 msgid "deleted content"
 msgstr "contenu supprimé"
 
-#: includes/admin/class-leiho-dashboard.php:218
+#: includes/admin/class-leiho-dashboard.php:239
 msgid "Before"
 msgstr "Avant"
 
-#: includes/admin/class-leiho-dashboard.php:223
+#: includes/admin/class-leiho-dashboard.php:244
 msgid "After"
 msgstr "Après"
 
-#: includes/admin/class-leiho-dashboard.php:316
+#: includes/admin/class-leiho-dashboard.php:337
 msgid "We’re going to make this site editable with Leiho, the visual editor for WordPress. Leiho has precise instructions to follow throughout the project; you’ll find them below. Read them in full before writing any code, and follow them for every component."
 msgstr "Nous allons rendre ce site éditable avec Leiho, l’éditeur visuel WordPress. Leiho a des instructions précises à suivre pendant tout le projet : je te les donne ci-dessous. Lis-les entièrement avant d’écrire du code, et respecte-les pour chaque composant."
 
-#: includes/admin/class-leiho-dashboard.php:317
+#: includes/admin/class-leiho-dashboard.php:338
 msgid "Site repository:"
 msgstr "Dépôt du site :"
 
-#: includes/admin/class-leiho-dashboard.php:317
+#: includes/admin/class-leiho-dashboard.php:338
 msgid "The site already exists. Install the bridge, then annotate every piece of displayed content with its matching WordPress field, following the instructions. Finish with the checklist."
 msgstr "Le site existe déjà. Installe le bridge, puis annote chaque contenu affiché avec le champ WordPress correspondant, en suivant les instructions. Termine par la liste de vérifications."
 
-#: includes/admin/class-leiho-dashboard.php:318
+#: includes/admin/class-leiho-dashboard.php:339
 msgid "Site idea or brief:"
 msgstr "Idée ou brief du site :"
 
-#: includes/admin/class-leiho-dashboard.php:318
+#: includes/admin/class-leiho-dashboard.php:339
 msgid "We’re starting from scratch. Build the site and its ACF content model, following the instructions from the very first component. Finish with the checklist."
 msgstr "Nous partons de zéro. Construis le site et son modèle de contenu ACF en suivant les instructions dès le premier composant. Termine par la liste de vérifications."
 
-#: includes/admin/class-leiho-dashboard.php:321
+#: includes/admin/class-leiho-dashboard.php:342
 msgid "Connect a site"
 msgstr "Connecter un site"
 
-#: includes/admin/class-leiho-dashboard.php:322
+#: includes/admin/class-leiho-dashboard.php:343
 msgid "Make your site editable"
 msgstr "Rendre votre site éditable"
 
-#: includes/admin/class-leiho-dashboard.php:323
+#: includes/admin/class-leiho-dashboard.php:344
 msgid "Leiho works with any site that reads its content from WordPress: React, Next.js, Remix, Vite, Astro, Nuxt, SvelteKit or plain HTML. Four steps, each one verifiable."
 msgstr "Leiho fonctionne avec n’importe quel site qui lit son contenu dans WordPress : React, Next.js, Remix, Vite, Astro, Nuxt, SvelteKit ou HTML. Quatre étapes, chacune vérifiable."
 
-#: includes/admin/class-leiho-dashboard.php:328
-#: includes/admin/class-leiho-dashboard.php:503
+#: includes/admin/class-leiho-dashboard.php:349
+#: includes/admin/class-leiho-dashboard.php:524
 msgid "Site URL"
 msgstr "Adresse du site"
 
-#: includes/admin/class-leiho-dashboard.php:333
+#: includes/admin/class-leiho-dashboard.php:354
 msgid "The site’s public URL and, if you have one, the preview URL to show in the editor."
 msgstr "L’adresse publique du site, et si vous en avez une, l’adresse de prévisualisation à afficher dans l’éditeur."
 
-#: includes/admin/class-leiho-dashboard.php:335
+#: includes/admin/class-leiho-dashboard.php:356
 msgid "Edit"
 msgstr "Modifier"
 
-#: includes/admin/class-leiho-dashboard.php:335
+#: includes/admin/class-leiho-dashboard.php:356
 msgid "Enter the URL"
 msgstr "Renseigner l’adresse"
 
-#: includes/admin/class-leiho-dashboard.php:340
+#: includes/admin/class-leiho-dashboard.php:361
 msgid "Allow the editor to display the site"
 msgstr "Autoriser l’éditeur à afficher le site"
 
-#: includes/admin/class-leiho-dashboard.php:341
+#: includes/admin/class-leiho-dashboard.php:362
 msgid "The site must allow being displayed in wp-admin. Add this HTTP header to its responses (host settings, middleware or the framework’s headers file)."
 msgstr "Le site doit accepter d’être affiché dans wp-admin. Ajoutez cet en-tête HTTP à ses réponses (configuration de l’hébergeur, middleware ou fichier d’en-têtes du framework)."
 
-#: includes/admin/class-leiho-dashboard.php:348
+#: includes/admin/class-leiho-dashboard.php:369
 msgid "Check headers"
 msgstr "Vérifier les en-têtes"
 
-#: includes/admin/class-leiho-dashboard.php:355
+#: includes/admin/class-leiho-dashboard.php:376
 msgid "Install the bridge"
 msgstr "Installer le bridge"
 
-#: includes/admin/class-leiho-dashboard.php:356
+#: includes/admin/class-leiho-dashboard.php:377
 msgid "A small script that only loads inside the editor. Your visitors never download it."
 msgstr "Un petit script qui ne se charge que dans l’éditeur : vos visiteurs ne le téléchargent jamais."
 
-#: includes/admin/class-leiho-dashboard.php:358
+#: includes/admin/class-leiho-dashboard.php:379
 msgid "HTML · Astro · Nuxt · SvelteKit"
 msgstr "HTML · Astro · Nuxt · SvelteKit"
 
-#: includes/admin/class-leiho-dashboard.php:359
+#: includes/admin/class-leiho-dashboard.php:380
 msgid "React · Next.js · Remix · Vite"
 msgstr "React · Next.js · Remix · Vite"
 
-#: includes/admin/class-leiho-dashboard.php:362
+#: includes/admin/class-leiho-dashboard.php:383
 msgid "Put leiho-bridge.js in the site’s public folder, then add this code to the layout’s <head>."
 msgstr "Placez leiho-bridge.js dans le dossier public du site, puis ce code dans le <head> du layout."
 
-#: includes/admin/class-leiho-dashboard.php:368
+#: includes/admin/class-leiho-dashboard.php:389
 msgid "Download leiho-bridge.js"
 msgstr "Télécharger leiho-bridge.js"
 
-#: includes/admin/class-leiho-dashboard.php:372
+#: includes/admin/class-leiho-dashboard.php:393
 msgid "The component loads the bridge only inside the editor, through a dynamic import."
 msgstr "Le composant charge le bridge uniquement dans l’éditeur, par import dynamique."
 
-#: includes/admin/class-leiho-dashboard.php:382
+#: includes/admin/class-leiho-dashboard.php:403
 msgid "Leiho opens your site in the background and waits for the bridge to check in. If it responds, the editor is ready."
 msgstr "Leiho ouvre votre site en arrière-plan et attend que le bridge se présente. S’il répond, l’éditeur est prêt."
 
 #. translators: 1: bridge version, 2: number of fields, 3: relative time (e.g. 5 mins).
-#: includes/admin/class-leiho-dashboard.php:396
+#: includes/admin/class-leiho-dashboard.php:417
 msgid "Bridge v%1$s detected, %2$d annotated field(s) on the home page. Checked %3$s ago."
 msgstr "Bridge v%1$s détecté, %2$d champ(s) annoté(s) sur la page d’accueil. Vérifié il y a %3$s."
 
 #. translators: %s: relative time (e.g. 5 mins).
-#: includes/admin/class-leiho-dashboard.php:398
+#: includes/admin/class-leiho-dashboard.php:419
 msgid "The bridge didn’t respond to the last test, %s ago."
 msgstr "Le bridge n’a pas répondu lors du dernier test, il y a %s."
 
-#: includes/admin/class-leiho-dashboard.php:407
+#: includes/admin/class-leiho-dashboard.php:428
 msgid "Annotate your content"
 msgstr "Annoter les contenus"
 
-#: includes/admin/class-leiho-dashboard.php:409
+#: includes/admin/class-leiho-dashboard.php:430
 msgid "Every element that displays a WordPress field carries that field’s name. The bridge uses it to know what to update, and the editor to know which field to open on click."
 msgstr "Chaque élément qui affiche un champ WordPress porte le nom de ce champ. Le bridge s’en sert pour savoir quoi mettre à jour, et l’éditeur pour savoir quel champ ouvrir quand on clique."
 
-#: includes/admin/class-leiho-dashboard.php:413
+#: includes/admin/class-leiho-dashboard.php:434
 msgid "All the annotations, rules and the checklist are in the guide below."
 msgstr "Toutes les annotations, les règles et la liste de vérifications sont dans le guide ci-dessous."
 
-#: includes/admin/class-leiho-dashboard.php:416
+#: includes/admin/class-leiho-dashboard.php:437
 msgid "With an AI agent"
 msgstr "Avec un agent IA"
 
-#: includes/admin/class-leiho-dashboard.php:418
+#: includes/admin/class-leiho-dashboard.php:439
 msgid "Claude, Codex, Cursor…"
 msgstr "Claude, Codex, Cursor…"
 
-#: includes/admin/class-leiho-dashboard.php:419
+#: includes/admin/class-leiho-dashboard.php:440
 msgid "Let the agent do the integration"
 msgstr "Laissez l’agent faire l’intégration"
 
-#: includes/admin/class-leiho-dashboard.php:420
+#: includes/admin/class-leiho-dashboard.php:441
 msgid "Leiho gives your agent a precise contract: where to load the bridge, how to name and annotate fields, which mistakes to avoid, what to check before shipping. Copy the right prompt, then add your repository or brief."
 msgstr "Leiho fournit à votre agent un contrat précis : où charger le bridge, comment nommer et annoter les champs, quelles erreurs éviter, quoi vérifier avant de livrer. Copiez le prompt adapté, ajoutez votre dépôt ou votre brief."
 
-#: includes/admin/class-leiho-dashboard.php:424
+#: includes/admin/class-leiho-dashboard.php:445
 msgid "Integrate an existing site"
 msgstr "Intégrer un site existant"
 
-#: includes/admin/class-leiho-dashboard.php:425
+#: includes/admin/class-leiho-dashboard.php:446
 msgid "The site already reads its content from WordPress. The agent installs the bridge and annotates all the content."
 msgstr "Le site lit déjà son contenu dans WordPress. L’agent installe le bridge et annote chaque contenu."
 
-#: includes/admin/class-leiho-dashboard.php:426
-#: includes/admin/class-leiho-dashboard.php:432
+#: includes/admin/class-leiho-dashboard.php:447
+#: includes/admin/class-leiho-dashboard.php:453
 msgid "Copy prompt"
 msgstr "Copier le prompt"
 
-#: includes/admin/class-leiho-dashboard.php:430
+#: includes/admin/class-leiho-dashboard.php:451
 msgid "Build a new site"
 msgstr "Construire un nouveau site"
 
-#: includes/admin/class-leiho-dashboard.php:431
+#: includes/admin/class-leiho-dashboard.php:452
 msgid "The agent designs the site and its ACF content model, editable with Leiho from the very first component."
 msgstr "L’agent conçoit le site et son modèle de contenu ACF, éditable avec Leiho dès le premier composant."
 
-#: includes/admin/class-leiho-dashboard.php:438
+#: includes/admin/class-leiho-dashboard.php:459
 msgid "Read the full instructions"
 msgstr "Lire les instructions complètes"
 
-#: includes/admin/class-leiho-dashboard.php:439
+#: includes/admin/class-leiho-dashboard.php:460
 msgid "Agent instructions"
 msgstr "Instructions pour l’agent"
 
-#: includes/admin/class-leiho-dashboard.php:463
+#: includes/admin/class-leiho-dashboard.php:484
 msgid "Settings saved."
 msgstr "Réglages enregistrés."
 
-#: includes/admin/class-leiho-dashboard.php:471
+#: includes/admin/class-leiho-dashboard.php:492
 msgid "Content cache cleared. Page caches were asked to purge the content API."
 msgstr "Cache de contenu vidé. Les caches de page ont été priés de purger l’API de contenu."
 
-#: includes/admin/class-leiho-dashboard.php:483
+#: includes/admin/class-leiho-dashboard.php:504
 msgid "GitHub configuration check"
 msgstr "Contrôle de la configuration GitHub"
 
-#: includes/admin/class-leiho-dashboard.php:487
+#: includes/admin/class-leiho-dashboard.php:508
 msgid "Error"
 msgstr "Erreur"
 
-#: includes/admin/class-leiho-dashboard.php:487
+#: includes/admin/class-leiho-dashboard.php:508
 msgid "OK"
 msgstr "OK"
 
-#: includes/admin/class-leiho-dashboard.php:487
+#: includes/admin/class-leiho-dashboard.php:508
 msgid "Warning"
 msgstr "Attention"
 
-#: includes/admin/class-leiho-dashboard.php:500
+#: includes/admin/class-leiho-dashboard.php:521
 msgid "The site your clients edit, as visitors see it."
 msgstr "Le site que vos clients modifient, tel que les visiteurs le voient."
 
-#: includes/admin/class-leiho-dashboard.php:509
+#: includes/admin/class-leiho-dashboard.php:530
 msgid "Preview URL"
 msgstr "Adresse de prévisualisation"
 
-#: includes/admin/class-leiho-dashboard.php:512
+#: includes/admin/class-leiho-dashboard.php:533
 msgid "Optional. Shown in the editor instead of the public site: useful when the public site is generated at build time and an up-to-date version is served elsewhere."
 msgstr "Facultatif. Affichée dans l’éditeur à la place du site public : utile quand le site public est généré au build et qu’une version à jour est servie ailleurs."
 
-#: includes/admin/class-leiho-dashboard.php:519
+#: includes/admin/class-leiho-dashboard.php:540
 msgid "The content types offered in the editor, and the URL of each one on the site."
 msgstr "Les types de contenus proposés dans l’éditeur, et l’adresse de chacun sur le site."
 
-#: includes/admin/class-leiho-dashboard.php:534
+#: includes/admin/class-leiho-dashboard.php:555
 msgid "URLs on the site"
 msgstr "Adresses sur le site"
 
 #. translators: %s: post type name.
-#: includes/admin/class-leiho-dashboard.php:540
+#: includes/admin/class-leiho-dashboard.php:561
 msgid "URL pattern for %s"
 msgstr "Modèle d’adresse pour %s"
 
-#: includes/admin/class-leiho-dashboard.php:544
+#: includes/admin/class-leiho-dashboard.php:565
 msgid "Available variables: {slug}, {id}. Empty = /{slug}. The home page always points to /."
 msgstr "Variables disponibles : {slug}, {id}. Vide = /{slug}. La page d’accueil pointe toujours vers /."
 
-#: includes/admin/class-leiho-dashboard.php:549
+#: includes/admin/class-leiho-dashboard.php:570
 msgid "Field holding the URL"
 msgstr "Champ contenant l’adresse"
 
-#: includes/admin/class-leiho-dashboard.php:552
+#: includes/admin/class-leiho-dashboard.php:573
 msgid "Optional. Name of an ACF field or meta key that holds each item’s actual URL (for example /services/audit). Takes priority over the patterns above."
 msgstr "Facultatif. Nom d’un champ ACF ou d’une meta qui contient l’adresse réelle de chaque contenu (par exemple /services/audit). Prioritaire sur les modèles ci-dessus."
 
-#: includes/admin/class-leiho-dashboard.php:559
+#: includes/admin/class-leiho-dashboard.php:580
 msgid "What happens when a client clicks “Publish”."
 msgstr "Ce qui se passe quand un client clique sur « Publier »."
 
-#: includes/admin/class-leiho-dashboard.php:561
+#: includes/admin/class-leiho-dashboard.php:582
 msgid "Publishing mode"
 msgstr "Mode de mise en ligne"
 
-#: includes/admin/class-leiho-dashboard.php:573
+#: includes/admin/class-leiho-dashboard.php:594
 msgid "Build hook URL"
 msgstr "URL du build hook"
 
-#: includes/admin/class-leiho-dashboard.php:582
+#: includes/admin/class-leiho-dashboard.php:603
 msgid "Coolify webhook URL"
 msgstr "URL du webhook Coolify"
 
-#: includes/admin/class-leiho-dashboard.php:585
+#: includes/admin/class-leiho-dashboard.php:606
 msgid "Coolify token"
 msgstr "Token Coolify"
 
-#: includes/admin/class-leiho-dashboard.php:590
+#: includes/admin/class-leiho-dashboard.php:611
 msgid "Build time"
 msgstr "Durée du build"
 
-#: includes/admin/class-leiho-dashboard.php:592
+#: includes/admin/class-leiho-dashboard.php:613
 msgid "minutes"
 msgstr "minutes"
 
-#: includes/admin/class-leiho-dashboard.php:593
+#: includes/admin/class-leiho-dashboard.php:614
 msgid "Shown to the client after “Publish”, since the build can’t be tracked live."
 msgstr "Affichée au client après « Publier », faute de pouvoir suivre le build en direct."
 
-#: includes/admin/class-leiho-dashboard.php:600
+#: includes/admin/class-leiho-dashboard.php:621
 msgid "GitHub repository"
 msgstr "Dépôt GitHub"
 
-#: includes/admin/class-leiho-dashboard.php:605
+#: includes/admin/class-leiho-dashboard.php:626
 msgid "Workflow file"
 msgstr "Fichier du workflow"
 
-#: includes/admin/class-leiho-dashboard.php:610
+#: includes/admin/class-leiho-dashboard.php:631
 msgid "Branch"
 msgstr "Branche"
 
-#: includes/admin/class-leiho-dashboard.php:613
+#: includes/admin/class-leiho-dashboard.php:634
 msgid "Fine-grained token limited to this repository only: “Actions: Read and write” for GitHub Actions, “Contents: Read and write” for the deployment commit. Don’t use a classic token: it grants access to all your repositories."
 msgstr "Token fine-grained limité à ce seul dépôt : « Actions : lecture et écriture » pour GitHub Actions, « Contents : lecture et écriture » pour le commit de publication. N’utilisez pas de token classique, il donne accès à tous vos dépôts."
 
-#: includes/admin/class-leiho-dashboard.php:613
+#: includes/admin/class-leiho-dashboard.php:634
 msgid "GitHub token"
 msgstr "Token GitHub"
 
-#: includes/admin/class-leiho-dashboard.php:618
+#: includes/admin/class-leiho-dashboard.php:639
 #: includes/deploy/class-leiho-deploy-manager.php:143
 msgid "Automatic publishing"
 msgstr "Publication automatique"
 
-#: includes/admin/class-leiho-dashboard.php:620
+#: includes/admin/class-leiho-dashboard.php:641
 msgid "Publish on its own after each change"
 msgstr "Publier tout seul après chaque modification"
 
 #. translators: %s: number input for the delay in seconds.
-#: includes/admin/class-leiho-dashboard.php:625
+#: includes/admin/class-leiho-dashboard.php:646
 msgid "Publishes %s seconds after the last change, so a series of edits gives a single deployment. Changes made in wp-admin count too."
 msgstr "Publie %s secondes après la dernière modification : une série de retouches donne un seul déploiement. Les modifications faites dans wp-admin comptent aussi."
 
-#: includes/admin/class-leiho-dashboard.php:626
+#: includes/admin/class-leiho-dashboard.php:647
 msgid "Delay before automatic publishing, in seconds"
 msgstr "Délai avant la publication automatique, en secondes"
 
-#: includes/admin/class-leiho-dashboard.php:633
+#: includes/admin/class-leiho-dashboard.php:654
 msgid "Delay between deployments"
 msgstr "Délai entre deux publications"
 
-#: includes/admin/class-leiho-dashboard.php:635
+#: includes/admin/class-leiho-dashboard.php:656
 msgid "seconds"
 msgstr "secondes"
 
-#: includes/admin/class-leiho-dashboard.php:642
+#: includes/admin/class-leiho-dashboard.php:663
 msgid "Editors"
 msgstr "Rédacteurs"
 
-#: includes/admin/class-leiho-dashboard.php:643
+#: includes/admin/class-leiho-dashboard.php:664
 msgid "Leiho is the whole back office for the people who edit the site."
 msgstr "Leiho est tout le back-office des personnes qui modifient le site."
 
-#: includes/admin/class-leiho-dashboard.php:645
+#: includes/admin/class-leiho-dashboard.php:666
 msgid "After logging in"
 msgstr "Après la connexion"
 
-#: includes/admin/class-leiho-dashboard.php:648
+#: includes/admin/class-leiho-dashboard.php:669
 msgid "Open Leiho for users who aren’t administrators"
 msgstr "Ouvrir Leiho pour les utilisateurs qui ne sont pas administrateurs"
 
-#: includes/admin/class-leiho-dashboard.php:649
+#: includes/admin/class-leiho-dashboard.php:670
 msgid "Editors and authors land in Leiho instead of the WordPress dashboard. Administrators keep the usual dashboard and reach Leiho from the menu."
 msgstr "Éditeurs et auteurs arrivent dans Leiho au lieu du tableau de bord WordPress. Les administrateurs gardent le tableau de bord habituel et ouvrent Leiho depuis le menu."
 
-#: includes/admin/class-leiho-dashboard.php:659
+#: includes/admin/class-leiho-dashboard.php:678
 msgid "Secrets are encrypted in the database with a key derived from the WordPress salts."
 msgstr "Les secrets sont chiffrés en base avec une clé dérivée des salts WordPress."
 
-#: includes/admin/class-leiho-dashboard.php:662
+#: includes/admin/class-leiho-dashboard.php:681
 msgid "Save and test GitHub"
 msgstr "Enregistrer et tester GitHub"
 
-#: includes/admin/class-leiho-dashboard.php:685
+#: includes/admin/class-leiho-dashboard.php:703
 msgid "One per line: your terms, how you name your offer."
 msgstr "Un par ligne : vos termes, la façon dont vous nommez votre offre."
 
-#: includes/admin/class-leiho-dashboard.php:685
+#: includes/admin/class-leiho-dashboard.php:703
 msgid "Words to prefer"
 msgstr "Mots à privilégier"
 
-#: includes/admin/class-leiho-dashboard.php:686
+#: includes/admin/class-leiho-dashboard.php:704
 msgid "One per line: jargon, competitors’ terms, overused words."
 msgstr "Un par ligne : jargon, termes des concurrents, mots usés."
 
-#: includes/admin/class-leiho-dashboard.php:686
+#: includes/admin/class-leiho-dashboard.php:704
 msgid "Words to avoid"
 msgstr "Mots à éviter"
 
-#: includes/admin/class-leiho-dashboard.php:687
+#: includes/admin/class-leiho-dashboard.php:705
 msgid "Forbidden claims"
 msgstr "Formulations interdites"
 
-#: includes/admin/class-leiho-dashboard.php:687
+#: includes/admin/class-leiho-dashboard.php:705
 msgid "One per line. Never written by the AI, and flagged in every proposal before you accept it. Matched without case or accents, at the start of a word (“guarantee” also flags “guaranteed”, “4 h” also flags “4h”); write /pattern/i for a regular expression."
 msgstr "Une par ligne. Jamais écrites par l’IA, et signalées dans chaque proposition avant que vous l’acceptiez. Recherchées sans tenir compte des majuscules ni des accents, en début de mot (« certifié » signale aussi « certifiée », « 4 h » signale aussi « 4h ») ; écrivez /motif/i pour une expression régulière."
 
-#: includes/admin/class-leiho-dashboard.php:688
+#: includes/admin/class-leiho-dashboard.php:706
 msgid "Mandatory facts"
 msgstr "Faits obligatoires"
 
-#: includes/admin/class-leiho-dashboard.php:688
+#: includes/admin/class-leiho-dashboard.php:706
 msgid "One per line: phone number, legal mentions, figures that must stay exact."
 msgstr "Un par ligne : numéro de téléphone, mentions légales, chiffres qui doivent rester exacts."
 
-#: includes/admin/class-leiho-dashboard.php:692
-msgid "Brand context (AI)"
-msgstr "Contexte de marque (IA)"
-
-#: includes/admin/class-leiho-dashboard.php:693
+#: includes/admin/class-leiho-dashboard.php:711
 msgid "What the AI needs to know to write like you. It’s sent with every AI request, together with the entry being edited."
 msgstr "Ce que l’IA doit savoir pour écrire comme vous. Il est envoyé avec chaque demande à l’IA, avec l’entrée en cours de modification."
 
-#: includes/admin/class-leiho-dashboard.php:696
-msgid "AI provider"
-msgstr "Fournisseur d’IA"
-
-#: includes/admin/class-leiho-dashboard.php:699
-msgid "Unavailable"
-msgstr "Indisponible"
-
-#: includes/admin/class-leiho-dashboard.php:700
-msgid "AI in Leiho uses the AI client of WordPress 7.0 and later. Update WordPress to use it."
-msgstr "L’IA de Leiho utilise le client d’IA de WordPress 7.0 et suivants. Mettez WordPress à jour pour l’utiliser."
-
-#: includes/admin/class-leiho-dashboard.php:702
-msgid "Not configured"
-msgstr "Non configuré"
-
-#: includes/admin/class-leiho-dashboard.php:703
-msgid "No AI provider is set up for text generation yet. Leiho never stores API keys: it uses the provider configured in WordPress."
-msgstr "Aucun fournisseur d’IA n’est encore configuré pour générer du texte. Leiho ne stocke jamais de clé d’API : il utilise le fournisseur configuré dans WordPress."
-
-#: includes/admin/class-leiho-dashboard.php:706
-msgid "Ready"
-msgstr "Prêt"
-
-#: includes/admin/class-leiho-dashboard.php:709
-msgid "Text generation and image descriptions (alternative text) are available."
-msgstr "La génération de texte et la description d’images (texte alternatif) sont disponibles."
-
-#: includes/admin/class-leiho-dashboard.php:709
-msgid "Text generation is available. The provider can’t read images, so alternative text isn’t offered."
-msgstr "La génération de texte est disponible. Le fournisseur ne lit pas les images : le texte alternatif n’est pas proposé."
-
 #: includes/admin/class-leiho-dashboard.php:714
-msgid "Privacy: when someone uses an AI action, the brand context, the text of the field and the other fields of the entry (or the image, for alternative text) are sent to the provider configured in Settings → Connectors, under its terms. Leiho keeps a line in the change log (who, which field, which action), never the prompt."
-msgstr "Confidentialité : quand quelqu’un utilise une action d’IA, le contexte de marque, le texte du champ et les autres champs de l’entrée (ou l’image, pour le texte alternatif) sont envoyés au fournisseur configuré dans Réglages → Connecteurs, selon ses conditions. Leiho garde une ligne dans le journal des modifications (qui, quel champ, quelle action), jamais le prompt."
-
-#: includes/admin/class-leiho-dashboard.php:719
 msgid "Brand name"
 msgstr "Nom de la marque"
 
-#: includes/admin/class-leiho-dashboard.php:723
+#: includes/admin/class-leiho-dashboard.php:718
 msgid "Activity and offer"
 msgstr "Activité et offre"
 
-#: includes/admin/class-leiho-dashboard.php:726
+#: includes/admin/class-leiho-dashboard.php:721
 msgid "What you do and sell, in a few sentences."
 msgstr "Ce que vous faites et vendez, en quelques phrases."
 
-#: includes/admin/class-leiho-dashboard.php:730
+#: includes/admin/class-leiho-dashboard.php:725
 msgid "Audience"
 msgstr "Public"
 
-#: includes/admin/class-leiho-dashboard.php:734
+#: includes/admin/class-leiho-dashboard.php:729
 msgid "Tone of voice"
 msgstr "Ton"
 
-#: includes/admin/class-leiho-dashboard.php:736
+#: includes/admin/class-leiho-dashboard.php:731
 msgid "Direct, expert, warm; short sentences; “vous”."
 msgstr "Direct, expert, chaleureux ; phrases courtes ; vouvoiement."
 
-#: includes/admin/class-leiho-dashboard.php:740
+#: includes/admin/class-leiho-dashboard.php:735
 msgid "Language"
 msgstr "Langue"
 
-#: includes/admin/class-leiho-dashboard.php:742
+#: includes/admin/class-leiho-dashboard.php:737
 msgid "French (France)"
 msgstr "Français (France)"
 
-#: includes/admin/class-leiho-dashboard.php:743
+#: includes/admin/class-leiho-dashboard.php:738
 msgid "Language of the texts written by the AI. Empty: the language of the existing content."
 msgstr "Langue des textes écrits par l’IA. Vide : la langue du contenu existant."
 
-#: includes/admin/class-leiho-dashboard.php:756
+#: includes/admin/class-leiho-dashboard.php:751
 msgid "Sample texts"
 msgstr "Textes d’exemple"
 
 #. translators: %d: sample number.
-#: includes/admin/class-leiho-dashboard.php:759
+#: includes/admin/class-leiho-dashboard.php:754
 msgid "Sample text %d"
 msgstr "Texte d’exemple %d"
 
-#: includes/admin/class-leiho-dashboard.php:761
+#: includes/admin/class-leiho-dashboard.php:756
 msgid "Up to three texts written in your voice (a page intro, a product description…). The AI takes their style, not their content."
 msgstr "Jusqu’à trois textes écrits avec votre ton (une introduction de page, une description de produit…). L’IA en reprend le style, pas le contenu."
 
-#: includes/admin/class-leiho-dashboard.php:765
+#: includes/admin/class-leiho-dashboard.php:760
 msgid "Share"
 msgstr "Partager"
 
-#: includes/admin/class-leiho-dashboard.php:767
+#: includes/admin/class-leiho-dashboard.php:762
 msgid "Export (JSON)"
 msgstr "Exporter (JSON)"
 
-#: includes/admin/class-leiho-dashboard.php:768
+#: includes/admin/class-leiho-dashboard.php:763
 msgid "Import…"
 msgstr "Importer…"
 
-#: includes/admin/class-leiho-dashboard.php:769
+#: includes/admin/class-leiho-dashboard.php:764
 msgid "Reuse the same brand context on another site. Importing fills the fields above: check them, then save."
 msgstr "Réutilisez le même contexte de marque sur un autre site. L’import remplit les champs ci-dessus : vérifiez-les, puis enregistrez."
 
-#: includes/admin/class-leiho-dashboard.php:786
+#: includes/admin/class-leiho-dashboard.php:791
+msgid "AI settings saved."
+msgstr "Réglages de l’IA enregistrés."
+
+#: includes/admin/class-leiho-dashboard.php:796
+msgid "AI provider"
+msgstr "Fournisseur d’IA"
+
+#: includes/admin/class-leiho-dashboard.php:797
+msgid "Leiho writes with the AI provider set up in WordPress. It stores no API key and picks no provider."
+msgstr "Leiho écrit avec le fournisseur d’IA configuré dans WordPress. Il ne stocke aucune clé d’API et ne choisit aucun fournisseur."
+
+#: includes/admin/class-leiho-dashboard.php:802
+msgid "Unavailable"
+msgstr "Indisponible"
+
+#: includes/admin/class-leiho-dashboard.php:803
+msgid "AI in Leiho uses the AI client of WordPress 7.0 and later. Update WordPress to use it."
+msgstr "L’IA de Leiho utilise le client d’IA de WordPress 7.0 et suivants. Mettez WordPress à jour pour l’utiliser."
+
+#: includes/admin/class-leiho-dashboard.php:805
+msgid "Not configured"
+msgstr "Non configuré"
+
+#: includes/admin/class-leiho-dashboard.php:806
+msgid "No AI provider is set up for text generation yet. Leiho never stores API keys: it uses the provider configured in WordPress."
+msgstr "Aucun fournisseur d’IA n’est encore configuré pour générer du texte. Leiho ne stocke jamais de clé d’API : il utilise le fournisseur configuré dans WordPress."
+
+#: includes/admin/class-leiho-dashboard.php:809
+msgid "Ready"
+msgstr "Prêt"
+
+#: includes/admin/class-leiho-dashboard.php:812
+msgid "Text generation and image descriptions (alternative text) are available."
+msgstr "La génération de texte et la description d’images (texte alternatif) sont disponibles."
+
+#: includes/admin/class-leiho-dashboard.php:812
+msgid "Text generation is available. The provider can’t read images, so alternative text isn’t offered."
+msgstr "La génération de texte est disponible. Le fournisseur ne lit pas les images : le texte alternatif n’est pas proposé."
+
+#: includes/admin/class-leiho-dashboard.php:817
+msgid "Privacy: when someone uses an AI action, the brand context, the text of the field and the other fields of the entry (or the image, for alternative text) are sent to the provider configured in Settings → Connectors, under its terms. Leiho keeps a line in the change log (who, which field, which action), never the prompt."
+msgstr "Confidentialité : quand quelqu’un utilise une action d’IA, le contexte de marque, le texte du champ et les autres champs de l’entrée (ou l’image, pour le texte alternatif) sont envoyés au fournisseur configuré dans Réglages → Connecteurs, selon ses conditions. Leiho garde une ligne dans le journal des modifications (qui, quel champ, quelle action), jamais le prompt."
+
+#: includes/admin/class-leiho-dashboard.php:831
+msgid "What each type of content is for, and who reads it. Sent with the brand context when the AI writes an entry of that type."
+msgstr "À quoi sert chaque type de contenu, et qui le lit. Envoyé avec le contexte de marque quand l’IA écrit une entrée de ce type."
+
+#: includes/admin/class-leiho-dashboard.php:833
+msgid "No content type is edited in Leiho yet. Choose them in Settings."
+msgstr "Aucun type de contenu n’est encore édité dans Leiho. Choisissez-les dans les réglages."
+
+#. translators: %s: content type name.
+#: includes/admin/class-leiho-dashboard.php:840
+msgid "Purpose of %s"
+msgstr "Rôle de %s"
+
+#: includes/admin/class-leiho-dashboard.php:840
+msgid "Purpose: what these entries are for"
+msgstr "Rôle : à quoi servent ces contenus"
+
+#. translators: %s: content type name.
+#: includes/admin/class-leiho-dashboard.php:841
+msgid "Readers of %s"
+msgstr "Lecteurs de %s"
+
+#: includes/admin/class-leiho-dashboard.php:841
+msgid "Readers: who they are written for"
+msgstr "Lecteurs : pour qui ils sont écrits"
+
+#: includes/admin/class-leiho-dashboard.php:848
+msgid "Nothing written by the AI is saved until someone accepts it in the editor."
+msgstr "Rien de ce qu’écrit l’IA n’est enregistré tant que quelqu’un ne l’a pas accepté dans l’éditeur."
+
+#: includes/admin/class-leiho-dashboard.php:855
+msgid "Recent AI actions"
+msgstr "Actions d’IA récentes"
+
+#: includes/admin/class-leiho-dashboard.php:857
+msgid "No AI action yet. Each one is logged here: who, which field, which action. Prompts and texts are never kept."
+msgstr "Aucune action d’IA pour l’instant. Chacune est notée ici : qui, quel champ, quelle action. Les consignes et les textes ne sont jamais gardés."
+
+#: includes/admin/class-leiho-dashboard.php:872
+msgid "AI agents"
+msgstr "Agents d’IA"
+
+#: includes/admin/class-leiho-dashboard.php:874
+msgid "External agents (through the WordPress MCP adapter, for example) can use these abilities, with the rights of the user they connect as. They never publish."
+msgstr "Les agents externes (par l’adaptateur MCP de WordPress, par exemple) peuvent utiliser ces capacités, avec les droits de l’utilisateur sous lequel ils se connectent. Ils ne publient jamais."
+
+#: includes/admin/class-leiho-dashboard.php:881
+msgid "Leiho offers abilities to external AI agents from WordPress 6.9 (Abilities API)."
+msgstr "Leiho propose des capacités aux agents d’IA externes à partir de WordPress 6.9 (API Abilities)."
+
+#: includes/admin/class-leiho-dashboard.php:898
 msgid "Content API"
 msgstr "API de contenu"
 
-#: includes/admin/class-leiho-dashboard.php:787
+#: includes/admin/class-leiho-dashboard.php:899
 msgid "Your front end reads its content here, in a single request at build time. WordPress stays the only source of truth."
 msgstr "Votre front lit son contenu ici, en une seule requête au moment du build. WordPress reste la seule source de vérité."
 
-#: includes/admin/class-leiho-dashboard.php:790
+#: includes/admin/class-leiho-dashboard.php:902
 msgid "Endpoints"
 msgstr "Adresses"
 
-#: includes/admin/class-leiho-dashboard.php:793
+#: includes/admin/class-leiho-dashboard.php:905
 msgid "All published content, cached and refreshed on every change. An unchanged build gets a 304."
 msgstr "Tout le contenu publié, mis en cache et rafraîchi à chaque modification. Un build sans changement reçoit un 304."
 
-#: includes/admin/class-leiho-dashboard.php:795
+#: includes/admin/class-leiho-dashboard.php:907
 msgid "TypeScript types of that content, generated from your fields. In the front-end project: npx leiho types."
 msgstr "Les types TypeScript de ce contenu, générés depuis vos champs. Dans le projet du front : npx leiho types."
 
-#: includes/admin/class-leiho-dashboard.php:800
+#: includes/admin/class-leiho-dashboard.php:912
 msgid "Access"
 msgstr "Accès"
 
-#: includes/admin/class-leiho-dashboard.php:802
+#: includes/admin/class-leiho-dashboard.php:914
 msgid "Public: published content only, as on the site"
 msgstr "Public : contenu publié seulement, comme sur le site"
 
-#: includes/admin/class-leiho-dashboard.php:803
+#: includes/admin/class-leiho-dashboard.php:915
 msgid "Restricted: the front end sends a token"
 msgstr "Restreint : le front envoie un jeton"
 
-#: includes/admin/class-leiho-dashboard.php:808
+#: includes/admin/class-leiho-dashboard.php:920
 msgid "Cache"
 msgstr "Cache"
 
-#: includes/admin/class-leiho-dashboard.php:810
+#: includes/admin/class-leiho-dashboard.php:922
 msgid "Keep API responses in cache until the content changes"
 msgstr "Garder les réponses de l’API en cache jusqu’au prochain changement de contenu"
 
 #. translators: %s: object cache name (Redis, Memcached…).
-#: includes/admin/class-leiho-dashboard.php:816
+#: includes/admin/class-leiho-dashboard.php:928
 msgid "Persistent object cache detected: %s. Leiho stores the export, items and types there."
 msgstr "Cache objet persistant détecté : %s. Leiho y range l’export, les contenus et les types."
 
-#: includes/admin/class-leiho-dashboard.php:818
+#: includes/admin/class-leiho-dashboard.php:930
 msgid "No persistent object cache: Leiho keeps its own copy of the export."
 msgstr "Pas de cache objet persistant : Leiho garde sa propre copie de l’export."
 
-#: includes/admin/class-leiho-dashboard.php:822
+#: includes/admin/class-leiho-dashboard.php:934
 msgid "Responses carry an ETag, and page caches (LiteSpeed, WP Rocket, W3 Total Cache…) are purged for the API whenever content changes."
 msgstr "Les réponses portent un ETag, et les caches de page (LiteSpeed, WP Rocket, W3 Total Cache…) sont purgés pour l’API à chaque changement de contenu."
 
-#: includes/admin/class-leiho-dashboard.php:823
+#: includes/admin/class-leiho-dashboard.php:935
 msgid "Clear the content cache"
 msgstr "Vider le cache de contenu"
 
-#: includes/admin/class-leiho-dashboard.php:829
+#: includes/admin/class-leiho-dashboard.php:941
 msgid "Content token"
 msgstr "Jeton de contenu"
 
-#: includes/admin/class-leiho-dashboard.php:832
+#: includes/admin/class-leiho-dashboard.php:944
 msgid "Generate a new token (the current one stops working)"
 msgstr "Générer un nouveau jeton (l’actuel cesse de fonctionner)"
 
-#: includes/admin/class-leiho-dashboard.php:833
+#: includes/admin/class-leiho-dashboard.php:945
 msgid "Set it as LEIHO_TOKEN in the front end’s build environment. Sent in the X-Leiho-Token header."
 msgstr "À renseigner comme LEIHO_TOKEN dans l’environnement de build du front. Envoyé dans l’en-tête X-Leiho-Token."
 
-#: includes/admin/class-leiho-dashboard.php:840
+#: includes/admin/class-leiho-dashboard.php:952
 msgid "WordPress as a back office"
 msgstr "WordPress en back-office"
 
-#: includes/admin/class-leiho-dashboard.php:841
+#: includes/admin/class-leiho-dashboard.php:953
 msgid "Your visitors use the front end. These options keep WordPress out of their way and out of search engines. wp-admin, login, the content API and draft previews are not affected."
 msgstr "Vos visiteurs passent par le front. Ces options tiennent WordPress à l’écart, y compris des moteurs de recherche. wp-admin, la connexion, l’API de contenu et l’aperçu des brouillons ne sont pas touchés."
 
-#: includes/admin/class-leiho-dashboard.php:844
+#: includes/admin/class-leiho-dashboard.php:956
 msgid "Protection"
 msgstr "Protection"
 
-#: includes/admin/class-leiho-dashboard.php:846
+#: includes/admin/class-leiho-dashboard.php:958
 msgid "Keep WordPress out of search engines (noindex, robots.txt, no sitemap)"
 msgstr "Tenir WordPress hors des moteurs de recherche (noindex, robots.txt, pas de sitemap)"
 
-#: includes/admin/class-leiho-dashboard.php:847
+#: includes/admin/class-leiho-dashboard.php:959
 msgid "Redirect WordPress pages to the same page on the site"
 msgstr "Rediriger les pages WordPress vers la même page du site"
 
-#: includes/admin/class-leiho-dashboard.php:848
+#: includes/admin/class-leiho-dashboard.php:960
 msgid "Lock down WordPress (XML-RPC off, user list hidden from visitors, version hidden)"
 msgstr "Verrouiller WordPress (XML-RPC coupé, liste des utilisateurs cachée aux visiteurs, version masquée)"
 
-#: includes/admin/class-leiho-dashboard.php:864
+#: includes/admin/class-leiho-dashboard.php:976
 msgid "Not set"
 msgstr "Non renseigné"
 
-#: includes/admin/class-leiho-dashboard.php:864
+#: includes/admin/class-leiho-dashboard.php:976
 msgid "Saved — leave empty to keep it"
 msgstr "Enregistré — laisser vide pour le conserver"
 
-#: includes/admin/class-leiho-dashboard.php:866
+#: includes/admin/class-leiho-dashboard.php:978
 msgid "This secret can’t be read anymore: the WordPress salts have changed (host or security plugin). Enter it again."
 msgstr "Ce secret n’est plus lisible : les salts WordPress ont changé (hébergeur ou plugin de sécurité). Saisissez-le à nouveau."
 
-#: includes/admin/class-leiho-dashboard.php:868
+#: includes/admin/class-leiho-dashboard.php:980
 msgid "Delete this secret"
 msgstr "Supprimer ce secret"
 
-#: includes/admin/class-leiho-dashboard.php:890
+#: includes/admin/class-leiho-dashboard.php:1002
 msgid "Deployment history"
 msgstr "Historique des publications"
 
-#: includes/admin/class-leiho-dashboard.php:895
+#: includes/admin/class-leiho-dashboard.php:1007
 msgid "No deployments yet"
 msgstr "Aucune publication"
 
-#: includes/admin/class-leiho-dashboard.php:896
+#: includes/admin/class-leiho-dashboard.php:1008
 msgid "Every click on “Publish” in the editor shows up here with its result."
 msgstr "Chaque clic sur « Publier » dans l’éditeur apparaîtra ici avec son résultat."
 
-#: includes/admin/class-leiho-dashboard.php:903
+#: includes/admin/class-leiho-dashboard.php:1015
 msgid "By"
 msgstr "Par"
 
-#: includes/admin/class-leiho-dashboard.php:904
+#: includes/admin/class-leiho-dashboard.php:1016
 msgid "Method"
 msgstr "Méthode"
 
-#: includes/admin/class-leiho-dashboard.php:905
+#: includes/admin/class-leiho-dashboard.php:1017
 msgid "Result"
 msgstr "Résultat"
 
-#: includes/admin/class-leiho-dashboard.php:920
+#: includes/admin/class-leiho-dashboard.php:1032
 msgid "View build"
 msgstr "Voir le build"
 
-#: includes/admin/class-leiho-dashboard.php:931
+#: includes/admin/class-leiho-dashboard.php:1043
 msgid "Weekly activity"
 msgstr "Activité par semaine"
 
-#: includes/admin/class-leiho-dashboard.php:936
+#: includes/admin/class-leiho-dashboard.php:1048
 msgid "Week"
 msgstr "Semaine"
 
-#: includes/admin/class-leiho-dashboard.php:937
+#: includes/admin/class-leiho-dashboard.php:1049
 msgid "Saves"
 msgstr "Enregistrements"
 
-#: includes/admin/class-leiho-dashboard.php:938
+#: includes/admin/class-leiho-dashboard.php:1050
 msgid "Deployments"
 msgstr "Publications"
 
-#: includes/admin/class-leiho-dashboard.php:969
+#: includes/admin/class-leiho-dashboard.php:1081
 msgid "Live content"
 msgstr "Contenu en direct"
 
-#: includes/admin/class-leiho-dashboard.php:970
+#: includes/admin/class-leiho-dashboard.php:1082
 msgid "The site reads WordPress on every visit. Saving is enough, nothing to publish."
 msgstr "Le site lit WordPress à chaque visite. Enregistrer suffit, rien à publier."
 
-#: includes/admin/class-leiho-dashboard.php:973
+#: includes/admin/class-leiho-dashboard.php:1085
 msgid "Build hook"
 msgstr "Build hook"
 
-#: includes/admin/class-leiho-dashboard.php:974
+#: includes/admin/class-leiho-dashboard.php:1086
 msgid "Vercel, Netlify, Cloudflare Pages… Leiho calls the rebuild URL."
 msgstr "Vercel, Netlify, Cloudflare Pages… Leiho appelle l’URL de rebuild."
 
-#: includes/admin/class-leiho-dashboard.php:977
+#: includes/admin/class-leiho-dashboard.php:1089
 msgid "GitHub Actions"
 msgstr "GitHub Actions"
 
-#: includes/admin/class-leiho-dashboard.php:978
+#: includes/admin/class-leiho-dashboard.php:1090
 msgid "Triggers a workflow and tracks the build live."
 msgstr "Déclenche un workflow et suit le build en direct."
 
-#: includes/admin/class-leiho-dashboard.php:981
+#: includes/admin/class-leiho-dashboard.php:1093
 msgid "GitHub commit"
 msgstr "Commit GitHub"
 
-#: includes/admin/class-leiho-dashboard.php:982
+#: includes/admin/class-leiho-dashboard.php:1094
 msgid "For hosts that deploy on every push."
 msgstr "Pour les hébergeurs qui déploient à chaque push."
 
-#: includes/admin/class-leiho-dashboard.php:985
+#: includes/admin/class-leiho-dashboard.php:1097
 msgid "Coolify"
 msgstr "Coolify"
 
-#: includes/admin/class-leiho-dashboard.php:986
+#: includes/admin/class-leiho-dashboard.php:1098
 msgid "Coolify deployment webhook."
 msgstr "Webhook de déploiement Coolify."
 
-#: includes/admin/class-leiho-dashboard.php:996
+#: includes/admin/class-leiho-dashboard.php:1108
 msgid "Not set up"
 msgstr "Non configurée"
 
-#: includes/admin/class-leiho-dashboard.php:1001
+#: includes/admin/class-leiho-dashboard.php:1113
 msgid "Pending"
 msgstr "En attente"
 
-#: includes/admin/class-leiho-dashboard.php:1002
+#: includes/admin/class-leiho-dashboard.php:1114
 msgid "Building"
 msgstr "Build en cours"
 
-#: includes/admin/class-leiho-dashboard.php:1003
+#: includes/admin/class-leiho-dashboard.php:1115
 msgid "Triggered"
 msgstr "Déclenchée"
 
-#: includes/admin/class-leiho-dashboard.php:1004
+#: includes/admin/class-leiho-dashboard.php:1116
 msgid "Live"
 msgstr "En ligne"
 
-#: includes/admin/class-leiho-dashboard.php:1005
+#: includes/admin/class-leiho-dashboard.php:1117
 msgid "Failed"
 msgstr "Échec"
 

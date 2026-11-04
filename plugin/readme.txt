@@ -4,7 +4,7 @@ Tags: headless, acf, visual editor, nextjs, astro
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.0.0-beta.12
+Stable tag: 1.0.0-beta.13
 License: GPL-2.0-or-later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -48,6 +48,9 @@ Leiho removes its own settings, tokens, history table and internal post meta, an
 Parts of the Leiho app's layout and styles (three-pane Collections view, list rows, field settings, dialogs) are derived from Stacki (https://github.com/flowtricks/stacki), Copyright (c) 2026 Timothy Ricks, MIT License. The full license text ships in licenses/stacki-MIT.txt.
 
 == Changelog ==
+
+= 1.0.0-beta.13 =
+* New AI screen (provider, brand context, context of each content type, recent AI actions, abilities for agents) and a live preview of the site's home page on Leiho's home. Fixes in tags, list filters and the "Go back to ACF" dialog.
 
 = 1.0.0-beta.12 =
 * Okno is now Leiho. Existing Okno sites are migrated automatically; front ends written for Okno keep working until 2.0. See "Coming from Okno" in the README.

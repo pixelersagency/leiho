@@ -217,4 +217,34 @@
 			document.body.appendChild( frame );
 		} );
 	}
+
+	/**
+	 * Accueil : aperçu en direct du site, rendu en largeur bureau (1440 px)
+	 * puis réduit à la largeur de la carte. Le bridge du site attend l'éditeur
+	 * avant d'afficher la page : on lui répond « init » sans valeur, la page
+	 * s'affiche telle qu'elle est en ligne.
+	 */
+	var previewBox = document.querySelector( '[data-leiho-site-preview]' );
+	if ( previewBox ) {
+		var previewFrame = previewBox.querySelector( 'iframe' );
+		var fit = function () {
+			previewBox.style.setProperty( '--leiho-preview-scale', String( previewBox.clientWidth / 1440 ) );
+		};
+		fit();
+		if ( window.ResizeObserver ) {
+			new window.ResizeObserver( fit ).observe( previewBox );
+		} else {
+			window.addEventListener( 'resize', fit );
+		}
+		window.addEventListener( 'message', function ( event ) {
+			var data = event.data;
+			if ( ! previewFrame || event.source !== previewFrame.contentWindow || event.origin !== cfg.frontOrigin ) {
+				return;
+			}
+			// « okno » : bridge d'avant le renommage en Leiho.
+			if ( data && ( 'leiho' === data.ns || 'okno' === data.ns ) && 'ready' === data.type ) {
+				previewFrame.contentWindow.postMessage( { ns: data.ns, type: 'init', values: {} }, cfg.frontOrigin );
+			}
+		} );
+	}
 } )();

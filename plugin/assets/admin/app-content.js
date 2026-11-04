@@ -708,7 +708,7 @@
 		App.confirm( {
 			/* translators: %s: content type. */
 			title: sprintf( __( 'Go back to ACF for “%s”?', 'leiho' ), label || name ),
-			message: __( 'ACF serves the fields of this content type again, with the values they had on the import day. Values edited in Leiho since the import are not written back to ACF: they are deleted with the Leiho table of this collection.', 'leiho' ),
+			message: __( 'ACF serves the fields of this content type again, with the values they had on the import day. Values edited in Leiho since the import are not written back to ACF: they are deleted with the Leiho table of this collection. WordPress’s own fields (title, content, excerpt, slug, categories and tags) keep their current values: they are not undone.', 'leiho' ),
 			confirmLabel: __( 'Go back to ACF', 'leiho' ),
 			danger: true,
 			typeToConfirm: name,

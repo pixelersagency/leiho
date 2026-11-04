@@ -781,6 +781,9 @@
 	border-radius: var(--leiho-radius);
 }
 
+/* Une section après un formulaire (écran IA : journal sous le bandeau
+   Enregistrer) garde le même espace qu'entre deux sections. */
+form + .leiho-form-section,
 .leiho-form-section + .leiho-form-section {
 	margin-top: 16px;
 }
