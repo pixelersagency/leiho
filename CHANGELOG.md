@@ -2,6 +2,12 @@
 
 All notable changes to Leiho (called Okno until 1.0.0-beta.11) are documented here. The project follows [Semantic Versioning](https://semver.org/). The plugin and the bridge package share one version number.
 
+## [Unreleased]
+
+### Fixed
+
+- **Publishing with Coolify rebuilds the site.** Coolify's webhook URL ends in `force=false`, and publishing content doesn't change the commit: Coolify reused the previous image and skipped the build, so published content never reached the site. Leiho now always asks for a fresh build.
+
 ## [1.0.0-rc.1] — 2026-11-05
 
 ### Added

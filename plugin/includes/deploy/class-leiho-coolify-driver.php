@@ -38,10 +38,14 @@ class Leiho_Coolify_Driver implements Leiho_Deploy_Driver_Interface {
 		$settings = Leiho_Plugin::settings();
 		$token    = Leiho_Secrets::get( self::SECRET_NAME );
 
+		// Le contenu publié change sans nouveau commit : sans force, Coolify reprend
+		// l'image du même commit et saute le build (le webhook copié porte force=false).
+		$url = add_query_arg( 'force', 'true', $settings['coolify_url'] );
+
 		// Pas de redirection : le jeton ne doit partir que vers l'adresse saisie.
 		$response = Leiho_Plugin::remote(
 			'POST',
-			$settings['coolify_url'],
+			$url,
 			array(
 				'timeout'     => 15,
 				'redirection' => 0,
