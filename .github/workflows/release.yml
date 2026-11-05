@@ -95,7 +95,7 @@ jobs:
 
       - name: Rebuild leiho.dev
         # leiho.dev lit la dernière release au build (version affichée, démo /try) :
-        # on relance son déploiement Coolify. Sans secret, l'étape ne fait rien.
+        # on relance son build Coolify (force : même commit, contenu neuf). Sans secret, l'étape ne fait rien.
         env:
           COOLIFY_TOKEN: ${{ secrets.COOLIFY_TOKEN }}
         run: |
@@ -104,5 +104,5 @@ jobs:
             exit 0
           fi
           curl -fsS -o /dev/null -H "Authorization: Bearer $COOLIFY_TOKEN" \
-            "https://coolify.mynto.fr/api/v1/deploy?uuid=jfy9av3epkehhovzlbhso5wk" \
+            "https://coolify.mynto.fr/api/v1/deploy?uuid=jfy9av3epkehhovzlbhso5wk&force=true" \
             || echo "::warning::leiho.dev rebuild request failed"
