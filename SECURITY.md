@@ -12,6 +12,12 @@ Include the affected version, the steps to reproduce and the impact you observed
 
 ## Scope
 
-In scope: the WordPress plugin (`plugin/`) and the bridge (`bridge/`), in particular REST permission checks, `postMessage` origin checks, sanitization of saved values and storage of deployment tokens.
+In scope: the WordPress plugin (`plugin/`) and the `leiho` npm package (`bridge/`), in particular:
+
+- the public content API (`/wp-json/leiho/v1/export`, `/content`, `/llms.txt`, `/markdown`): nothing unpublished, protected or private should be readable;
+- REST permission checks and the abilities offered to AI agents (MCP);
+- `postMessage` origin checks and the bridge's HTML sanitizer;
+- sanitization of saved values, translations included;
+- storage of deployment tokens and the signature check of updates.
 
 Out of scope: vulnerabilities in WordPress, ACF or your front-end framework themselves, and issues that require an administrator account to exploit.
