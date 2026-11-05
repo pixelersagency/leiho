@@ -255,6 +255,8 @@ class Leiho_Collections_Schema {
 			self::error( $errors, self::join( $path, 'fields' ), sprintf( __( 'A collection holds at most %d short indexed text fields (text up to 191 characters, slug, email, select).', 'leiho' ), self::MAX_VARCHAR ) );
 		}
 
+		$seo = class_exists( 'Leiho_Seo' ) ? Leiho_Seo::normalize( isset( $input['seo'] ) ? $input['seo'] : null, $fields, self::join( $path, 'seo' ), $errors ) : null;
+
 		return array(
 			'id'             => $id,
 			'kind'           => $kind,
@@ -265,6 +267,7 @@ class Leiho_Collections_Schema {
 			'icon'           => $icon,
 			'external'       => $external,
 			'source'         => $source,
+			'seo'            => $seo,
 			'fields'         => $fields,
 		);
 	}
@@ -773,6 +776,9 @@ class Leiho_Collections_Schema {
 			}
 			if ( ! empty( $collection['source'] ) ) {
 				$item['source'] = $collection['source'];
+			}
+			if ( ! empty( $collection['seo'] ) ) {
+				$item['seo'] = $collection['seo'];
 			}
 			$item['fields']         = self::compact_fields( $collection['fields'], true );
 			$out['collections'][] = $item;

@@ -273,10 +273,12 @@ class Leiho_Content {
 			'format'    => self::FORMAT,
 			'generated' => gmdate( 'c' ),
 			'site'      => array(
-				'name'      => html_entity_decode( get_bloginfo( 'name' ), ENT_QUOTES, 'UTF-8' ),
-				'front_url' => Leiho_Plugin::settings()['front_url'],
-				'cms_url'   => home_url(),
-				'language'  => get_bloginfo( 'language' ),
+				'name'        => html_entity_decode( get_bloginfo( 'name' ), ENT_QUOTES, 'UTF-8' ),
+				'front_url'   => Leiho_Plugin::settings()['front_url'],
+				'cms_url'     => home_url(),
+				'language'    => get_bloginfo( 'language' ),
+				'description' => Leiho_Seo::site_description(),
+				'icon'        => (string) get_site_icon_url( 512 ),
 			),
 			'items'     => $items,
 		);
@@ -542,6 +544,9 @@ class Leiho_Content {
 			$item['locale']       = Leiho_I18n::current();
 			$item['translations'] = (object) Leiho_I18n::paths( $mapper->default_path( $post ) );
 		}
+
+		// Titre, description, image, FAQ et JSON-LD, dans la langue de l'item.
+		$item['seo'] = Leiho_Seo::item( $post, $item );
 
 		return $item;
 	}

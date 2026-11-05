@@ -55,6 +55,8 @@ require_once LEIHO_DIR . 'includes/class-leiho-native-fields.php';
 require_once LEIHO_DIR . 'includes/class-leiho-schema.php';
 require_once LEIHO_DIR . 'includes/class-leiho-rest.php';
 require_once LEIHO_DIR . 'includes/class-leiho-content.php';
+require_once LEIHO_DIR . 'includes/class-leiho-seo.php';
+require_once LEIHO_DIR . 'includes/class-leiho-llms.php';
 require_once LEIHO_DIR . 'includes/class-leiho-cache.php';
 require_once LEIHO_DIR . 'includes/class-leiho-types.php';
 require_once LEIHO_DIR . 'includes/class-leiho-headless.php';
@@ -125,6 +127,7 @@ final class Leiho_Plugin {
 		);
 		add_action( 'rest_api_init', array( new Leiho_Rest( $this ), 'register_routes' ) );
 		add_action( 'rest_api_init', array( new Leiho_Content( $this ), 'register_routes' ) );
+		add_action( 'rest_api_init', array( 'Leiho_Llms', 'register_routes' ) );
 		add_action( Leiho_Deploy_Manager::CRON_HOOK, array( 'Leiho_Deploy_Manager', 'cleanup_stale' ) );
 		add_action( Leiho_Deploy_Manager::AUTO_HOOK, array( 'Leiho_Deploy_Manager', 'run_auto' ) );
 		add_action( 'leiho_content_changed', array( 'Leiho_Deploy_Manager', 'queue_auto' ) );

@@ -171,6 +171,22 @@ export interface LeihoItem<TType extends string, TFields> {
 	locale?: string;
 	/** Path of this item in each language (translated Collections only). */
 	translations?: Record<string, string>;
+	/** Search engines and AI assistants: description, image, FAQ and schema.org nodes. */
+	seo: LeihoSeo;
+}
+
+export interface LeihoSeo {
+	/** schema.org type declared by the collection (WebPage by default). */
+	type: string;
+	title: string;
+	/** Plain text, at most 300 characters. */
+	description: string;
+	image: LeihoMedia | null;
+	faq: { question: string; answer: string }[];
+	/** Listed in llms.txt. */
+	llms: boolean;
+	/** schema.org nodes of this page (no @context): leihoGraph() from 'leiho/seo' adds the site. */
+	jsonld: Record<string, unknown>[];
 }
 
 TS;

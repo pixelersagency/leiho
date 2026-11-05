@@ -567,6 +567,11 @@ class Leiho_AI_Abilities {
 			if ( Leiho_I18n::enabled() && Leiho_Collections::for_post_type( $type['name'] ) ) {
 				$item['languages'] = Leiho_I18n::codes(); // La première est la langue par défaut.
 			}
+			// Champs qui font la description et la FAQ : un agent sait lesquels soigner.
+			$collection = Leiho_Collections::for_post_type( $type['name'] );
+			if ( $collection && ! empty( $collection['seo'] ) ) {
+				$item['seo'] = $collection['seo'];
+			}
 			if ( $fields ) {
 				$item['fields'] = self::public_fields( Leiho_AI::type_fields( $type['name'] ) );
 			}

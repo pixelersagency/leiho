@@ -306,3 +306,18 @@ A schema may declare languages at the top level:
 - **State.** `Leiho_I18n::status( $post_id, $locale )`: `missing` (nothing translated), `partial` (a text of the original has no translation, at any depth), `outdated` (the original changed since the translation was last written) or `complete`.
 - **Served items** in another language carry `locale` and `translations` (`{ code: path }`).
 - **Deleting** an entry permanently deletes its translations.
+
+## 11. Search and AI
+
+A collection may describe its entries for search engines and AI assistants. Nothing is stored per entry: the block points at existing root fields.
+
+```json
+"seo": { "type": "TechArticle", "title": "headline", "description": "summary", "image": "cover", "faq": "faq", "llms": false }
+```
+
+- `type`: one of `WebPage`, `AboutPage`, `ContactPage`, `CollectionPage`, `FAQPage`, `ProfilePage` (the page itself), `Article`, `BlogPosting`, `NewsArticle`, `TechArticle` (an article node attached to the page), `Product`, `Service`, `Event`, `Course`, `SoftwareApplication`, `Person`, `Organization`, `LocalBusiness`, `Place`, `Recipe`, `CreativeWork` (the page's `mainEntity`).
+- `title` (text), `description` (text or richtext), `image` (image), `faq` (list with `question` and `answer` text or richtext sub-fields): root field names, checked when the schema is saved.
+- `llms: false` leaves the collection out of `llms.txt`. Every key is optional; an empty block is dropped.
+- **Served.** `Leiho_Seo::item()` adds `seo` to every item of the content API: `type`, `title`, `description` (plain text, at most 300 characters), `image`, `faq` (complete rows, plain text), `llms`, `jsonld` (nodes without `@context`, `@id` based on the item URL). Without a description field: a text field named `description`, `summary`, `excerpt`, `intro`, `lead`, `subtitle` or `tagline`, then the first root text of 50 characters or more, then an SEO plugin's meta description (Yoast, Rank Math, SEOPress, AIOSEO, unless it holds template variables), then the excerpt. Filter `leiho_seo`.
+- **Text routes.** `GET /llms.txt` (`locale`, `full`, `md`) and `GET /markdown?path=` (`locale`) return `text/plain` and `text/markdown`, with the read permission, cache and `ETag` of the content API.
+

@@ -380,6 +380,7 @@
 			body.appendChild( h( 'div', { class: 'leiho-detail__card', dataset: { uid: sel.field._uid } }, h( 'div', { class: 'leiho-field-settings' }, renderFieldSettings( d.fields, sel.field, 1, path, errors.own ) ) ) );
 		} else {
 			body.appendChild( renderGeneral( d, cur ) );
+			body.appendChild( renderSeo( d ) );
 			if ( ! cur.isNew ) {
 				// Contexte de la collection pour l'IA (ai.js), enregistré à part.
 				var aiCard = window.LeihoAI ? window.LeihoAI.collectionCard( d.id ) : null;
@@ -565,6 +566,110 @@
 				] ),
 				kinds,
 				features,
+			] ),
+		] );
+	}
+
+	/** Types schema.org proposés, du plus courant au plus rare. */
+	var SEO_TYPES = [
+		{ value: '', label: __( 'Page (default)', 'leiho' ) },
+		{ value: 'Article', label: __( 'Article', 'leiho' ) },
+		{ value: 'BlogPosting', label: __( 'Blog post', 'leiho' ) },
+		{ value: 'NewsArticle', label: __( 'News article', 'leiho' ) },
+		{ value: 'TechArticle', label: __( 'Documentation', 'leiho' ) },
+		{ value: 'FAQPage', label: __( 'FAQ page', 'leiho' ) },
+		{ value: 'AboutPage', label: __( 'About page', 'leiho' ) },
+		{ value: 'ContactPage', label: __( 'Contact page', 'leiho' ) },
+		{ value: 'CollectionPage', label: __( 'Listing page', 'leiho' ) },
+		{ value: 'ProfilePage', label: __( 'Profile page', 'leiho' ) },
+		{ value: 'Product', label: __( 'Product', 'leiho' ) },
+		{ value: 'Service', label: __( 'Service', 'leiho' ) },
+		{ value: 'Event', label: __( 'Event', 'leiho' ) },
+		{ value: 'Course', label: __( 'Course', 'leiho' ) },
+		{ value: 'SoftwareApplication', label: __( 'Software', 'leiho' ) },
+		{ value: 'Recipe', label: __( 'Recipe', 'leiho' ) },
+		{ value: 'Person', label: __( 'Person', 'leiho' ) },
+		{ value: 'Organization', label: __( 'Organization', 'leiho' ) },
+		{ value: 'LocalBusiness', label: __( 'Local business', 'leiho' ) },
+		{ value: 'Place', label: __( 'Place', 'leiho' ) },
+		{ value: 'CreativeWork', label: __( 'Creative work', 'leiho' ) },
+	];
+
+	/**
+	 * Référencement et citations IA : type schema.org, et les champs existants
+	 * qui servent de titre, description, image et FAQ. Rien n'est ajouté aux entrées.
+	 */
+	function renderSeo( d ) {
+		var seo = d.seo || {};
+		var update = function ( key, value ) {
+			var next = Object.assign( {}, d.seo || {} );
+			if ( value === '' || value === true ) {
+				delete next[ key ];
+			} else {
+				next[ key ] = value;
+			}
+			d.seo = Object.keys( next ).length ? next : null;
+			markDirty();
+		};
+		var fieldsOf = function ( types, test ) {
+			return ( d.fields || [] ).filter( function ( f ) {
+				return f.name && types.indexOf( f.type ) !== -1 && ( ! test || test( f ) );
+			} );
+		};
+		var isFaq = function ( f ) {
+			var names = ( f.fields || [] ).map( function ( s ) {
+				return s.name;
+			} );
+			return names.indexOf( 'question' ) !== -1 && names.indexOf( 'answer' ) !== -1;
+		};
+
+		var typeId = App.uid( 'seo-type' );
+		var typeSelect = h( 'select', { id: typeId, class: 'leiho-input' }, SEO_TYPES.map( function ( t ) {
+			return h( 'option', { value: t.value, text: t.label, selected: ( seo.type || '' ) === t.value } );
+		} ) );
+		typeSelect.addEventListener( 'change', function () {
+			update( 'type', typeSelect.value );
+		} );
+
+		var pick = function ( key, labelText, help, types, test, empty ) {
+			var id = App.uid( 'seo-' + key );
+			var options = fieldsOf( types, test );
+			var select = h( 'select', { id: id, class: 'leiho-input' }, [ h( 'option', { value: '', text: empty } ) ].concat( options.map( function ( f ) {
+				return h( 'option', { value: f.name, text: ( f.label || f.name ) + ' (' + f.name + ')', selected: seo[ key ] === f.name } );
+			} ) ) );
+			select.addEventListener( 'change', function () {
+				update( key, select.value );
+			} );
+			var errors = errorsFor( 'seo.' + key );
+			return h( 'div', { class: 'leiho-setting' + ( errors.length ? ' has-error' : '' ) }, [
+				h( 'label', { class: 'leiho-label', for: id, text: labelText } ),
+				select,
+				h( 'p', { class: 'leiho-help', text: help } ),
+				errors.map( errorLine ),
+			] );
+		};
+
+		var llms = h( 'input', { type: 'checkbox', checked: seo.llms !== false } );
+		llms.addEventListener( 'change', function () {
+			update( 'llms', llms.checked );
+		} );
+
+		var typeErrors = errorsFor( 'seo.type' );
+		return h( 'div', { class: 'leiho-detail__card' }, [
+			h( 'h3', { text: __( 'Search and AI', 'leiho' ) } ),
+			h( 'p', { class: 'leiho-muted', text: __( 'How search engines and AI assistants read these entries. Leiho builds the structured data (schema.org), the description and the llms.txt entry from fields you already have, in every language.', 'leiho' ) } ),
+			h( 'div', { class: 'leiho-settings-grid' }, [
+				h( 'div', { class: 'leiho-setting' + ( typeErrors.length ? ' has-error' : '' ) }, [
+					h( 'label', { class: 'leiho-label', for: typeId, text: __( 'What an entry is', 'leiho' ) } ),
+					typeSelect,
+					h( 'p', { class: 'leiho-help', text: __( 'The schema.org type in the page’s structured data.', 'leiho' ) } ),
+					typeErrors.map( errorLine ),
+				] ),
+				pick( 'description', __( 'Description', 'leiho' ), __( 'Meta description, link previews and llms.txt. Shortened to 300 characters.', 'leiho' ), [ 'text', 'richtext' ], null, __( 'Guess (summary, intro…)', 'leiho' ) ),
+				pick( 'title', __( 'Title', 'leiho' ), __( 'When the entry title is not the one to show in search results.', 'leiho' ), [ 'text' ], null, __( 'Entry title', 'leiho' ) ),
+				pick( 'image', __( 'Image', 'leiho' ), __( 'Shown in link previews.', 'leiho' ), [ 'image' ], null, __( 'Featured image', 'leiho' ) ),
+				pick( 'faq', __( 'Questions and answers', 'leiho' ), __( 'A list with “question” and “answer” fields, published as an FAQ that AI assistants can quote.', 'leiho' ), [ 'list' ], isFaq, __( 'None', 'leiho' ) ),
+				h( 'label', { class: 'leiho-check' }, [ llms, __( 'List these entries in llms.txt', 'leiho' ) ] ),
 			] ),
 		] );
 	}

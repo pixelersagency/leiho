@@ -197,8 +197,8 @@ msgstr ""
 #: assets/admin/ai.js:821 assets/admin/ai.js:909 assets/admin/ai.js:924
 #: assets/admin/ai.js:945 assets/admin/ai.js:1032 assets/admin/ai.js:1041
 #: assets/admin/ai.js:1093 assets/admin/ai.js:1127
-#: assets/admin/app-collections.js:1803 assets/admin/app-collections.js:1882
-#: assets/admin/app-collections.js:1941 assets/admin/app-content.js:629
+#: assets/admin/app-collections.js:1908 assets/admin/app-collections.js:1987
+#: assets/admin/app-collections.js:2046 assets/admin/app-content.js:629
 #: assets/admin/app-content.js:686 assets/admin/app-content.js:1267
 #: assets/admin/app.js:342
 msgid "Cancel"
@@ -535,7 +535,8 @@ msgstr ""
 msgid "Color"
 msgstr ""
 
-#: assets/admin/app-collections.js:50 assets/admin/app-content.js:422
+#: assets/admin/app-collections.js:50 assets/admin/app-collections.js:670
+#: assets/admin/app-content.js:422
 msgid "Image"
 msgstr ""
 
@@ -607,7 +608,8 @@ msgstr ""
 msgid "Excerpt"
 msgstr ""
 
-#: assets/admin/app-collections.js:67 includes/class-leiho-schema.php:265
+#: assets/admin/app-collections.js:67 assets/admin/app-collections.js:670
+#: includes/class-leiho-schema.php:265
 msgid "Featured image"
 msgstr ""
 
@@ -649,7 +651,7 @@ msgid "Changes not applied yet"
 msgstr ""
 
 #: assets/admin/app-collections.js:336 assets/admin/app-collections.js:363
-#: assets/admin/app-collections.js:535 assets/admin/app-collections.js:550
+#: assets/admin/app-collections.js:536 assets/admin/app-collections.js:551
 msgid "General"
 msgstr ""
 
@@ -663,430 +665,572 @@ msgstr ""
 msgid "Drag the handle or use the arrows to reorder. The title (and the features ticked above) come with every entry."
 msgstr ""
 
-#: assets/admin/app-collections.js:348 assets/admin/app-collections.js:600
-#: assets/admin/app-collections.js:1930
+#: assets/admin/app-collections.js:348 assets/admin/app-collections.js:705
+#: assets/admin/app-collections.js:2035
 msgid "Add a field"
 msgstr ""
 
-#: assets/admin/app-collections.js:367 assets/admin/app-collections.js:499
+#: assets/admin/app-collections.js:367 assets/admin/app-collections.js:500
 #: assets/admin/app-content.js:305
 msgid "Collection"
 msgstr ""
 
-#: assets/admin/app-collections.js:367 assets/admin/app-collections.js:500
+#: assets/admin/app-collections.js:367 assets/admin/app-collections.js:501
 msgid "Single page"
 msgstr ""
 
-#: assets/admin/app-collections.js:396
+#: assets/admin/app-collections.js:397
 msgid "Remove this collection"
 msgstr ""
 
-#: assets/admin/app-collections.js:397
+#: assets/admin/app-collections.js:398
 msgid "It disappears from Leiho and the content API. Its entries and their values are kept: create it again with the same id to get everything back."
 msgstr ""
 
-#: assets/admin/app-collections.js:399 assets/admin/app-collections.js:665
-#: assets/admin/app-collections.js:949 assets/admin/app-collections.js:1359
-#: assets/admin/app-collections.js:1367 assets/admin/app-collections.js:1753
+#: assets/admin/app-collections.js:400 assets/admin/app-collections.js:770
+#: assets/admin/app-collections.js:1054 assets/admin/app-collections.js:1464
+#: assets/admin/app-collections.js:1472 assets/admin/app-collections.js:1858
 #: assets/admin/editor.js:3391
 msgid "Remove"
 msgstr ""
 
-#: assets/admin/app-collections.js:428 assets/admin/app-collections.js:444
+#: assets/admin/app-collections.js:429 assets/admin/app-collections.js:445
 #: assets/admin/app-content.js:713
 msgid "Go back to ACF"
 msgstr ""
 
 #. translators: %s: date of the import.
-#: assets/admin/app-collections.js:431
+#: assets/admin/app-collections.js:432
 #, javascript-format
 msgid "Imported from ACF on %s. ACF still has the values of that day: going back serves them again and deletes the Leiho values of this collection."
 msgstr ""
 
-#: assets/admin/app-collections.js:432
+#: assets/admin/app-collections.js:433
 msgid "ACF still has the values of the import day: going back serves them again and deletes the Leiho values of this collection."
 msgstr ""
 
-#: assets/admin/app-collections.js:438
+#: assets/admin/app-collections.js:439
 msgid "Activate ACF (or Secure Custom Fields) first."
 msgstr ""
 
-#: assets/admin/app-collections.js:469
+#: assets/admin/app-collections.js:470
 msgid "Services"
 msgstr ""
 
-#: assets/admin/app-collections.js:470
+#: assets/admin/app-collections.js:471 assets/admin/app-collections.js:586
 msgid "Service"
 msgstr ""
 
-#: assets/admin/app-collections.js:497
+#: assets/admin/app-collections.js:498
 msgid "Kind"
 msgstr ""
 
-#: assets/admin/app-collections.js:499
+#: assets/admin/app-collections.js:500
 msgid "Many entries (services, articles, testimonials)."
 msgstr ""
 
-#: assets/admin/app-collections.js:500
+#: assets/admin/app-collections.js:501
 msgid "Exactly one entry (home, contact, site settings)."
 msgstr ""
 
-#: assets/admin/app-collections.js:512
+#: assets/admin/app-collections.js:513
 msgid "Built-in features"
 msgstr ""
 
-#: assets/admin/app-collections.js:537
+#: assets/admin/app-collections.js:538
 msgid "These fields come from ACF. The content type itself (labels, URL, features) is still declared where it was: in ACF, the theme or a plugin. Leiho manages its fields."
 msgstr ""
 
-#: assets/admin/app-collections.js:538
+#: assets/admin/app-collections.js:539
 msgid "This content type is declared by the theme or a plugin. Leiho manages its fields."
 msgstr ""
 
-#: assets/admin/app-collections.js:541 assets/admin/app-collections.js:555
+#: assets/admin/app-collections.js:542 assets/admin/app-collections.js:556
 msgid "Identifier"
 msgstr ""
 
-#: assets/admin/app-collections.js:544 assets/admin/app-collections.js:552
+#: assets/admin/app-collections.js:545 assets/admin/app-collections.js:553
 msgid "Name (plural)"
 msgstr ""
 
-#: assets/admin/app-collections.js:544
+#: assets/admin/app-collections.js:545
 msgid "Shown in Leiho."
 msgstr ""
 
-#: assets/admin/app-collections.js:553
+#: assets/admin/app-collections.js:554
 msgid "Name of one entry"
 msgstr ""
 
-#: assets/admin/app-collections.js:553
+#: assets/admin/app-collections.js:554
 msgid "Optional. Used in “New service”."
 msgstr ""
 
-#: assets/admin/app-collections.js:557
+#: assets/admin/app-collections.js:558
 msgid "Content type and table name. Lowercase letters, digits and underscores; it can’t change later."
 msgstr ""
 
-#: assets/admin/app-collections.js:557
+#: assets/admin/app-collections.js:558
 msgid "The identifier never changes."
 msgstr ""
 
-#: assets/admin/app-collections.js:561
+#: assets/admin/app-collections.js:562
 msgid "URL on the site"
 msgstr ""
 
-#: assets/admin/app-collections.js:563
+#: assets/admin/app-collections.js:564
 msgid "Where an entry is shown on the site, with {slug} or {id}. Leave empty for content without a page (testimonials, settings): its entries are then edited in Collections only, without the visual editor."
 msgstr ""
 
+#: assets/admin/app-collections.js:575
+msgid "Page (default)"
+msgstr ""
+
+#: assets/admin/app-collections.js:576
+msgid "Article"
+msgstr ""
+
+#: assets/admin/app-collections.js:577
+msgid "Blog post"
+msgstr ""
+
+#: assets/admin/app-collections.js:578
+msgid "News article"
+msgstr ""
+
+#: assets/admin/app-collections.js:579
+msgid "Documentation"
+msgstr ""
+
+#: assets/admin/app-collections.js:580
+msgid "FAQ page"
+msgstr ""
+
+#: assets/admin/app-collections.js:581
+msgid "About page"
+msgstr ""
+
+#: assets/admin/app-collections.js:582
+msgid "Contact page"
+msgstr ""
+
+#: assets/admin/app-collections.js:583
+msgid "Listing page"
+msgstr ""
+
+#: assets/admin/app-collections.js:584
+msgid "Profile page"
+msgstr ""
+
+#: assets/admin/app-collections.js:585
+msgid "Product"
+msgstr ""
+
+#: assets/admin/app-collections.js:587
+msgid "Event"
+msgstr ""
+
+#: assets/admin/app-collections.js:588
+msgid "Course"
+msgstr ""
+
+#: assets/admin/app-collections.js:589
+msgid "Software"
+msgstr ""
+
+#: assets/admin/app-collections.js:590
+msgid "Recipe"
+msgstr ""
+
+#: assets/admin/app-collections.js:591
+msgid "Person"
+msgstr ""
+
 #: assets/admin/app-collections.js:592
+msgid "Organization"
+msgstr ""
+
+#: assets/admin/app-collections.js:593
+msgid "Local business"
+msgstr ""
+
+#: assets/admin/app-collections.js:594
+msgid "Place"
+msgstr ""
+
+#: assets/admin/app-collections.js:595
+msgid "Creative work"
+msgstr ""
+
+#: assets/admin/app-collections.js:659
+msgid "Search and AI"
+msgstr ""
+
+#: assets/admin/app-collections.js:660
+msgid "How search engines and AI assistants read these entries. Leiho builds the structured data (schema.org), the description and the llms.txt entry from fields you already have, in every language."
+msgstr ""
+
+#: assets/admin/app-collections.js:663
+msgid "What an entry is"
+msgstr ""
+
+#: assets/admin/app-collections.js:665
+msgid "The schema.org type in the page’s structured data."
+msgstr ""
+
+#: assets/admin/app-collections.js:668
+msgid "Description"
+msgstr ""
+
+#: assets/admin/app-collections.js:668
+msgid "Guess (summary, intro…)"
+msgstr ""
+
+#: assets/admin/app-collections.js:668
+msgid "Meta description, link previews and llms.txt. Shortened to 300 characters."
+msgstr ""
+
+#: assets/admin/app-collections.js:669
+msgid "Entry title"
+msgstr ""
+
+#: assets/admin/app-collections.js:669 assets/admin/app-content.js:1254
+#: assets/admin/app-media.js:256 assets/admin/editor.js:1210
+#: includes/ai/class-leiho-ai.php:470 includes/class-leiho-schema.php:244
+msgid "Title"
+msgstr ""
+
+#: assets/admin/app-collections.js:669
+msgid "When the entry title is not the one to show in search results."
+msgstr ""
+
+#: assets/admin/app-collections.js:670
+msgid "Shown in link previews."
+msgstr ""
+
+#: assets/admin/app-collections.js:671
+msgid "A list with “question” and “answer” fields, published as an FAQ that AI assistants can quote."
+msgstr ""
+
+#: assets/admin/app-collections.js:671
+msgid "None"
+msgstr ""
+
+#: assets/admin/app-collections.js:671
+msgid "Questions and answers"
+msgstr ""
+
+#: assets/admin/app-collections.js:672
+msgid "List these entries in llms.txt"
+msgstr ""
+
+#: assets/admin/app-collections.js:697
 msgid "No fields yet. Each entry still has a title."
 msgstr ""
 
-#: assets/admin/app-collections.js:609 assets/admin/app-collections.js:854
+#: assets/admin/app-collections.js:714 assets/admin/app-collections.js:959
 msgid "Drag to reorder"
 msgstr ""
 
 #. translators: %s: field label.
 #. translators: %s: block type label.
-#: assets/admin/app-collections.js:641 assets/admin/app-collections.js:1347
+#: assets/admin/app-collections.js:746 assets/admin/app-collections.js:1452
 #, javascript-format
 msgid "Move “%s” up"
 msgstr ""
 
-#: assets/admin/app-collections.js:642 assets/admin/app-collections.js:1345
+#: assets/admin/app-collections.js:747 assets/admin/app-collections.js:1450
 #: assets/admin/editor.js:3052
 msgid "Move up"
 msgstr ""
 
 #. translators: %s: field label.
 #. translators: %s: block type label.
-#: assets/admin/app-collections.js:653 assets/admin/app-collections.js:1354
+#: assets/admin/app-collections.js:758 assets/admin/app-collections.js:1459
 #, javascript-format
 msgid "Move “%s” down"
 msgstr ""
 
-#: assets/admin/app-collections.js:654 assets/admin/app-collections.js:1352
+#: assets/admin/app-collections.js:759 assets/admin/app-collections.js:1457
 #: assets/admin/editor.js:3060
 msgid "Move down"
 msgstr ""
 
 #. translators: %s: field label.
 #. translators: %s: block type label.
-#: assets/admin/app-collections.js:664 assets/admin/app-collections.js:1361
+#: assets/admin/app-collections.js:769 assets/admin/app-collections.js:1466
 #, javascript-format
 msgid "Remove “%s”"
 msgstr ""
 
-#: assets/admin/app-collections.js:684
+#: assets/admin/app-collections.js:789
 msgid "No sub-fields yet."
 msgstr ""
 
-#: assets/admin/app-collections.js:694
+#: assets/admin/app-collections.js:799
 msgid "Add a sub-field"
 msgstr ""
 
-#: assets/admin/app-collections.js:927
+#: assets/admin/app-collections.js:1032
 msgid "Field moved."
 msgstr ""
 
-#: assets/admin/app-collections.js:941
+#: assets/admin/app-collections.js:1046
 msgid "This field isn’t saved yet: it is simply removed."
 msgstr ""
 
-#: assets/admin/app-collections.js:943
+#: assets/admin/app-collections.js:1048
 msgid "Its values disappear from each entry the next time the entry is saved. Revisions keep the previous values."
 msgstr ""
 
-#: assets/admin/app-collections.js:944
+#: assets/admin/app-collections.js:1049
 msgid "Its column is archived, not deleted: add a field with the same key and type again to get the values back, or purge archived columns to delete them."
 msgstr ""
 
 #. translators: %s: field label.
 #. translators: %s: collection label.
-#: assets/admin/app-collections.js:947 assets/admin/app-collections.js:1751
+#: assets/admin/app-collections.js:1052 assets/admin/app-collections.js:1856
 #, javascript-format
 msgid "Remove “%s”?"
 msgstr ""
 
 #. translators: %s: field key.
-#: assets/admin/app-collections.js:1003
+#: assets/admin/app-collections.js:1108
 #, javascript-format
 msgid "Key: %s (fixed: it names the stored data, renaming is free)."
 msgstr ""
 
 #. translators: %s: field key.
-#: assets/admin/app-collections.js:1005
+#: assets/admin/app-collections.js:1110
 #, javascript-format
 msgid "Key: %s (set when you apply, then fixed)."
 msgstr ""
 
-#: assets/admin/app-collections.js:1068
+#: assets/admin/app-collections.js:1173
 msgid "Shown to editors under the field"
 msgstr ""
 
-#: assets/admin/app-collections.js:1076
+#: assets/admin/app-collections.js:1181
 msgid "Changing the type of a saved field moves its values to a new column; values that can’t be converted stay in the archived column."
 msgstr ""
 
-#: assets/admin/app-collections.js:1081 assets/admin/app-collections.js:1383
+#: assets/admin/app-collections.js:1186 assets/admin/app-collections.js:1488
 #: assets/admin/editor.js:3669
 msgid "Label"
 msgstr ""
 
-#: assets/admin/app-collections.js:1083 assets/admin/app-collections.js:1384
-#: assets/admin/app-collections.js:1415
+#: assets/admin/app-collections.js:1188 assets/admin/app-collections.js:1489
+#: assets/admin/app-collections.js:1520
 msgid "Name in the API"
 msgstr ""
 
-#: assets/admin/app-collections.js:1087 assets/admin/app-collections.js:1416
+#: assets/admin/app-collections.js:1192 assets/admin/app-collections.js:1521
 #: assets/admin/app-content.js:1252 assets/admin/app-media.js:58
 #: assets/admin/editor.js:1221
 msgid "Type"
 msgstr ""
 
-#: assets/admin/app-collections.js:1088
+#: assets/admin/app-collections.js:1193
 msgid "Instructions"
 msgstr ""
 
-#: assets/admin/app-collections.js:1099
+#: assets/admin/app-collections.js:1204
 msgid "Several lines"
 msgstr ""
 
-#: assets/admin/app-collections.js:1106
+#: assets/admin/app-collections.js:1211
 msgid "Maximum length"
 msgstr ""
 
-#: assets/admin/app-collections.js:1108 assets/admin/app-collections.js:1147
-#: assets/admin/app-collections.js:1157 assets/admin/app-collections.js:1166
-#: assets/admin/app-collections.js:1390
+#: assets/admin/app-collections.js:1213 assets/admin/app-collections.js:1252
+#: assets/admin/app-collections.js:1262 assets/admin/app-collections.js:1271
+#: assets/admin/app-collections.js:1495
 msgid "No limit"
 msgstr ""
 
-#: assets/admin/app-collections.js:1108
+#: assets/admin/app-collections.js:1213
 msgid "Up to 191 characters, the text is indexed (fast to sort and filter)."
 msgstr ""
 
-#: assets/admin/app-collections.js:1112
+#: assets/admin/app-collections.js:1217
 msgid "Whole numbers only"
 msgstr ""
 
-#: assets/admin/app-collections.js:1115 assets/admin/app-collections.js:1388
-#: assets/admin/app-collections.js:1422
+#: assets/admin/app-collections.js:1220 assets/admin/app-collections.js:1493
+#: assets/admin/app-collections.js:1527
 msgid "Maximum"
 msgstr ""
 
-#: assets/admin/app-collections.js:1115 assets/admin/app-collections.js:1385
-#: assets/admin/app-collections.js:1421
+#: assets/admin/app-collections.js:1220 assets/admin/app-collections.js:1490
+#: assets/admin/app-collections.js:1526
 msgid "Minimum"
 msgstr ""
 
-#: assets/admin/app-collections.js:1115
+#: assets/admin/app-collections.js:1220
 msgid "Step"
 msgstr ""
 
-#: assets/admin/app-collections.js:1124
+#: assets/admin/app-collections.js:1229
 msgid "Several choices"
 msgstr ""
 
-#: assets/admin/app-collections.js:1137 assets/admin/app-collections.js:1419
+#: assets/admin/app-collections.js:1242 assets/admin/app-collections.js:1524
 msgid "Choices"
 msgstr ""
 
-#: assets/admin/app-collections.js:1139
+#: assets/admin/app-collections.js:1244
 msgid "One choice per line. Write “value : Label” to show a label different from the stored value."
 msgstr ""
 
-#: assets/admin/app-collections.js:1145
+#: assets/admin/app-collections.js:1250
 msgid "Maximum images"
 msgstr ""
 
-#: assets/admin/app-collections.js:1151
+#: assets/admin/app-collections.js:1256
 msgid "Several entries"
 msgstr ""
 
-#: assets/admin/app-collections.js:1155
+#: assets/admin/app-collections.js:1260
 msgid "Maximum entries"
 msgstr ""
 
-#: assets/admin/app-collections.js:1157
+#: assets/admin/app-collections.js:1262
 msgid "With “Several entries”."
 msgstr ""
 
-#: assets/admin/app-collections.js:1162
+#: assets/admin/app-collections.js:1267
 msgid "Maximum rows"
 msgstr ""
 
-#: assets/admin/app-collections.js:1162
+#: assets/admin/app-collections.js:1267
 msgid "Minimum rows"
 msgstr ""
 
-#: assets/admin/app-collections.js:1178
+#: assets/admin/app-collections.js:1283
 msgid "Advanced options"
 msgstr ""
 
-#: assets/admin/app-collections.js:1198
+#: assets/admin/app-collections.js:1303
 msgid "Translatable"
 msgstr ""
 
-#: assets/admin/app-collections.js:1200
+#: assets/admin/app-collections.js:1305
 msgid "On: one value per language. Off: the same value in every language (prices, images, dates)."
 msgstr ""
 
-#: assets/admin/app-collections.js:1214
+#: assets/admin/app-collections.js:1319
 msgid "Required"
 msgstr ""
 
-#: assets/admin/app-collections.js:1222
+#: assets/admin/app-collections.js:1327
 msgid "Fields of each row"
 msgstr ""
 
-#: assets/admin/app-collections.js:1222
+#: assets/admin/app-collections.js:1327
 msgid "Fields of the group"
 msgstr ""
 
-#: assets/admin/app-collections.js:1272 assets/admin/app-collections.js:1420
+#: assets/admin/app-collections.js:1377 assets/admin/app-collections.js:1525
 msgid "Points to"
 msgstr ""
 
-#: assets/admin/app-collections.js:1294 assets/admin/app-collections.js:1418
+#: assets/admin/app-collections.js:1399 assets/admin/app-collections.js:1523
 msgid "Block types"
 msgstr ""
 
-#: assets/admin/app-collections.js:1296
+#: assets/admin/app-collections.js:1401
 msgid "Add at least one block type: editors pick one each time they add a block."
 msgstr ""
 
-#: assets/admin/app-collections.js:1303
+#: assets/admin/app-collections.js:1408
 msgid "New block"
 msgstr ""
 
-#: assets/admin/app-collections.js:1308
+#: assets/admin/app-collections.js:1413
 msgid "Add a block type"
 msgstr ""
 
 #. translators: %s: block type label.
-#: assets/admin/app-collections.js:1365
+#: assets/admin/app-collections.js:1470
 #, javascript-format
 msgid "Remove the block type “%s”?"
 msgstr ""
 
-#: assets/admin/app-collections.js:1366
+#: assets/admin/app-collections.js:1471
 msgid "Blocks of this type disappear from each entry the next time the entry is saved. Revisions keep them."
 msgstr ""
 
 #. translators: %s: block key.
-#: assets/admin/app-collections.js:1384
+#: assets/admin/app-collections.js:1489
 #, javascript-format
 msgid "Key: %s"
 msgstr ""
 
-#: assets/admin/app-collections.js:1393
+#: assets/admin/app-collections.js:1498
 msgid "Fields of this block"
 msgstr ""
 
-#: assets/admin/app-collections.js:1414
+#: assets/admin/app-collections.js:1519
 msgid "Key"
 msgstr ""
 
-#: assets/admin/app-collections.js:1417
+#: assets/admin/app-collections.js:1522
 msgid "Sub-fields"
 msgstr ""
 
-#: assets/admin/app-collections.js:1456
+#: assets/admin/app-collections.js:1561
 msgid "Archived columns"
 msgstr ""
 
-#: assets/admin/app-collections.js:1457
+#: assets/admin/app-collections.js:1562
 msgid "Values of removed or retyped fields. They are kept until you purge them."
 msgstr ""
 
-#: assets/admin/app-collections.js:1460
+#: assets/admin/app-collections.js:1565
 msgid "No archived columns."
 msgstr ""
 
-#: assets/admin/app-collections.js:1466
+#: assets/admin/app-collections.js:1571
 msgid "Field"
 msgstr ""
 
-#: assets/admin/app-collections.js:1467
+#: assets/admin/app-collections.js:1572
 msgid "Column"
 msgstr ""
 
-#: assets/admin/app-collections.js:1468
+#: assets/admin/app-collections.js:1573
 msgid "Why"
 msgstr ""
 
-#: assets/admin/app-collections.js:1469
+#: assets/admin/app-collections.js:1574
 msgid "Archived"
 msgstr ""
 
-#: assets/admin/app-collections.js:1475
+#: assets/admin/app-collections.js:1580
 msgid "Field removed"
 msgstr ""
 
-#: assets/admin/app-collections.js:1475
+#: assets/admin/app-collections.js:1580
 msgid "Type changed"
 msgstr ""
 
-#: assets/admin/app-collections.js:1484
+#: assets/admin/app-collections.js:1589
 msgid "Purge archived columns"
 msgstr ""
 
-#: assets/admin/app-collections.js:1492
+#: assets/admin/app-collections.js:1597
 msgid "Purge archived columns?"
 msgstr ""
 
-#: assets/admin/app-collections.js:1493
+#: assets/admin/app-collections.js:1598
 msgid "Their values are deleted from the database for good. Revisions of entries keep a copy, but the columns can’t be restored."
 msgstr ""
 
-#: assets/admin/app-collections.js:1494
+#: assets/admin/app-collections.js:1599
 msgid "Purge"
 msgstr ""
 
 #. translators: %d: number of columns.
-#: assets/admin/app-collections.js:1505
+#: assets/admin/app-collections.js:1610
 #, javascript-format
 msgid "%d column purged."
 msgid_plural "%d columns purged."
@@ -1094,168 +1238,168 @@ msgstr[0] ""
 msgstr[1] ""
 
 #. translators: %s: collection id.
-#: assets/admin/app-collections.js:1573
+#: assets/admin/app-collections.js:1678
 #, javascript-format
 msgid "Create the table of “%s”."
 msgstr ""
 
 #. translators: 1: field label, 2: SQL column type.
-#: assets/admin/app-collections.js:1576
+#: assets/admin/app-collections.js:1681
 #, javascript-format
 msgid "Add a column for “%1$s” (%2$s)."
 msgstr ""
 
 #. translators: %s: field label.
-#: assets/admin/app-collections.js:1579
+#: assets/admin/app-collections.js:1684
 #, javascript-format
 msgid "Bring back the archived values of “%s”."
 msgstr ""
 
 #. translators: 1: field label, 2: previous type, 3: new type.
-#: assets/admin/app-collections.js:1582
+#: assets/admin/app-collections.js:1687
 #, javascript-format
 msgid "Convert “%1$s” from %2$s to %3$s: values move to a new column, the old one is archived."
 msgstr ""
 
 #. translators: %s: field label.
-#: assets/admin/app-collections.js:1585
+#: assets/admin/app-collections.js:1690
 #, javascript-format
 msgid "Archive the column of “%s” (values kept)."
 msgstr ""
 
 #. translators: %s: collection id.
-#: assets/admin/app-collections.js:1588
+#: assets/admin/app-collections.js:1693
 #, javascript-format
 msgid "Remove the collection “%s” from Leiho (entries and values kept)."
 msgstr ""
 
 #. translators: %s: collection id.
-#: assets/admin/app-collections.js:1591
+#: assets/admin/app-collections.js:1696
 #, javascript-format
 msgid "Create the entry of “%s”."
 msgstr ""
 
 #. translators: %d: number of problems.
-#: assets/admin/app-collections.js:1634
+#: assets/admin/app-collections.js:1739
 #, javascript-format
 msgid "%d problem to fix before applying."
 msgid_plural "%d problems to fix before applying."
 msgstr[0] ""
 msgstr[1] ""
 
-#: assets/admin/app-collections.js:1665
+#: assets/admin/app-collections.js:1770
 msgid "Leiho will make these changes to the database:"
 msgstr ""
 
-#: assets/admin/app-collections.js:1671
+#: assets/admin/app-collections.js:1776
 msgid "No database change needed: only the field definitions are updated (labels, options, sub-fields, order)."
 msgstr ""
 
-#: assets/admin/app-collections.js:1691
+#: assets/admin/app-collections.js:1796
 msgid "Removed sub-fields lose their values the next time each entry is saved (revisions keep them):"
 msgstr ""
 
-#: assets/admin/app-collections.js:1699
+#: assets/admin/app-collections.js:1804
 msgid "Apply these changes?"
 msgstr ""
 
-#: assets/admin/app-collections.js:1699
+#: assets/admin/app-collections.js:1804
 msgid "Create this collection?"
 msgstr ""
 
-#: assets/admin/app-collections.js:1703 assets/admin/app-content.js:175
+#: assets/admin/app-collections.js:1808 assets/admin/app-content.js:175
 msgid "Keep editing"
 msgstr ""
 
-#: assets/admin/app-collections.js:1705
+#: assets/admin/app-collections.js:1810
 msgid "Apply"
 msgstr ""
 
-#: assets/admin/app-collections.js:1705
+#: assets/admin/app-collections.js:1810
 msgid "Create"
 msgstr ""
 
 #. translators: %d: number of values.
-#: assets/admin/app-collections.js:1732
+#: assets/admin/app-collections.js:1837
 #, javascript-format
 msgid "%d value couldn’t be converted: it stays in the archived column."
 msgid_plural "%d values couldn’t be converted: they stay in the archived column."
 msgstr[0] ""
 msgstr[1] ""
 
-#: assets/admin/app-collections.js:1737
+#: assets/admin/app-collections.js:1842
 msgid "Changes applied."
 msgstr ""
 
-#: assets/admin/app-collections.js:1737
+#: assets/admin/app-collections.js:1842
 msgid "Collection created."
 msgstr ""
 
-#: assets/admin/app-collections.js:1752
+#: assets/admin/app-collections.js:1857
 msgid "The collection disappears from Leiho, the editor and the content API. Its entries and their values are kept in the database: creating it again with the same identifier brings everything back."
 msgstr ""
 
-#: assets/admin/app-collections.js:1762
+#: assets/admin/app-collections.js:1867
 msgid "Collection removed. Its data is kept."
 msgstr ""
 
-#: assets/admin/app-collections.js:1794 assets/admin/app-content.js:208
+#: assets/admin/app-collections.js:1899 assets/admin/app-content.js:208
 msgid "Languages"
 msgstr ""
 
-#: assets/admin/app-collections.js:1796
+#: assets/admin/app-collections.js:1901
 msgid "Translate your collections without duplicating entries: each translatable field gets one value per language, and pages get a /fr/… address."
 msgstr ""
 
-#: assets/admin/app-collections.js:1797
+#: assets/admin/app-collections.js:1902
 msgid "Language codes"
 msgstr ""
 
-#: assets/admin/app-collections.js:1799
+#: assets/admin/app-collections.js:1904
 msgid "Separated by commas. The first one is the default language: its content stays where it is. Leave empty for a single-language site; translations already written are kept."
 msgstr ""
 
-#: assets/admin/app-collections.js:1805 assets/admin/app-media.js:218
+#: assets/admin/app-collections.js:1910 assets/admin/app-media.js:218
 #: assets/admin/editor.js:4020 includes/admin/class-leiho-admin.php:506
 #: includes/admin/class-leiho-dashboard.php:1694
 #: includes/admin/class-leiho-dashboard.php:1860
 msgid "Save"
 msgstr ""
 
-#: assets/admin/app-collections.js:1818
+#: assets/admin/app-collections.js:1923
 msgid "Languages saved."
 msgstr ""
 
-#: assets/admin/app-collections.js:1818
+#: assets/admin/app-collections.js:1923
 msgid "Single-language site."
 msgstr ""
 
-#: assets/admin/app-collections.js:1827
+#: assets/admin/app-collections.js:1932
 msgid "Couldn’t save the languages."
 msgstr ""
 
-#: assets/admin/app-collections.js:1862
+#: assets/admin/app-collections.js:1967
 #: includes/collections/class-leiho-collections.php:322
 msgid "The file is not valid JSON."
 msgstr ""
 
 #. translators: %s: file name.
-#: assets/admin/app-collections.js:1872
+#: assets/admin/app-collections.js:1977
 #, javascript-format
 msgid "Import %s?"
 msgstr ""
 
 #. translators: %s: list of collection ids.
-#: assets/admin/app-collections.js:1877
+#: assets/admin/app-collections.js:1982
 #, javascript-format
 msgid "The file replaces the whole schema with: %s."
 msgstr ""
 
-#: assets/admin/app-collections.js:1884
+#: assets/admin/app-collections.js:1989
 msgid "Import"
 msgstr ""
 
-#: assets/admin/app-collections.js:1891
+#: assets/admin/app-collections.js:1996
 msgid "Schema imported."
 msgstr ""
 
@@ -1823,12 +1967,6 @@ msgstr ""
 
 #: assets/admin/app-content.js:1224 includes/class-leiho-rest.php:644
 msgid "Couldn’t restore this content."
-msgstr ""
-
-#: assets/admin/app-content.js:1254 assets/admin/app-media.js:256
-#: assets/admin/editor.js:1210 includes/ai/class-leiho-ai.php:470
-#: includes/class-leiho-schema.php:244
-msgid "Title"
 msgstr ""
 
 #. translators: %s: content type (e.g. Services).
@@ -4662,60 +4800,60 @@ msgstr ""
 msgid "Save the translations (default false)."
 msgstr ""
 
-#: includes/ai/class-leiho-ai-abilities.php:617
-#: includes/ai/class-leiho-ai-abilities.php:846
+#: includes/ai/class-leiho-ai-abilities.php:622
+#: includes/ai/class-leiho-ai-abilities.php:851
 #: includes/ai/class-leiho-ai-translate.php:30
-#: includes/class-leiho-content.php:393 includes/class-leiho-content.php:397
-#: includes/class-leiho-rest.php:357 includes/class-leiho-rest.php:565
-#: includes/class-leiho-rest.php:610 includes/class-leiho-rest.php:656
-#: includes/class-leiho-schema.php:29
+#: includes/class-leiho-content.php:395 includes/class-leiho-content.php:399
+#: includes/class-leiho-llms.php:100 includes/class-leiho-rest.php:357
+#: includes/class-leiho-rest.php:565 includes/class-leiho-rest.php:610
+#: includes/class-leiho-rest.php:656 includes/class-leiho-schema.php:29
 msgid "Content not found."
 msgstr ""
 
-#: includes/ai/class-leiho-ai-abilities.php:622
+#: includes/ai/class-leiho-ai-abilities.php:627
 msgid "This entry is published, scheduled or private: changes would go live. Only drafts and pending entries can be edited by an agent."
 msgstr ""
 
-#: includes/ai/class-leiho-ai-abilities.php:627
-#: includes/ai/class-leiho-ai-abilities.php:842
+#: includes/ai/class-leiho-ai-abilities.php:632
+#: includes/ai/class-leiho-ai-abilities.php:847
 #: includes/ai/class-leiho-ai-admin-abilities.php:282
 #: includes/ai/class-leiho-ai-rest.php:596 includes/class-leiho-rest.php:742
 msgid "Nothing to save."
 msgstr ""
 
-#: includes/ai/class-leiho-ai-abilities.php:634
+#: includes/ai/class-leiho-ai-abilities.php:639
 msgid "This content was changed elsewhere since you read it. Read it again with leiho/get-entry."
 msgstr ""
 
 #. translators: %d: number of fields.
-#: includes/ai/class-leiho-ai-abilities.php:646
+#: includes/ai/class-leiho-ai-abilities.php:651
 #, php-format
 msgid "%d field"
 msgid_plural "%d fields"
 msgstr[0] ""
 msgstr[1] ""
 
-#: includes/ai/class-leiho-ai-abilities.php:668
+#: includes/ai/class-leiho-ai-abilities.php:673
 #: includes/class-leiho-rest.php:300
 msgid "This content type isn’t editable in Leiho."
 msgstr ""
 
-#: includes/ai/class-leiho-ai-abilities.php:738
+#: includes/ai/class-leiho-ai-abilities.php:743
 #: includes/ai/class-leiho-ai-rest.php:600 includes/class-leiho-rest.php:530
 msgid "A title is required."
 msgstr ""
 
-#: includes/ai/class-leiho-ai-abilities.php:786
+#: includes/ai/class-leiho-ai-abilities.php:791
 #: includes/ai/class-leiho-ai-rest.php:483 includes/ai/class-leiho-ai.php:287
 msgid "The configured AI provider can’t read images."
 msgstr ""
 
-#: includes/ai/class-leiho-ai-abilities.php:813
+#: includes/ai/class-leiho-ai-abilities.php:818
 msgid "Unknown content type."
 msgstr ""
 
 #. translators: 1: language code, 2: number of fields.
-#: includes/ai/class-leiho-ai-abilities.php:856
+#: includes/ai/class-leiho-ai-abilities.php:861
 #, php-format
 msgid "%1$s translation, %2$d field"
 msgid_plural "%1$s translation, %2$d fields"
@@ -4985,7 +5123,7 @@ msgid "The brief is too long."
 msgstr ""
 
 #: includes/ai/class-leiho-ai-rest.php:571
-#: includes/ai/class-leiho-ai-translate.php:245
+#: includes/ai/class-leiho-ai-translate.php:261
 msgid "The AI answer couldn’t be read. Try again."
 msgstr ""
 
@@ -5003,15 +5141,15 @@ msgstr ""
 msgid "Choose a language to translate into: %s."
 msgstr ""
 
-#: includes/ai/class-leiho-ai-translate.php:197
+#: includes/ai/class-leiho-ai-translate.php:213
 msgid "Everything is already translated."
 msgstr ""
 
-#: includes/ai/class-leiho-ai-translate.php:274
+#: includes/ai/class-leiho-ai-translate.php:292
 msgid "The AI didn’t translate anything. Try again."
 msgstr ""
 
-#: includes/ai/class-leiho-ai-translate.php:454
+#: includes/ai/class-leiho-ai-translate.php:489
 msgid "This content type isn’t translatable."
 msgstr ""
 
@@ -5143,7 +5281,7 @@ msgstr ""
 msgid "A valid Leiho content token is required."
 msgstr ""
 
-#: includes/class-leiho-content.php:317
+#: includes/class-leiho-content.php:319
 msgid "This content type is not served by Leiho."
 msgstr ""
 
@@ -5271,6 +5409,34 @@ msgstr ""
 
 #: includes/class-leiho-schema.php:276
 msgid "Main content"
+msgstr ""
+
+#: includes/class-leiho-seo.php:64
+msgid "Must be an object."
+msgstr ""
+
+#. translators: %s: list of schema.org types.
+#: includes/class-leiho-seo.php:78
+#, php-format
+msgid "Use one of: %s."
+msgstr ""
+
+#. translators: %s: field name.
+#: includes/class-leiho-seo.php:98
+#, php-format
+msgid "No field named “%s” at the top level of this collection."
+msgstr ""
+
+#. translators: 1: field name, 2: allowed field types.
+#: includes/class-leiho-seo.php:106
+#, php-format
+msgid "“%1$s” must be a field of type %2$s."
+msgstr ""
+
+#. translators: %s: field name.
+#: includes/class-leiho-seo.php:114
+#, php-format
+msgid "“%s” needs a “question” and an “answer” text field."
 msgstr ""
 
 #: includes/class-leiho-updater.php:220
@@ -5516,8 +5682,8 @@ msgid "Schema version %d is newer than this Leiho supports. Update Leiho."
 msgstr ""
 
 #: includes/collections/class-leiho-collections-schema.php:133
-#: includes/collections/class-leiho-collections-schema.php:285
-#: includes/collections/class-leiho-collections-schema.php:462
+#: includes/collections/class-leiho-collections-schema.php:288
+#: includes/collections/class-leiho-collections-schema.php:465
 msgid "Must be a list."
 msgstr ""
 
@@ -5572,83 +5738,83 @@ msgid "A collection holds at most %d short indexed text fields (text up to 191 c
 msgstr ""
 
 #. translators: %d: maximum nesting depth.
-#: includes/collections/class-leiho-collections-schema.php:290
+#: includes/collections/class-leiho-collections-schema.php:293
 #, php-format
 msgid "Fields can be nested %d levels deep at most."
 msgstr ""
 
 #. translators: %s: field key.
-#: includes/collections/class-leiho-collections-schema.php:304
+#: includes/collections/class-leiho-collections-schema.php:307
 #, php-format
 msgid "The key “%s” is used twice."
 msgstr ""
 
 #. translators: %s: field name.
-#: includes/collections/class-leiho-collections-schema.php:309
+#: includes/collections/class-leiho-collections-schema.php:312
 #, php-format
 msgid "The name “%s” is used twice."
 msgstr ""
 
-#: includes/collections/class-leiho-collections-schema.php:332
+#: includes/collections/class-leiho-collections-schema.php:335
 msgid "A field must be an object."
 msgstr ""
 
-#: includes/collections/class-leiho-collections-schema.php:338
-#: includes/collections/class-leiho-collections-schema.php:512
+#: includes/collections/class-leiho-collections-schema.php:341
+#: includes/collections/class-leiho-collections-schema.php:515
 msgid "Use snake_case: lowercase letters, digits and underscores, starting with a letter (64 characters max)."
 msgstr ""
 
-#: includes/collections/class-leiho-collections-schema.php:344
-#: includes/collections/class-leiho-collections-schema.php:517
+#: includes/collections/class-leiho-collections-schema.php:347
+#: includes/collections/class-leiho-collections-schema.php:520
 msgid "Use lowercase letters, digits and underscores, starting with a letter (48 characters max)."
 msgstr ""
 
 #. translators: %s: field type.
-#: includes/collections/class-leiho-collections-schema.php:351
+#: includes/collections/class-leiho-collections-schema.php:354
 #, php-format
 msgid "Unknown field type “%s”."
 msgstr ""
 
-#: includes/collections/class-leiho-collections-schema.php:387
+#: includes/collections/class-leiho-collections-schema.php:390
 msgid "min is greater than max."
 msgstr ""
 
-#: includes/collections/class-leiho-collections-schema.php:405
+#: includes/collections/class-leiho-collections-schema.php:408
 msgid "References point to collection ids or post types."
 msgstr ""
 
 #. translators: %s: collection id or post type.
-#: includes/collections/class-leiho-collections-schema.php:412
+#: includes/collections/class-leiho-collections-schema.php:415
 #, php-format
 msgid "Unknown collection or content type “%s”."
 msgstr ""
 
-#: includes/collections/class-leiho-collections-schema.php:418
+#: includes/collections/class-leiho-collections-schema.php:421
 msgid "Say which collections this field points to."
 msgstr ""
 
-#: includes/collections/class-leiho-collections-schema.php:430
+#: includes/collections/class-leiho-collections-schema.php:433
 msgid "A list needs at least one field."
 msgstr ""
 
-#: includes/collections/class-leiho-collections-schema.php:437
+#: includes/collections/class-leiho-collections-schema.php:440
 msgid "A group needs at least one field."
 msgstr ""
 
-#: includes/collections/class-leiho-collections-schema.php:479
+#: includes/collections/class-leiho-collections-schema.php:482
 msgid "Each choice needs a value of 1 to 191 characters."
 msgstr ""
 
-#: includes/collections/class-leiho-collections-schema.php:492
+#: includes/collections/class-leiho-collections-schema.php:495
 msgid "A select needs at least one choice."
 msgstr ""
 
-#: includes/collections/class-leiho-collections-schema.php:505
+#: includes/collections/class-leiho-collections-schema.php:508
 msgid "A blocks field needs at least one block type."
 msgstr ""
 
 #. translators: %s: block name.
-#: includes/collections/class-leiho-collections-schema.php:522
+#: includes/collections/class-leiho-collections-schema.php:525
 #, php-format
 msgid "The block type “%s” is declared twice."
 msgstr ""

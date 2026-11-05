@@ -185,6 +185,7 @@ require __DIR__ . '/../includes/class-leiho-url-mapper.php';
 require __DIR__ . '/../includes/class-leiho-content.php';
 require __DIR__ . '/../includes/class-leiho-cache.php';
 require __DIR__ . '/../includes/class-leiho-types.php';
+require __DIR__ . '/../includes/class-leiho-seo.php';
 
 function check( $label, $cond, $dump = null ) {
 	echo ( $cond ? 'ok   ' : 'FAIL ' ) . $label . "\n";
@@ -302,6 +303,10 @@ check( 'slug plafonné à 191', 191 === $schema['collections'][1]['fields'][5]['
 $again = array();
 $reread = Leiho_Collections_Schema::normalize( Leiho_Collections_Schema::compact( $schema ), $again );
 check( 'export relu à l’identique', $schema === $reread && ! $again, first_diff( $schema, $reread ) . json_encode( $again ) );
+$with_seo = Leiho_Collections_Schema::normalize( array( 'collections' => array( array_merge( $home, array( 'seo' => array( 'type' => 'AboutPage', 'title' => 'hero_title' ) ) ) ) ), $again );
+check( 'bloc seo validé et gardé', array( 'type' => 'AboutPage', 'title' => 'hero_title' ) === $with_seo['collections'][0]['seo'] && ! $again, $again );
+check( 'bloc seo relu à l’identique', $with_seo === Leiho_Collections_Schema::normalize( Leiho_Collections_Schema::compact( $with_seo ), $again ) );
+check( 'pas de bloc seo : rien d’écrit', ! isset( Leiho_Collections_Schema::compact( $schema )['collections'][0]['seo'] ) );
 check( 'export compact (pas de required:false)', false === strpos( json_encode( Leiho_Collections_Schema::compact( $schema ) ), '"required":false' ) );
 
 /* --- Colonnes --- */

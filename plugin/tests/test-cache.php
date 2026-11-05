@@ -51,6 +51,7 @@ function rest_url( $p ) { return 'https://cms.test/wp-json/' . $p; }
 function wp_json_encode( $v ) { return json_encode( $v ); }
 function get_posts( $a ) { $GLOBALS['get_posts']++; return array(); }
 function get_bloginfo( $k ) { return 'name' === $k ? 'Site' : 'fr-FR'; }
+function get_site_icon_url( $s = 512 ) { return ''; }
 function home_url() { return 'https://cms.test'; }
 function __( $s, $d = '' ) { return $s; }
 function wp_parse_args( $a, $d ) { return array_merge( $d, (array) $a ); }
@@ -80,6 +81,7 @@ class Leiho_Rest { const NS = 'leiho/v1'; }
 
 require __DIR__ . '/../includes/class-leiho-i18n.php';
 require __DIR__ . '/../includes/class-leiho-content.php';
+require __DIR__ . '/../includes/class-leiho-seo.php';
 require __DIR__ . '/../includes/class-leiho-cache.php';
 
 function assert_true( $label, $cond, $dump = null ) {
