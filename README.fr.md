@@ -204,6 +204,43 @@ API REST (administrateurs) : `GET /leiho/v1/collections/import-acf` (types et é
 
 Format et API : [plugin/docs/collections-spec.md](plugin/docs/collections-spec.md) (en anglais).
 
+## Moteurs de recherche et assistants IA
+
+Leiho donne à chaque site ce dont les moteurs de recherche et les assistants IA (ChatGPT, Claude, Perplexity, les réponses IA de Google) ont besoin pour le lire et le citer, à partir des champs que vous avez déjà.
+
+**Dans WordPress** : chaque collection dit ce que sont ses entrées et quels champs les décrivent (Collections → une collection → *Recherche et IA*, ou dans le schéma) :
+
+```json
+{ "id": "doc", "seo": { "type": "TechArticle", "description": "summary", "image": "cover", "faq": "faq" }, "fields": [ … ] }
+```
+
+- `type` : le type schema.org (`WebPage` par défaut, `BlogPosting` pour les articles ; articles, FAQ, pages « à propos », contact, liste et profil, produit, service, événement, formation, logiciel, recette, personne, organisation, commerce local, lieu).
+- `title`, `description`, `image` : les champs qui les portent. Sans champ de description, Leiho prend un champ nommé comme un résumé (`summary`, `intro`, `description`…), puis Yoast, Rank Math, SEOPress ou All in One SEO, puis l'extrait. L'image par défaut est l'image mise en avant.
+- `faq` : une liste avec des champs `question` et `answer`, publiée comme une FAQ.
+- `"llms": false` retire la collection de `llms.txt`.
+
+Chaque contenu de l'API porte alors un bloc `seo` (`type`, `title`, `description`, `image`, `faq`, `jsonld`) dans la langue de la requête : `jsonld` contient la page, l'article ou le sujet et la FAQ en nœuds schema.org, avec dates et langue. Le filtre `leiho_seo` ajoute ce que vous seul savez (prix d'un produit, lieu d'un événement).
+
+WordPress sert aussi, pour les fronts rendus à la demande (Next.js, Nuxt, SvelteKit…), via une réécriture de `/llms.txt` et de `/page.md` :
+
+| Endpoint | Renvoie |
+|---|---|
+| `GET /wp-json/leiho/v1/llms.txt` | Le [llms.txt](https://llmstxt.org) du site : nom, description, puis chaque type de contenu avec ses entrées et leur description. `?full=1` ajoute le texte de chaque entrée, `?md=1` lie les `page.md`, `?locale=fr` dans une langue. Filtre `leiho_llms_intro`. |
+| `GET /wp-json/leiho/v1/markdown?path=/docs/install` | Une entrée en Markdown, avec titre, description, adresse, langue et date, et un en-tête `Link: rel="canonical"`. |
+
+**Côté front** (paquet `leiho`) : `leihoGraph()`, `jsonLd()` et `seoMeta()` dans `leiho/seo` construisent le graphe schema.org de la page (site, organisation, fil d'Ariane et nœuds du contenu) et les balises Open Graph. Pour un site statique, `leiho/ai-ready` écrit après le build chaque page en Markdown à côté de son HTML, `llms.txt` et `llms-full.txt` par langue, et un `sitemap.xml` avec les autres langues de chaque page (`hreflang`) et sa date :
+
+```js
+// astro.config.mjs
+import { aiReady } from 'leiho/ai-ready';
+export default defineConfig( { site: 'https://example.com', integrations: [ aiReady() ] } );
+```
+
+```bash
+# tout autre build statique
+npx leiho ai-ready --site https://example.com --dir out
+```
+
 ## IA (WordPress 7.0+)
 
 Leiho écrit avec le fournisseur d’IA configuré dans **Réglages → Connecteurs**, par le client d’IA de WordPress (`wp_ai_client_prompt()`). Leiho ne stocke aucune clé d’API et ne choisit aucun fournisseur ; sans WordPress 7.0, ou sans fournisseur capable de générer du texte, les outils d’IA n’apparaissent pas (les administrateurs ont un lien vers les connecteurs).

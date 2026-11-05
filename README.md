@@ -311,6 +311,61 @@ Nothing is ever deleted from ACF: no postmeta, no field group, no post type. Val
 
 With WP-CLI: `wp leiho acf-import list`, `wp leiho acf-import preview ville`, `wp leiho acf-import run ville`, `wp leiho acf-import rollback ville --yes`.
 
+## Search engines and AI assistants
+
+Leiho gives every site what search engines and AI assistants (ChatGPT, Claude, Perplexity, Google's AI answers) need to read it and quote it, from fields you already have.
+
+**In WordPress**: each Collection says what its entries are and which fields describe them (Collections → a collection → *Search and AI*, or in the schema):
+
+```json
+{ "id": "doc", "seo": { "type": "TechArticle", "description": "summary", "image": "cover", "faq": "faq" }, "fields": [ … ] }
+```
+
+- `type`: the schema.org type (`WebPage` by default, `BlogPosting` for posts; articles, FAQ, about, contact, listing and profile pages, product, service, event, course, software, recipe, person, organization, local business, place).
+- `title`, `description`, `image`: the fields that hold them. Without a description field, Leiho takes one named like a summary (`summary`, `intro`, `description`…), then Yoast, Rank Math, SEOPress or All in One SEO, then the excerpt. The image defaults to the featured image.
+- `faq`: a list with `question` and `answer` fields, published as an FAQ.
+- `"llms": false` keeps the collection out of `llms.txt`.
+
+Every item of the content API then carries a `seo` block (`type`, `title`, `description`, `image`, `faq`, `jsonld`) in the language of the request: `jsonld` holds the page, the article or subject and the FAQ as schema.org nodes, with dates and language. Hook `leiho_seo` to add what only you know (a product's price, an event's place).
+
+Also served by WordPress, for front ends rendered on request (Next.js, Nuxt, SvelteKit…), through a rewrite of `/llms.txt` and `/page.md`:
+
+| Endpoint | Returns |
+|---|---|
+| `GET /wp-json/leiho/v1/llms.txt` | The site's [llms.txt](https://llmstxt.org): name, description, then each content type with its entries and their description. `?full=1` adds the full text of every entry, `?md=1` links to `page.md`, `?locale=fr` in a language. Filter `leiho_llms_intro`. |
+| `GET /wp-json/leiho/v1/markdown?path=/docs/install` | One entry as Markdown, with its title, description, address, language and date, and a `Link: rel="canonical"` header. |
+
+**On the front end** (`leiho` package):
+
+```ts
+import { leihoGraph, jsonLd, seoMeta } from 'leiho/seo';
+
+const graph = leihoGraph( {
+  url: 'https://example.com/docs/install',
+  item,                                                   // item.seo.jsonld from WordPress
+  site: { url: 'https://example.com', name: 'Example', locales: [ 'en', 'fr' ] },
+  organization: { name: 'Example Inc.', logo: '/logo.png', sameAs: [ 'https://github.com/example' ] },
+  breadcrumbs: [ { name: 'Docs', url: '/docs' }, { name: 'Install' } ],
+} );
+// <script type="application/ld+json" set:html={ jsonLd( graph ) } />
+const { title, description, meta } = seoMeta( item, { url, siteName: 'Example' } ); // description, Open Graph
+```
+
+A static build gets every page as Markdown next to its HTML (`docs/install.md`), `llms.txt` and `llms-full.txt` per language, and a `sitemap.xml` with each page's other languages (`hreflang`) and date, read from the pages themselves:
+
+```js
+// astro.config.mjs
+import { aiReady } from 'leiho/ai-ready';
+export default defineConfig( { site: 'https://example.com', integrations: [ aiReady() ] } );
+```
+
+```bash
+# any other static build (Next.js export, Nuxt generate, SvelteKit, Eleventy, Hugo…)
+npx leiho ai-ready --site https://example.com --dir out
+```
+
+The Markdown comes from each page's `<main>`; elements with `aria-hidden="true"`, `data-md-skip`, `svg`, `canvas`, navigation and buttons are left out. Options: `locales`, `intro` and `sections` (llms.txt text and headings per language), `optional`, `exclude`, `skipClasses`, `selector`, `sitemap: false`. To answer `Accept: text/markdown` on the page's own address, rewrite to `page.md` on the server (nginx: `map $http_accept`).
+
 ## AI (WordPress 7.0+)
 
 Leiho writes with the AI provider the site configured in **Settings → Connectors**, through WordPress's own AI client (`wp_ai_client_prompt()`). Leiho stores no API key and picks no provider; without WordPress 7.0, or without a provider that generates text, the AI tools simply don't show (administrators get a link to the connectors).

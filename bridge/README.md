@@ -107,6 +107,28 @@ Content-Security-Policy: frame-ancestors 'self' https://your-wordpress.example
 
 and must not send `X-Frame-Options: DENY` or `SAMEORIGIN`.
 
+## Search engines and AI assistants
+
+```js
+import { leihoGraph, jsonLd, seoMeta } from 'leiho/seo';
+// One schema.org graph per page: site, organization, breadcrumbs, and the
+// item's own nodes (item.seo.jsonld, computed by the plugin).
+const graph = leihoGraph( { url, item, site: { url: 'https://example.com', name: 'Example' }, breadcrumbs } );
+const tag = `<script type="application/ld+json">${ jsonLd( graph ) }</script>`;
+```
+
+After a static build, every page as Markdown (`page.md`), `llms.txt`, `llms-full.txt` and `sitemap.xml` with `hreflang`:
+
+```js
+import { aiReady } from 'leiho/ai-ready';            // Astro integration
+import { buildAiFiles } from 'leiho/ai-ready';       // or call it yourself
+await buildAiFiles( { dir: 'dist', site: 'https://example.com' } );
+```
+
+```bash
+npx leiho ai-ready --site https://example.com --dir dist
+```
+
 ## Protocol
 
 Messages are `{ ns: 'leiho', type, … }`, sent with an explicit `targetOrigin` and checked against `event.origin`.

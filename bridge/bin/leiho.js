@@ -4,12 +4,14 @@
  *
  *   npx leiho types [--url https://cms.example.com] [--out src/leiho.d.ts]
  *   npx leiho pull  [--url https://cms.example.com] [--out .leiho/content.json]
+ *   npx leiho ai-ready --site https://example.com [--dir dist] [--locales en,fr]
  *
  * L'adresse du CMS et le jeton se lisent aussi dans LEIHO_URL et LEIHO_TOKEN.
  */
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import { exportUrl, loadLeihoContent } from '../src/content.js';
+import { buildAiFiles } from '../src/ai-ready.js';
 
 const [ command, ...rest ] = process.argv.slice( 2 );
 const args = {};
@@ -43,10 +45,22 @@ async function pull() {
 	console.log( 'leiho: ' + data.items.length + ' items (' + source + ') in ' + out );
 }
 
-const commands = { types, pull };
+// Après un build statique : pages en Markdown, llms.txt, llms-full.txt, sitemap.xml.
+async function aiReady() {
+	await buildAiFiles( {
+		dir: args.dir || 'dist',
+		site: args.site || process.env.SITE_URL,
+		locales: args.locales ? args.locales.split( ',' ) : undefined,
+		exclude: args.exclude ? args.exclude.split( ',' ) : undefined,
+		sitemap: args.sitemap !== 'false',
+		logger: { info: ( message ) => console.log( 'leiho: ' + message ) },
+	} );
+}
+
+const commands = { types, pull, 'ai-ready': aiReady };
 
 if ( ! commands[ command ] ) {
-	console.log( 'Usage: leiho <types|pull> [--url https://cms.example.com] [--out file] [--token …]' );
+	console.log( 'Usage: leiho <types|pull> [--url https://cms.example.com] [--out file] [--token …]\n       leiho ai-ready --site https://example.com [--dir dist] [--locales en,fr] [--exclude /drafts] [--sitemap false]' );
 	process.exit( command ? 1 : 0 );
 }
 

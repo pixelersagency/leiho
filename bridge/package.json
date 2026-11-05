@@ -13,7 +13,10 @@
 		"remix",
 		"vite",
 		"nuxt",
-		"sveltekit"
+		"sveltekit",
+		"llms.txt",
+		"json-ld",
+		"seo"
 	],
 	"license": "GPL-2.0-or-later",
 	"author": "Pixelers (https://pixelers.fr)",
@@ -34,6 +37,12 @@
 		},
 		"./attrs": {
 			"import": "./src/attrs.js"
+		},
+		"./seo": {
+			"import": "./src/seo.js"
+		},
+		"./ai-ready": {
+			"import": "./src/ai-ready.js"
 		}
 	},
 	"scripts": {
