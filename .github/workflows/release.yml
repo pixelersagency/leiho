@@ -92,3 +92,17 @@ jobs:
             exit 0
           fi
           npm publish --access public --provenance --tag "$TAG"
+
+      - name: Rebuild leiho.dev
+        # leiho.dev lit la dernière release au build (version affichée, démo /try) :
+        # on relance son déploiement Coolify. Sans secret, l'étape ne fait rien.
+        env:
+          COOLIFY_TOKEN: ${{ secrets.COOLIFY_TOKEN }}
+        run: |
+          if [ -z "$COOLIFY_TOKEN" ]; then
+            echo "COOLIFY_TOKEN not set, skipping."
+            exit 0
+          fi
+          curl -fsS -o /dev/null -H "Authorization: Bearer $COOLIFY_TOKEN" \
+            "https://coolify.mynto.fr/api/v1/deploy?uuid=jfy9av3epkehhovzlbhso5wk" \
+            || echo "::warning::leiho.dev rebuild request failed"
