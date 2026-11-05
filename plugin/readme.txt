@@ -4,7 +4,7 @@ Tags: headless, acf, visual editor, nextjs, astro
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.0.0-beta.13
+Stable tag: 1.0.0-rc.1
 License: GPL-2.0-or-later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -48,6 +48,9 @@ Leiho removes its own settings, tokens, history table and internal post meta, an
 Parts of the Leiho app's layout and styles (three-pane Collections view, list rows, field settings, dialogs) are derived from Stacki (https://github.com/flowtricks/stacki), Copyright (c) 2026 Timothy Ricks, MIT License. The full license text ships in licenses/stacki-MIT.txt.
 
 == Changelog ==
+
+= 1.0.0-rc.1 =
+* Languages for Leiho Collections: one entry for every language, translatable or shared fields, a language switch in the editor, translation with AI, and translation abilities for agents. Search and AI: schema.org data, descriptions and FAQ from your fields, llms.txt and Markdown for every entry. A security review of the whole plugin: protected content hidden from the content API, signed updates, safer agents, editor and bridge.
 
 = 1.0.0-beta.13 =
 * Get started becomes a framework-aware onboarding (step by step, or one prompt for your coding agent). New AI screen with an MCP connection guide, new abilities for agents (search, drafts, alt text, diagnostics and settings for administrators), and a live preview of the site's home page on Leiho's home. Fixes in tags, list filters and the "Go back to ACF" dialog.
