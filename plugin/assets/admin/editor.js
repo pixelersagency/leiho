@@ -379,8 +379,19 @@
 	 * mais un onglet fermé ne perd plus le travail en cours.
 	 * ------------------------------------------------------------------ */
 
+	/** Brouillons gardés au plus une semaine. */
+	var DRAFT_MAX_AGE = 7 * 24 * 3600 * 1000;
+
+	/**
+	 * Texte d'un HTML, lu dans un document inerte : un innerHTML sur un élément
+	 * de la page chargerait ses images et lancerait leurs gestionnaires (onerror).
+	 */
+	function htmlText( html ) {
+		return new DOMParser().parseFromString( '<body>' + String( html || '' ) + '</body>', 'text/html' ).body.textContent || '';
+	}
+
 	function draftKey( postId ) {
-		return 'leiho-draft-' + postId + ( state.locale ? '-' + state.locale : '' );
+		return 'leiho-draft-' + ( cfg.draftScope ? cfg.draftScope + '-' : '' ) + postId + ( state.locale ? '-' + state.locale : '' );
 	}
 
 	function scheduleDraft() {
@@ -415,7 +426,12 @@
 	function readDraft( postId ) {
 		try {
 			var raw = window.localStorage.getItem( draftKey( postId ) );
-			return raw ? JSON.parse( raw ) : null;
+			var draft = raw ? JSON.parse( raw ) : null;
+			if ( draft && ( ! draft.savedAt || Date.now() - draft.savedAt > DRAFT_MAX_AGE ) ) {
+				window.localStorage.removeItem( draftKey( postId ) );
+				return null;
+			}
+			return draft;
 		} catch ( e ) {
 			return null;
 		}
@@ -492,6 +508,15 @@
 	 * de l'édition visuelle, il était purement et simplement bloqué.
 	 */
 	function onNavigateFromFrame( data ) {
+		var target;
+		try {
+			target = new URL( data.href );
+		} catch ( e ) {
+			return;
+		}
+		if ( ! /^https?:$/.test( target.protocol ) ) {
+			return;
+		}
 		if ( data.external ) {
 			/* translators: %s: URL of the external link. */
 			if ( window.confirm( sprintf( __( 'This link leaves the site (%s). Open it in a new tab?', 'leiho' ), data.href ) ) ) {
@@ -500,13 +525,13 @@
 			return;
 		}
 
-		var target = findPostByPath( data.path );
-		if ( target ) {
-			if ( state.post && target.id === state.post.id ) {
+		var post = findPostByPath( data.path );
+		if ( post ) {
+			if ( state.post && post.id === state.post.id ) {
 				return;
 			}
 			if ( confirmLoseChanges() ) {
-				openPost( target );
+				openPost( post );
 			}
 			return;
 		}
@@ -2878,9 +2903,7 @@
 					}
 					var text = String( display || '' );
 					if ( 'wysiwyg' === type ) {
-						var div = document.createElement( 'div' );
-						div.innerHTML = text;
-						text = div.textContent || '';
+						text = htmlText( text );
 					}
 					text = text.replace( /\s+/g, ' ' ).trim();
 					if ( text ) {
@@ -4134,9 +4157,7 @@
 				/* texte brut */
 			}
 		}
-		var div = document.createElement( 'div' );
-		div.innerHTML = text;
-		text = ( div.textContent || '' ).replace( /\s+/g, ' ' ).trim();
+		text = htmlText( text ).replace( /\s+/g, ' ' ).trim();
 		return text.length > 80 ? text.slice( 0, 77 ) + '…' : text;
 	}
 

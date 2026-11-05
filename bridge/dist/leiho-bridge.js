@@ -292,22 +292,68 @@
 		 * Application des valeurs
 		 * ------------------------------------------------------------------ */
 
+		// Liste blanche : seul ce qu'un texte riche contient passe. Une liste noire
+		// laisse toujours une porte (noscript, svg/math, schémas d'URL exotiques).
+		const ALLOWED_TAGS = new Set( [
+			'A', 'ABBR', 'B', 'BLOCKQUOTE', 'BR', 'CAPTION', 'CITE', 'CODE', 'DD', 'DEL', 'DIV', 'DL', 'DT', 'EM', 'FIGCAPTION',
+			'FIGURE', 'H1', 'H2', 'H3', 'H4', 'H5', 'H6', 'HR', 'I', 'IMG', 'INS', 'KBD', 'LI', 'MARK', 'OL', 'P', 'PRE', 'Q',
+			'S', 'SMALL', 'SPAN', 'STRONG', 'SUB', 'SUP', 'TABLE', 'TBODY', 'TD', 'TFOOT', 'TH', 'THEAD', 'TR', 'U', 'UL',
+		] );
+		// Hors liste blanche et retirées avec leur contenu (code, documents imbriqués).
+		const DROPPED_TAGS = new Set( [ ...BANNED_TAGS.map( ( t ) => t.toUpperCase() ), 'NOSCRIPT', 'NOEMBED', 'NOFRAMES', 'TEMPLATE', 'SVG', 'MATH', 'XMP', 'TEXTAREA', 'TITLE', 'SELECT', 'OBJECT' ] );
+		const ALLOWED_ATTRS = new Set( [ 'href', 'src', 'alt', 'title', 'class', 'width', 'height', 'target', 'rel', 'colspan', 'rowspan', 'lang', 'dir', 'start', 'reversed', 'loading', 'decoding', 'srcset', 'sizes', 'id', 'style' ] );
+
+		/** Adresse sûre : http(s), mailto, tel ou relative. */
+		function safeUrl( value ) {
+			const url = String( null == value ? '' : value ).replace( /[\u0000-\u0020\u007f-\u009f]/g, '' );
+			const scheme = url.match( /^([a-z][a-z0-9+.-]*):/i );
+			return ! scheme || /^(https?|mailto|tel)$/i.test( scheme[ 1 ] ) ? String( value ) : '';
+		}
+
 		function sanitizeHtml( html ) {
-			const doc = document.implementation.createHTMLDocument( '' );
-			doc.body.innerHTML = String( null == html ? '' : html );
-			doc.body.querySelectorAll( BANNED_TAGS.join( ',' ) ).forEach( ( el ) => el.remove() );
-			doc.body.querySelectorAll( '*' ).forEach( ( el ) => {
-				[ ...el.attributes ].forEach( ( attr ) => {
-					const name = attr.name.toLowerCase();
-					const value = attr.value.replace( /\s+/g, '' ).toLowerCase();
-					if ( 0 === name.indexOf( 'on' ) ) {
-						el.removeAttribute( attr.name );
-					} else if ( ( 'href' === name || 'src' === name || 'xlink:href' === name ) && 0 === value.indexOf( 'javascript:' ) ) {
-						el.removeAttribute( attr.name );
+			const source = new DOMParser().parseFromString( '<body>' + String( null == html ? '' : html ) + '</body>', 'text/html' ).body;
+			const clean = ( node, into ) => {
+				node.childNodes.forEach( ( child ) => {
+					if ( child.nodeType === Node.TEXT_NODE ) {
+						into.appendChild( document.createTextNode( child.nodeValue ) );
+						return;
 					}
+					if ( child.nodeType !== Node.ELEMENT_NODE ) {
+						return;
+					}
+					if ( ! ALLOWED_TAGS.has( child.tagName ) ) {
+						// Balise inconnue : son texte reste, sauf pour ce qui n'en a pas à montrer.
+						if ( ! DROPPED_TAGS.has( child.tagName.toUpperCase() ) ) {
+							clean( child, into );
+						}
+						return;
+					}
+					const el = document.createElement( child.tagName );
+					[ ...child.attributes ].forEach( ( a ) => {
+						const name = a.name.toLowerCase();
+						if ( ! ALLOWED_ATTRS.has( name ) ) {
+							return;
+						}
+						if ( 'href' === name || 'src' === name ) {
+							const url = safeUrl( a.value );
+							if ( url ) {
+								el.setAttribute( name, url );
+							}
+						} else if ( 'srcset' === name ) {
+							if ( ! /(^|,)\s*[a-z][a-z0-9+.-]*:/i.test( a.value ) || a.value.split( ',' ).every( ( part ) => safeUrl( part.trim().split( /\s+/ )[ 0 ] ) ) ) {
+								el.setAttribute( name, a.value );
+							}
+						} else {
+							el.setAttribute( name, a.value );
+						}
+					} );
+					clean( child, el );
+					into.appendChild( el );
 				} );
-			} );
-			return doc.body.innerHTML;
+			};
+			const out = document.createElement( 'div' );
+			clean( source, out );
+			return out.innerHTML;
 		}
 
 		/**
@@ -330,12 +376,13 @@
 			if ( 'image' === fieldType ) {
 				const img = 'IMG' === el.tagName ? el : el.querySelector( 'img' );
 				if ( img ) {
-					if ( img.getAttribute( 'src' ) !== ( value || '' ) ) {
-						img.setAttribute( 'src', value || '' );
+					if ( img.getAttribute( 'src' ) !== safeUrl( value || '' ) ) {
+						img.setAttribute( 'src', safeUrl( value || '' ) );
 						img.removeAttribute( 'srcset' );
 					}
 				} else {
-					el.style.backgroundImage = value ? 'url("' + value + '")' : '';
+					const src = safeUrl( value || '' );
+					el.style.backgroundImage = src ? 'url("' + src.replace( /["\\\n]/g, '' ) + '")' : '';
 				}
 			} else if ( 'color_picker' === fieldType ) {
 				el.style.setProperty( attr( el, 'style' ) || 'color', value || '' );
@@ -343,7 +390,7 @@
 				const link = 'A' === el.tagName ? el : el.querySelector( 'a' );
 				const data = value && 'object' === typeof value ? value : { url: value };
 				if ( link ) {
-					link.setAttribute( 'href', data.url || '' );
+					link.setAttribute( 'href', safeUrl( data.url || '' ) );
 					if ( data.target ) {
 						link.setAttribute( 'target', data.target );
 					} else {
@@ -505,6 +552,9 @@
 					} catch ( e ) {
 						return;
 					}
+					if ( ! /^https?:$/.test( url.protocol ) ) {
+						return;
+					}
 					send( { type: 'navigate', href: url.href, path: url.pathname, external: url.origin !== window.location.origin } );
 					return;
 				}
@@ -544,7 +594,7 @@
 		}
 
 		window.addEventListener( 'message', ( event ) => {
-			if ( event.origin !== wpOrigin || ! event.data || event.data.ns !== NS ) {
+			if ( event.origin !== wpOrigin || event.source !== window.parent || ! event.data || event.data.ns !== NS ) {
 				return;
 			}
 			const data = event.data;

@@ -312,6 +312,8 @@ class Leiho_Admin {
 			'postTypes'            => $post_types,
 			'frontOrigin'          => $mapper->preview_origin(),
 			'wpOrigin'             => self::wp_origin(),
+			// Brouillons locaux propres à l'utilisateur et au site (poste partagé, multisite).
+			'draftScope'           => get_current_blog_id() . '-' . get_current_user_id(),
 			'initialPost'          => isset( $_GET['post'] ) ? absint( $_GET['post'] ) : 0, // Collections : app-content.js ouvre l'entrée (id).
 			'initialField'         => isset( $_GET['field'] ) ? sanitize_text_field( wp_unslash( $_GET['field'] ) ) : '',
 			'mode'                 => $mode,
