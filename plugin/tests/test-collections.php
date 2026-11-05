@@ -593,6 +593,16 @@ check( 'statut partiel tant qu\'une ligne manque', 'partial' === Leiho_I18n::sta
 Leiho_I18n::set_current( 'en' );
 check( 'original de la liste intact', false !== strpos( $adapter->get_content( 1 )['sections'][0]['body'], 'Hello' ) );
 
+/* Ligne ajoutée à l'original après la traduction : elle se traduit aussi. */
+$adapter->save_values( 1, array( 'sections' => array( array( '_layout' => 'hero', 'body' => '<p>Hello</p>' ), array( '_layout' => 'hero', 'body' => '<p>Second</p>' ), array( '_layout' => 'hero', 'body' => '<p>Third</p>' ) ) ) );
+Leiho_I18n::set_current( 'fr' );
+$r = $adapter->save_values( 1, array( 'sections.2.body' => '<p>Troisième</p>' ) );
+$fr = $adapter->get_content( 1 );
+check( 'nouvelle ligne de l\'original traduisible', array() === $r['errors'] && false !== strpos( $fr['sections'][2]['body'], 'Troisième' ), $r );
+check( 'traductions existantes gardées', false !== strpos( $fr['sections'][0]['body'], 'Bonjour' ) && false !== strpos( $fr['sections'][1]['body'], 'Second' ), $fr['sections'] );
+check( 'ligne intermédiaire pas copiée', false === strpos( (string) Leiho_I18n::row( 1, 'fr' )['data']['sections'], 'Second' ) );
+Leiho_I18n::set_current( 'en' );
+
 /* Chemins. */
 check( 'chemin préfixé', '/fr/services/a' === Leiho_I18n::path( '/services/a', 'fr' ) && '/fr' === Leiho_I18n::path( '/', 'fr' ) );
 check( 'langue par défaut sans préfixe', '/services/a' === Leiho_I18n::path( '/services/a', 'en' ) );

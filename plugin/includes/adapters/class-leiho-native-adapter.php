@@ -243,9 +243,24 @@ class Leiho_Native_Adapter extends Leiho_Field_Adapter {
 		if ( Leiho_I18n::is_translation() ) {
 			$source = null;
 			foreach ( array_keys( $batches ) as $root ) {
-				if ( Leiho_I18n::is_localized( $defs[ $root ]['field'] ) && $this->is_blank( $raw[ $root ] ) ) {
+				if ( ! Leiho_I18n::is_localized( $defs[ $root ]['field'] ) ) {
+					continue;
+				}
+				if ( $this->is_blank( $raw[ $root ] ) ) {
 					$source       = null === $source ? $this->raw_values( $collection, $post_id, Leiho_I18n::default_locale() ) : $source;
 					$raw[ $root ] = $this->blank_texts( $defs[ $root ]['engine'], $source[ $root ] );
+					continue;
+				}
+				// Lignes ajoutées à l'original après la traduction : la liste traduite
+				// reçoit leurs pendants (textes vidés), pour qu'on puisse les traduire.
+				$engine_type = isset( $defs[ $root ]['engine']['type'] ) ? $defs[ $root ]['engine']['type'] : '';
+				if ( in_array( $engine_type, array( 'repeater', 'flexible_content' ), true ) && is_array( $raw[ $root ] ) && array_values( $raw[ $root ] ) === $raw[ $root ] ) {
+					$source   = null === $source ? $this->raw_values( $collection, $post_id, Leiho_I18n::default_locale() ) : $source;
+					$original = isset( $source[ $root ] ) && is_array( $source[ $root ] ) ? array_values( $source[ $root ] ) : array();
+					if ( count( $original ) > count( $raw[ $root ] ) ) {
+						$extra        = array_slice( $original, count( $raw[ $root ] ) );
+						$raw[ $root ] = array_merge( $raw[ $root ], $this->blank_texts( $defs[ $root ]['engine'], $extra ) );
+					}
 				}
 			}
 		}
