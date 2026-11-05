@@ -39,6 +39,9 @@ class Leiho_Content {
 	/** @var Leiho_Url_Mapper|null */
 	private static $mapper = null;
 
+	/** @var array<int,bool> Contenus qui viennent de quitter le statut publié (dépublication, corbeille). */
+	private static $unpublished = array();
+
 	/** Cache déjà vidé dans cette requête : un save ACF écrit des dizaines de métas. */
 	private static $invalidated = false;
 
@@ -52,6 +55,7 @@ class Leiho_Content {
 	 * @return void
 	 */
 	public static function init() {
+		add_action( 'transition_post_status', array( __CLASS__, 'note_transition' ), 10, 3 );
 		foreach ( array( 'save_post', 'deleted_post', 'trashed_post', 'untrashed_post', 'edit_attachment' ) as $hook ) {
 			add_action( $hook, array( __CLASS__, 'post_changed' ) );
 		}
@@ -906,13 +910,31 @@ class Leiho_Content {
 
 		// Un média seul (téléversé, recadré) ne change rien tant qu'aucun
 		// contenu ne l'utilise : il vide le cache sans déclencher de publication.
-		if ( in_array( $post->post_type, self::post_types(), true ) ) {
+		// Un brouillon non plus : seul ce qui est ou était en ligne compte (un
+		// contributeur qui enregistre son brouillon ne lance pas de build).
+		$served = 'publish' === $post->post_status || isset( self::$unpublished[ (int) $post->ID ] );
+		if ( $served && in_array( $post->post_type, self::post_types(), true ) ) {
 			/**
 			 * Le contenu servi au front a changé.
 			 *
 			 * @param int $post_id Post modifié.
 			 */
 			do_action( 'leiho_content_changed', (int) $post_id );
+		}
+	}
+
+	/**
+	 * Retient les contenus qui quittent le statut publié : leur disparition
+	 * du site est un changement à publier.
+	 *
+	 * @param string  $new_status Nouveau statut.
+	 * @param string  $old_status Ancien statut.
+	 * @param WP_Post $post       Post.
+	 * @return void
+	 */
+	public static function note_transition( $new_status, $old_status, $post ) {
+		if ( 'publish' === $old_status && 'publish' !== $new_status && $post ) {
+			self::$unpublished[ (int) $post->ID ] = true;
 		}
 	}
 

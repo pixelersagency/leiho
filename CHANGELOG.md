@@ -22,6 +22,18 @@ All notable changes to Leiho (called Okno until 1.0.0-beta.11) are documented he
 
 - Translations: a row added to a list or flexible field of the original after it was translated can now be translated too (it failed with `row_not_found`).
 
+### Security
+
+- **Content API**: password-protected entries are no longer served to visitors (filter `leiho_content_include_protected` to serve them anyway), ACF *password* fields are never served, and an anonymous request can no longer make WordPress scan every post (unknown paths) or rebuild a whole export on each call (other languages, types and `llms.txt` are now cached even without a persistent object cache). `/content` returns at most 100 items per page.
+- **Editor**: stored HTML is read in an inert document (the change history and the AI context could run an `onerror` handler in wp-admin). The bridge sanitizes rich text with an allowlist and only keeps http(s), mailto, tel and relative addresses; links clicked in the preview only open http(s) addresses. Local drafts are kept per user and site, for a week at most.
+- **Agents (MCP)**: `leiho/update-settings` no longer changes the site, preview, build hook or Coolify addresses or the GitHub repository (an administrator sets them in Settings), agent writes always go through `wp_kses_post` and never change the author or date, and translation and search lists only show entries the user can edit.
+- **Data**: changing a field's type runs the new type's sanitizing (a code field can't become a script in rich text or a `javascript:` link); ACF sub-fields Leiho doesn't edit are filtered on save; `l10n` is reserved as a collection id; uninstalling also drops the translations table.
+- **Publishing**: saving a draft no longer starts a build (only published content, or content leaving the site, does), and the minimum time between two builds is 15 seconds.
+- **Outgoing requests**: the site, build hook and Coolify addresses can no longer point at private or local network addresses outside a local or development environment (filter `leiho_allow_private_urls`), build hooks and Coolify are called without following redirects, and the Coolify address must be https. The GitHub repository setting must look like `owner/name`.
+- **Updates**: only an archive from the official repository's GitHub releases is accepted.
+- **Pickers** (parent page, references) no longer list the titles of other authors' drafts or private entries, and a parent must be readable.
+- **Change log**: entries are kept 180 days (filter `leiho_activity_retention_days`), anonymized when their user is deleted, and erased with WordPress's personal data eraser.
+
 ## [1.0.0-beta.13] — 2026-11-04
 
 ### Added

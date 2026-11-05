@@ -382,7 +382,8 @@ class Leiho_Rest {
 			return new WP_Error( 'leiho_no_url', __( 'No site URL set.', 'leiho' ), array( 'status' => 400 ) );
 		}
 
-		$response = wp_remote_get(
+		$response = Leiho_Plugin::remote(
+			'GET',
 			trailingslashit( $url ),
 			array(
 				'timeout'     => 10,
@@ -536,12 +537,18 @@ class Leiho_Rest {
 			$status = 'draft';
 		}
 
+		// Parent : du même type, et lisible par l'utilisateur.
+		$parent = absint( $request->get_param( 'parent' ) );
+		if ( $parent && ( get_post_type( $parent ) !== $type || ! current_user_can( 'read_post', $parent ) ) ) {
+			return new WP_Error( 'leiho_bad_request', __( 'This parent can’t be used.', 'leiho' ), array( 'status' => 400 ) );
+		}
+
 		$post_id = wp_insert_post(
 			array(
 				'post_type'   => $type,
 				'post_title'  => $title,
 				'post_status' => $status,
-				'post_parent' => absint( $request->get_param( 'parent' ) ),
+				'post_parent' => $parent,
 			),
 			true
 		);

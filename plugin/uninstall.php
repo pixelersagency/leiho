@@ -65,6 +65,8 @@ function leiho_uninstall_site() {
 				$drop_legacy( $id );
 			}
 		}
+		// Traductions des entrées (une table pour toutes les langues).
+		$wpdb->query( "DROP TABLE IF EXISTS `{$wpdb->prefix}leiho_l10n`" ); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.DirectDatabaseQuery.SchemaChange -- Nom fixe.
 		delete_option( 'leiho_collections' );
 		delete_option( 'leiho_collections_state' );
 		delete_option( 'leiho_acf_import' );

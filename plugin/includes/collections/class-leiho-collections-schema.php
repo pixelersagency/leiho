@@ -49,6 +49,7 @@ class Leiho_Collections_Schema {
 
 	/** Post types que WordPress (ou Leiho) réserve. */
 	const RESERVED_IDS = array(
+		'l10n', // Table des traductions de Leiho ({prefix}leiho_l10n).
 		'post',
 		'page',
 		'attachment',

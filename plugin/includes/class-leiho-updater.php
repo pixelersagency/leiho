@@ -79,7 +79,8 @@ class Leiho_Updater {
 		}
 		$package = '';
 		foreach ( (array) ( isset( $release['assets'] ) ? $release['assets'] : array() ) as $asset ) {
-			if ( isset( $asset['name'], $asset['browser_download_url'] ) && self::ASSET === $asset['name'] ) {
+			// Seulement une archive publiée sur les releases du dépôt officiel.
+			if ( isset( $asset['name'], $asset['browser_download_url'] ) && self::ASSET === $asset['name'] && 0 === strpos( (string) $asset['browser_download_url'], 'https://github.com/' . self::REPO . '/releases/download/' ) ) {
 				$package = $asset['browser_download_url'];
 			}
 		}

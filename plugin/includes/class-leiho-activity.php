@@ -18,6 +18,81 @@ class Leiho_Activity {
 
 	public static function init() {
 		add_action( 'init', array( __CLASS__, 'maybe_install' ), 5 );
+		// Même tâche horaire que le ménage des publications.
+		add_action( 'leiho_cleanup_deploys', array( __CLASS__, 'prune' ) );
+		add_action( 'deleted_user', array( __CLASS__, 'forget_user' ) );
+		add_filter( 'wp_privacy_personal_data_erasers', array( __CLASS__, 'register_eraser' ) );
+	}
+
+	/**
+	 * Durée de conservation du journal, en jours (0 : sans limite).
+	 *
+	 * @return int
+	 */
+	public static function retention_days() {
+		/**
+		 * Jours de conservation du journal des modifications.
+		 *
+		 * @param int $days Défaut 180.
+		 */
+		return max( 0, (int) apply_filters( 'leiho_activity_retention_days', 180 ) );
+	}
+
+	/**
+	 * Supprime les entrées plus anciennes que la durée de conservation.
+	 *
+	 * @return void
+	 */
+	public static function prune() {
+		global $wpdb;
+		$days = self::retention_days();
+		if ( ! $days ) {
+			return;
+		}
+		$table = self::table_name();
+		$wpdb->query( $wpdb->prepare( "DELETE FROM `{$table}` WHERE created_at < %s", gmdate( 'Y-m-d H:i:s', time() - $days * DAY_IN_SECONDS ) ) ); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.DirectDatabaseQuery -- Table de Leiho.
+	}
+
+	/**
+	 * Utilisateur supprimé : ses entrées restent (l'historique du contenu),
+	 * sans son nom ni son identifiant.
+	 *
+	 * @param int $user_id Utilisateur.
+	 * @return int Lignes anonymisées.
+	 */
+	public static function forget_user( $user_id ) {
+		global $wpdb;
+		$table = self::table_name();
+		return (int) $wpdb->query( $wpdb->prepare( "UPDATE `{$table}` SET user_id = 0, user_name = '' WHERE user_id = %d", (int) $user_id ) ); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.DirectDatabaseQuery -- Table de Leiho.
+	}
+
+	/**
+	 * Outil « Effacer les données personnelles » de WordPress.
+	 *
+	 * @param array $erasers Effaceurs.
+	 * @return array
+	 */
+	public static function register_eraser( $erasers ) {
+		$erasers['leiho-activity'] = array(
+			'eraser_friendly_name' => __( 'Leiho change log', 'leiho' ),
+			'callback'             => array( __CLASS__, 'erase' ),
+		);
+		return $erasers;
+	}
+
+	/**
+	 * @param string $email Adresse de la personne.
+	 * @return array
+	 */
+	public static function erase( $email ) {
+		$user  = get_user_by( 'email', $email );
+		$count = $user ? self::forget_user( $user->ID ) : 0;
+		return array(
+			'items_removed'  => $count > 0,
+			'items_retained' => false,
+			'messages'       => array(),
+			'done'           => true,
+		);
 	}
 
 	public static function table_name() {

@@ -631,8 +631,8 @@ class Leiho_AI_Abilities {
 		if ( ! $values ) {
 			return new WP_Error( 'leiho_bad_request', __( 'Nothing to save.', 'leiho' ), array( 'status' => 400 ) );
 		}
-		// Le statut ne change jamais par ici.
-		unset( $values['_status'] );
+		// Le statut, l'auteur et la date ne changent jamais par ici.
+		unset( $values['_status'], $values['_author'], $values['_date'] );
 
 		$revision = isset( $input['revision'] ) ? (string) $input['revision'] : '';
 		if ( '' !== $revision && Leiho_Schema::revision( $id ) !== $revision ) {
@@ -640,7 +640,7 @@ class Leiho_AI_Abilities {
 		}
 
 		set_transient( Leiho_Deploy_Manager::TRANSIENT_SAVE, 1, 30 );
-		$result = ( new Leiho_Schema( Leiho_Plugin::instance() ) )->save( $id, $values );
+		$result = self::save_filtered( $id, $values );
 		delete_transient( Leiho_Deploy_Manager::TRANSIENT_SAVE );
 
 		if ( $result['saved'] ) {
@@ -692,6 +692,8 @@ class Leiho_AI_Abilities {
 		$args = array(
 			'post_type'      => $types,
 			'post_status'    => $statuses,
+			// Le total ne compte que ce que l'utilisateur peut modifier.
+			'perm'           => 'editable',
 			'posts_per_page' => $per_page,
 			'paged'          => $page,
 			'orderby'        => 'modified',
@@ -742,8 +744,8 @@ class Leiho_AI_Abilities {
 		if ( '' === trim( $title ) ) {
 			return new WP_Error( 'leiho_bad_request', __( 'A title is required.', 'leiho' ), array( 'status' => 400 ) );
 		}
-		// Le statut ne change jamais par ici ; le titre vient de « title ».
-		unset( $values['_status'], $values[ Leiho_Schema::PATH_TITLE ] );
+		// Le statut, l'auteur et la date ne changent jamais par ici ; le titre vient de « title ».
+		unset( $values['_status'], $values['_author'], $values['_date'], $values[ Leiho_Schema::PATH_TITLE ] );
 
 		$post_id = wp_insert_post(
 			array(
@@ -765,7 +767,7 @@ class Leiho_AI_Abilities {
 		);
 		if ( $values ) {
 			set_transient( Leiho_Deploy_Manager::TRANSIENT_SAVE, 1, 30 );
-			$result = ( new Leiho_Schema( Leiho_Plugin::instance() ) )->save( $post_id, $values );
+			$result = self::save_filtered( $post_id, $values );
 			delete_transient( Leiho_Deploy_Manager::TRANSIENT_SAVE );
 		}
 		Leiho_Activity::record_ai( $post_id, Leiho_Schema::PATH_TITLE, $title, 'draft' );
@@ -950,5 +952,28 @@ class Leiho_AI_Abilities {
 			$out['value'] = isset( $field['value'] ) ? $field['value'] : null;
 		}
 		return $out;
+	}
+
+	/**
+	 * Écriture d'un agent : le HTML passe toujours par wp_kses_post, même
+	 * pour un compte qui a unfiltered_html. Un agent lit des textes qu'il n'a
+	 * pas écrits (brouillons, pages web) : il ne doit pas pouvoir y glisser
+	 * de script avec les droits d'un administrateur.
+	 *
+	 * @param int   $post_id Entrée.
+	 * @param array $values  Valeurs.
+	 * @return array
+	 */
+	private static function save_filtered( $post_id, $values ) {
+		$deny = static function ( $caps ) {
+			$caps['unfiltered_html'] = false;
+			return $caps;
+		};
+		add_filter( 'user_has_cap', $deny );
+		try {
+			return ( new Leiho_Schema( Leiho_Plugin::instance() ) )->save( $post_id, $values );
+		} finally {
+			remove_filter( 'user_has_cap', $deny );
+		}
 	}
 }

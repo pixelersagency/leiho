@@ -86,6 +86,7 @@ function wp_remote_retrieve_response_code( $r ) { return $r['code']; }
  * ------------------------------------------------------------------- */
 
 class Leiho_Plugin {
+	public static function remote( $method, $url, $args = array() ) { $GLOBALS['remote_args'] = $args; return wp_remote_get( $url, $args ); }
 	const OPTION_SETTINGS = 'leiho_settings';
 	const OPTION_SECRETS  = 'leiho_secrets';
 	public static function settings() {
@@ -246,10 +247,16 @@ Leiho_Secrets::set( 'gh_pat', $pat );
 Leiho_Secrets::set( 'coolify_token', $coolify );
 $before_option = get_option( 'leiho_settings' );
 
-$dry = Leiho_AI_Admin_Abilities::update_settings( array( 'settings' => array( 'front_url' => 'https://new.test/', 'auto_deploy_delay' => 5 ), 'dry_run' => true ) );
+$dry = Leiho_AI_Admin_Abilities::update_settings( array( 'settings' => array( 'url_patterns' => array( 'service' => 'services/{slug}/' ), 'auto_deploy_delay' => 5 ), 'dry_run' => true ) );
 check( 'dry_run : rien d’enregistré', $before_option === get_option( 'leiho_settings' ) && false === $dry['saved'] && true === $dry['dry_run'], $dry );
 $changes = (array) $dry['changes'];
-check( 'dry_run : changements validés comme le formulaire (barre finale, délai minimal 15 s)', 'https://new.test' === $changes['front_url']['after'] && 'https://site.test' === $changes['front_url']['before'] && 15 === $changes['auto_deploy_delay']['after'], $changes );
+check( 'dry_run : changements validés comme le formulaire (délai minimal 15 s)', 15 === $changes['auto_deploy_delay']['after'] && isset( $changes['url_patterns'] ), $changes );
+
+// Les adresses où partent contenu et jetons ne se changent pas par un agent.
+foreach ( array( 'front_url', 'preview_url', 'build_hook_url', 'coolify_url', 'gh_repo' ) as $key ) {
+	$bad = Leiho_AI_Admin_Abilities::update_settings( array( 'settings' => array( $key => 'https://attacker.test/x' ) ) );
+	check( "réglages : $key refusé à un agent", is_wp_error( $bad ) && false !== strpos( $bad->message, $key ), $bad );
+}
 
 $bad = Leiho_AI_Admin_Abilities::update_settings( array( 'settings' => array( 'deploy_driver' => 'ftp' ) ) );
 check( 'réglages : mode de publication inconnu refusé', is_wp_error( $bad ) && 'leiho_bad_setting' === $bad->code && 400 === $bad->data['status'] );
@@ -270,8 +277,6 @@ check( 'réglages : contrôle GitHub relancé après changement', isset( $up['ch
 $row = end( $GLOBALS['ai_log'] );
 check( 'réglages : journalisés comme action d’agent, sans valeur', 'settings' === $row['new_value'] && false !== strpos( $row['field_label'], 'deploy_driver' ) && false === strpos( $row['field_label'], 'prod' ) && 'AI agent · Settings changed' === Leiho_Activity::ai_label( 'settings' ), $row );
 
-$hk = Leiho_AI_Admin_Abilities::update_settings( array( 'settings' => array( 'build_hook_url' => 'https://api.netlify.com/build_hooks/NEWHOOKSECRET99' ) ) );
-check( 'réglages : URL de build hook rendue par son hôte seulement', ! leaks( $hk, array( 'NEWHOOKSECRET99', 'prj_HOOKSECRET42' ) ) && 'api.netlify.com' === $hk['changes']->build_hook_url['after']['host'], $hk );
 
 Leiho_Secrets::set( 'content_token', '' );
 $tok = Leiho_AI_Admin_Abilities::update_settings( array( 'settings' => array( 'content_access' => 'token' ) ) );

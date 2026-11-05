@@ -50,15 +50,18 @@ $release = array(
 	'published_at' => '2026-09-26T10:00:00Z',
 	'body'         => "### Added\n\n> Install by hand once.\n\n- Updates from **GitHub** in `wp-admin`\n- See [docs](https://github.com/pixelersagency/leiho)\n\n<script>alert(1)</script>",
 	'assets'       => array(
-		array( 'name' => 'leiho-1.0.0-beta.4.zip', 'browser_download_url' => 'https://github.com/x/leiho-1.0.0-beta.4.zip' ),
-		array( 'name' => 'leiho.zip', 'browser_download_url' => 'https://github.com/x/leiho.zip' ),
+		array( 'name' => 'leiho-1.0.0-beta.4.zip', 'browser_download_url' => 'https://github.com/pixelersagency/leiho/releases/download/v1.0.0-beta.4/leiho-1.0.0-beta.4.zip' ),
+		array( 'name' => 'leiho.zip', 'browser_download_url' => 'https://github.com/pixelersagency/leiho/releases/download/v1.0.0-beta.4/leiho.zip' ),
 	),
 );
 
 /* --- from_release --- */
 $u = Leiho_Updater::from_release( $release );
 check( 'version sans le v', '1.0.0-beta.4' === $u['version'], $u );
-check( 'paquet = leiho.zip', 'https://github.com/x/leiho.zip' === $u['package'], $u );
+check( 'paquet = leiho.zip', 'https://github.com/pixelersagency/leiho/releases/download/v1.0.0-beta.4/leiho.zip' === $u['package'], $u );
+$foreign = $release;
+$foreign['assets'][1]['browser_download_url'] = 'https://evil.example/leiho.zip';
+check( 'archive hors des releases du dépôt officiel : ignorée', false === Leiho_Updater::from_release( $foreign ) );
 check( 'slug leiho', 'leiho' === $u['slug'] );
 check( 'release sans leiho.zip ignorée', false === Leiho_Updater::from_release( array( 'tag_name' => 'v2.0.0', 'assets' => array() ) ) );
 check( 'brouillon ignoré', false === Leiho_Updater::from_release( array_merge( $release, array( 'draft' => true ) ) ) );

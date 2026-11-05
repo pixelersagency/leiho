@@ -56,7 +56,7 @@ function sanitize_textarea_field( $v ) { return trim( strip_tags( (string) $v ) 
 function sanitize_title( $v ) { return trim( preg_replace( '/[^a-z0-9]+/', '-', strtolower( (string) $v ) ), '-' ); }
 function sanitize_email( $v ) { return filter_var( $v, FILTER_VALIDATE_EMAIL ) ? $v : ''; }
 function wp_kses_post( $v ) { return preg_replace( '#<script.*?</script>#is', '', (string) $v ); }
-function esc_url_raw( $v ) { return (string) $v; }
+function esc_url_raw( $v ) { return preg_match( '/^\s*javascript:/i', (string) $v ) ? '' : (string) $v; }
 function wpautop( $v ) { return '<p>' . $v . '</p>'; }
 function absint( $v ) { return abs( (int) $v ); }
 function wp_list_pluck( $l, $f ) { return array_column( $l, $f ); }
@@ -531,6 +531,13 @@ Leiho_Collections_Values::convert( 'zzz', array( 'type' => 'text' ), $to( array(
 check( 'choix inconnu : échec', false === $ok );
 Leiho_Collections_Values::convert( str_repeat( 'x', 300 ), array( 'type' => 'text' ), $to( array( 'name' => 'a', 'type' => 'text', 'max_length' => 100 ) ), $ok );
 check( 'trop long pour la colonne : échec, pas de troncature', false === $ok );
+Leiho_Collections_Values::convert( '<p>a</p><script>x()</script>', array( 'type' => 'code' ), $to( array( 'name' => 'a', 'type' => 'richtext' ) ), $ok );
+check( 'code → texte riche avec script : échec, l\'original reste archivé', false === $ok );
+check( 'code → texte riche propre : converti', '<p>a</p>' === Leiho_Collections_Values::convert( '<p>a</p>', array( 'type' => 'code' ), $to( array( 'name' => 'a', 'type' => 'richtext' ) ), $ok ) && $ok );
+Leiho_Collections_Values::convert( 'javascript:alert(1)', array( 'type' => 'code' ), $to( array( 'name' => 'a', 'type' => 'link' ) ), $ok );
+check( 'code → lien javascript: : échec', false === $ok );
+Leiho_Collections_Values::convert( '<b>x</b>', array( 'type' => 'code' ), $to( array( 'name' => 'a', 'type' => 'text' ) ), $ok );
+check( 'code → texte avec balises : échec', false === $ok );
 
 /* =====================================================================
  * Révisions

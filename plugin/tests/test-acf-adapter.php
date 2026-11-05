@@ -22,6 +22,7 @@ $GLOBALS['group_fields'] = array(
 		field( 'reglages', 'group', array( 'sub_fields' => array(
 			field( 'adresse', 'text' ),
 			field( 'lien', 'link' ),
+			field( 'mode', 'radio' ),
 		) ) ),
 	),
 );
@@ -65,6 +66,10 @@ assert_true( 'patch profond', 'Délais ?' === $GLOBALS['store']['field_sections'
 
 $result = $adapter->save_values( 1, array( 'reglages.adresse' => 'Lyon' ) );
 assert_true( 'patch group', 'Lyon' === $GLOBALS['store']['field_reglages']['field_adresse'], $result );
+
+/* Sous-champ que Leiho n'édite pas : renvoyé par l'éditeur, filtré quand même. */
+$result = $adapter->save_values( 1, array( 'reglages' => array( 'adresse' => 'Lyon', 'mode' => 'R&D<script>alert(1)</script>' ) ) );
+assert_true( 'sous-champ non pris en charge : HTML filtré', 'R&D' === $GLOBALS['store']['field_reglages']['field_mode'], array( $result, $GLOBALS['store']['field_reglages'] ) );
 
 /* --- Écriture du champ entier (réordonnancement + nouveau bloc) --- */
 $rows = array(

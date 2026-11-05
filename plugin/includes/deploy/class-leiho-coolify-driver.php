@@ -38,15 +38,18 @@ class Leiho_Coolify_Driver implements Leiho_Deploy_Driver_Interface {
 		$settings = Leiho_Plugin::settings();
 		$token    = Leiho_Secrets::get( self::SECRET_NAME );
 
-		$response = wp_remote_post(
+		// Pas de redirection : le jeton ne doit partir que vers l'adresse saisie.
+		$response = Leiho_Plugin::remote(
+			'POST',
 			$settings['coolify_url'],
 			array(
-				'timeout' => 15,
-				'headers' => array(
+				'timeout'     => 15,
+				'redirection' => 0,
+				'headers'     => array(
 					'Authorization' => 'Bearer ' . $token,
 					'Content-Type'  => 'application/json',
 				),
-				'body'    => '{}',
+				'body'        => '{}',
 			)
 		);
 

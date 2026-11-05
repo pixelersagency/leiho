@@ -285,6 +285,9 @@ class Leiho_Native_Fields {
 			if ( self::is_descendant( (int) $candidate->ID, (int) $post->ID ) ) {
 				continue;
 			}
+			if ( 'publish' !== $candidate->post_status && ! current_user_can( 'read_post', $candidate->ID ) ) {
+				continue;
+			}
 			$out[ (string) $candidate->ID ] = '' !== $candidate->post_title ? $candidate->post_title : sprintf( '#%d', $candidate->ID );
 		}
 		return $out;
@@ -410,7 +413,7 @@ class Leiho_Native_Fields {
 					$parent_id = absint( $value );
 					if ( ! $object || empty( $object->hierarchical ) ) {
 						$error = 'unknown_field';
-					} elseif ( $parent_id && ( get_post_type( $parent_id ) !== $type || self::is_descendant( $parent_id, (int) $post->ID ) ) ) {
+					} elseif ( $parent_id && ( get_post_type( $parent_id ) !== $type || self::is_descendant( $parent_id, (int) $post->ID ) || ! current_user_can( 'read_post', $parent_id ) ) ) {
 						$error = 'invalid_parent';
 					} else {
 						$postarr['post_parent'] = $parent_id;

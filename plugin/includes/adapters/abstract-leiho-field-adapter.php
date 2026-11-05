@@ -478,6 +478,10 @@ abstract class Leiho_Field_Adapter implements Leiho_Adapter_Interface, Leiho_Con
 			)
 		);
 		foreach ( $posts as $post ) {
+			// Brouillons d'autres auteurs, contenus privés : pas pour qui ne peut pas les lire.
+			if ( 'publish' !== $post->post_status && ! current_user_can( 'read_post', $post->ID ) ) {
+				continue;
+			}
 			$choices[ (string) $post->ID ] = Leiho_Plugin::title( $post );
 		}
 		return $choices;
@@ -1173,8 +1177,9 @@ abstract class Leiho_Field_Adapter implements Leiho_Adapter_Interface, Leiho_Con
 
 	/**
 	 * Sanitize les sous-champs d'une ligne. Les sous-champs absents du payload
-	 * ne sont pas touchés ; ceux que Leiho ne sait pas éditer repassent tels quels
-	 * pour ne pas être effacés par le remplacement de la ligne.
+	 * ne sont pas touchés ; ceux que Leiho ne sait pas éditer repassent pour ne
+	 * pas être effacés par le remplacement de la ligne, mais filtrés : la valeur
+	 * vient de la requête, pas de la base.
 	 */
 	protected function sanitize_row( $subs, $row, &$error, $post_id ) {
 		$clean = array();
@@ -1189,7 +1194,7 @@ abstract class Leiho_Field_Adapter implements Leiho_Adapter_Interface, Leiho_Con
 			$value = $has_name ? $row[ $sub['name'] ] : $row[ $sub['key'] ];
 
 			if ( ! in_array( $sub['type'], static::SUPPORTED_TYPES, true ) ) {
-				$clean[ $sub['key'] ] = $value;
+				$clean[ $sub['key'] ] = $this->sanitize_unknown( $value );
 				continue;
 			}
 
@@ -1203,5 +1208,32 @@ abstract class Leiho_Field_Adapter implements Leiho_Adapter_Interface, Leiho_Con
 		}
 
 		return $clean;
+	}
+
+	/**
+	 * Valeur d'un sous-champ que Leiho n'édite pas (radio, case à cocher,
+	 * carte, utilisateur…), renvoyée telle quelle par l'éditeur : scalaires
+	 * gardés, HTML filtré comme un contenu, profondeur bornée.
+	 *
+	 * @param mixed $value Valeur reçue.
+	 * @param int   $depth Profondeur.
+	 * @return mixed
+	 */
+	protected function sanitize_unknown( $value, $depth = 0 ) {
+		if ( is_array( $value ) ) {
+			if ( $depth >= 5 ) {
+				return array();
+			}
+			$out = array();
+			foreach ( $value as $key => $item ) {
+				$out[ is_int( $key ) ? $key : sanitize_text_field( (string) $key ) ] = $this->sanitize_unknown( $item, $depth + 1 );
+			}
+			return $out;
+		}
+		if ( is_string( $value ) ) {
+			// Sans balise, rien à filtrer (et R&D reste R&D).
+			return false === strpos( $value, '<' ) ? $value : wp_kses_post( $value );
+		}
+		return is_scalar( $value ) || null === $value ? $value : null;
 	}
 }

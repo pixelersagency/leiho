@@ -680,11 +680,15 @@ class Leiho_Admin {
 
 		$settings['build_hook_url']      = esc_url_raw( isset( $input['build_hook_url'] ) ? trim( $input['build_hook_url'] ) : '' );
 		$settings['build_hook_eta']      = max( 1, absint( isset( $input['build_hook_eta'] ) ? $input['build_hook_eta'] : 3 ) );
-		$settings['coolify_url']         = esc_url_raw( isset( $input['coolify_url'] ) ? trim( $input['coolify_url'] ) : '' );
-		$settings['gh_repo']             = sanitize_text_field( isset( $input['gh_repo'] ) ? $input['gh_repo'] : '' );
+		// Le jeton Coolify part avec chaque appel : jamais en clair (http).
+		$coolify                         = esc_url_raw( isset( $input['coolify_url'] ) ? trim( $input['coolify_url'] ) : '', array( 'https' ) );
+		$settings['coolify_url']         = $coolify;
+		$repo                            = trim( sanitize_text_field( isset( $input['gh_repo'] ) ? $input['gh_repo'] : '' ) );
+		$settings['gh_repo']             = preg_match( '#^[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+$#', $repo ) ? $repo : '';
 		$settings['gh_workflow']         = sanitize_text_field( isset( $input['gh_workflow'] ) ? $input['gh_workflow'] : '' );
 		$settings['gh_branch']           = sanitize_text_field( isset( $input['gh_branch'] ) ? $input['gh_branch'] : '' );
-		$settings['min_deploy_interval'] = absint( isset( $input['min_deploy_interval'] ) ? $input['min_deploy_interval'] : 60 );
+		// 15 s au moins : un enregistrement ne doit jamais pouvoir lancer des builds en rafale.
+		$settings['min_deploy_interval'] = max( 15, absint( isset( $input['min_deploy_interval'] ) ? $input['min_deploy_interval'] : 60 ) );
 		$settings['auto_deploy']         = ! empty( $input['auto_deploy'] );
 		$settings['auto_deploy_delay']   = max( 15, absint( isset( $input['auto_deploy_delay'] ) ? $input['auto_deploy_delay'] : 60 ) );
 		$settings['content_access']      = isset( $input['content_access'] ) && 'token' === $input['content_access'] ? 'token' : 'public';

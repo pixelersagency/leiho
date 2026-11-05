@@ -159,6 +159,34 @@ final class Leiho_Plugin {
 	}
 
 	/**
+	 * Requête vers une adresse saisie dans les réglages (site, build hook,
+	 * Coolify). Hors développement local, les adresses privées et locales
+	 * (réseau interne, 169.254.169.254…) sont refusées et les redirections
+	 * non suivies : la réponse ne doit pas servir à sonder le réseau du serveur.
+	 *
+	 * @param string $method GET ou POST.
+	 * @param string $url    Adresse.
+	 * @param array  $args   Arguments de wp_remote_request().
+	 * @return array|WP_Error
+	 */
+	public static function remote( $method, $url, $args = array() ) {
+		$args['method'] = $method;
+		$local          = function_exists( 'wp_get_environment_type' ) && in_array( wp_get_environment_type(), array( 'local', 'development' ), true );
+		/**
+		 * Autoriser les adresses privées ou locales dans les réglages (front
+		 * sur le même réseau qu'un WordPress de production, par exemple).
+		 *
+		 * @param bool   $allow Défaut : en environnement local ou de développement.
+		 * @param string $url   Adresse demandée.
+		 */
+		if ( apply_filters( 'leiho_allow_private_urls', $local, $url ) ) {
+			return wp_remote_request( $url, $args );
+		}
+		$args['reject_unsafe_urls'] = true;
+		return wp_safe_remote_request( $url, $args );
+	}
+
+	/**
 	 * Réglages avec valeurs par défaut.
 	 *
 	 * @return array

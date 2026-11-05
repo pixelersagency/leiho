@@ -502,6 +502,10 @@ class Leiho_AI_Translate {
 		);
 		$out   = array();
 		foreach ( $ids as $id ) {
+			// Brouillons des autres, contenus privés : seulement pour qui peut les modifier.
+			if ( ! current_user_can( 'edit_post', $id ) ) {
+				continue;
+			}
 			$statuses = array();
 			foreach ( $codes as $code ) {
 				$statuses[ $code ] = Leiho_I18n::status( $id, $code );

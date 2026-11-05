@@ -483,17 +483,45 @@ class Leiho_Collections_Values {
 				return $text;
 
 			case 'link':
-				if ( is_array( $raw ) ) {
-					return $raw;
+				// Assaini comme une saisie : une valeur venue d'un champ code ou
+				// texte (stockée sans filtre) ne devient jamais un lien javascript:.
+				$link = is_array( $raw ) ? $raw : array( 'url' => $text );
+				$url  = isset( $link['url'] ) && is_scalar( $link['url'] ) ? (string) $link['url'] : '';
+				if ( '' !== $url && esc_url_raw( $url ) !== $url ) {
+					$ok = false;
+					return null;
 				}
 				return array(
-					'url'    => $text,
-					'title'  => '',
-					'target' => '',
+					'url'    => $url,
+					'title'  => isset( $link['title'] ) && is_scalar( $link['title'] ) ? sanitize_text_field( (string) $link['title'] ) : '',
+					'target' => isset( $link['target'] ) && '_blank' === $link['target'] ? '_blank' : '',
 				);
 
+			case 'url':
+				if ( '' !== $text && esc_url_raw( $text ) !== $text ) {
+					$ok = false;
+					return null;
+				}
+				return self::fits( $to, $text, $ok );
+
+			case 'richtext':
+				// Un champ code garde son HTML tel quel ; en texte riche, il passe
+				// le même filtre qu'une saisie. Ce que le filtre retirerait reste
+				// dans la colonne archivée, rien n'est perdu.
+				if ( wp_kses_post( $text ) !== $text ) {
+					$ok = false;
+					return null;
+				}
+				return self::fits( $to, $text, $ok );
+
+			case 'text':
+				if ( sanitize_textarea_field( $text ) !== $text ) {
+					$ok = false;
+					return null;
+				}
+				return self::fits( $to, $text, $ok );
+
 			default:
-				// text, richtext, url.
 				return self::fits( $to, $text, $ok );
 		}
 	}

@@ -14,18 +14,18 @@ defined( 'ABSPATH' ) || exit;
  */
 class Leiho_AI_Admin_Abilities {
 
-	/** Réglages modifiables par leiho/update-settings. */
+	/**
+	 * Réglages modifiables par leiho/update-settings. Les adresses où partent
+	 * le contenu et les jetons (front, aperçu, build hook, Coolify, dépôt
+	 * GitHub) n'y sont pas : un agent trompé par un texte qu'il lit pourrait
+	 * sinon les envoyer ailleurs. Elles se changent dans les Réglages.
+	 */
 	const SETTINGS_KEYS = array(
-		'front_url',
-		'preview_url',
 		'post_types',
 		'url_patterns',
 		'path_meta_key',
 		'deploy_driver',
-		'build_hook_url',
 		'build_hook_eta',
-		'coolify_url',
-		'gh_repo',
 		'gh_branch',
 		'gh_workflow',
 		'min_deploy_interval',
@@ -38,6 +38,9 @@ class Leiho_AI_Admin_Abilities {
 		'headless_redirect',
 		'headless_lockdown',
 	);
+
+	/** Réglages lus par leiho/get-diagnostics mais jamais écrits par un agent. */
+	const READ_ONLY_KEYS = array( 'front_url', 'preview_url', 'build_hook_url', 'coolify_url', 'gh_repo' );
 
 	/** Réglages rendus par leur hôte seulement (l'URL porte souvent un jeton). */
 	const HOST_ONLY = array( 'build_hook_url', 'coolify_url' );
@@ -92,7 +95,7 @@ class Leiho_AI_Admin_Abilities {
 			),
 			'leiho/update-settings'  => array(
 				'label'               => __( 'Update the settings', 'leiho' ),
-				'description'         => __( 'Administrators only. Changes technical settings of Leiho, validated like the Settings screen. Only the keys given change. Keys: front_url, preview_url, post_types (array), url_patterns (object: content type => pattern with {slug} or {id}), path_meta_key, deploy_driver (live, build_hook, github, github_commit, coolify or empty), build_hook_url, build_hook_eta (minutes), coolify_url, gh_repo (owner/name), gh_branch, gh_workflow (file name), min_deploy_interval (seconds), auto_deploy, auto_deploy_delay (seconds, at least 15), content_access (public or token), content_cache, editor_landing, headless_noindex, headless_redirect, headless_lockdown. Pass dry_run to see the changes without saving. Returns the changes and the result of the related checks. Secrets go through leiho/set-secret.', 'leiho' ),
+				'description'         => __( 'Administrators only. Changes technical settings of Leiho, validated like the Settings screen. Only the keys given change. Keys: post_types (array), url_patterns (object: content type => pattern with {slug} or {id}), path_meta_key, deploy_driver (live, build_hook, github, github_commit, coolify or empty), build_hook_eta (minutes), gh_branch, gh_workflow (file name), min_deploy_interval (seconds), auto_deploy, auto_deploy_delay (seconds, at least 15), content_access (public or token), content_cache, editor_landing, headless_noindex, headless_redirect, headless_lockdown. The site, preview, build hook and Coolify addresses and the GitHub repository are not changed by agents: an administrator sets them in Leiho → Settings. Pass dry_run to see the changes without saving. Returns the changes and the result of the related checks. Secrets go through leiho/set-secret.', 'leiho' ),
 				'category'            => Leiho_AI_Abilities::CATEGORY,
 				'input_schema'        => array(
 					'type'                 => 'object',
@@ -282,6 +285,16 @@ class Leiho_AI_Admin_Abilities {
 			return new WP_Error( 'leiho_bad_request', __( 'Nothing to save.', 'leiho' ), array( 'status' => 400 ) );
 		}
 
+		$locked = array_intersect( array_keys( $changes ), self::READ_ONLY_KEYS );
+		if ( $locked ) {
+			return new WP_Error(
+				'leiho_setting_locked',
+				/* translators: %s: setting keys. */
+				sprintf( __( 'These addresses can only be changed by an administrator in Leiho → Settings: %s.', 'leiho' ), implode( ', ', $locked ) ),
+				array( 'status' => 403 )
+			);
+		}
+
 		$unknown = array_diff( array_keys( $changes ), self::SETTINGS_KEYS );
 		if ( $unknown ) {
 			return new WP_Error(
@@ -462,7 +475,7 @@ class Leiho_AI_Admin_Abilities {
 	 */
 	public static function public_settings( array $settings ) {
 		$out = array();
-		foreach ( self::SETTINGS_KEYS as $key ) {
+		foreach ( array_merge( self::READ_ONLY_KEYS, self::SETTINGS_KEYS ) as $key ) {
 			$out[ $key ] = self::public_value( $key, isset( $settings[ $key ] ) ? $settings[ $key ] : null );
 		}
 		return $out;
@@ -623,7 +636,7 @@ class Leiho_AI_Admin_Abilities {
 		};
 
 		if ( '' === $settings['front_url'] ) {
-			$add( 'error', 'front_url_missing', __( 'The front-end URL isn’t set: the editor has no site to show.', 'leiho' ), __( 'Set front_url with leiho/update-settings (Leiho → Settings → Site URL).', 'leiho' ) );
+			$add( 'error', 'front_url_missing', __( 'The front-end URL isn’t set: the editor has no site to show.', 'leiho' ), __( 'Ask an administrator to set it in Leiho → Settings → Site URL.', 'leiho' ) );
 		}
 
 		$headers = isset( $report['headers'] ) && is_array( $report['headers'] ) ? $report['headers'] : array();
@@ -638,7 +651,7 @@ class Leiho_AI_Admin_Abilities {
 		$github = isset( $report['github'] ) && is_array( $report['github'] ) ? $report['github'] : array();
 		foreach ( $github as $line ) {
 			if ( in_array( $line['level'], array( 'error', 'warning' ), true ) ) {
-				$add( $line['level'], 'github', $line['message'], __( 'Fix the repository, branch or workflow with leiho/update-settings, or set a new token with leiho/set-secret (gh_pat). The token needs access to the repository, with Contents and Actions permissions.', 'leiho' ) );
+				$add( $line['level'], 'github', $line['message'], __( 'Fix the branch or workflow with leiho/update-settings (the repository is set by an administrator in Leiho → Settings), or set a new token with leiho/set-secret (gh_pat). The token needs access to the repository, with Contents and Actions permissions.', 'leiho' ) );
 			}
 		}
 
@@ -658,9 +671,9 @@ class Leiho_AI_Admin_Abilities {
 		if ( '' === $driver ) {
 			$add( 'warning', 'driver_missing', __( 'No publishing mode is chosen: changes can’t be published.', 'leiho' ), __( 'Set deploy_driver with leiho/update-settings (live, build_hook, github, github_commit or coolify).', 'leiho' ) );
 		} elseif ( 'build_hook' === $driver && '' === $settings['build_hook_url'] ) {
-			$add( 'error', 'build_hook_missing', __( 'Build hook publishing is chosen but no build hook URL is set.', 'leiho' ), __( 'Set build_hook_url with leiho/update-settings (from the host’s deploy hooks).', 'leiho' ) );
+			$add( 'error', 'build_hook_missing', __( 'Build hook publishing is chosen but no build hook URL is set.', 'leiho' ), __( 'Ask an administrator to paste the build hook URL in Leiho → Settings (from the host’s deploy hooks).', 'leiho' ) );
 		} elseif ( 'coolify' === $driver && ( '' === $settings['coolify_url'] || 'set' !== $secrets['coolify_token'] ) ) {
-			$add( 'error', 'coolify_missing', __( 'Coolify publishing needs both the webhook URL and the API token.', 'leiho' ), __( 'Set coolify_url with leiho/update-settings and the token with leiho/set-secret (coolify_token).', 'leiho' ) );
+			$add( 'error', 'coolify_missing', __( 'Coolify publishing needs both the webhook URL and the API token.', 'leiho' ), __( 'Ask an administrator to set the webhook URL in Leiho → Settings, and set the token with leiho/set-secret (coolify_token).', 'leiho' ) );
 		} elseif ( in_array( $driver, array( 'github', 'github_commit' ), true ) && 'set' !== $secrets['gh_pat'] ) {
 			$add( 'error', 'gh_pat_missing', __( 'GitHub publishing needs a GitHub token.', 'leiho' ), __( 'Set it with leiho/set-secret (gh_pat).', 'leiho' ) );
 		}

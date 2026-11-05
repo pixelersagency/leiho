@@ -26,12 +26,14 @@ class Leiho_Build_Hook_Driver implements Leiho_Deploy_Driver_Interface {
 	public function trigger( array $record ) {
 		$settings = Leiho_Plugin::settings();
 
-		$response = wp_remote_post(
+		$response = Leiho_Plugin::remote(
+			'POST',
 			$settings['build_hook_url'],
 			array(
-				'timeout' => 15,
-				'body'    => '{}',
-				'headers' => array( 'Content-Type' => 'application/json' ),
+				'timeout'     => 15,
+				'redirection' => 0,
+				'body'        => '{}',
+				'headers'     => array( 'Content-Type' => 'application/json' ),
 			)
 		);
 
