@@ -73,13 +73,14 @@ class Leiho_Llms {
 	 * @return WP_REST_Response
 	 */
 	public static function get_llms( WP_REST_Request $request ) {
-		$locale = (string) $request->get_param( 'locale' );
+		// Langue validée : elle entre dans la clé de cache, qui doit rester bornée.
+		$locale = (string) Leiho_I18n::valid( (string) $request->get_param( 'locale' ) );
 		$full   = (bool) $request->get_param( 'full' );
 		$md     = (bool) $request->get_param( 'md' );
-		$body   = (string) Leiho_Cache::remember(
+		$body   = (string) Leiho_Cache::remember_stored(
 			'llms:' . $locale . ':' . (int) $full . ':' . (int) $md,
-			static function () use ( $locale, $full, $md ) {
-				return self::llms( self::export( $locale ), $full, $md );
+			static function () use ( $locale, $full, $md, $request ) {
+				return self::llms( self::export( $locale, $request ), $full, $md );
 			}
 		);
 		return self::text( $request, $body, 'text/plain' );
@@ -92,7 +93,7 @@ class Leiho_Llms {
 	 * @return WP_REST_Response|WP_Error
 	 */
 	public static function get_markdown( WP_REST_Request $request ) {
-		$inner = new WP_REST_Request( 'GET', '/' . Leiho_Rest::NS . '/content' );
+		$inner = self::inner( '/content', $request );
 		$inner->set_param( 'path', (string) $request->get_param( 'path' ) );
 		$inner->set_param( 'locale', (string) $request->get_param( 'locale' ) );
 		$items = self::data( rest_do_request( $inner ) );
@@ -535,13 +536,33 @@ class Leiho_Llms {
 	/**
 	 * Export dans la langue demandée, en tableaux.
 	 *
-	 * @param string $locale Langue ('' : par défaut).
+	 * @param string          $locale  Langue ('' : par défaut).
+	 * @param WP_REST_Request $request Requête d'origine (jeton).
 	 * @return array
 	 */
-	private static function export( $locale ) {
-		$inner = new WP_REST_Request( 'GET', '/' . Leiho_Rest::NS . '/export' );
+	private static function export( $locale, $request ) {
+		$inner = self::inner( '/export', $request );
 		$inner->set_param( 'locale', $locale );
 		return self::data( rest_do_request( $inner ) );
+	}
+
+	/**
+	 * Requête interne vers l'API de contenu, avec le jeton de la requête
+	 * d'origine (accès restreint) : mêmes droits, ni plus ni moins.
+	 *
+	 * @param string          $route   Route (/export, /content).
+	 * @param WP_REST_Request $request Requête d'origine.
+	 * @return WP_REST_Request
+	 */
+	private static function inner( $route, $request ) {
+		$inner = new WP_REST_Request( 'GET', '/' . Leiho_Rest::NS . $route );
+		foreach ( array( 'x_leiho_token', 'x_okno_token', 'authorization' ) as $header ) {
+			$value = (string) $request->get_header( $header );
+			if ( '' !== $value ) {
+				$inner->set_header( $header, $value );
+			}
+		}
+		return $inner;
 	}
 
 	/**

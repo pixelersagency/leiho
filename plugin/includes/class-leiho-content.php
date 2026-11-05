@@ -27,6 +27,9 @@ class Leiho_Content {
 	/** Format de la réponse : incrémenté à chaque changement incompatible. */
 	const FORMAT = 1;
 
+	/** Contenus par page au plus sur /content : chacun est rendu (the_content, champs). */
+	const MAX_PER_PAGE = 100;
+
 	/** Métas dont l'écriture ne change pas le contenu publié. */
 	const IGNORED_META = array( '_edit_lock', '_edit_last', '_wp_old_slug', '_wp_old_date', '_encloseme', '_pingme' );
 
@@ -210,7 +213,7 @@ class Leiho_Content {
 			return Leiho_I18n::in_locale(
 				$locale,
 				function () use ( $request, $locale ) {
-					$cache   = Leiho_Cache::remember(
+					$cache   = Leiho_Cache::remember_stored(
 						'export:' . $locale,
 						function () {
 							return $this->build_export();
@@ -253,6 +256,7 @@ class Leiho_Content {
 		$query = array(
 			'post_type'              => self::post_types(),
 			'post_status'            => 'publish',
+			'has_password'           => self::include_protected() ? null : false,
 			'posts_per_page'         => -1,
 			'orderby'                => array(
 				'post_type'  => 'ASC',
@@ -347,11 +351,12 @@ class Leiho_Content {
 			return Leiho_Cache::response( $request, $post ? array( $this->cached_item( $post ) ) : array() );
 		}
 
-		$per_page = min( 500, max( 1, (int) $request->get_param( 'per_page' ) ) );
+		$per_page = min( self::MAX_PER_PAGE, max( 1, (int) $request->get_param( 'per_page' ) ) );
 		$page     = max( 1, (int) $request->get_param( 'page' ) );
 		$args     = array(
 			'post_type'      => $types,
 			'post_status'    => 'publish',
+			'has_password'   => self::include_protected() ? null : false,
 			'posts_per_page' => $per_page,
 			'paged'          => $page,
 			'orderby'        => 'date',
@@ -394,11 +399,12 @@ class Leiho_Content {
 		if ( ! $post || ! in_array( $post->post_type, self::post_types(), true ) ) {
 			return new WP_Error( 'leiho_not_found', __( 'Content not found.', 'leiho' ), array( 'status' => 404 ) );
 		}
-		// Brouillons : seulement pour qui peut les éditer (aperçu).
-		if ( 'publish' !== $post->post_status && ! current_user_can( 'edit_post', $post->ID ) ) {
+		// Brouillons et contenus protégés par mot de passe : seulement pour qui peut les éditer (aperçu).
+		$hidden = 'publish' !== $post->post_status || ( '' !== $post->post_password && ! self::include_protected() );
+		if ( $hidden && ! current_user_can( 'edit_post', $post->ID ) ) {
 			return new WP_Error( 'leiho_not_found', __( 'Content not found.', 'leiho' ), array( 'status' => 404 ) );
 		}
-		return Leiho_Cache::response( $request, $this->cached_item( $post ), 'publish' !== $post->post_status );
+		return Leiho_Cache::response( $request, $this->cached_item( $post ), $hidden );
 	}
 
 	/**
@@ -408,7 +414,7 @@ class Leiho_Content {
 	 * @return WP_REST_Response
 	 */
 	public function get_types( WP_REST_Request $request ) {
-		$body    = (string) Leiho_Cache::remember(
+		$body    = (string) Leiho_Cache::remember_stored(
 			'types',
 			static function () {
 				return Leiho_Types::generate( Leiho_Plugin::instance() );
@@ -742,42 +748,109 @@ class Leiho_Content {
 	 * @return WP_Post|null
 	 */
 	public static function find_by_path( $path, $types ) {
-		$path   = '/' . trim( (string) wp_parse_url( $path, PHP_URL_PATH ), '/' );
-		$mapper = self::mapper();
+		$path      = '/' . trim( (string) wp_parse_url( $path, PHP_URL_PATH ), '/' );
+		$mapper    = self::mapper();
+		$protected = self::include_protected() ? null : false;
 
-		// Raccourci : le dernier segment est presque toujours le slug.
-		$slug       = sanitize_title( basename( $path ) );
+		// Raccourci : le dernier segment est presque toujours le slug, ou l'id ({id}).
+		$last       = basename( $path );
+		$slug       = sanitize_title( $last );
 		$candidates = '/' === $path
 			? array_filter( array( get_post( (int) get_option( 'page_on_front' ) ) ) )
 			: get_posts(
 				array(
 					'post_type'      => $types,
 					'post_status'    => 'publish',
+					'has_password'   => $protected,
 					'name'           => $slug,
 					'posts_per_page' => 20,
 				)
 			);
+		if ( ctype_digit( $last ) ) {
+			$candidates[] = get_post( (int) $last );
+		}
+		// Types à adresse fixe (/, /contact) : leurs quelques contenus.
+		$base     = Leiho_I18n::is_translation() ? Leiho_I18n::split_path( $path )[1] : $path;
+		$patterns = Leiho_Plugin::settings()['url_patterns'];
+		$static   = array();
+		foreach ( $types as $type ) {
+			$pattern = isset( $patterns[ $type ] ) && '' !== $patterns[ $type ] ? $patterns[ $type ] : '/{slug}';
+			if ( false === strpos( $pattern, '{' ) && untrailingslashit( '/' . ltrim( $pattern, '/' ) ) === untrailingslashit( $base ) ) {
+				$static[] = $type;
+			}
+		}
+		if ( $static ) {
+			$candidates = array_merge(
+				$candidates,
+				get_posts(
+					array(
+						'post_type'      => $static,
+						'post_status'    => 'publish',
+						'has_password'   => $protected,
+						'posts_per_page' => 20,
+					)
+				)
+			);
+		}
 
-		foreach ( $candidates as $post ) {
+		foreach ( array_filter( $candidates ) as $post ) {
+			if ( 'publish' !== $post->post_status || ( false === $protected && '' !== $post->post_password ) ) {
+				continue;
+			}
 			if ( in_array( $post->post_type, $types, true ) && untrailingslashit( $mapper->path( $post ) ) === untrailingslashit( $path ) ) {
 				return $post;
 			}
 		}
 
-		// Chemin porté par une méta (réglage « champ qui contient l'URL ») :
-		// le slug n'y figure pas forcément.
-		foreach ( get_posts(
+		// Chemin porté par une méta (adresse propre au contenu, ou réglage
+		// « champ qui contient l'URL ») : le slug n'y figure pas forcément, on
+		// cherche la méta elle-même. Jamais de parcours de tous les contenus :
+		// n'importe quel visiteur peut demander une adresse qui n'existe pas.
+		$keys     = array_values( array_filter( array( Leiho_Url_Mapper::META_PATH, Leiho_Plugin::settings()['path_meta_key'] ) ) );
+		$variants = array_values( array_unique( array( $base, ltrim( $base, '/' ), trailingslashit( $base ), trailingslashit( ltrim( $base, '/' ) ) ) ) );
+		$by_meta  = get_posts(
 			array(
 				'post_type'      => $types,
 				'post_status'    => 'publish',
-				'posts_per_page' => -1,
+				'has_password'   => $protected,
+				'posts_per_page' => 20,
+				'meta_query'     => array_merge( // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query -- Requête bornée, résultat mis en cache.
+					array( 'relation' => 'OR' ),
+					array_map(
+						static function ( $key ) use ( $variants ) {
+							return array(
+								'key'     => $key,
+								'value'   => $variants,
+								'compare' => 'IN',
+							);
+						},
+						$keys
+					)
+				),
 			)
-		) as $post ) {
+		);
+		foreach ( $by_meta as $post ) {
 			if ( untrailingslashit( $mapper->path( $post ) ) === untrailingslashit( $path ) ) {
 				return $post;
 			}
 		}
 		return null;
+	}
+
+	/**
+	 * Servir aussi les contenus protégés par mot de passe ? Non par défaut :
+	 * WordPress cache leur contenu à qui n'a pas le mot de passe, l'API aussi.
+	 *
+	 * @return bool
+	 */
+	public static function include_protected() {
+		/**
+		 * Servir les contenus protégés par mot de passe dans l'API de contenu
+		 * (le front gère alors lui-même la protection).
+		 *
+		 * @param bool $include Défaut false.
+		 */
+		return (bool) apply_filters( 'leiho_content_include_protected', false );
 	}
 
 	private static function mapper() {
@@ -801,6 +874,7 @@ class Leiho_Content {
 		if ( ! self::$invalidated ) {
 			self::$invalidated = true;
 			delete_option( self::OPTION_CACHE );
+			delete_option( Leiho_Cache::OPTION_STORED );
 			Leiho_Cache::bump();
 			// Encore une fois en fin de requête : un build lancé entre deux
 			// écritures aurait remis en cache un état à moitié enregistré.
@@ -808,6 +882,7 @@ class Leiho_Content {
 				'shutdown',
 				static function () {
 					delete_option( Leiho_Content::OPTION_CACHE );
+					delete_option( Leiho_Cache::OPTION_STORED );
 					Leiho_Cache::bump();
 				}
 			);

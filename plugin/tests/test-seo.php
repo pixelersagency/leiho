@@ -18,7 +18,7 @@ function wp_parse_url( $u, $c = -1 ) { return parse_url( $u, $c ); }
 function esc_url_raw( $v ) { return (string) $v; }
 function get_post_meta( $id, $key, $single = false ) { return isset( $GLOBALS['meta'][ $id ][ $key ] ) ? $GLOBALS['meta'][ $id ][ $key ] : ''; }
 function post_type_supports( $type, $feature ) { return 'post' === $type && 'author' === $feature; }
-function get_the_author_meta( $field, $user ) { return 'Ada'; }
+function get_the_author_meta( $field, $user ) { return 'user_login' === $field ? ( 2 === (int) $user ? 'Ada' : 'ada_admin' ) : 'Ada'; }
 function get_bloginfo( $key ) { return 'description' === $key ? 'Sites & builds' : 'en-US'; }
 function get_post_type_object( $type ) { return (object) array( 'labels' => (object) array( 'name' => ucfirst( $type ) . 's' ) ); }
 class Leiho_Collections {
@@ -124,6 +124,8 @@ check( 'modèle Yoast ignoré : extrait', 'From the excerpt' === $plain['descrip
 check( 'page sans type : WebPage seul', array( 'WebPage' ) === array_column( $plain['jsonld'], '@type' ) );
 
 $blog = Leiho_Seo::item( (object) array( 'ID' => 9, 'post_type' => 'post', 'post_author' => 1 ), array_merge( $page, array( 'type' => 'post' ) ) );
+$anon = Leiho_Seo::item( (object) array( 'ID' => 9, 'post_type' => 'post', 'post_author' => 2 ), array_merge( $page, array( 'type' => 'post' ) ) );
+check( 'nom affiché = identifiant de connexion : pas d\'auteur publié', ! isset( $anon['jsonld'][1]['author'] ), $anon['jsonld'][1] );
 check( 'article de blog : BlogPosting avec auteur', 'BlogPosting' === $blog['jsonld'][1]['@type'] && 'Ada' === $blog['jsonld'][1]['author']['name'], $blog['jsonld'] );
 
 $GLOBALS['collections']['faq'] = array( 'id' => 'faq', 'fields' => $fields, 'seo' => array( 'type' => 'FAQPage', 'faq' => 'faq' ) );

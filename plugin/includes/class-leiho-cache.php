@@ -199,6 +199,39 @@ class Leiho_Cache {
 		return $value;
 	}
 
+	/** Option des quelques autres entrées coûteuses, sans cache persistant. */
+	const OPTION_STORED = 'leiho_content_cache_more';
+
+	/**
+	 * Comme remember(), mais sans cache persistant la valeur est gardée dans
+	 * une option non autochargée, vidée à chaque modification. Réservé aux
+	 * entrées en nombre borné (export d'une langue, types, llms.txt) que
+	 * n'importe quel visiteur peut demander : les recalculer à chaque requête
+	 * ferait de l'API publique un moyen de saturer le serveur.
+	 *
+	 * @param string   $name     Nom court, pris dans une liste bornée.
+	 * @param callable $callback Calcul.
+	 * @return mixed
+	 */
+	public static function remember_stored( $name, $callback ) {
+		if ( ! self::enabled() ) {
+			return call_user_func( $callback );
+		}
+		if ( self::persistent() ) {
+			return self::remember( $name, $callback );
+		}
+		$key    = Leiho_Content::FORMAT . ':' . LEIHO_VERSION . ':' . $name;
+		$stored = get_option( self::OPTION_STORED );
+		if ( is_array( $stored ) && array_key_exists( $key, $stored ) ) {
+			return $stored[ $key ];
+		}
+		$value          = call_user_func( $callback );
+		$stored         = is_array( $stored ) ? $stored : array();
+		$stored[ $key ] = $value;
+		update_option( self::OPTION_STORED, $stored, false );
+		return $value;
+	}
+
 	/**
 	 * Export en cache : cache objet s'il est persistant, sinon l'option.
 	 *

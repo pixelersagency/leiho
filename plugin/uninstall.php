@@ -29,7 +29,7 @@ function leiho_uninstall_site() {
 		}
 	};
 
-	foreach ( array( 'leiho_settings', 'leiho_secrets', 'leiho_deploy_history', 'leiho_usage', 'leiho_connection', 'leiho_activity_db_version', 'leiho_update_last_release', 'leiho_export_cache', 'leiho_auto_deploy_attempts', 'leiho_auto_deploy_pending', 'leiho_deploy_lock', 'leiho_ai_brand', 'leiho_migrated_from_okno', 'leiho_migration_lock', 'leiho_legacy_tables' ) as $option ) {
+	foreach ( array( 'leiho_settings', 'leiho_secrets', 'leiho_deploy_history', 'leiho_usage', 'leiho_connection', 'leiho_activity_db_version', 'leiho_update_last_release', 'leiho_export_cache', 'leiho_content_cache_more', 'leiho_auto_deploy_attempts', 'leiho_auto_deploy_pending', 'leiho_deploy_lock', 'leiho_ai_brand', 'leiho_migrated_from_okno', 'leiho_migration_lock', 'leiho_legacy_tables' ) as $option ) {
 		delete_option( $option );
 	}
 

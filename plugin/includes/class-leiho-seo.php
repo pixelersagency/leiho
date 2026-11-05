@@ -267,6 +267,11 @@ class Leiho_Seo {
 				$article['image'] = $image;
 			}
 			$author = post_type_supports( $post->post_type, 'author' ) ? get_the_author_meta( 'display_name', $post->post_author ) : '';
+			// Nom affiché resté sur l'identifiant de connexion : on ne le publie pas
+			// (le mode back-office ferme justement /wp/v2/users pour le cacher).
+			if ( $author && get_the_author_meta( 'user_login', $post->post_author ) === $author ) {
+				$author = '';
+			}
 			if ( $author ) {
 				$article['author'] = array(
 					'@type' => 'Person',

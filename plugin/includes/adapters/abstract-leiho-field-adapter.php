@@ -624,6 +624,10 @@ abstract class Leiho_Field_Adapter implements Leiho_Adapter_Interface, Leiho_Con
 			case 'checkbox':
 				return array_values( array_map( 'strval', (array) ( $raw ? $raw : array() ) ) );
 
+			case 'password':
+				// Un champ « mot de passe » d'ACF n'est jamais servi : l'API de contenu est publique.
+				return '';
+
 			default:
 				// Types simples (text, textarea, url, email…) et types inconnus
 				// de Leiho : la valeur brute, sans la tronquer en chaîne.
