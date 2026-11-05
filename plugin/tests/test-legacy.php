@@ -192,6 +192,19 @@ check( 'secret lisible avec la clé Leiho', 'github_pat_SECRET' === Leiho_Secret
 check( 'secret rechiffré pendant la migration', 1 === $report['secrets'], $report );
 check( 'plus rien à rechiffrer ensuite', 0 === Leiho_Secrets::upgrade_legacy() );
 check( 'secret illisible laissé tel quel', 'unreadable' === Leiho_Secrets::status( 'broken' ) );
+check( 'secret rechiffré au format à sous-clés séparées', 0 === strpos( get_option( 'leiho_secrets' )['gh_pat'], 'v2:' ) );
+
+// Ancien format Leiho (une seule clé pour chiffrer et signer) : lu, puis rechiffré.
+$key = hash( 'sha256', wp_salt( 'auth' ) . '|leiho-secrets', true );
+$iv  = random_bytes( 16 );
+$enc = openssl_encrypt( 'coolify_OLD', 'aes-256-cbc', $key, OPENSSL_RAW_DATA, $iv );
+update_option( 'leiho_secrets', array_merge( get_option( 'leiho_secrets' ), array( 'coolify_token' => base64_encode( $iv . hash_hmac( 'sha256', $iv . $enc, $key, true ) . $enc ) ) ), false );
+check( 'ancien format lisible', 'coolify_OLD' === Leiho_Secrets::get( 'coolify_token' ) );
+check( 'ancien format rechiffré à la lecture', 0 === strpos( get_option( 'leiho_secrets' )['coolify_token'], 'v2:' ) && 'coolify_OLD' === Leiho_Secrets::get( 'coolify_token' ) );
+$tampered = get_option( 'leiho_secrets' );
+$tampered['coolify_token'] = 'v2:' . base64_encode( str_repeat( 'x', 60 ) );
+update_option( 'leiho_secrets', $tampered, false );
+check( 'v2 altéré : illisible', 'unreadable' === Leiho_Secrets::status( 'coolify_token' ) );
 
 check( 'historique : table renommée avec ses lignes', 2 === (int) $wpdb->get_var( 'SELECT COUNT(*) FROM wp_leiho_activity' ) );
 check( 'historique : la table Leiho vide a cédé la place', in_array( 'wp_leiho_activity', $report['tables'], true ), $report );

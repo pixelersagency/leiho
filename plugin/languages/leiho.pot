@@ -609,7 +609,7 @@ msgid "Excerpt"
 msgstr ""
 
 #: assets/admin/app-collections.js:67 assets/admin/app-collections.js:670
-#: includes/class-leiho-schema.php:265
+#: includes/class-leiho-schema.php:336
 msgid "Featured image"
 msgstr ""
 
@@ -657,7 +657,7 @@ msgstr ""
 
 #: assets/admin/app-collections.js:338 assets/admin/app-collections.js:343
 #: assets/admin/app-content.js:269 assets/admin/app-content.js:311
-#: includes/collections/class-leiho-collections.php:572
+#: includes/collections/class-leiho-collections.php:579
 msgid "Fields"
 msgstr ""
 
@@ -895,7 +895,7 @@ msgstr ""
 
 #: assets/admin/app-collections.js:669 assets/admin/app-content.js:1254
 #: assets/admin/app-media.js:256 assets/admin/editor.js:1235
-#: includes/ai/class-leiho-ai.php:470 includes/class-leiho-schema.php:244
+#: includes/ai/class-leiho-ai.php:543 includes/class-leiho-schema.php:315
 msgid "Title"
 msgstr ""
 
@@ -1955,7 +1955,7 @@ msgstr ""
 msgid "“%s” moved to the trash."
 msgstr ""
 
-#: assets/admin/app-content.js:1210 includes/class-leiho-rest.php:577
+#: assets/admin/app-content.js:1210 includes/class-leiho-rest.php:596
 msgid "Couldn’t delete this content."
 msgstr ""
 
@@ -1965,7 +1965,7 @@ msgstr ""
 msgid "“%s” restored as a draft."
 msgstr ""
 
-#: assets/admin/app-content.js:1224 includes/class-leiho-rest.php:651
+#: assets/admin/app-content.js:1224 includes/class-leiho-rest.php:670
 msgid "Couldn’t restore this content."
 msgstr ""
 
@@ -3105,7 +3105,7 @@ msgid "Back to the calendar"
 msgstr ""
 
 #: includes/admin/class-leiho-admin.php:96
-#: includes/collections/class-leiho-collections.php:578
+#: includes/collections/class-leiho-collections.php:585
 msgid "Edit with Leiho"
 msgstr ""
 
@@ -3317,7 +3317,7 @@ msgstr ""
 
 #: includes/admin/class-leiho-admin.php:583
 #: includes/admin/class-leiho-admin.php:607 includes/class-leiho-cache.php:553
-#: includes/class-leiho-rest.php:497
+#: includes/class-leiho-rest.php:516
 msgid "Access denied."
 msgstr ""
 
@@ -4801,12 +4801,12 @@ msgid "Save the translations (default false)."
 msgstr ""
 
 #: includes/ai/class-leiho-ai-abilities.php:622
-#: includes/ai/class-leiho-ai-abilities.php:853
+#: includes/ai/class-leiho-ai-abilities.php:855
 #: includes/ai/class-leiho-ai-translate.php:30
 #: includes/class-leiho-content.php:404 includes/class-leiho-content.php:409
-#: includes/class-leiho-llms.php:101 includes/class-leiho-rest.php:357
-#: includes/class-leiho-rest.php:572 includes/class-leiho-rest.php:617
-#: includes/class-leiho-rest.php:663 includes/class-leiho-schema.php:29
+#: includes/class-leiho-llms.php:101 includes/class-leiho-rest.php:376
+#: includes/class-leiho-rest.php:591 includes/class-leiho-rest.php:636
+#: includes/class-leiho-rest.php:709 includes/class-leiho-schema.php:29
 msgid "Content not found."
 msgstr ""
 
@@ -4815,45 +4815,45 @@ msgid "This entry is published, scheduled or private: changes would go live. Onl
 msgstr ""
 
 #: includes/ai/class-leiho-ai-abilities.php:632
-#: includes/ai/class-leiho-ai-abilities.php:849
+#: includes/ai/class-leiho-ai-abilities.php:851
 #: includes/ai/class-leiho-ai-admin-abilities.php:285
-#: includes/ai/class-leiho-ai-rest.php:596 includes/class-leiho-rest.php:749
+#: includes/ai/class-leiho-ai-rest.php:596 includes/class-leiho-rest.php:798
 msgid "Nothing to save."
 msgstr ""
 
-#: includes/ai/class-leiho-ai-abilities.php:639
+#: includes/ai/class-leiho-ai-abilities.php:645
 msgid "This content was changed elsewhere since you read it. Read it again with leiho/get-entry."
 msgstr ""
 
 #. translators: %d: number of fields.
-#: includes/ai/class-leiho-ai-abilities.php:651
+#: includes/ai/class-leiho-ai-abilities.php:653
 #, php-format
 msgid "%d field"
 msgid_plural "%d fields"
 msgstr[0] ""
 msgstr[1] ""
 
-#: includes/ai/class-leiho-ai-abilities.php:673
-#: includes/class-leiho-rest.php:300
+#: includes/ai/class-leiho-ai-abilities.php:675
+#: includes/class-leiho-rest.php:319
 msgid "This content type isn’t editable in Leiho."
 msgstr ""
 
-#: includes/ai/class-leiho-ai-abilities.php:745
-#: includes/ai/class-leiho-ai-rest.php:600 includes/class-leiho-rest.php:531
+#: includes/ai/class-leiho-ai-abilities.php:747
+#: includes/ai/class-leiho-ai-rest.php:600 includes/class-leiho-rest.php:550
 msgid "A title is required."
 msgstr ""
 
-#: includes/ai/class-leiho-ai-abilities.php:793
+#: includes/ai/class-leiho-ai-abilities.php:795
 #: includes/ai/class-leiho-ai-rest.php:483 includes/ai/class-leiho-ai.php:287
 msgid "The configured AI provider can’t read images."
 msgstr ""
 
-#: includes/ai/class-leiho-ai-abilities.php:820
+#: includes/ai/class-leiho-ai-abilities.php:822
 msgid "Unknown content type."
 msgstr ""
 
 #. translators: 1: language code, 2: number of fields.
-#: includes/ai/class-leiho-ai-abilities.php:863
+#: includes/ai/class-leiho-ai-abilities.php:865
 #, php-format
 msgid "%1$s translation, %2$d field"
 msgid_plural "%1$s translation, %2$d fields"
@@ -5208,22 +5208,22 @@ msgid "The AI couldn’t generate this text."
 msgstr ""
 
 #. translators: %d: seconds to wait.
-#: includes/ai/class-leiho-ai.php:442
+#: includes/ai/class-leiho-ai.php:447
 #, php-format
 msgid "Too many AI requests. Try again in %d second."
 msgid_plural "Too many AI requests. Try again in %d seconds."
 msgstr[0] ""
 msgstr[1] ""
 
-#: includes/ai/class-leiho-ai.php:516
+#: includes/ai/class-leiho-ai.php:589
 msgid "This file isn’t an image the AI can read."
 msgstr ""
 
-#: includes/ai/class-leiho-ai.php:530
+#: includes/ai/class-leiho-ai.php:603
 msgid "The image file can’t be read on the server."
 msgstr ""
 
-#: includes/ai/class-leiho-ai.php:533
+#: includes/ai/class-leiho-ai.php:606
 msgid "This image is too large to be sent to the AI."
 msgstr ""
 
@@ -5369,59 +5369,63 @@ msgstr ""
 msgid "Unknown theme."
 msgstr ""
 
-#: includes/class-leiho-rest.php:382
+#: includes/class-leiho-rest.php:401
 msgid "No site URL set."
 msgstr ""
 
 #. translators: %s: network error message.
-#: includes/class-leiho-rest.php:399
+#: includes/class-leiho-rest.php:418
 #, php-format
 msgid "Can’t reach the site from the server: %s"
 msgstr ""
 
-#: includes/class-leiho-rest.php:439 includes/class-leiho-rest.php:448
+#: includes/class-leiho-rest.php:458 includes/class-leiho-rest.php:467
 msgid "The site allows wp-admin in its frame-ancestors header."
 msgstr ""
 
 #. translators: 1: current frame-ancestors value, 2: wp-admin origin.
-#: includes/class-leiho-rest.php:456
+#: includes/class-leiho-rest.php:475
 #, php-format
 msgid "The site’s frame-ancestors header (%1$s) doesn’t allow %2$s. Add this address."
 msgstr ""
 
 #. translators: %s: X-Frame-Options value.
-#: includes/class-leiho-rest.php:465
+#: includes/class-leiho-rest.php:484
 #, php-format
 msgid "The site sends X-Frame-Options: %s, which blocks any display in wp-admin. Remove this header and use frame-ancestors."
 msgstr ""
 
-#: includes/class-leiho-rest.php:471
+#: includes/class-leiho-rest.php:490
 msgid "No header blocks display, so the editor will work. To stop other sites from embedding yours, add frame-ancestors anyway."
 msgstr ""
 
-#: includes/class-leiho-rest.php:543
+#: includes/class-leiho-rest.php:562
 msgid "This parent can’t be used."
 msgstr ""
 
-#: includes/class-leiho-rest.php:622
+#: includes/class-leiho-rest.php:641
 msgid "You’re not allowed to give this status."
 msgstr ""
 
-#: includes/class-leiho-rest.php:648
+#: includes/class-leiho-rest.php:667
 msgid "This content isn’t in the trash."
 msgstr ""
 
 #. translators: %s: original title.
-#: includes/class-leiho-rest.php:669
+#: includes/class-leiho-rest.php:715
 #, php-format
 msgid "%s (copy)"
 msgstr ""
 
-#: includes/class-leiho-rest.php:760
+#: includes/class-leiho-rest.php:806
+msgid "The revision of the content you edited is missing. Reload and try again."
+msgstr ""
+
+#: includes/class-leiho-rest.php:821
 msgid "This content was changed elsewhere since you opened it. Reload to get the latest version."
 msgstr ""
 
-#: includes/class-leiho-schema.php:276
+#: includes/class-leiho-schema.php:347
 msgid "Main content"
 msgstr ""
 
@@ -5453,15 +5457,23 @@ msgstr ""
 msgid "“%s” needs a “question” and an “answer” text field."
 msgstr ""
 
-#: includes/class-leiho-updater.php:221
+#: includes/class-leiho-updater.php:115
+msgid "This Leiho update has no signature, so it was not installed. Download it from the Leiho releases on GitHub if you trust it."
+msgstr ""
+
+#: includes/class-leiho-updater.php:124
+msgid "The signature of this Leiho update doesn’t match, so it was not installed. Please report it at github.com/pixelersagency/leiho."
+msgstr ""
+
+#: includes/class-leiho-updater.php:304
 msgid "Visual editing for headless WordPress: edit your ACF fields live on your real front end, from wp-admin."
 msgstr ""
 
-#: includes/class-leiho-updater.php:223
+#: includes/class-leiho-updater.php:306
 msgid "Release notes on GitHub"
 msgstr ""
 
-#: includes/class-leiho-updater.php:293
+#: includes/class-leiho-updater.php:376
 msgid "Couldn’t prepare the Leiho update folder."
 msgstr ""
 
@@ -5865,7 +5877,7 @@ msgstr ""
 msgid "This is not a Leiho Collections schema file."
 msgstr ""
 
-#: includes/collections/class-leiho-collections.php:576
+#: includes/collections/class-leiho-collections.php:583
 msgid "The fields of this entry are edited in Leiho."
 msgstr ""
 

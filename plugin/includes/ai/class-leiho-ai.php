@@ -412,7 +412,7 @@ class Leiho_AI {
 		 * @param array $limit { requests: int, window: int (secondes) } ; requests 0 = aucune limite.
 		 * @param int   $user_id Utilisateur.
 		 */
-		$limit    = apply_filters(
+		$user = apply_filters(
 			'leiho_ai_rate_limit',
 			array(
 				'requests' => 20,
@@ -420,35 +420,108 @@ class Leiho_AI {
 			),
 			$user_id
 		);
+		/**
+		 * Limite de requêtes d'IA pour tout le site (tous utilisateurs) : borne
+		 * la facture du fournisseur même si plusieurs comptes s'y mettent.
+		 *
+		 * @param array $limit { requests: int, window: int (secondes) } ; requests 0 = aucune limite.
+		 */
+		$site = apply_filters(
+			'leiho_ai_site_rate_limit',
+			array(
+				'requests' => 120,
+				'window'   => 60,
+			)
+		);
+
+		// Lire, vérifier et compter sous un verrou : des requêtes parallèles
+		// passeraient sinon toutes avant que le compteur ne bouge.
+		$locked = self::rate_lock();
+		try {
+			foreach ( array( 'leiho_ai_rl_' . (int) $user_id => $user, 'leiho_ai_rl_site' => $site ) as $key => $limit ) {
+				$wait = self::over_limit( $key, $limit );
+				if ( $wait ) {
+					return new WP_Error(
+						'leiho_ai_rate_limited',
+						/* translators: %d: seconds to wait. */
+						sprintf( _n( 'Too many AI requests. Try again in %d second.', 'Too many AI requests. Try again in %d seconds.', $wait, 'leiho' ), $wait ),
+						array(
+							'status'      => 429,
+							'retry_after' => $wait,
+						)
+					);
+				}
+			}
+			foreach ( array( 'leiho_ai_rl_' . (int) $user_id => $user, 'leiho_ai_rl_site' => $site ) as $key => $limit ) {
+				self::count_request( $key, $limit );
+			}
+			return true;
+		} finally {
+			if ( $locked ) {
+				delete_option( 'leiho_ai_rl_lock' );
+			}
+		}
+	}
+
+	/**
+	 * Secondes à attendre si la fenêtre est pleine, 0 sinon.
+	 *
+	 * @param string $key   Transient du compteur.
+	 * @param array  $limit { requests, window }.
+	 * @return int
+	 */
+	private static function over_limit( $key, $limit ) {
 		$requests = isset( $limit['requests'] ) ? (int) $limit['requests'] : 0;
 		$window   = isset( $limit['window'] ) ? max( 1, (int) $limit['window'] ) : 60;
 		if ( $requests <= 0 ) {
-			return true;
+			return 0;
 		}
-		$key   = 'leiho_ai_rl_' . (int) $user_id;
-		$now   = time();
+		$state = self::rate_state( $key, $window );
+		return (int) $state['count'] >= $requests ? max( 1, $window - ( time() - (int) $state['start'] ) ) : 0;
+	}
+
+	private static function count_request( $key, $limit ) {
+		$requests = isset( $limit['requests'] ) ? (int) $limit['requests'] : 0;
+		$window   = isset( $limit['window'] ) ? max( 1, (int) $limit['window'] ) : 60;
+		if ( $requests <= 0 ) {
+			return;
+		}
+		$state          = self::rate_state( $key, $window );
+		$state['count'] = (int) $state['count'] + 1;
+		set_transient( $key, $state, $window );
+	}
+
+	private static function rate_state( $key, $window ) {
 		$state = get_transient( $key );
-		if ( ! is_array( $state ) || ! isset( $state['start'], $state['count'] ) || $now - (int) $state['start'] >= $window ) {
+		if ( ! is_array( $state ) || ! isset( $state['start'], $state['count'] ) || time() - (int) $state['start'] >= $window ) {
 			$state = array(
-				'start' => $now,
+				'start' => time(),
 				'count' => 0,
 			);
 		}
-		if ( (int) $state['count'] >= $requests ) {
-			$wait = max( 1, $window - ( $now - (int) $state['start'] ) );
-			return new WP_Error(
-				'leiho_ai_rate_limited',
-				/* translators: %d: seconds to wait. */
-				sprintf( _n( 'Too many AI requests. Try again in %d second.', 'Too many AI requests. Try again in %d seconds.', $wait, 'leiho' ), $wait ),
-				array(
-					'status'      => 429,
-					'retry_after' => $wait,
-				)
-			);
-		}
-		$state['count'] = (int) $state['count'] + 1;
-		set_transient( $key, $state, $window );
-		return true;
+		return $state;
+	}
+
+	/**
+	 * Verrou court du compteur (add_option est atomique). Au-delà de 2 s
+	 * d'attente, on compte quand même : mieux vaut une requête de trop qu'un
+	 * éditeur bloqué par un verrou abandonné.
+	 *
+	 * @return bool Verrou pris.
+	 */
+	private static function rate_lock() {
+		$until = microtime( true ) + 2;
+		do {
+			if ( add_option( 'leiho_ai_rl_lock', time() + 5, '', false ) ) {
+				return true;
+			}
+			if ( (int) get_option( 'leiho_ai_rl_lock', 0 ) < time() ) {
+				delete_option( 'leiho_ai_rl_lock' );
+				continue;
+			}
+			usleep( 50000 );
+		} while ( microtime( true ) < $until );
+		return false;
 	}
 
 	/* ---------------------------------------------------------------------

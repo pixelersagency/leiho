@@ -398,8 +398,15 @@ class Leiho_Collections {
 	 * @return array{saved:string[],errors:array<string,string>}
 	 */
 	public static function save_entry( $post_id, $values ) {
+		$locked  = class_exists( 'Leiho_Schema' ) && Leiho_Schema::lock( $post_id );
 		$adapter = new Leiho_Native_Adapter();
-		$result  = $adapter->save_values( $post_id, $values );
+		try {
+			$result = $adapter->save_values( $post_id, $values );
+		} finally {
+			if ( $locked ) {
+				Leiho_Schema::unlock( $post_id );
+			}
+		}
 		if ( $result['saved'] && class_exists( 'Leiho_Schema' ) ) {
 			// Empreinte de version de l'éditeur + invalidation du cache d'export.
 			Leiho_Schema::touch( $post_id );

@@ -64,11 +64,82 @@ class Leiho_Schema {
 	/**
 	 * Écrit un lot de valeurs { path => valeur } sur un post.
 	 *
+	 * Un enregistrement à la fois par contenu : deux éditeurs (ou un éditeur
+	 * et un agent) qui modifient deux lignes d'une même liste ne s'écrasent
+	 * pas, le second relit ce que le premier vient d'écrire.
+	 *
+	 * @param int         $post_id  Post.
+	 * @param array       $values   Valeurs reçues.
+	 * @param string|null $revision Empreinte attendue (Leiho_Schema::revision) : vérifiée sous le verrou.
+	 * @return array { saved: string[], errors: array<string,string>, conflict?: bool }
+	 */
+	public function save( $post_id, array $values, $revision = null ) {
+		if ( ! self::lock( $post_id ) ) {
+			return array(
+				'saved'    => array(),
+				'errors'   => array_fill_keys( array_map( 'strval', array_keys( $values ) ), 'busy' ),
+				'schema'   => null,
+				'conflict' => true,
+			);
+		}
+		try {
+			if ( null !== $revision && self::revision( $post_id ) !== $revision ) {
+				return array(
+					'saved'    => array(),
+					'errors'   => array(),
+					'schema'   => null,
+					'conflict' => true,
+				);
+			}
+			return $this->write( $post_id, $values );
+		} finally {
+			self::unlock( $post_id );
+		}
+	}
+
+	/** Durée maximale d'un verrou d'enregistrement (secondes) : au-delà, il est périmé. */
+	const LOCK_TTL = 30;
+
+	/**
+	 * Prend le verrou d'enregistrement d'un contenu (add_option est atomique :
+	 * clé unique en base). Attend au plus 5 secondes qu'il se libère.
+	 *
+	 * @param int $post_id Post.
+	 * @return bool
+	 */
+	public static function lock( $post_id ) {
+		$name  = 'leiho_save_lock_' . (int) $post_id;
+		$until = microtime( true ) + 5;
+		do {
+			if ( add_option( $name, time() + self::LOCK_TTL, '', false ) ) {
+				return true;
+			}
+			$expires = (int) get_option( $name, 0 );
+			if ( $expires && $expires < time() ) {
+				delete_option( $name ); // Requête interrompue : verrou abandonné.
+				continue;
+			}
+			usleep( 100000 );
+		} while ( microtime( true ) < $until );
+		return false;
+	}
+
+	/**
+	 * @param int $post_id Post.
+	 * @return void
+	 */
+	public static function unlock( $post_id ) {
+		delete_option( 'leiho_save_lock_' . (int) $post_id );
+	}
+
+	/**
+	 * Écriture proprement dite (sous verrou).
+	 *
 	 * @param int   $post_id Post.
 	 * @param array $values  Valeurs reçues.
-	 * @return array { saved: string[], errors: array<string,string> }
+	 * @return array
 	 */
-	public function save( $post_id, array $values ) {
+	private function write( $post_id, array $values ) {
 		$saved  = array();
 		$errors = array();
 

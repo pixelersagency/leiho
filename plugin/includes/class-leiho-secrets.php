@@ -4,7 +4,10 @@ defined( 'ABSPATH' ) || exit;
 /**
  * Stockage chiffré des secrets de deploy.
  *
- * AES-256-CBC + HMAC-SHA256, clé dérivée des salts WordPress.
+ * AES-256-CBC puis HMAC-SHA256 (encrypt-then-MAC), deux sous-clés dérivées
+ * d'une clé tirée des salts WordPress : une pour chiffrer, une pour signer.
+ * Format « v2: » ; les secrets plus anciens (une seule clé pour les deux) se
+ * lisent toujours et sont rechiffrés à la première lecture.
  * Si les salts tournent (hébergeur, plugin de sécurité), le déchiffrement
  * échoue proprement : decrypt() retourne null et l'UI demande de re-saisir
  * le secret — jamais d'erreur opaque au moment du deploy.
@@ -43,7 +46,13 @@ class Leiho_Secrets {
 		if ( ! is_array( $secrets ) || empty( $secrets[ $name ] ) ) {
 			return null;
 		}
-		return self::decrypt( $secrets[ $name ] );
+		$plain = self::decrypt( $secrets[ $name ] );
+		// Ancien format lisible : rechiffré avec des sous-clés séparées.
+		if ( null !== $plain && 0 !== strpos( (string) $secrets[ $name ], self::PREFIX ) ) {
+			$secrets[ $name ] = self::encrypt( $plain );
+			update_option( Leiho_Plugin::OPTION_SECRETS, $secrets, false );
+		}
+		return $plain;
 	}
 
 	/**
@@ -68,20 +77,37 @@ class Leiho_Secrets {
 		return hash( 'sha256', wp_salt( 'auth' ) . ( $legacy ? '|okno-secrets' : '|leiho-secrets' ), true );
 	}
 
+	/** Préfixe du format à sous-clés séparées. */
+	const PREFIX = 'v2:';
+
+	/**
+	 * Sous-clé dédiée à un usage ('enc' ou 'mac').
+	 *
+	 * @param string $use Usage.
+	 * @return string
+	 */
+	private static function subkey( $use ) {
+		return hash_hmac( 'sha256', 'leiho-secrets-' . $use, self::key(), true );
+	}
+
 	private static function encrypt( $plain ) {
-		$key    = self::key();
 		$iv     = random_bytes( 16 );
-		$cipher = openssl_encrypt( $plain, 'aes-256-cbc', $key, OPENSSL_RAW_DATA, $iv );
-		$mac    = hash_hmac( 'sha256', $iv . $cipher, $key, true );
-		return base64_encode( $iv . $mac . $cipher );
+		$cipher = openssl_encrypt( $plain, 'aes-256-cbc', self::subkey( 'enc' ), OPENSSL_RAW_DATA, $iv );
+		$mac    = hash_hmac( 'sha256', $iv . $cipher, self::subkey( 'mac' ), true );
+		return self::PREFIX . base64_encode( $iv . $mac . $cipher );
 	}
 
 	private static function decrypt( $blob ) {
-		$plain = self::decrypt_with( $blob, self::key() );
-		return null !== $plain ? $plain : self::decrypt_with( $blob, self::key( true ) );
+		$blob = (string) $blob;
+		if ( 0 === strpos( $blob, self::PREFIX ) ) {
+			return self::decrypt_with( substr( $blob, strlen( self::PREFIX ) ), self::subkey( 'enc' ), self::subkey( 'mac' ) );
+		}
+		// Ancien format : une seule clé (Leiho, puis Okno).
+		$plain = self::decrypt_with( $blob, self::key(), self::key() );
+		return null !== $plain ? $plain : self::decrypt_with( $blob, self::key( true ), self::key( true ) );
 	}
 
-	private static function decrypt_with( $blob, $key ) {
+	private static function decrypt_with( $blob, $enc_key, $mac_key ) {
 		$raw = base64_decode( $blob, true );
 		if ( false === $raw || strlen( $raw ) < 49 ) {
 			return null;
@@ -90,17 +116,17 @@ class Leiho_Secrets {
 		$mac    = substr( $raw, 16, 32 );
 		$cipher = substr( $raw, 48 );
 
-		if ( ! hash_equals( hash_hmac( 'sha256', $iv . $cipher, $key, true ), $mac ) ) {
+		if ( ! hash_equals( hash_hmac( 'sha256', $iv . $cipher, $mac_key, true ), $mac ) ) {
 			return null;
 		}
 
-		$plain = openssl_decrypt( $cipher, 'aes-256-cbc', $key, OPENSSL_RAW_DATA, $iv );
+		$plain = openssl_decrypt( $cipher, 'aes-256-cbc', $enc_key, OPENSSL_RAW_DATA, $iv );
 		return false === $plain ? null : $plain;
 	}
 
 	/**
-	 * Rechiffre avec la clé Leiho les secrets hérités d'Okno (migration). Un
-	 * secret illisible avec les deux clés (salts changés) est laissé tel quel :
+	 * Rechiffre au format actuel les secrets d'un format plus ancien (Okno,
+	 * ou Leiho à clé unique). Un secret illisible (salts changés) est laissé tel quel :
 	 * l'écran des réglages le signale déjà comme « illisible ».
 	 *
 	 * @return int Nombre de secrets rechiffrés.
@@ -112,10 +138,10 @@ class Leiho_Secrets {
 		}
 		$count = 0;
 		foreach ( $secrets as $name => $blob ) {
-			if ( ! is_string( $blob ) || '' === $blob || null !== self::decrypt_with( $blob, self::key() ) ) {
+			if ( ! is_string( $blob ) || '' === $blob || 0 === strpos( $blob, self::PREFIX ) ) {
 				continue;
 			}
-			$plain = self::decrypt_with( $blob, self::key( true ) );
+			$plain = self::decrypt( $blob );
 			if ( null !== $plain ) {
 				$secrets[ $name ] = self::encrypt( $plain );
 				$count++;

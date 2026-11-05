@@ -30,7 +30,11 @@ All notable changes to Leiho (called Okno until 1.0.0-beta.11) are documented he
 - **Data**: changing a field's type runs the new type's sanitizing (a code field can't become a script in rich text or a `javascript:` link); ACF sub-fields Leiho doesn't edit are filtered on save; `l10n` is reserved as a collection id; uninstalling also drops the translations table.
 - **Publishing**: saving a draft no longer starts a build (only published content, or content leaving the site, does), and the minimum time between two builds is 15 seconds.
 - **Outgoing requests**: the site, build hook and Coolify addresses can no longer point at private or local network addresses outside a local or development environment (filter `leiho_allow_private_urls`), build hooks and Coolify are called without following redirects, and the Coolify address must be https. The GitHub repository setting must look like `owner/name`.
-- **Updates**: only an archive from the official repository's GitHub releases is accepted.
+- **Signed updates**: every release archive is signed (Ed25519) by the release workflow, and Leiho checks the signature against the public key it ships before WordPress installs an update; an unsigned or altered archive is refused. Only archives from the official repository's GitHub releases are considered. The release workflow pins its actions by commit and its npm version.
+- **Concurrent edits**: one save at a time per entry, with the revision checked under that lock (two people editing two rows of the same list no longer overwrite each other); the editor's save route requires the revision.
+- **AI requests**: the per-user limit is counted under a lock (parallel requests no longer slip through) and a site-wide limit is added (120 per minute, filter `leiho_ai_site_rate_limit`).
+- **Editing routes** only work on the content types Leiho edits (settings and Collections), and *Duplicate* only copies public meta, the featured image, the template and ACF field references (filter `leiho_duplicate_meta`), never the original's own address.
+- **Secrets** are encrypted and authenticated with two separate keys derived from the WordPress salts; older secrets are read and re-encrypted on first use.
 - **Pickers** (parent page, references) no longer list the titles of other authors' drafts or private entries, and a parent must be readable.
 - **Change log**: entries are kept 180 days (filter `leiho_activity_retention_days`), anonymized when their user is deleted, and erased with WordPress's personal data eraser.
 

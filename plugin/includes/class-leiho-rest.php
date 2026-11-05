@@ -249,16 +249,35 @@ class Leiho_Rest {
 	}
 
 	public function can_edit_post( WP_REST_Request $request ) {
-		return current_user_can( 'edit_post', (int) $request['id'] );
+		return self::managed( (int) $request['id'] ) && current_user_can( 'edit_post', (int) $request['id'] );
 	}
 
 	public function can_delete_post( WP_REST_Request $request ) {
-		return current_user_can( 'delete_post', (int) $request['id'] );
+		return self::managed( (int) $request['id'] ) && current_user_can( 'delete_post', (int) $request['id'] );
+	}
+
+	/**
+	 * Contenu d'un type que Leiho édite (réglages, Leiho Collections) : les
+	 * routes d'édition ne servent pas aux autres (blocs réutilisables, menus,
+	 * médias…), même pour qui pourrait les modifier ailleurs.
+	 *
+	 * @param int $post_id Post.
+	 * @return bool
+	 */
+	public static function managed( $post_id ) {
+		$type = get_post_type( $post_id );
+		if ( ! $type ) {
+			return false;
+		}
+		if ( in_array( $type, (array) Leiho_Plugin::settings()['post_types'], true ) ) {
+			return true;
+		}
+		return class_exists( 'Leiho_Collections' ) && (bool) Leiho_Collections::for_post_type( $type );
 	}
 
 	public function can_duplicate_post( WP_REST_Request $request ) {
 		$post = get_post( (int) $request['id'] );
-		if ( ! $post || ! current_user_can( 'edit_post', $post->ID ) ) {
+		if ( ! $post || ! self::managed( $post->ID ) || ! current_user_can( 'edit_post', $post->ID ) ) {
 			return false;
 		}
 		return $this->can_create_type( $post->post_type );
@@ -653,6 +672,33 @@ class Leiho_Rest {
 		return rest_ensure_response( $this->post_item( get_post( $post_id ), new Leiho_Url_Mapper() ) );
 	}
 
+	/** Métas protégées copiées par « Dupliquer ». */
+	const COPY_PROTECTED_META = array( '_thumbnail_id', '_wp_page_template' );
+
+	/**
+	 * Une méta de l'original est-elle copiée sur la copie ?
+	 *
+	 * @param string $key  Clé.
+	 * @param array  $meta Toutes les métas de l'original.
+	 * @return bool
+	 */
+	public static function copyable_meta( $key, $meta ) {
+		$public = substr( $key, 1 );
+		$value  = isset( $meta[ $key ][0] ) ? (string) $meta[ $key ][0] : '';
+		$copy   = '_' !== substr( $key, 0, 1 )
+			|| in_array( $key, self::COPY_PROTECTED_META, true )
+			// Référence ACF : « _nom » vaut la field key du champ « nom ».
+			|| ( '' !== $public && isset( $meta[ $public ] ) && 1 === preg_match( '/^field_[A-Za-z0-9_]+$/', $value ) );
+		/**
+		 * Copier une méta de l'original sur sa copie (« Dupliquer ») : ajouter
+		 * les métas protégées d'une extension SEO, par exemple.
+		 *
+		 * @param bool   $copy Copiée ou non.
+		 * @param string $key  Clé.
+		 */
+		return (bool) apply_filters( 'leiho_duplicate_meta', $copy, $key );
+	}
+
 	/**
 	 * POST /posts/{id}/duplicate : copie le contenu, ses métas et ses champs ACF.
 	 */
@@ -682,13 +728,16 @@ class Leiho_Rest {
 			return $copy_id;
 		}
 
-		// Métas (ACF compris : les valeurs et leurs références de field key).
-		foreach ( get_post_meta( $post_id ) as $key => $values ) {
-			if ( '_edit_lock' === $key || '_edit_last' === $key || '_leiho_rev' === $key ) {
+		// Métas : les publiques (valeurs ACF comprises), et parmi les protégées
+		// seulement celles qui font le contenu (image, modèle, références ACF).
+		// Jamais l'adresse propre de l'original, son verrou ou son historique.
+		$meta = get_post_meta( $post_id );
+		foreach ( $meta as $key => $values ) {
+			if ( ! self::copyable_meta( (string) $key, $meta ) ) {
 				continue;
 			}
-			foreach ( $values as $value ) {
-				add_post_meta( $copy_id, $key, maybe_unserialize( $value ) );
+			foreach ( get_post_meta( $post_id, $key, false ) as $value ) {
+				add_post_meta( $copy_id, $key, $value );
 			}
 		}
 
@@ -749,12 +798,24 @@ class Leiho_Rest {
 			return new WP_Error( 'leiho_bad_request', __( 'Nothing to save.', 'leiho' ), array( 'status' => 400 ) );
 		}
 
-		// Refus d'écraser une version plus récente (autre éditeur, autre onglet).
+		// Refus d'écraser une version plus récente (autre éditeur, autre onglet) :
+		// l'empreinte lue à l'ouverture est obligatoire, et vérifiée sous le verrou.
 		$body     = $request->get_json_params();
 		$revision = isset( $body['revision'] ) ? (string) $body['revision'] : '';
-		$current  = Leiho_Schema::revision( $post_id );
-		if ( '' !== $revision && $revision !== $current ) {
-			$fresh = ( new Leiho_Schema( $this->plugin ) )->get( $post_id );
+		if ( '' === $revision ) {
+			return new WP_Error( 'leiho_bad_request', __( 'The revision of the content you edited is missing. Reload and try again.', 'leiho' ), array( 'status' => 400 ) );
+		}
+
+		// Lock : un deploy déclenché pendant l'écriture serait un état intermédiaire.
+		set_transient( Leiho_Deploy_Manager::TRANSIENT_SAVE, 1, 30 );
+
+		$schema_service = new Leiho_Schema( $this->plugin );
+		$result         = $schema_service->save( $post_id, $values, $revision );
+
+		delete_transient( Leiho_Deploy_Manager::TRANSIENT_SAVE );
+
+		if ( ! empty( $result['conflict'] ) ) {
+			$fresh = $schema_service->get( $post_id );
 			return new WP_Error(
 				'leiho_conflict',
 				__( 'This content was changed elsewhere since you opened it. Reload to get the latest version.', 'leiho' ),
@@ -764,14 +825,6 @@ class Leiho_Rest {
 				)
 			);
 		}
-
-		// Lock : un deploy déclenché pendant l'écriture serait un état intermédiaire.
-		set_transient( Leiho_Deploy_Manager::TRANSIENT_SAVE, 1, 30 );
-
-		$schema_service = new Leiho_Schema( $this->plugin );
-		$result         = $schema_service->save( $post_id, $values );
-
-		delete_transient( Leiho_Deploy_Manager::TRANSIENT_SAVE );
 
 		Leiho_Plugin::bump_usage( 'save' );
 

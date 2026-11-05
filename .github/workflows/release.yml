@@ -15,9 +15,9 @@ jobs:
   release:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
 
-      - uses: actions/setup-node@v5
+      - uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444 # v5.0.0
         with:
           node-version: 24
           registry-url: https://registry.npmjs.org
@@ -33,6 +33,23 @@ jobs:
 
       - name: Build zip
         run: ./scripts/build-zip.sh
+
+      # Every site checks this signature before installing an update
+      # (Leiho_Updater::SIGNING_KEY). The private key only lives in the
+      # LEIHO_SIGNING_KEY secret: no secret, no release.
+      - name: Sign zip
+        env:
+          LEIHO_SIGNING_KEY: ${{ secrets.LEIHO_SIGNING_KEY }}
+        run: |
+          if [ -z "$LEIHO_SIGNING_KEY" ]; then
+            echo "The LEIHO_SIGNING_KEY secret is missing: sites would refuse this update." >&2
+            exit 1
+          fi
+          ZIP="dist/leiho-$VERSION.zip"
+          php -r 'file_put_contents($argv[1] . ".sig", base64_encode(sodium_crypto_sign_detached(file_get_contents($argv[1]), base64_decode(getenv("LEIHO_SIGNING_KEY"), true))));' "$ZIP"
+          # Checked with the public key shipped in the plugin: a wrong secret fails here, not on every site.
+          PUB="$(grep -o "SIGNING_KEY = '[^']*'" plugin/includes/class-leiho-updater.php | cut -d"'" -f2)"
+          php -r 'exit(sodium_crypto_sign_verify_detached(base64_decode(file_get_contents($argv[1] . ".sig")), file_get_contents($argv[1]), base64_decode($argv[2])) ? 0 : 1);' "$ZIP" "$PUB"
 
       - name: Release notes
         run: |
@@ -52,12 +69,13 @@ jobs:
           # leiho.zip pour un lien de téléchargement stable :
           # https://github.com/<repo>/releases/latest/download/leiho.zip
           cp "dist/leiho-$VERSION.zip" dist/leiho.zip
+          cp "dist/leiho-$VERSION.zip.sig" dist/leiho.zip.sig
           # Toute version est marquée « latest » (bêta comprise) : une
           # pré-release est exclue de /releases/latest, le lien casserait.
           if gh release view "$GITHUB_REF_NAME" > /dev/null 2>&1; then
-            gh release upload "$GITHUB_REF_NAME" "dist/leiho-$VERSION.zip" dist/leiho.zip --clobber
+            gh release upload "$GITHUB_REF_NAME" "dist/leiho-$VERSION.zip" "dist/leiho-$VERSION.zip.sig" dist/leiho.zip dist/leiho.zip.sig --clobber
           else
-            gh release create "$GITHUB_REF_NAME" "dist/leiho-$VERSION.zip" dist/leiho.zip \
+            gh release create "$GITHUB_REF_NAME" "dist/leiho-$VERSION.zip" "dist/leiho-$VERSION.zip.sig" dist/leiho.zip dist/leiho.zip.sig \
               --title "Leiho $VERSION" --notes-file notes.md --latest
           fi
 
@@ -65,7 +83,7 @@ jobs:
         working-directory: bridge
         run: |
           # Trusted Publishing needs npm 11.5.1 or later.
-          npm install -g npm@latest
+          npm install -g npm@11.21.2
           TAG=latest
           if npm view "$(node -p "require('./package.json').name")@$VERSION" version > /dev/null 2>&1; then
             echo "Already on npm, skipping."

@@ -634,14 +634,16 @@ class Leiho_AI_Abilities {
 		// Le statut, l'auteur et la date ne changent jamais par ici.
 		unset( $values['_status'], $values['_author'], $values['_date'] );
 
-		$revision = isset( $input['revision'] ) ? (string) $input['revision'] : '';
-		if ( '' !== $revision && Leiho_Schema::revision( $id ) !== $revision ) {
-			return new WP_Error( 'leiho_conflict', __( 'This content was changed elsewhere since you read it. Read it again with leiho/get-entry.', 'leiho' ), array( 'status' => 409 ) );
-		}
+		// Empreinte vérifiée sous le verrou d'enregistrement.
+		$revision = isset( $input['revision'] ) && '' !== (string) $input['revision'] ? (string) $input['revision'] : null;
 
 		set_transient( Leiho_Deploy_Manager::TRANSIENT_SAVE, 1, 30 );
-		$result = self::save_filtered( $id, $values );
+		$result = self::save_filtered( $id, $values, $revision );
 		delete_transient( Leiho_Deploy_Manager::TRANSIENT_SAVE );
+
+		if ( ! empty( $result['conflict'] ) ) {
+			return new WP_Error( 'leiho_conflict', __( 'This content was changed elsewhere since you read it. Read it again with leiho/get-entry.', 'leiho' ), array( 'status' => 409 ) );
+		}
 
 		if ( $result['saved'] ) {
 			Leiho_Activity::record_ai(
@@ -960,18 +962,19 @@ class Leiho_AI_Abilities {
 	 * pas écrits (brouillons, pages web) : il ne doit pas pouvoir y glisser
 	 * de script avec les droits d'un administrateur.
 	 *
-	 * @param int   $post_id Entrée.
-	 * @param array $values  Valeurs.
+	 * @param int         $post_id  Entrée.
+	 * @param array       $values   Valeurs.
+	 * @param string|null $revision Empreinte attendue.
 	 * @return array
 	 */
-	private static function save_filtered( $post_id, $values ) {
+	private static function save_filtered( $post_id, $values, $revision = null ) {
 		$deny = static function ( $caps ) {
 			$caps['unfiltered_html'] = false;
 			return $caps;
 		};
 		add_filter( 'user_has_cap', $deny );
 		try {
-			return ( new Leiho_Schema( Leiho_Plugin::instance() ) )->save( $post_id, $values );
+			return ( new Leiho_Schema( Leiho_Plugin::instance() ) )->save( $post_id, $values, $revision );
 		} finally {
 			remove_filter( 'user_has_cap', $deny );
 		}

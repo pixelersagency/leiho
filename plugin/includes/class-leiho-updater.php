@@ -26,10 +26,20 @@ class Leiho_Updater {
 	const OPTION    = 'leiho_update_last_release';
 	const SLUG      = 'leiho';
 
+	/**
+	 * Clé publique Ed25519 des releases. Chaque leiho.zip est publié avec
+	 * leiho.zip.sig, signé par le workflow de release avec la clé privée
+	 * correspondante (secret GitHub, jamais dans le dépôt). Une archive dont
+	 * la signature manque ou ne correspond pas n'est pas installée : un dépôt
+	 * ou un compte GitHub compromis ne suffit pas à pousser du code sur les sites.
+	 */
+	const SIGNING_KEY = 'ZOkhOTE4TsBPfUo9N3utm8ejHv1H57H1aVKCWOXHf5I=';
+
 	public static function init() {
 		add_filter( 'update_plugins_github.com', array( __CLASS__, 'check' ), 10, 3 );
 		add_filter( 'plugins_api', array( __CLASS__, 'details' ), 10, 3 );
 		add_filter( 'upgrader_source_selection', array( __CLASS__, 'fix_folder' ), 10, 4 );
+		add_filter( 'upgrader_pre_download', array( __CLASS__, 'download_verified' ), 10, 3 );
 		add_action( 'upgrader_process_complete', array( __CLASS__, 'flush' ) );
 		// « Vérifier à nouveau » (Tableau de bord → Mises à jour) : sans ça,
 		// la release gardée en cache masquait une version publiée entre-temps.
@@ -65,6 +75,79 @@ class Leiho_Updater {
 	}
 
 	/**
+	 * Archive d'une release officielle ? (adresse des releases du dépôt)
+	 *
+	 * @param string $url Adresse.
+	 * @return bool
+	 */
+	public static function is_release_package( $url ) {
+		$url = (string) $url;
+		return 0 === strpos( $url, 'https://github.com/' . self::REPO . '/releases/download/' ) && '/' . self::ASSET === substr( $url, -strlen( '/' . self::ASSET ) );
+	}
+
+	/**
+	 * Télécharge une mise à jour de Leiho et vérifie sa signature avant que
+	 * WordPress ne l'installe. Les autres paquets ne sont pas touchés.
+	 *
+	 * @param false|string|WP_Error $reply   Réponse d'un filtre précédent.
+	 * @param string                $package Adresse du paquet.
+	 * @return false|string|WP_Error Chemin du fichier vérifié, ou erreur.
+	 */
+	public static function download_verified( $reply, $package ) {
+		if ( false !== $reply || ! self::is_release_package( $package ) ) {
+			return $reply;
+		}
+		/**
+		 * Vérifier la signature des mises à jour de Leiho. À ne couper que pour
+		 * tester une archive construite à la main.
+		 *
+		 * @param bool $verify Défaut true.
+		 */
+		if ( ! apply_filters( 'leiho_verify_updates', true ) ) {
+			return $reply;
+		}
+		if ( ! function_exists( 'download_url' ) ) {
+			require_once ABSPATH . 'wp-admin/includes/file.php';
+		}
+
+		$signature = wp_safe_remote_get( $package . '.sig', array( 'timeout' => 30 ) );
+		if ( is_wp_error( $signature ) || 200 !== wp_remote_retrieve_response_code( $signature ) ) {
+			return new WP_Error( 'leiho_update_unsigned', __( 'This Leiho update has no signature, so it was not installed. Download it from the Leiho releases on GitHub if you trust it.', 'leiho' ) );
+		}
+
+		$file = download_url( $package, 300 );
+		if ( is_wp_error( $file ) ) {
+			return $file;
+		}
+		if ( ! self::verify( (string) file_get_contents( $file ), wp_remote_retrieve_body( $signature ) ) ) { // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents -- Fichier local téléchargé.
+			wp_delete_file( $file );
+			return new WP_Error( 'leiho_update_bad_signature', __( 'The signature of this Leiho update doesn’t match, so it was not installed. Please report it at github.com/pixelersagency/leiho.', 'leiho' ) );
+		}
+		return $file;
+	}
+
+	/**
+	 * Signature Ed25519 (base64) d'une archive, avec la clé publique de Leiho.
+	 *
+	 * @param string      $contents  Contenu de l'archive.
+	 * @param string      $signature Signature en base64.
+	 * @param string|null $key       Clé publique en base64 (tests) ; défaut SIGNING_KEY.
+	 * @return bool
+	 */
+	public static function verify( $contents, $signature, $key = null ) {
+		$sig = base64_decode( trim( (string) $signature ), true );
+		$pub = base64_decode( null === $key ? self::SIGNING_KEY : $key, true );
+		if ( false === $sig || false === $pub || 64 !== strlen( $sig ) || 32 !== strlen( $pub ) || ! function_exists( 'sodium_crypto_sign_verify_detached' ) ) {
+			return false;
+		}
+		try {
+			return sodium_crypto_sign_verify_detached( $sig, (string) $contents, $pub );
+		} catch ( Exception $e ) {
+			return false;
+		}
+	}
+
+	/**
 	 * Traduit une release GitHub en réponse de mise à jour WordPress. Toujours
 	 * renvoyée, même si la version n'est pas plus récente : WordPress compare
 	 * lui-même, et range le plugin dans « à jour » (utile pour le bouton de
@@ -80,7 +163,7 @@ class Leiho_Updater {
 		$package = '';
 		foreach ( (array) ( isset( $release['assets'] ) ? $release['assets'] : array() ) as $asset ) {
 			// Seulement une archive publiée sur les releases du dépôt officiel.
-			if ( isset( $asset['name'], $asset['browser_download_url'] ) && self::ASSET === $asset['name'] && 0 === strpos( (string) $asset['browser_download_url'], 'https://github.com/' . self::REPO . '/releases/download/' ) ) {
+			if ( isset( $asset['name'], $asset['browser_download_url'] ) && self::ASSET === $asset['name'] && self::is_release_package( $asset['browser_download_url'] ) ) {
 				$package = $asset['browser_download_url'];
 			}
 		}

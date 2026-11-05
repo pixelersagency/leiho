@@ -84,6 +84,8 @@ function current_user_can( $cap, $id = 0 ) {
 function get_current_user_id() { return 7; }
 function get_option( $k, $d = false ) { return array_key_exists( $k, $GLOBALS['options'] ) ? $GLOBALS['options'][ $k ] : $d; }
 function update_option( $k, $v, $a = null ) { $GLOBALS['options'][ $k ] = $v; return true; }
+function add_option( $k, $v = '', $d = '', $a = null ) { if ( array_key_exists( $k, $GLOBALS['options'] ) ) { return false; } $GLOBALS['options'][ $k ] = $v; return true; }
+if ( ! function_exists( 'delete_option' ) ) { function delete_option( $k ) { unset( $GLOBALS['options'][ $k ] ); return true; } }
 function get_transient( $k ) { return isset( $GLOBALS['transients'][ $k ] ) ? $GLOBALS['transients'][ $k ] : false; }
 function set_transient( $k, $v, $t = 0 ) { $GLOBALS['transients'][ $k ] = $v; return true; }
 function delete_transient( $k ) { unset( $GLOBALS['transients'][ $k ] ); }
@@ -130,7 +132,13 @@ class Leiho_Schema {
 	public function __construct( $p = null ) {}
 	public static $by_locale = array();
 	public function get( $id ) { return isset( self::$by_locale[ Leiho_I18n::current() ] ) ? self::$by_locale[ Leiho_I18n::current() ] : self::$fixture; }
-	public function save( $id, $values ) { self::$saved[ $id ] = $values; return array( 'saved' => array_keys( $values ), 'errors' => array(), 'schema' => null ); }
+	public function save( $id, $values, $revision = null ) {
+		if ( null !== $revision && self::revision( $id ) !== $revision ) {
+			return array( 'saved' => array(), 'errors' => array(), 'schema' => null, 'conflict' => true );
+		}
+		self::$saved[ $id ] = $values;
+		return array( 'saved' => array_keys( $values ), 'errors' => array(), 'schema' => null );
+	}
 	public static function revision( $id ) { return 'rev1'; }
 }
 /** Langues : en par défaut, fr déclarée. */
@@ -565,7 +573,12 @@ check( 'débit : deux requêtes passent, la troisième non', true === $a && true
 check( 'débit : par utilisateur', true === Leiho_AI::throttle( 8 ) );
 $GLOBALS['filters']['leiho_ai_rate_limit'] = array( static function () { return array( 'requests' => 0 ); } );
 check( 'débit : 0 = aucune limite', true === Leiho_AI::throttle( 7 ) );
-unset( $GLOBALS['filters']['leiho_ai_rate_limit'] );
+$GLOBALS['filters']['leiho_ai_site_rate_limit'] = array( static function () { return array( 'requests' => 3, 'window' => 60 ); } );
+$GLOBALS['transients'] = array();
+$site = array( Leiho_AI::throttle( 21 ), Leiho_AI::throttle( 22 ), Leiho_AI::throttle( 23 ), Leiho_AI::throttle( 24 ) );
+check( 'débit : limite du site, tous utilisateurs confondus', true === $site[0] && true === $site[2] && is_wp_error( $site[3] ), $site );
+check( 'débit : verrou rendu après chaque requête', ! array_key_exists( 'leiho_ai_rl_lock', $GLOBALS['options'] ) );
+unset( $GLOBALS['filters']['leiho_ai_rate_limit'], $GLOBALS['filters']['leiho_ai_site_rate_limit'] );
 $GLOBALS['transients'] = array();
 
 /* ---------------------------------------------------------------------
