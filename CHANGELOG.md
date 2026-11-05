@@ -20,6 +20,8 @@ All notable changes to Leiho (called Okno until 1.0.0-beta.11) are documented he
 
 ### Fixed
 
+- Moving between Leiho's screens no longer flashes: the menu opens in its saved state before the page is painted (it used to start collapsed and slide open on every page), and supporting browsers cross-fade from one screen to the next with the menu standing still (off with reduced motion).
+- Field type badges in Collections show the type's icon instead of two letters of its translated name.
 - Translations: a row added to a list or flexible field of the original after it was translated can now be translated too (it failed with `row_not_found`).
 
 ### Security

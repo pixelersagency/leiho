@@ -267,6 +267,42 @@ body.leiho-app-body #wpbody-content {
 	overflow: hidden auto;
 }
 
+/* Premier affichage : le menu arrive dans son état, sans glisser. */
+.leiho-app--booting .leiho-nav,
+.leiho-app--booting .leiho-nav * {
+	transition: none !important;
+}
+
+/*
+ * Passage d'un écran de Leiho à l'autre : le navigateur garde la page
+ * affichée jusqu'à ce que la suivante soit prête, puis fond l'une dans
+ * l'autre ; le menu ne bouge pas. Sans prise en charge (Firefox), rien ne
+ * change.
+ */
+@view-transition {
+	navigation: auto;
+}
+
+.leiho-nav {
+	view-transition-name: leiho-nav;
+}
+
+::view-transition-old(root),
+::view-transition-new(root) {
+	animation-duration: 0.14s;
+	animation-timing-function: ease-out;
+}
+
+::view-transition-group(leiho-nav) {
+	animation-duration: 0s;
+}
+
+@media (prefers-reduced-motion: reduce) {
+	@view-transition {
+		navigation: none;
+	}
+}
+
 .leiho-nav__brand {
 	display: flex;
 	align-items: center;

@@ -459,8 +459,15 @@ class Leiho_App {
 		$embedded = in_array( $view, array( 'editor', 'collections' ), true );
 		$user     = wp_get_current_user();
 		?>
-		<div id="leiho-app" class="leiho-app leiho-app--collapsed<?php echo $embedded ? ' leiho-app--embedded' : ''; ?>" data-view="<?php echo esc_attr( $view ); ?>" data-theme="<?php echo esc_attr( self::theme() ); ?>">
+		<div id="leiho-app" class="leiho-app leiho-app--collapsed leiho-app--booting<?php echo $embedded ? ' leiho-app--embedded' : ''; ?>" data-view="<?php echo esc_attr( $view ); ?>" data-theme="<?php echo esc_attr( self::theme() ); ?>">
 			<?php self::print_theme_sync( 'leiho-app' ); ?>
+			<?php if ( ! $embedded ) : ?>
+			<script>
+			// Menu déplié si l'utilisateur l'a choisi, avant le premier affichage :
+			// sinon chaque page s'ouvrait repliée puis se dépliait, et tout glissait.
+			( function () { try { if ( 'expanded' === window.localStorage.getItem( 'leiho-nav' ) ) { document.getElementById( 'leiho-app' ).classList.remove( 'leiho-app--collapsed' ); } } catch ( e ) {} } )();
+			</script>
+			<?php endif; ?>
 			<a class="leiho-skip" href="#leiho-view"><?php esc_html_e( 'Skip to content', 'leiho' ); ?></a>
 
 			<nav id="leiho-nav" class="leiho-nav" aria-label="<?php esc_attr_e( 'Leiho navigation', 'leiho' ); ?>">

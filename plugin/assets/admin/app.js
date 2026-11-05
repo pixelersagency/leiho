@@ -497,6 +497,12 @@
 	// Rail d'icônes par défaut (les volets ont besoin de place) ; l'éditeur
 	// reste replié quel que soit le choix enregistré.
 	setCollapsed( embedded || 'expanded' !== storage( 'leiho-nav' ), false );
+	// Animations du menu seulement après le premier affichage (pas au chargement).
+	window.requestAnimationFrame( function () {
+		window.requestAnimationFrame( function () {
+			root.classList.remove( 'leiho-app--booting' );
+		} );
+	} );
 
 	if ( collapseBtn ) {
 		collapseBtn.addEventListener( 'click', function () {
