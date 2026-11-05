@@ -287,7 +287,8 @@ class Leiho_Updater {
 	 * @return string Version de WordPress, ou '' si introuvable.
 	 */
 	private static function tested_up_to( $tag ) {
-		$response = wp_remote_get(
+		// Lecture du readme.txt de la release (version de WordPress testée), pas un contenu chargé dans les pages.
+		$response = wp_remote_get( // phpcs:ignore PluginCheck.CodeAnalysis.Offloading.OffloadedContent
 			'https://raw.githubusercontent.com/' . self::REPO . '/' . rawurlencode( $tag ) . '/plugin/readme.txt',
 			array(
 				'timeout' => 10,

@@ -111,3 +111,6 @@ jobs:
       - uses: WordPress/plugin-check-action@10857da14b6c2246d15402b3e69f777edcf8c12e # v1.1.9
         with:
           build-dir: dist/plugin/leiho
+          # Leiho is distributed from GitHub with its own (signed) updates, which
+          # WordPress.org forbids; the .org build will leave the updater out.
+          ignore-codes: plugin_updater_detected

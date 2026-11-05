@@ -221,8 +221,8 @@ class Leiho_AI_Brand {
 	 */
 	private static function text( $text, $max, $multiline = false ) {
 		$text = $multiline
-			? ( function_exists( 'sanitize_textarea_field' ) ? sanitize_textarea_field( $text ) : trim( strip_tags( $text ) ) )
-			: ( function_exists( 'sanitize_text_field' ) ? sanitize_text_field( $text ) : trim( strip_tags( $text ) ) );
+			? sanitize_textarea_field( $text )
+			: sanitize_text_field( $text );
 		if ( function_exists( 'mb_substr' ) ) {
 			return mb_substr( $text, 0, $max, 'UTF-8' );
 		}

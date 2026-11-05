@@ -847,7 +847,7 @@ class Leiho_AI_Prompt {
 		if ( false !== strpos( $text, '<' ) ) {
 			$text = (string) preg_replace( '#<(script|style)\b.*?</\1>#is', '', $text );
 			$text = (string) preg_replace( '#<br\s*/?>|</(p|h[1-6]|li|blockquote|div)>#i', "\n", $text );
-			$text = strip_tags( $text );
+			$text = wp_strip_all_tags( $text );
 		}
 		$text = html_entity_decode( $text, ENT_QUOTES | ENT_HTML5, 'UTF-8' );
 		if ( $keep_lines ) {

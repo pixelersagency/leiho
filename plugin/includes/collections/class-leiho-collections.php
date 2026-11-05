@@ -347,13 +347,12 @@ class Leiho_Collections {
 		}
 		$ids = get_posts(
 			array(
-				'post_type'        => $id,
-				'post_status'      => array( 'publish', 'draft', 'pending', 'private', 'future' ),
-				'posts_per_page'   => 1,
-				'orderby'          => 'ID',
-				'order'            => 'ASC',
-				'fields'           => 'ids',
-				'suppress_filters' => true,
+				'post_type'      => $id,
+				'post_status'    => array( 'publish', 'draft', 'pending', 'private', 'future' ),
+				'posts_per_page' => 1,
+				'orderby'        => 'ID',
+				'order'          => 'ASC',
+				'fields'         => 'ids',
 			)
 		);
 		self::$entries[ $id ] = $ids ? (int) $ids[0] : 0;

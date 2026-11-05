@@ -123,7 +123,7 @@ class Leiho_Github_Preflight {
 				if ( isset( $item['state'] ) && 'active' !== $item['state'] ) {
 					return self::line( 'warning', sprintf( /* translators: 1: workflow file, 2: workflow state. */ __( 'Workflow “%1$s” found but disabled (state: %2$s).', 'leiho' ), $workflow, $item['state'] ) );
 				}
-				return self::line( 'ok', sprintf( __( 'Workflow “%s” found and active.', 'leiho' ), $workflow ) );
+				return self::line( 'ok', sprintf( /* translators: %s: workflow file. */ __( 'Workflow “%s” found and active.', 'leiho' ), $workflow ) );
 			}
 		}
 
