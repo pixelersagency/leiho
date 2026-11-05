@@ -7,6 +7,15 @@
 
 <h1 align="center">Edit the real site.</h1>
 
+<p align="center">
+  <a href="https://leiho.dev/try"><b>▶ Try it in your browser</b></a> · no install, no sign-up<br>
+  <a href="https://leiho.dev">leiho.dev</a> · <a href="https://leiho.dev/get/leiho.zip">Download leiho.zip</a> · <a href="https://leiho.dev/docs">Docs</a>
+</p>
+
+<p align="center">
+  <a href="https://leiho.dev/try"><img src=".github/assets/leiho-demo.gif" alt="Leiho editor: click a heading on the real site in wp-admin, type, and publish" width="560"></a>
+</p>
+
 
 **Visual editing for headless WordPress.** Your editors see the real front end — Next.js, Astro, Remix, Vite, Nuxt, SvelteKit or plain HTML — inside wp-admin. They click a heading, change it, watch it update live, save, and publish. Define your content types in Leiho, or keep your existing ACF fields: either way WordPress stays the single source of truth, with no page builder and no lock-in.
 
@@ -14,7 +23,7 @@
 
 [Français](README.fr.md) · [Changelog](CHANGELOG.md) · [Bridge package](bridge/) · [Framework examples](examples/)
 
-> **Status: 1.0 beta.** The interface is in English and French (it follows the WordPress site language).
+> **Status: 1.0.0-rc.1 (release candidate).** The interface is in English and French (it follows the WordPress site language).
 
 ---
 
@@ -54,7 +63,7 @@ Headless WordPress gives developers a modern front end, but it takes the "what y
 
 ### 1. Install the plugin
 
-[Download `leiho.zip`](https://github.com/pixelersagency/leiho/releases/latest/download/leiho.zip) (latest version, also listed on the [releases page](https://github.com/pixelersagency/leiho/releases)) and upload it in **Plugins → Add New → Upload Plugin**. Later versions show up in **Plugins** like any other update. Requires WordPress 6.0+, PHP 7.4+ and [ACF](https://www.advancedcustomfields.com/) (free or Pro). Without ACF, only the title and featured image are editable.
+[Download `leiho.zip`](https://github.com/pixelersagency/leiho/releases/latest/download/leiho.zip) (latest version, also listed on the [releases page](https://github.com/pixelersagency/leiho/releases)) and upload it in **Plugins → Add New → Upload Plugin**. Later versions show up in **Plugins** like any other update. Requires WordPress 6.0+ and PHP 7.4+. [ACF](https://www.advancedcustomfields.com/) (free or Pro) is optional: use your existing ACF fields, or define your content in [Leiho Collections](#collections) instead.
 
 ### 2. Point it at your site
 

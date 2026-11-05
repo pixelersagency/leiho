@@ -7,6 +7,15 @@
 
 <h1 align="center">Modifiez le vrai site.</h1>
 
+<p align="center">
+  <a href="https://leiho.dev/fr/try"><b>▶ Essayez-le dans votre navigateur</b></a> · sans installation ni inscription<br>
+  <a href="https://leiho.dev/fr">leiho.dev</a> · <a href="https://leiho.dev/get/leiho.zip">Télécharger leiho.zip</a> · <a href="https://leiho.dev/fr/docs">Documentation</a>
+</p>
+
+<p align="center">
+  <a href="https://leiho.dev/fr/try"><img src=".github/assets/leiho-demo.gif" alt="Éditeur Leiho : cliquer sur un titre du vrai site dans wp-admin, le modifier et publier" width="560"></a>
+</p>
+
 
 **L'édition visuelle pour WordPress headless.** Vos rédacteurs voient le vrai site (Next.js, Astro, Remix, Vite, Nuxt, SvelteKit ou HTML simple) directement dans wp-admin. Ils cliquent sur un titre, le modifient, voient le changement en direct, enregistrent et publient. Définissez vos types de contenu dans Leiho, ou gardez vos champs ACF : dans les deux cas WordPress reste l'unique source de vérité, sans constructeur de pages ni enfermement.
 
@@ -14,7 +23,7 @@
 
 [English](README.md) · [Changelog](CHANGELOG.md) · [Paquet bridge](bridge/) · [Exemples par framework](examples/)
 
-> **État : 1.0 bêta.** L’interface est en français et en anglais (elle suit la langue du site WordPress).
+> **État : 1.0.0-rc.1 (version candidate).** L’interface est en français et en anglais (elle suit la langue du site WordPress).
 
 ---
 
@@ -48,7 +57,7 @@ Un contenu écrit avec l'éditeur de blocs de WordPress n'est jamais réécrit p
 
 ### 1. Installer le plugin
 
-[Téléchargez `leiho.zip`](https://github.com/pixelersagency/leiho/releases/latest/download/leiho.zip) (dernière version, aussi listée sur la [page des versions](https://github.com/pixelersagency/leiho/releases)) et téléversez-le dans **Extensions → Ajouter → Téléverser**. Les versions suivantes apparaissent dans **Extensions** comme n’importe quelle mise à jour. Nécessite WordPress 6.0+, PHP 7.4+ et [ACF](https://www.advancedcustomfields.com/) (gratuit ou Pro). Sans ACF, seuls le titre et l'image mise en avant sont modifiables.
+[Téléchargez `leiho.zip`](https://github.com/pixelersagency/leiho/releases/latest/download/leiho.zip) (dernière version, aussi listée sur la [page des versions](https://github.com/pixelersagency/leiho/releases)) et téléversez-le dans **Extensions → Ajouter → Téléverser**. Les versions suivantes apparaissent dans **Extensions** comme n’importe quelle mise à jour. Nécessite WordPress 6.0+ et PHP 7.4+. [ACF](https://www.advancedcustomfields.com/) (gratuit ou Pro) est facultatif : gardez vos champs ACF, ou définissez vos contenus avec [Leiho Collections](#collections).
 
 ### 2. Le relier au site
 
