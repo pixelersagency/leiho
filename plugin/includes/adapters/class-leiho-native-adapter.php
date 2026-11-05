@@ -526,6 +526,14 @@ class Leiho_Native_Adapter extends Leiho_Field_Adapter {
 				return null;
 			}
 			$code = is_scalar( $value ) ? str_replace( array( "\r\n", "\r", "\0" ), array( "\n", "\n", '' ), (string) $value ) : '';
+			// Du balisage gardé tel quel : réservé à qui peut déjà publier du HTML
+			// sans filtre (unfiltered_html). Un auteur, un contributeur ou un agent
+			// écrit du code sans balise ; un front qui l'afficherait comme du HTML
+			// par erreur ne recevrait jamais de script de leur part.
+			if ( false !== strpos( $code, '<' ) && ! current_user_can( 'unfiltered_html' ) ) {
+				$error = 'markup_not_allowed';
+				return null;
+			}
 			return $this->within_length( $field, wp_check_invalid_utf8( $code ), $error );
 		}
 

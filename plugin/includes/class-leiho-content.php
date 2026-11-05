@@ -31,7 +31,7 @@ class Leiho_Content {
 	const MAX_PER_PAGE = 100;
 
 	/** Métas dont l'écriture ne change pas le contenu publié. */
-	const IGNORED_META = array( '_edit_lock', '_edit_last', '_wp_old_slug', '_wp_old_date', '_encloseme', '_pingme' );
+	const IGNORED_META = array( '_edit_lock', '_edit_last', '_wp_old_slug', '_wp_old_date', '_encloseme', '_pingme', '_leiho_l10n_pending' );
 
 	/** @var Leiho_Plugin */
 	private $plugin;

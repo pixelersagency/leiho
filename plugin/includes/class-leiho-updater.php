@@ -28,7 +28,9 @@ class Leiho_Updater {
 
 	/**
 	 * Clé publique Ed25519 des releases. Chaque leiho.zip est publié avec
-	 * leiho.zip.sig, signé par le workflow de release avec la clé privée
+	 * leiho.zip.sig : la signature de « leiho », de la version et de
+	 * l'empreinte SHA-256 de l'archive (Leiho_Updater::signed_message), faite
+	 * par le workflow de release avec la clé privée
 	 * correspondante (secret GitHub, jamais dans le dépôt). Une archive dont
 	 * la signature manque ou ne correspond pas n'est pas installée : un dépôt
 	 * ou un compte GitHub compromis ne suffit pas à pousser du code sur les sites.
@@ -119,7 +121,9 @@ class Leiho_Updater {
 		if ( is_wp_error( $file ) ) {
 			return $file;
 		}
-		if ( ! self::verify( (string) file_get_contents( $file ), wp_remote_retrieve_body( $signature ) ) ) { // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents -- Fichier local téléchargé.
+		// La version vient de l'adresse (/releases/download/v1.2.3/leiho.zip) : une
+		// ancienne archive signée republiée sous un nouveau tag ne passe pas.
+		if ( ! self::verify( (string) file_get_contents( $file ), wp_remote_retrieve_body( $signature ), self::package_version( $package ) ) ) { // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents -- Fichier local téléchargé.
 			wp_delete_file( $file );
 			return new WP_Error( 'leiho_update_bad_signature', __( 'The signature of this Leiho update doesn’t match, so it was not installed. Please report it at github.com/pixelersagency/leiho.', 'leiho' ) );
 		}
@@ -127,21 +131,45 @@ class Leiho_Updater {
 	}
 
 	/**
-	 * Signature Ed25519 (base64) d'une archive, avec la clé publique de Leiho.
+	 * Version d'un paquet d'après son adresse de release.
+	 *
+	 * @param string $url Adresse (/releases/download/v1.2.3/leiho.zip).
+	 * @return string
+	 */
+	public static function package_version( $url ) {
+		return preg_match( '#/releases/download/v?([^/]+)/[^/]+$#', (string) $url, $m ) ? $m[1] : '';
+	}
+
+	/**
+	 * Message signé pour une release : le nom, la version et l'empreinte de
+	 * l'archive. Même calcul dans le workflow de release.
+	 *
+	 * @param string $version  Version (sans v).
+	 * @param string $contents Contenu de l'archive.
+	 * @return string
+	 */
+	public static function signed_message( $version, $contents ) {
+		return "leiho\n" . $version . "\n" . hash( 'sha256', (string) $contents );
+	}
+
+	/**
+	 * Signature Ed25519 (base64) d'une archive pour une version, avec la clé
+	 * publique de Leiho.
 	 *
 	 * @param string      $contents  Contenu de l'archive.
 	 * @param string      $signature Signature en base64.
+	 * @param string      $version   Version attendue.
 	 * @param string|null $key       Clé publique en base64 (tests) ; défaut SIGNING_KEY.
 	 * @return bool
 	 */
-	public static function verify( $contents, $signature, $key = null ) {
+	public static function verify( $contents, $signature, $version, $key = null ) {
 		$sig = base64_decode( trim( (string) $signature ), true );
 		$pub = base64_decode( null === $key ? self::SIGNING_KEY : $key, true );
-		if ( false === $sig || false === $pub || 64 !== strlen( $sig ) || 32 !== strlen( $pub ) || ! function_exists( 'sodium_crypto_sign_verify_detached' ) ) {
+		if ( '' === (string) $version || false === $sig || false === $pub || 64 !== strlen( $sig ) || 32 !== strlen( $pub ) || ! function_exists( 'sodium_crypto_sign_verify_detached' ) ) {
 			return false;
 		}
 		try {
-			return sodium_crypto_sign_verify_detached( $sig, (string) $contents, $pub );
+			return sodium_crypto_sign_verify_detached( $sig, self::signed_message( $version, $contents ), $pub );
 		} catch ( Exception $e ) {
 			return false;
 		}

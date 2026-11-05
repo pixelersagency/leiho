@@ -59,15 +59,17 @@ $release = array(
 $u = Leiho_Updater::from_release( $release );
 check( 'version sans le v', '1.0.0-beta.4' === $u['version'], $u );
 check( 'paquet = leiho.zip', 'https://github.com/pixelersagency/leiho/releases/download/v1.0.0-beta.4/leiho.zip' === $u['package'], $u );
-// Signature des archives (Ed25519, clé de test).
+// Signature des archives (Ed25519, clé de test) : nom, version et empreinte.
 $kp   = sodium_crypto_sign_keypair();
 $pub  = base64_encode( sodium_crypto_sign_publickey( $kp ) );
 $zip  = 'PK fake zip';
-$sig  = base64_encode( sodium_crypto_sign_detached( $zip, sodium_crypto_sign_secretkey( $kp ) ) );
-check( 'signature valide acceptée', Leiho_Updater::verify( $zip, $sig, $pub ) );
-check( 'archive modifiée refusée', ! Leiho_Updater::verify( $zip . 'x', $sig, $pub ) );
-check( 'signature absente ou illisible refusée', ! Leiho_Updater::verify( $zip, '', $pub ) && ! Leiho_Updater::verify( $zip, 'pas du base64 !', $pub ) );
-check( 'autre clé refusée', ! Leiho_Updater::verify( $zip, $sig ) );
+$sig  = base64_encode( sodium_crypto_sign_detached( Leiho_Updater::signed_message( '1.0.0', $zip ), sodium_crypto_sign_secretkey( $kp ) ) );
+check( 'signature valide acceptée', Leiho_Updater::verify( $zip, $sig, '1.0.0', $pub ) );
+check( 'archive modifiée refusée', ! Leiho_Updater::verify( $zip . 'x', $sig, '1.0.0', $pub ) );
+check( 'ancienne archive signée sous une autre version refusée', ! Leiho_Updater::verify( $zip, $sig, '9.0.0', $pub ) );
+check( 'signature absente ou illisible refusée', ! Leiho_Updater::verify( $zip, '', '1.0.0', $pub ) && ! Leiho_Updater::verify( $zip, 'pas du base64 !', '1.0.0', $pub ) );
+check( 'autre clé refusée', ! Leiho_Updater::verify( $zip, $sig, '1.0.0' ) );
+check( 'version lue dans l\'adresse du paquet', '1.0.0-rc.1' === Leiho_Updater::package_version( 'https://github.com/pixelersagency/leiho/releases/download/v1.0.0-rc.1/leiho.zip' ) );
 check( 'clé publique de Leiho bien formée', 32 === strlen( base64_decode( Leiho_Updater::SIGNING_KEY, true ) ) );
 check( 'paquet officiel reconnu, autres ignorés', Leiho_Updater::is_release_package( 'https://github.com/pixelersagency/leiho/releases/download/v1.0.0/leiho.zip' ) && ! Leiho_Updater::is_release_package( 'https://github.com/pixelersagency/leiho/releases/download/v1.0.0/other.zip' ) && ! Leiho_Updater::is_release_package( 'https://evil.example/pixelersagency/leiho/releases/download/leiho.zip' ) );
 check( 'autres extensions : filtre sans effet', false === Leiho_Updater::download_verified( false, 'https://downloads.wordpress.org/plugin/acf.zip' ) );

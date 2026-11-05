@@ -826,6 +826,12 @@ class Leiho_Rest {
 			);
 		}
 
+		// Traduction enregistrée depuis l'éditeur : les suggestions d'agents de
+		// cette langue ont été relues (gardées, modifiées ou annulées).
+		if ( $result['saved'] && Leiho_I18n::is_translation() ) {
+			Leiho_I18n::clear_pending( $post_id, Leiho_I18n::current() );
+		}
+
 		Leiho_Plugin::bump_usage( 'save' );
 
 		$fresh = $result['schema'] ? $result['schema'] : $schema_service->get( $post_id );

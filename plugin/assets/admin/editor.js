@@ -1553,6 +1553,33 @@
 	}
 
 	/**
+	 * Traductions proposées par un agent sur une entrée en ligne : elles
+	 * arrivent comme une saisie, à relire puis enregistrer (ou annuler).
+	 * Rien n'est en ligne avant.
+	 */
+	function applySuggestions( post, schema ) {
+		var pending = schema && schema.i18n && schema.i18n.pending ? schema.i18n.pending : {};
+		var count = 0;
+		Object.keys( pending ).forEach( function ( path ) {
+			var field = state.fields[ fieldKey( post.id, path ) ];
+			if ( field ) {
+				rootCtx( field ).write( clone( pending[ path ] ) );
+				count++;
+			}
+		} );
+		if ( count ) {
+			toast(
+				sprintf(
+					/* translators: %d: number of suggested translations. */
+					_n( '%d translation suggested by an agent. Review it, then save.', '%d translations suggested by an agent. Review them, then save.', count, 'leiho' ),
+					count
+				),
+				false
+			);
+		}
+	}
+
+	/**
 	 * Traduction par l'IA des champs pas encore traduits : les textes
 	 * arrivent comme une saisie (aperçu, annuler), à relire puis enregistrer.
 	 */
@@ -1664,6 +1691,7 @@
 				return; // Une autre entrée a été ouverte entre-temps.
 			}
 			resetHistory();
+			applySuggestions( post, schema );
 			renderStructure();
 			renderInspector();
 			if ( FORM ) {
@@ -3821,6 +3849,7 @@
 		invalid_link: __( 'Invalid link.', 'leiho' ),
 		invalid_date: __( 'Invalid date.', 'leiho' ),
 		invalid_user: __( 'This person can’t write this type of content.', 'leiho' ),
+		markup_not_allowed: __( 'Only an administrator or an editor can put HTML tags in a code field.', 'leiho' ),
 		invalid_parent: __( 'This parent isn’t allowed (same type only, and not one of its own sub-entries).', 'leiho' ),
 		blocks_protected: __( 'This content uses blocks: edit it in the WordPress editor.', 'leiho' ),
 		forbidden: __( 'You aren’t allowed to change this field.', 'leiho' ),

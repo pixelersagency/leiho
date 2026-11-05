@@ -186,7 +186,7 @@ Un site multilingue n'a pas besoin d'une entrée par langue. Déclarez les langu
 - **Chemins préfixés** : `/services/audit` devient `/fr/services/audit` (`/fr` pour l'accueil).
 - **Repli** : ce qui n'est pas encore traduit, jusqu'à une ligne de liste ou un sous-champ, est servi dans la langue par défaut.
 - **Édition** : sélecteur de langue dans l'éditeur visuel et le formulaire, avec l'état de chaque langue ; l'original s'affiche en indication dans les champs vides ; **Traduire avec l'IA** remplit les textes manquants, à relire avant d'enregistrer.
-- **Agents** : `leiho/list-translations`, `leiho/get-translation`, `leiho/update-translation` (sur une entrée publiée, ne remplit que les traductions vides), `leiho/translate-entry`.
+- **Agents** : `leiho/list-translations`, `leiho/get-translation`, `leiho/update-translation` (sur une entrée publiée, ne remplit que les traductions vides, comme suggestions qu’un éditeur relit et enregistre dans l’éditeur), `leiho/translate-entry`.
 - **Front** : `?locale=fr` sur l'API de contenu, ou `loadLeihoContent( { url, locale: 'fr' } )` ; chaque élément traduit porte `locale` et `translations` (chemin dans chaque langue) pour le sélecteur de langue et `hreflang`.
 
 ### Importer depuis ACF

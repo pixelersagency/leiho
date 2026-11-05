@@ -324,7 +324,7 @@ class Leiho_AI_Abilities {
 			),
 			'leiho/update-translation'  => array(
 				'label'               => __( 'Write translations', 'leiho' ),
-				'description'         => __( 'Writes translated texts of an entry in one language, by path (as returned by leiho/get-translation). The original language is never changed. On a draft any translation can be written; on a published entry only empty translations can be filled: texts already translated are refused (already_translated) so that reviewed work is never replaced. Never publishes.', 'leiho' ),
+				'description'         => __( 'Writes translated texts of an entry in one language, by path (as returned by leiho/get-translation). The original language is never changed. On a draft any translation is written. On a published entry only empty translations can be filled, and they are stored as suggestions (pending) that an editor reviews and saves in the Leiho editor: nothing reaches the site before. Texts already translated are refused (already_translated). Never publishes.', 'leiho' ),
 				'category'            => self::CATEGORY,
 				'input_schema'        => array(
 					'type'                 => 'object',

@@ -420,15 +420,16 @@ class Leiho_AI_Translate {
 	}
 
 	/**
-	 * Écrit des traductions (agents) : un brouillon librement ; une entrée
-	 * en ligne seulement là où la traduction est encore vide, pour qu'un
-	 * agent complète sans jamais remplacer un texte relu.
+	 * Écrit des traductions (agents) : un brouillon librement. Sur une entrée
+	 * en ligne, seulement là où la traduction est encore vide, et comme
+	 * suggestions à relire dans l'éditeur : un agent ne remplace jamais un
+	 * texte relu et ne met rien en ligne.
 	 *
 	 * @param int    $post_id Entrée.
 	 * @param string $locale  Langue.
 	 * @param array  $values  { chemin pointé: texte }.
 	 * @param bool   $draft   L'entrée est un brouillon.
-	 * @return array|WP_Error { saved, errors, status }
+	 * @return array|WP_Error { saved, pending, errors, status }
 	 */
 	public static function write( $post_id, $locale, array $values, $draft ) {
 		$data = self::units( $post_id, $locale );
@@ -458,8 +459,14 @@ class Leiho_AI_Translate {
 			}
 			$clean[ $path ] = self::value_for( $units[ $path ], self::clean( $text, $units[ $path ]['format'] ) );
 		}
-		$saved = array();
-		if ( $clean ) {
+		$saved   = array();
+		$pending = array();
+		if ( $clean && ! $draft ) {
+			// Entrée en ligne : proposé, pas publié. Un éditeur relit les
+			// suggestions dans l'éditeur ; rien n'atteint le site avant.
+			Leiho_I18n::suggest( $post_id, $locale, $clean );
+			$pending = array_keys( $clean );
+		} elseif ( $clean ) {
 			$result = Leiho_I18n::in_locale(
 				$locale,
 				function () use ( $post_id, $clean ) {
@@ -470,10 +477,11 @@ class Leiho_AI_Translate {
 			$errors = array_merge( $errors, $result['errors'] );
 		}
 		return array(
-			'locale' => $locale,
-			'saved'  => $saved,
-			'errors' => (object) $errors,
-			'status' => Leiho_I18n::status( $post_id, $locale ),
+			'locale'  => $locale,
+			'saved'   => $saved,
+			'pending' => $pending,
+			'errors'  => (object) $errors,
+			'status'  => Leiho_I18n::status( $post_id, $locale ),
 		);
 	}
 

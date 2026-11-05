@@ -45,6 +45,8 @@ class Leiho_Schema {
 				'default'  => Leiho_I18n::default_locale(),
 				'locales'  => Leiho_I18n::config()['locales'],
 				'statuses' => Leiho_I18n::statuses( $post_id ),
+				// Traductions proposées par un agent, à relire (entrée en ligne).
+				'pending'  => (object) ( Leiho_I18n::is_translation() && current_user_can( 'edit_post', $post_id ) ? Leiho_I18n::pending( $post_id, Leiho_I18n::current() ) : array() ),
 			);
 		}
 

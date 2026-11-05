@@ -348,6 +348,74 @@ class Leiho_I18n {
 	}
 
 	/* ---------------------------------------------------------------------
+	 * Suggestions d'agents (entrées publiées)
+	 * ------------------------------------------------------------------- */
+
+	/** Méta des traductions proposées par un agent, en attente de relecture. */
+	const META_PENDING = '_leiho_l10n_pending';
+
+	/** Une suggestion non relue expire au bout de 30 jours. */
+	const PENDING_TTL = 30 * DAY_IN_SECONDS;
+
+	/**
+	 * Traductions proposées pour une entrée publiée : rien n'est servi au
+	 * site tant qu'un éditeur ne les a pas relues et enregistrées.
+	 *
+	 * @param int    $post_id Entrée.
+	 * @param string $locale  Langue.
+	 * @param array  $values  { chemin pointé: valeur }.
+	 * @return void
+	 */
+	public static function suggest( $post_id, $locale, array $values ) {
+		$all = get_post_meta( $post_id, self::META_PENDING, true );
+		$all = is_array( $all ) ? $all : array();
+		$cur = isset( $all[ $locale ]['values'] ) && is_array( $all[ $locale ]['values'] ) ? $all[ $locale ]['values'] : array();
+		$all[ $locale ] = array(
+			'values' => array_merge( $cur, $values ),
+			'at'     => time(),
+			'by'     => get_current_user_id(),
+		);
+		update_post_meta( $post_id, self::META_PENDING, $all );
+	}
+
+	/**
+	 * @param int    $post_id Entrée.
+	 * @param string $locale  Langue.
+	 * @return array { chemin pointé: valeur }
+	 */
+	public static function pending( $post_id, $locale ) {
+		$all = get_post_meta( $post_id, self::META_PENDING, true );
+		if ( ! is_array( $all ) || empty( $all[ $locale ]['values'] ) || ! is_array( $all[ $locale ]['values'] ) ) {
+			return array();
+		}
+		if ( isset( $all[ $locale ]['at'] ) && (int) $all[ $locale ]['at'] < time() - self::PENDING_TTL ) {
+			self::clear_pending( $post_id, $locale );
+			return array();
+		}
+		return $all[ $locale ]['values'];
+	}
+
+	/**
+	 * Suggestions relues (l'éditeur a enregistré la traduction) : retirées.
+	 *
+	 * @param int    $post_id Entrée.
+	 * @param string $locale  Langue.
+	 * @return void
+	 */
+	public static function clear_pending( $post_id, $locale ) {
+		$all = get_post_meta( $post_id, self::META_PENDING, true );
+		if ( ! is_array( $all ) || ! isset( $all[ $locale ] ) ) {
+			return;
+		}
+		unset( $all[ $locale ] );
+		if ( $all ) {
+			update_post_meta( $post_id, self::META_PENDING, $all );
+		} else {
+			delete_post_meta( $post_id, self::META_PENDING );
+		}
+	}
+
+	/* ---------------------------------------------------------------------
 	 * Table des traductions
 	 * ------------------------------------------------------------------- */
 

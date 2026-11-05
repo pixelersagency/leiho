@@ -46,10 +46,12 @@ jobs:
             exit 1
           fi
           ZIP="dist/leiho-$VERSION.zip"
-          php -r 'file_put_contents($argv[1] . ".sig", base64_encode(sodium_crypto_sign_detached(file_get_contents($argv[1]), base64_decode(getenv("LEIHO_SIGNING_KEY"), true))));' "$ZIP"
+          # Signed message: "leiho", the version and the archive's SHA-256 (Leiho_Updater::signed_message),
+          # so an old signed archive can't be republished under a newer tag.
+          php -r 'file_put_contents($argv[1] . ".sig", base64_encode(sodium_crypto_sign_detached("leiho\n" . $argv[2] . "\n" . hash_file("sha256", $argv[1]), base64_decode(getenv("LEIHO_SIGNING_KEY"), true))));' "$ZIP" "$VERSION"
           # Checked with the public key shipped in the plugin: a wrong secret fails here, not on every site.
           PUB="$(grep -o "SIGNING_KEY = '[^']*'" plugin/includes/class-leiho-updater.php | cut -d"'" -f2)"
-          php -r 'exit(sodium_crypto_sign_verify_detached(base64_decode(file_get_contents($argv[1] . ".sig")), file_get_contents($argv[1]), base64_decode($argv[2])) ? 0 : 1);' "$ZIP" "$PUB"
+          php -r 'define("ABSPATH", 1); require "plugin/includes/class-leiho-updater.php"; exit(Leiho_Updater::verify(file_get_contents($argv[1]), file_get_contents($argv[1] . ".sig"), $argv[2], $argv[3]) ? 0 : 1);' "$ZIP" "$VERSION" "$PUB"
 
       - name: Release notes
         run: |

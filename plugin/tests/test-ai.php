@@ -143,6 +143,8 @@ class Leiho_Schema {
 }
 /** Langues : en par défaut, fr déclarée. */
 class Leiho_I18n {
+	public static $suggested = array();
+	public static function suggest( $id, $locale, $values ) { self::$suggested[ $id ][ $locale ] = $values; }
 	public static $current = 'en';
 	public static $statuses = array();
 	public static function enabled() { return true; }
@@ -856,7 +858,8 @@ Leiho_Schema::$saved = array();
 $w = Leiho_AI_Translate::write( 90, 'fr', array( '_title' => 'Autre', 'steps.1.title' => 'Rapport', 'price' => '1 €' ), false );
 check( 'agent : entrée en ligne, texte déjà traduit refusé', 'already_translated' === $w['errors']->_title, $w );
 check( 'agent : champ partagé refusé', 'not_translatable' === $w['errors']->price );
-check( 'agent : texte vide rempli dans la langue demandée', array( 'steps.1.title' => 'Rapport' ) === Leiho_Schema::$saved[90] && array( 'steps.1.title' ) === $w['saved'], Leiho_Schema::$saved );
+check( 'agent : entrée en ligne, rien d\'écrit dans la traduction servie', ! isset( Leiho_Schema::$saved[90] ) && array() === $w['saved'], Leiho_Schema::$saved );
+check( 'agent : texte vide proposé comme suggestion à relire', array( 'steps.1.title' => 'Rapport' ) === Leiho_I18n::$suggested[90]['fr'] && array( 'steps.1.title' ) === $w['pending'], array( Leiho_I18n::$suggested, $w ) );
 $w = Leiho_AI_Translate::write( 90, 'fr', array( '_title' => 'Autre' ), true );
 check( 'agent : brouillon, tout modifiable', array( '_title' ) === $w['saved'] );
 
