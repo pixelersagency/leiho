@@ -288,13 +288,15 @@ class Leiho_Updater {
 	 */
 	private static function tested_up_to( $tag ) {
 		// Lecture du readme.txt de la release (version de WordPress testée), pas un contenu chargé dans les pages.
-		$response = wp_remote_get( // phpcs:ignore PluginCheck.CodeAnalysis.Offloading.OffloadedContent
+		// phpcs:disable PluginCheck.CodeAnalysis.Offloading.OffloadedContent
+		$response = wp_remote_get(
 			'https://raw.githubusercontent.com/' . self::REPO . '/' . rawurlencode( $tag ) . '/plugin/readme.txt',
 			array(
 				'timeout' => 10,
 				'headers' => array( 'User-Agent' => 'Leiho/' . LEIHO_VERSION ),
 			)
 		);
+		// phpcs:enable PluginCheck.CodeAnalysis.Offloading.OffloadedContent
 		if ( is_wp_error( $response ) || 200 !== wp_remote_retrieve_response_code( $response ) ) {
 			return '';
 		}
