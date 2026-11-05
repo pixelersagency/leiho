@@ -1360,9 +1360,6 @@ body.leiho-app-body #wpbody-content {
 	border-radius: 4px;
 	background: var(--leiho-input);
 	color: var(--leiho-muted);
-	font-family: var(--leiho-mono);
-	font-size: var(--leiho-text-2xs, 11px);
-	font-weight: 600;
 }
 
 .leiho-list-empty {

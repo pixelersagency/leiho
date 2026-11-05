@@ -362,7 +362,7 @@
 
 		var detailTitle = sel ? sel.field.label || sel.field.name : __( 'General', 'leiho' );
 		var head = h( 'div', { class: 'leiho-detail__head' }, [
-			h( 'span', { class: 'leiho-detail__icon' + ( sel ? '' : ' leiho-detail__icon--purple' ) }, sel ? h( 'span', { class: 'leiho-type-tag', text: typeAbbr( sel.field.type ) } ) : icon( 'database', 15 ) ),
+			h( 'span', { class: 'leiho-detail__icon' + ( sel ? '' : ' leiho-detail__icon--purple' ) }, sel ? typeTag( sel.field.type ) : icon( 'database', 15 ) ),
 			h( 'h2', { class: 'leiho-detail__title', dataset: sel ? { uid: sel.field._uid } : {}, text: detailTitle } ),
 			sel ? h( 'code', { class: 'leiho-detail__path leiho-fieldrow__name', text: sel.field.name } ) : cur.isNew ? null : h( 'span', { class: 'leiho-detail__path', text: ( 'singleton' === d.kind ? __( 'Single page', 'leiho' ) : __( 'Collection', 'leiho' ) ) + ' · ' + d.id } ),
 			h( 'div', { class: 'leiho-detail__actions' }, headActions ),
@@ -446,10 +446,9 @@
 		] ) );
 	}
 
-	/** Deux lettres pour la pastille de type (Te, Nu, Li…). */
-	function typeAbbr( type ) {
-		var label = ( TYPE_INDEX[ type ] || { label: type } ).label;
-		return label.slice( 0, 2 );
+	/** Pastille d'un type de champ : son icône, son nom en infobulle. */
+	function typeTag( type ) {
+		return h( 'span', { class: 'leiho-type-tag', title: ( TYPE_INDEX[ type ] || { label: type } ).label }, icon( 'type-' + type, 13 ) );
 	}
 
 	function field( labelText, control, help, id ) {
@@ -725,7 +724,7 @@
 					select( f._uid, '[data-uid="' + f._uid + '"] .leiho-field-label-input' );
 				},
 			}, [
-				h( 'span', { class: 'leiho-type-tag', title: ( TYPE_INDEX[ f.type ] || { label: f.type } ).label, text: typeAbbr( f.type ) } ),
+				typeTag( f.type ),
 				h( 'span', { class: 'leiho-item__title leiho-fieldrow__label', text: label + ( f.required ? ' *' : '' ) } ),
 				h( 'code', { class: 'leiho-item__meta leiho-fieldrow__name', text: f.name } ),
 			] ),

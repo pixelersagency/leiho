@@ -119,6 +119,7 @@
 		draft: 'M12 4a8 8 0 1 0 0 16 8 8 0 0 0 0-16z M9 12h6',
 		// Types de champ (sélecteur « Ajouter un champ »).
 		'type-text': 'M5 6h14 M12 6v13 M9 19h6',
+		'type-code': 'M8 8l-4 4 4 4 M16 8l4 4-4 4 M13.5 5l-3 14',
 		'type-richtext': 'M4 6h16 M4 10h16 M4 14h10 M4 18h7 M17 14l3 3-3 3',
 		'type-number': 'M9 4L7 20 M17 4l-2 16 M4 9h17 M3 15h17',
 		'type-boolean': 'M8 7h8a5 5 0 0 1 0 10H8A5 5 0 0 1 8 7z M16 9.5a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5z',
