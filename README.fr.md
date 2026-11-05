@@ -71,6 +71,80 @@ Le front doit envoyer cet en-tête (**Leiho → Démarrer** l'affiche avec votre
 Content-Security-Policy: frame-ancestors 'self' https://votre-wordpress.fr
 ```
 
+Remplacez `https://wp.example.com` par l'origine de votre wp-admin (protocole et domaine, sans chemin). Plusieurs origines se séparent par des espaces, par exemple le WordPress de production et celui de préproduction.
+
+<details>
+<summary><b>Vercel</b> : <code>vercel.json</code></summary>
+
+```json
+{
+  "headers": [
+    {
+      "source": "/(.*)",
+      "headers": [
+        { "key": "Content-Security-Policy", "value": "frame-ancestors 'self' https://wp.example.com" }
+      ]
+    }
+  ]
+}
+```
+</details>
+
+<details>
+<summary><b>Netlify</b> : <code>netlify.toml</code></summary>
+
+```toml
+[[headers]]
+  for = "/*"
+  [headers.values]
+    Content-Security-Policy = "frame-ancestors 'self' https://wp.example.com"
+```
+</details>
+
+<details>
+<summary><b>Cloudflare Pages / Workers (fichiers statiques), Netlify</b> : <code>public/_headers</code></summary>
+
+```
+/*
+  Content-Security-Policy: frame-ancestors 'self' https://wp.example.com
+```
+
+Astro, Vite, Nuxt et SvelteKit copient `public/` tel quel dans le build (`static/` pour SvelteKit).
+</details>
+
+<details>
+<summary><b>Next.js</b> (tout hébergeur) : <code>next.config.mjs</code></summary>
+
+```js
+export default {
+  async headers() {
+    return [{
+      source: '/:path*',
+      headers: [{ key: 'Content-Security-Policy', value: `frame-ancestors 'self' ${process.env.WORDPRESS_URL}` }],
+    }];
+  },
+};
+```
+</details>
+
+<details>
+<summary><b>nginx</b> (Coolify, un VPS…)</summary>
+
+```nginx
+add_header Content-Security-Policy "frame-ancestors 'self' https://wp.example.com" always;
+```
+</details>
+
+<details>
+<summary><b>Apache / .htaccess</b></summary>
+
+```apache
+Header always set Content-Security-Policy "frame-ancestors 'self' https://wp.example.com"
+```
+</details>
+
+Si le site envoie déjà un `Content-Security-Policy`, ajoutez-y la directive `frame-ancestors`. L'éditeur affiche toujours un cadre vide ? Ouvrez la console du navigateur sur la page Leiho : elle nomme l'en-tête qui bloque.
+
 ### 4. Installer le bridge et annoter le balisage
 
 **React (Next.js, Remix, Vite…)**
@@ -259,6 +333,29 @@ Leiho écrit avec le fournisseur d’IA configuré dans **Réglages → Connecte
 - **Texte alternatif** des images (champs image, Médias), si le fournisseur lit les images.
 - **Nouvelle entrée avec l’IA** dans Collections : un brief, une réponse JSON structurée selon les champs du type (texte, texte riche, listes, sections), un aperçu, puis un brouillon.
 - **Capacités** pour les agents externes (adaptateur MCP, agents WordPress), catégorie `leiho` : `leiho/get-brand-context`, `leiho/list-collections`, `leiho/get-entry`, `leiho/update-entry-fields` (brouillons et entrées en attente seulement, validées comme dans l’éditeur, ne publie jamais).
+
+## Questions fréquentes
+
+**Les rédacteurs peuvent-ils casser la mise en page ou le build ?**
+Non. Ils ne modifient que les champs que vous avez annotés, et chaque valeur est vérifiée selon le type de son champ à l'enregistrement. La structure reste dans votre code : quels champs existent, quels types de sections une page peut utiliser. Ajouter, déplacer, dupliquer ou supprimer une section n'est possible que là où vous l'avez liée à un contenu flexible (ou à un champ blocs de Leiho), et seulement avec les mises en page que vous avez définies. Pas de HTML libre ni de constructeur de pages : le contenu ne peut pas produire un balisage que vos composants n'attendent pas.
+
+**Et les sections que mes composants ne gèrent pas encore ?**
+Un type de section n'existe qu'une fois ajouté au groupe de champs (ou au schéma Leiho) et rendu par votre front. D'ici là, les rédacteurs ne peuvent pas le choisir.
+
+**Pourquoi pas des fichiers Markdown dans Git ?**
+Si vos rédacteurs sont à l'aise pour commiter du Markdown, gardez-le. Leiho s'adresse à ceux qui connaissent déjà WordPress, ou qui préfèrent cliquer sur la page plutôt qu'apprendre Git : ils voient le vrai site pendant qu'ils écrivent, et personne n'a à relire une pull request pour corriger une faute.
+
+**Qu'est-ce que ça demande comme maintenance ?**
+Une extension WordPress, mise à jour depuis l'écran Extensions comme les autres (les mises à jour sont signées), et un bridge d'environ 10 Ko sans dépendance dans votre front. Le contenu reste dans WordPress : les champs ACF restent des champs ACF, et Leiho n'y touche pas si vous le retirez. Les Collections Leiho sont des articles WordPress plus une table par collection, exportés en JSON par l'API de contenu ; supprimer l'extension efface ces tables, sauf si `define( 'LEIHO_KEEP_DATA', true );` figure dans `wp-config.php` (la désactiver garde tout).
+
+**Faut-il WPGraphQL ?**
+Non. Gardez-le si vous l'utilisez : Leiho lit et écrit les mêmes champs ACF. Ou utilisez l'API de contenu de Leiho (`/leiho/v1/export`, une requête par build, avec les types TypeScript).
+
+**Site statique ou rendu serveur ?**
+Les deux. Un site rendu côté serveur affiche les changements dès l'enregistrement ; un site statique se reconstruit quand un rédacteur clique sur **Publier** (build hook, GitHub Actions, commit ou Coolify).
+
+**C'est gratuit ?**
+Oui, sous licence GPL-2.0.
 
 ## Vous veniez d’Okno
 

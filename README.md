@@ -77,6 +77,80 @@ Send this header from your front end (**Leiho → Get started** shows it with yo
 Content-Security-Policy: frame-ancestors 'self' https://your-wordpress.example
 ```
 
+Replace `https://wp.example.com` with your wp-admin's origin (scheme and host, no path). Several origins are separated by spaces, e.g. production and staging WordPress.
+
+<details>
+<summary><b>Vercel</b>: <code>vercel.json</code></summary>
+
+```json
+{
+  "headers": [
+    {
+      "source": "/(.*)",
+      "headers": [
+        { "key": "Content-Security-Policy", "value": "frame-ancestors 'self' https://wp.example.com" }
+      ]
+    }
+  ]
+}
+```
+</details>
+
+<details>
+<summary><b>Netlify</b>: <code>netlify.toml</code></summary>
+
+```toml
+[[headers]]
+  for = "/*"
+  [headers.values]
+    Content-Security-Policy = "frame-ancestors 'self' https://wp.example.com"
+```
+</details>
+
+<details>
+<summary><b>Cloudflare Pages / Workers static assets, Netlify</b>: <code>public/_headers</code></summary>
+
+```
+/*
+  Content-Security-Policy: frame-ancestors 'self' https://wp.example.com
+```
+
+`public/` is copied as is into the build output by Astro, Vite, Nuxt and SvelteKit (`static/` for SvelteKit).
+</details>
+
+<details>
+<summary><b>Next.js</b> (any host): <code>next.config.mjs</code></summary>
+
+```js
+export default {
+  async headers() {
+    return [{
+      source: '/:path*',
+      headers: [{ key: 'Content-Security-Policy', value: `frame-ancestors 'self' ${process.env.WORDPRESS_URL}` }],
+    }];
+  },
+};
+```
+</details>
+
+<details>
+<summary><b>nginx</b> (Coolify, a VPS…)</summary>
+
+```nginx
+add_header Content-Security-Policy "frame-ancestors 'self' https://wp.example.com" always;
+```
+</details>
+
+<details>
+<summary><b>Apache / .htaccess</b></summary>
+
+```apache
+Header always set Content-Security-Policy "frame-ancestors 'self' https://wp.example.com"
+```
+</details>
+
+If the site already sends a `Content-Security-Policy`, add the `frame-ancestors` directive to it. The editor still shows a blank frame? Open the browser console on the Leiho page: it names the header that blocked it.
+
 ### 4. Add the bridge and annotate your markup
 
 **React (Next.js, Remix, Vite…)**
@@ -406,6 +480,29 @@ Update the CMS first. Your front end keeps working unchanged until Leiho 2.0: th
 | `/wp-json/okno/v1/…`, `X-Okno-Token` | `/wp-json/leiho/v1/…`, `X-Leiho-Token` |
 | `npx okno pull`, `OKNO_URL`, `OKNO_TOKEN`, `.okno/` | `npx leiho pull`, `LEIHO_URL`, `LEIHO_TOKEN`, `.leiho/` |
 | `okno.schema.json`, `okno_*` hooks, `OKNO_KEEP_DATA` | `leiho.schema.json`, `leiho_*` hooks, `LEIHO_KEEP_DATA` |
+
+## FAQ
+
+**Can editors break the layout or the build?**
+No. Editors only change the fields you annotated, and every value is checked against its field type on save. The structure stays in your code: which fields exist, and which section types a page may use. Editors can add, move, duplicate and remove sections only where you bound them to flexible content (or a Leiho blocks field), and only with the layouts you defined. There is no free HTML and no page builder, so content can't produce markup your components don't expect.
+
+**What about sections my components don't handle yet?**
+A section type exists only once you add it to the field group (or the Leiho schema) and render it in your front end. Until then editors can't pick it.
+
+**Why not Markdown files in Git?**
+If your editors are happy committing Markdown, keep that. Leiho is for people who already know WordPress, or would rather click on the page than learn Git: they see the real site while they type, and nobody has to review a pull request to fix a typo.
+
+**What does it take to maintain?**
+One WordPress plugin, updated from the Plugins screen like any other (updates are signed), and a ~10 KB bridge in your front end with no dependencies. Content stays in WordPress: ACF fields stay ACF fields and are never touched if you remove Leiho. Leiho Collections are regular posts plus one table per collection, exported as JSON by the content API; deleting the plugin drops those tables unless `define( 'LEIHO_KEEP_DATA', true );` is set in `wp-config.php` (deactivating keeps everything).
+
+**Do I need WPGraphQL?**
+No. Keep it if you use it: Leiho reads and writes the same ACF fields. Or use Leiho's content API (`/leiho/v1/export`, one request per build, with TypeScript types).
+
+**Static site or server-rendered?**
+Both. Server-rendered sites show changes on save; static sites rebuild when an editor clicks **Publish** (build hook, GitHub Actions, a commit, or Coolify).
+
+**Is it free?**
+Yes, GPL-2.0.
 
 ## Security
 
