@@ -663,6 +663,13 @@ body > .screen-reader-text[role="status"] {
 	padding-right: 120px;
 }
 
+/* Au survol, les actions prennent la place du compteur : il disparaît au
+   lieu d'être repoussé vers la gauche par la place réservée aux actions. */
+.leiho-tree-row:hover .leiho-tree-count,
+.leiho-tree-row:focus-within .leiho-tree-count {
+	display: none;
+}
+
 .leiho-page-action,
 .leiho-tree-action {
 	display: grid;
