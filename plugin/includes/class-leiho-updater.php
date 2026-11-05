@@ -332,7 +332,7 @@ class Leiho_Updater {
 			'last_updated'  => isset( $release['published_at'] ) ? $release['published_at'] : '',
 			'download_link' => $update['package'],
 			'sections'      => array(
-				'description' => '<p>' . esc_html__( 'Visual editing for headless WordPress: edit your ACF fields live on your real front end, from wp-admin.', 'leiho' ) . '</p>',
+				'description' => '<p>' . esc_html__( 'Visual editor and content API for headless front ends (Astro, Next.js, …), right inside wp-admin. Define your content types in Leiho, or keep your existing ACF fields.', 'leiho' ) . '</p>',
 				'changelog'   => self::markdown( isset( $release['body'] ) ? (string) $release['body'] : '' ) .
 					'<p><a href="' . esc_url( isset( $release['html_url'] ) ? $release['html_url'] : $update['url'] ) . '">' . esc_html__( 'Release notes on GitHub', 'leiho' ) . '</a></p>',
 			),

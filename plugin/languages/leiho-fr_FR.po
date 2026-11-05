@@ -5325,10 +5325,6 @@ msgstr "Cette mise à jour de Leiho n’est pas signée : elle n’a pas été i
 msgid "The signature of this Leiho update doesn’t match, so it was not installed. Please report it at github.com/pixelersagency/leiho."
 msgstr "La signature de cette mise à jour de Leiho ne correspond pas : elle n’a pas été installée. Merci de le signaler sur github.com/pixelersagency/leiho."
 
-#: includes/class-leiho-updater.php:333
-msgid "Visual editing for headless WordPress: edit your ACF fields live on your real front end, from wp-admin."
-msgstr "L’édition visuelle pour WordPress headless : modifiez vos champs ACF en direct sur votre vrai site, depuis wp-admin."
-
 #: includes/class-leiho-updater.php:335
 msgid "Release notes on GitHub"
 msgstr "Notes de version sur GitHub"
