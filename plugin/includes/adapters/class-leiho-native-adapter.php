@@ -178,7 +178,7 @@ class Leiho_Native_Adapter extends Leiho_Field_Adapter {
 			$entry['source']    = 'collections';
 			$entry['localized'] = Leiho_I18n::is_localized( $def['field'] );
 			if ( $source && $entry['localized'] && is_string( $source[ $name ] ) && '' !== $source[ $name ] ) {
-				$entry['original'] = wp_strip_all_tags( $source[ $name ] );
+				$entry['original'] = Leiho_Text::strip_tags( $source[ $name ] ); // Indication en texte brut (« x<1 » gardé).
 			}
 			$fields[] = $entry;
 		}

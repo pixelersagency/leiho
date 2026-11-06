@@ -4186,7 +4186,12 @@
 				/* texte brut */
 			}
 		}
-		text = htmlText( text ).replace( /\s+/g, ' ' ).trim();
+		// Seul un texte riche est du HTML : un texte brut (« x<1 », « &amp; »)
+		// s'affiche tel quel, toujours par textContent.
+		if ( 'wysiwyg' === type ) {
+			text = htmlText( text );
+		}
+		text = String( text ).replace( /\s+/g, ' ' ).trim();
 		return text.length > 80 ? text.slice( 0, 77 ) + '…' : text;
 	}
 

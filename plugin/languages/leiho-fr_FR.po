@@ -1626,7 +1626,7 @@ msgid "Leiho creates the collection “%1$s” from its ACF fields, then copies 
 msgstr "Leiho crée la collection « %1$s » à partir de ses champs ACF, puis copie %2$s entrées (%3$s champs, %4$s valeurs stockées) avec les mêmes contrôles que l’éditeur. Le front continue de recevoir le même JSON ; chaque entrée est vérifiée après la copie."
 
 #: assets/admin/app-content.js:531
-#: includes/collections/class-leiho-acf-import.php:1679
+#: includes/collections/class-leiho-acf-import.php:1674
 msgid "The Leiho collection built from these ACF fields is invalid."
 msgstr "La collection Leiho construite à partir de ces champs ACF est invalide."
 
@@ -2115,19 +2115,19 @@ msgstr "Tapez %s pour confirmer"
 msgid "Confirm"
 msgstr "Confirmer"
 
-#: assets/admin/app.js:396 assets/admin/editor.js:4200
+#: assets/admin/app.js:396 assets/admin/editor.js:4205
 msgid "just now"
 msgstr "à l’instant"
 
 #. translators: %d: number of minutes.
-#: assets/admin/app.js:400 assets/admin/editor.js:4204
+#: assets/admin/app.js:400 assets/admin/editor.js:4209
 msgid "%d minute ago"
 msgid_plural "%d minutes ago"
 msgstr[0] "il y a %d min"
 msgstr[1] "il y a %d min"
 
 #. translators: %d: number of hours.
-#: assets/admin/app.js:404 assets/admin/editor.js:4209
+#: assets/admin/app.js:404 assets/admin/editor.js:4214
 msgid "%d hour ago"
 msgid_plural "%d hours ago"
 msgstr[0] "il y a %d h"
@@ -2137,13 +2137,13 @@ msgstr[1] "il y a %d h"
 msgid "Something went wrong."
 msgstr "Un problème est survenu."
 
-#: assets/admin/app.js:450 assets/admin/editor.js:4596
+#: assets/admin/app.js:450 assets/admin/editor.js:4601
 #: includes/admin/class-leiho-admin.php:506
 #: includes/admin/class-leiho-app.php:556
 msgid "Switch to dark theme"
 msgstr "Passer au thème sombre"
 
-#: assets/admin/app.js:450 assets/admin/editor.js:4596
+#: assets/admin/app.js:450 assets/admin/editor.js:4601
 msgid "Switch to light theme"
 msgstr "Passer au thème clair"
 
@@ -2186,7 +2186,7 @@ msgid "Publish (unpublished changes)"
 msgstr "Publier (modifications non publiées)"
 
 #: assets/admin/app.js:646 assets/admin/app.js:672 assets/admin/app.js:707
-#: assets/admin/editor.js:4371
+#: assets/admin/editor.js:4376
 msgid "Publishing…"
 msgstr "Mise en ligne…"
 
@@ -2891,57 +2891,57 @@ msgstr "vide"
 msgid "Image #%s"
 msgstr "Image n°%s"
 
-#: assets/admin/editor.js:4213
+#: assets/admin/editor.js:4218
 msgid "yesterday"
 msgstr "hier"
 
 #. translators: %d: number of days.
-#: assets/admin/editor.js:4216
+#: assets/admin/editor.js:4221
 msgid "%d day ago"
 msgid_plural "%d days ago"
 msgstr[0] "il y a %d jour"
 msgstr[1] "il y a %d jours"
 
-#: assets/admin/editor.js:4249 assets/admin/editor.js:4401
+#: assets/admin/editor.js:4254 assets/admin/editor.js:4406
 msgid "Couldn’t start the deployment."
 msgstr "Échec du déclenchement du déploiement."
 
-#: assets/admin/editor.js:4273
+#: assets/admin/editor.js:4278
 msgid "Building…"
 msgstr "Build en cours…"
 
 #. translators: %d: estimated number of minutes before the site is live.
-#: assets/admin/editor.js:4277
+#: assets/admin/editor.js:4282
 msgid "Deployment triggered — live in ~%d min"
 msgstr "Déploiement déclenché — en ligne dans ~%d min"
 
-#: assets/admin/editor.js:4280
+#: assets/admin/editor.js:4285
 msgid "The site should be live now."
 msgstr "Le site devrait être en ligne."
 
-#: assets/admin/editor.js:4286
+#: assets/admin/editor.js:4291
 msgid "Live ✓"
 msgstr "En ligne ✓"
 
 #. translators: %s: error message from the deployment service.
-#: assets/admin/editor.js:4292
+#: assets/admin/editor.js:4297
 msgid "Deployment failed — %s"
 msgstr "Échec du déploiement — %s"
 
-#: assets/admin/editor.js:4293
+#: assets/admin/editor.js:4298
 msgid "Deployment failed"
 msgstr "Échec du déploiement"
 
-#: assets/admin/editor.js:4306
+#: assets/admin/editor.js:4311
 msgid "Logs"
 msgstr "Logs"
 
 #. translators: %d: number of seconds before automatic publishing.
-#: assets/admin/editor.js:4370
+#: assets/admin/editor.js:4375
 msgid "Publishing in %d s"
 msgstr "Mise en ligne dans %d s"
 
-#: assets/admin/editor.js:4372
+#: assets/admin/editor.js:4377
 msgid "Your saved changes go live automatically. Click “Publish” to do it now."
 msgstr "Vos modifications enregistrées seront mises en ligne automatiquement. Cliquez sur « Publier » pour le faire tout de suite."
 
@@ -5071,7 +5071,7 @@ msgstr "Tout est déjà traduit."
 msgid "The AI didn’t translate anything. Try again."
 msgstr "L’IA n’a rien traduit. Réessayez."
 
-#: includes/ai/class-leiho-ai-translate.php:497
+#: includes/ai/class-leiho-ai-translate.php:496
 msgid "This content type isn’t translatable."
 msgstr "Ce type de contenu n’est pas traduisible."
 
@@ -5383,232 +5383,232 @@ msgstr "Notes de version sur GitHub"
 msgid "Couldn’t prepare the Leiho update folder."
 msgstr "Impossible de préparer le dossier de mise à jour de Leiho."
 
-#: includes/collections/class-leiho-acf-import.php:1381
+#: includes/collections/class-leiho-acf-import.php:1376
 msgid "The import finished with failures or differences: ACF still serves this content type. Review the report, then switch to Leiho anyway or go back to ACF."
 msgstr "L’import s’est terminé avec des échecs ou des écarts : ACF sert toujours ce type de contenu. Examinez le rapport, puis basculez quand même vers Leiho ou revenez à ACF."
 
-#: includes/collections/class-leiho-acf-import.php:1383
+#: includes/collections/class-leiho-acf-import.php:1378
 msgid "Already imported into Leiho."
 msgstr "Déjà importé dans Leiho."
 
-#: includes/collections/class-leiho-acf-import.php:1386
-#: includes/collections/class-leiho-acf-import.php:1749
+#: includes/collections/class-leiho-acf-import.php:1381
+#: includes/collections/class-leiho-acf-import.php:1744
 msgid "ACF (or Secure Custom Fields) isn’t active."
 msgstr "ACF (ou Secure Custom Fields) n’est pas actif."
 
-#: includes/collections/class-leiho-acf-import.php:1389
+#: includes/collections/class-leiho-acf-import.php:1384
 msgid "Pages and posts can’t become Leiho collections: Leiho fields belong to a collection’s own content type. Their ACF fields stay in ACF."
 msgstr "Les pages et les articles ne peuvent pas devenir des collections Leiho : les champs Leiho appartiennent au type de contenu propre d’une collection. Leurs champs ACF restent dans ACF."
 
-#: includes/collections/class-leiho-acf-import.php:1392
+#: includes/collections/class-leiho-acf-import.php:1387
 msgid "This content type isn’t registered."
 msgstr "Ce type de contenu n’est pas enregistré."
 
-#: includes/collections/class-leiho-acf-import.php:1395
+#: includes/collections/class-leiho-acf-import.php:1390
 msgid "A Leiho collection already uses this identifier."
 msgstr "Une collection Leiho utilise déjà cet identifiant."
 
-#: includes/collections/class-leiho-acf-import.php:1398
+#: includes/collections/class-leiho-acf-import.php:1393
 msgid "Its identifier can’t name a Leiho collection (1 to 20 lowercase letters, digits or underscores, not reserved by WordPress)."
 msgstr "Son identifiant ne peut pas nommer une collection Leiho (1 à 20 minuscules, chiffres ou tirets bas, non réservé par WordPress)."
 
-#: includes/collections/class-leiho-acf-import.php:1401
+#: includes/collections/class-leiho-acf-import.php:1396
 msgid "No ACF field group is attached to this content type."
 msgstr "Aucun groupe de champs ACF n’est rattaché à ce type de contenu."
 
 #. translators: %s: field names.
-#: includes/collections/class-leiho-acf-import.php:1435
+#: includes/collections/class-leiho-acf-import.php:1430
 msgid "Some fields have a different shape depending on the entry, because several ACF groups define them differently: %s. One Leiho field can’t hold both shapes. Rename one of them in ACF (and move its values), then preview again."
 msgstr "Certains champs n’ont pas la même forme selon l’entrée, parce que plusieurs groupes ACF les définissent différemment : %s. Un champ Leiho ne peut pas avoir les deux formes. Renommez l’un d’eux dans ACF (et déplacez ses valeurs), puis relancez l’aperçu."
 
-#: includes/collections/class-leiho-acf-import.php:1463
+#: includes/collections/class-leiho-acf-import.php:1458
 msgid "None of its ACF fields can be carried over."
 msgstr "Aucun de ses champs ACF ne peut être repris."
 
-#: includes/collections/class-leiho-acf-import.php:1551
+#: includes/collections/class-leiho-acf-import.php:1546
 msgid "Fields with no Leiho equivalent are not carried over; their values leave the content API (they stay in ACF)."
 msgstr "Les champs sans équivalent dans Leiho ne sont pas repris ; leurs valeurs quittent l’API de contenu (elles restent dans ACF)."
 
-#: includes/collections/class-leiho-acf-import.php:1552
+#: includes/collections/class-leiho-acf-import.php:1547
 msgid "Clone fields without cloned fields are not carried over (a seamless clone is replaced by its fields, a clone shown as a group becomes a group)."
 msgstr "Les champs clones sans champ cloné ne sont pas repris (un clone transparent est remplacé par ses champs, un clone affiché en groupe devient un groupe)."
 
-#: includes/collections/class-leiho-acf-import.php:1553
+#: includes/collections/class-leiho-acf-import.php:1548
 msgid "Fields or layouts whose name can’t be used as an API name are not carried over."
 msgstr "Les champs ou mises en page dont le nom ne peut pas servir de nom d’API ne sont pas repris."
 
-#: includes/collections/class-leiho-acf-import.php:1554
+#: includes/collections/class-leiho-acf-import.php:1549
 msgid "Several groups define a field with the same name: Leiho keeps the last definition, as ACF served it."
 msgstr "Plusieurs groupes définissent un champ du même nom : Leiho garde la dernière définition, comme ACF la servait."
 
-#: includes/collections/class-leiho-acf-import.php:1555
+#: includes/collections/class-leiho-acf-import.php:1550
 msgid "Several groups define a field with the same name but a different shape, and ACF picks one or the other depending on the entry: these fields block the import."
 msgstr "Plusieurs groupes définissent un champ du même nom mais de forme différente, et ACF choisit l’un ou l’autre selon l’entrée : ces champs bloquent l’import."
 
-#: includes/collections/class-leiho-acf-import.php:1556
+#: includes/collections/class-leiho-acf-import.php:1551
 msgid "Some groups are attached to specific entries of this content type: their fields become available on every entry."
 msgstr "Certains groupes sont rattachés à des entrées précises de ce type de contenu : leurs champs deviennent disponibles sur toutes les entrées."
 
-#: includes/collections/class-leiho-acf-import.php:1557
+#: includes/collections/class-leiho-acf-import.php:1552
 msgid "Some existing values exceed limits that ACF only checks in its own editor: the Leiho collection raises (or lowers) these limits to fit them, so nothing is refused or lost. You can tighten them later in the collection settings."
 msgstr "Des valeurs existantes dépassent des limites qu’ACF ne vérifie que dans son propre éditeur : la collection Leiho élargit ces limites pour les accueillir, rien n’est refusé ni perdu. Vous pourrez les resserrer ensuite dans les réglages de la collection."
 
-#: includes/collections/class-leiho-acf-import.php:1558
+#: includes/collections/class-leiho-acf-import.php:1553
 msgid "Conditional logic is dropped: these fields are always shown in the editor."
 msgstr "La logique conditionnelle est abandonnée : ces champs sont toujours affichés dans l’éditeur."
 
-#: includes/collections/class-leiho-acf-import.php:1559
+#: includes/collections/class-leiho-acf-import.php:1554
 msgid "Default values are not carried over: existing entries keep their value, new entries start empty."
 msgstr "Les valeurs par défaut ne sont pas reprises : les entrées existantes gardent leur valeur, les nouvelles commencent vides."
 
-#: includes/collections/class-leiho-acf-import.php:1560
+#: includes/collections/class-leiho-acf-import.php:1555
 msgid "Location rules other than the content type are dropped: the fields of these groups become available on every entry."
 msgstr "Les règles d’emplacement autres que le type de contenu sont abandonnées : les champs de ces groupes deviennent disponibles sur chaque entrée."
 
-#: includes/collections/class-leiho-acf-import.php:1561
+#: includes/collections/class-leiho-acf-import.php:1556
 msgid "Media restrictions (size, dimensions, file types) are not enforced by Leiho."
 msgstr "Les restrictions de médias (poids, dimensions, types de fichier) ne sont pas appliquées par Leiho."
 
-#: includes/collections/class-leiho-acf-import.php:1562
+#: includes/collections/class-leiho-acf-import.php:1557
 msgid "Repeater options of ACF Pro (collapsed rows, pagination) are not carried over."
 msgstr "Les options de répéteur d’ACF Pro (lignes repliées, pagination) ne sont pas reprises."
 
-#: includes/collections/class-leiho-acf-import.php:1563
+#: includes/collections/class-leiho-acf-import.php:1558
 msgid "Bidirectional relationships stop updating the other side."
 msgstr "Les relations bidirectionnelles ne mettent plus à jour l’autre côté."
 
-#: includes/collections/class-leiho-acf-import.php:1564
+#: includes/collections/class-leiho-acf-import.php:1559
 msgid "Taxonomy filters of relation fields are not carried over."
 msgstr "Les filtres de taxonomie des champs de relation ne sont pas repris."
 
-#: includes/collections/class-leiho-acf-import.php:1565
+#: includes/collections/class-leiho-acf-import.php:1560
 msgid "Values typed by editors outside the declared choices (allow custom, other) are refused by Leiho: they are reported as failures."
 msgstr "Les valeurs saisies par les rédacteurs hors des choix déclarés (valeurs personnalisées, « autre ») sont refusées par Leiho : elles sont signalées comme échecs."
 
-#: includes/collections/class-leiho-acf-import.php:1581
+#: includes/collections/class-leiho-acf-import.php:1576
 msgid "The content type stays registered by the theme or the plugin that declares it; Leiho only takes over its fields."
 msgstr "Le type de contenu reste enregistré par le thème ou l’extension qui le déclare ; Leiho ne reprend que ses champs."
 
-#: includes/collections/class-leiho-acf-import.php:1587
+#: includes/collections/class-leiho-acf-import.php:1582
 msgid "The content type is declared in ACF: Leiho keeps it registered with the same settings if ACF is deactivated. Taxonomies declared in ACF are not taken over."
 msgstr "Le type de contenu est déclaré dans ACF : Leiho le garde enregistré avec les mêmes réglages si ACF est désactivé. Les taxonomies déclarées dans ACF ne sont pas reprises."
 
-#: includes/collections/class-leiho-acf-import.php:1593
+#: includes/collections/class-leiho-acf-import.php:1588
 msgid "Past revisions keep their ACF values only: restoring one restores the post, not the Leiho fields."
 msgstr "Les révisions passées ne gardent que leurs valeurs ACF : en restaurer une restaure le contenu, pas les champs Leiho."
 
-#: includes/collections/class-leiho-acf-import.php:1598
+#: includes/collections/class-leiho-acf-import.php:1593
 msgid "ACF data is never deleted. Values edited in Leiho after the import are not written back to ACF: going back to ACF restores the values of the import day."
 msgstr "Les données ACF ne sont jamais supprimées. Les valeurs modifiées dans Leiho après l’import ne sont pas réécrites dans ACF : revenir à ACF rétablit les valeurs du jour de l’import."
 
-#: includes/collections/class-leiho-acf-import.php:1743
+#: includes/collections/class-leiho-acf-import.php:1738
 msgid "This import hasn’t started."
 msgstr "Cet import n’a pas commencé."
 
-#: includes/collections/class-leiho-acf-import.php:1753
-#: includes/collections/class-leiho-acf-import.php:1828
+#: includes/collections/class-leiho-acf-import.php:1748
+#: includes/collections/class-leiho-acf-import.php:1823
 #: includes/collections/class-leiho-collections-rest.php:164
 #: includes/collections/class-leiho-collections-rest.php:190
 #: includes/collections/class-leiho-collections-rest.php:199
 msgid "Unknown collection."
 msgstr "Collection inconnue."
 
-#: includes/collections/class-leiho-acf-import.php:1822
-#: includes/collections/class-leiho-acf-import.php:2016
-#: includes/collections/class-leiho-acf-import.php:2168
+#: includes/collections/class-leiho-acf-import.php:1817
+#: includes/collections/class-leiho-acf-import.php:2011
+#: includes/collections/class-leiho-acf-import.php:2163
 msgid "This content type wasn’t imported from ACF."
 msgstr "Ce type de contenu n’a pas été importé d’ACF."
 
-#: includes/collections/class-leiho-acf-import.php:1825
+#: includes/collections/class-leiho-acf-import.php:1820
 msgid "Only an import waiting for review can be switched to Leiho this way."
 msgstr "Seul un import en attente d’examen peut être basculé vers Leiho de cette façon."
 
-#: includes/collections/class-leiho-acf-import.php:1975
+#: includes/collections/class-leiho-acf-import.php:1970
 msgid "A required value is empty."
 msgstr "Une valeur obligatoire est vide."
 
-#: includes/collections/class-leiho-acf-import.php:1976
+#: includes/collections/class-leiho-acf-import.php:1971
 msgid "The text is longer than the maximum length."
 msgstr "Le texte dépasse la longueur maximale."
 
-#: includes/collections/class-leiho-acf-import.php:1977
+#: includes/collections/class-leiho-acf-import.php:1972
 msgid "The value isn’t one of the choices."
 msgstr "La valeur ne fait pas partie des choix."
 
-#: includes/collections/class-leiho-acf-import.php:1978
+#: includes/collections/class-leiho-acf-import.php:1973
 msgid "The media can’t be used."
 msgstr "Le média ne peut pas être utilisé."
 
-#: includes/collections/class-leiho-acf-import.php:1979
+#: includes/collections/class-leiho-acf-import.php:1974
 msgid "A linked entry doesn’t exist or isn’t of an allowed type."
 msgstr "Une entrée liée n’existe pas ou n’est pas d’un type autorisé."
 
-#: includes/collections/class-leiho-acf-import.php:1980
+#: includes/collections/class-leiho-acf-import.php:1975
 msgid "A linked entry doesn’t exist."
 msgstr "Une entrée liée n’existe pas."
 
-#: includes/collections/class-leiho-acf-import.php:1981
+#: includes/collections/class-leiho-acf-import.php:1976
 msgid "The number is invalid."
 msgstr "Le nombre est invalide."
 
-#: includes/collections/class-leiho-acf-import.php:1982
+#: includes/collections/class-leiho-acf-import.php:1977
 msgid "The number is out of range."
 msgstr "Le nombre est hors des bornes."
 
-#: includes/collections/class-leiho-acf-import.php:1983
+#: includes/collections/class-leiho-acf-import.php:1978
 msgid "The date is invalid."
 msgstr "La date est invalide."
 
-#: includes/collections/class-leiho-acf-import.php:1984
+#: includes/collections/class-leiho-acf-import.php:1979
 msgid "The email address is invalid."
 msgstr "L’adresse e-mail est invalide."
 
-#: includes/collections/class-leiho-acf-import.php:1985
+#: includes/collections/class-leiho-acf-import.php:1980
 msgid "The color is invalid."
 msgstr "La couleur est invalide."
 
-#: includes/collections/class-leiho-acf-import.php:1986
+#: includes/collections/class-leiho-acf-import.php:1981
 msgid "The link is invalid."
 msgstr "Le lien est invalide."
 
-#: includes/collections/class-leiho-acf-import.php:1987
+#: includes/collections/class-leiho-acf-import.php:1982
 msgid "There are more rows than allowed."
 msgstr "Il y a plus de lignes qu’autorisé."
 
-#: includes/collections/class-leiho-acf-import.php:1988
+#: includes/collections/class-leiho-acf-import.php:1983
 msgid "There are fewer rows than required."
 msgstr "Il y a moins de lignes que le minimum."
 
-#: includes/collections/class-leiho-acf-import.php:1989
+#: includes/collections/class-leiho-acf-import.php:1984
 msgid "There are more items than allowed."
 msgstr "Il y a plus d’éléments qu’autorisé."
 
-#: includes/collections/class-leiho-acf-import.php:1990
+#: includes/collections/class-leiho-acf-import.php:1985
 msgid "A layout no longer exists."
 msgstr "Une mise en page n’existe plus."
 
-#: includes/collections/class-leiho-acf-import.php:1991
+#: includes/collections/class-leiho-acf-import.php:1986
 msgid "The database refused the value."
 msgstr "La base de données a refusé la valeur."
 
-#: includes/collections/class-leiho-acf-import.php:1994
+#: includes/collections/class-leiho-acf-import.php:1989
 msgid "The value was refused."
 msgstr "La valeur a été refusée."
 
 #. translators: 1: error message, 2: sub-field name.
-#: includes/collections/class-leiho-acf-import.php:1997
+#: includes/collections/class-leiho-acf-import.php:1992
 msgid "%1$s (sub-field “%2$s”)"
 msgstr "%1$s (sous-champ « %2$s »)"
 
-#: includes/collections/class-leiho-acf-import.php:2019
+#: includes/collections/class-leiho-acf-import.php:2014
 msgid "Activate ACF (or Secure Custom Fields) first: it serves the fields again after going back."
 msgstr "Activez d’abord ACF (ou Secure Custom Fields) : c’est lui qui sert de nouveau les champs après le retour."
 
-#: includes/collections/class-leiho-acf-import.php:2176
+#: includes/collections/class-leiho-acf-import.php:2171
 msgid "Set confirm to the content type to switch it to Leiho despite the failures and differences of its import."
 msgstr "Indiquez le type de contenu dans confirm pour le basculer vers Leiho malgré les échecs et les écarts de son import."
 
-#: includes/collections/class-leiho-acf-import.php:2185
+#: includes/collections/class-leiho-acf-import.php:2180
 msgid "Set confirm to the content type to go back to ACF. The Leiho values of this type are deleted."
 msgstr "Indiquez le type de contenu dans confirm pour revenir à ACF. Les valeurs Leiho de ce type sont supprimées."
 

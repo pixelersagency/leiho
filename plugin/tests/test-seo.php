@@ -25,6 +25,7 @@ class Leiho_Collections {
 	public static function for_post_type( $type ) { return isset( $GLOBALS['collections'][ $type ] ) ? $GLOBALS['collections'][ $type ] : null; }
 }
 
+require __DIR__ . '/../includes/class-leiho-text.php';
 require __DIR__ . '/../includes/class-leiho-seo.php';
 require __DIR__ . '/../includes/class-leiho-llms.php';
 
@@ -168,6 +169,9 @@ check( 'llms.txt : nom, description, rubrique, entrée', "# Example\n\n> Sites &
 check( 'llms.txt : liens .md sur demande', false !== strpos( Leiho_Llms::llms( $export, false, true ), '(https://example.com/docs/install.md)' ) );
 $full = Leiho_Llms::llms( $export, true );
 check( 'llms-full : contenu à la suite, entrée exclue absente', false !== strpos( $full, "Source: https://example.com/docs/install (updated 2026-02-03)\n\n# Install" ) && false === strpos( $full, 'Secret' ), $full );
+
+check( 'texte brut : « x<1 » et « <3 » ne sont pas des balises', 'x<1 et <3 : < 1 000 UFC/L' === Leiho_Seo::plain( 'x<1 et <3 : &lt; 1 000 UFC/L' ) );
+check( 'texte brut : balises retirées', 'Bonjour le monde' === Leiho_Seo::plain( '<p>Bonjour <b>le</b> monde</p><script>x()</script>' ) );
 
 echo $failed ? "\n$failed ÉCHEC(S)\n" : "\nTOUS LES TESTS PASSENT\n";
 exit( $failed ? 1 : 0 );

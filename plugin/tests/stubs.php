@@ -46,6 +46,7 @@ function is_wp_error( $t ) { return false; }
 function __( $s, $d = '' ) { return $s; }
 function _x( $s, $c, $d = '' ) { return $s; }
 
+require __DIR__ . '/../includes/class-leiho-text.php';
 require __DIR__ . '/../includes/adapters/interface-leiho-adapter.php';
 require __DIR__ . '/../includes/adapters/abstract-leiho-field-adapter.php';
 require __DIR__ . '/../includes/adapters/class-leiho-acf-adapter.php';

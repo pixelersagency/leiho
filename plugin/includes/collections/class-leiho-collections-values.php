@@ -362,7 +362,7 @@ class Leiho_Collections_Values {
 			return self::encode( $to, $raw );
 		}
 
-		$value = self::coerce( $raw, $to, $ok );
+		$value = self::coerce( $raw, $to, $ok, $from );
 		if ( ! $ok ) {
 			return null;
 		}
@@ -372,7 +372,7 @@ class Leiho_Collections_Values {
 	/**
 	 * Valeur brute quelconque → valeur brute du type cible.
 	 */
-	private static function coerce( $raw, $to, &$ok ) {
+	private static function coerce( $raw, $to, &$ok, $from = array() ) {
 		$ok = true;
 
 		// Les liens se lisent par leur URL.
@@ -426,6 +426,8 @@ class Leiho_Collections_Values {
 		}
 
 		$text = is_array( $raw ) ? '' : trim( (string) $raw );
+		// Texte et code : tels que saisis, espaces de début et de fin compris.
+		$plain = is_array( $raw ) ? '' : (string) $raw;
 
 		switch ( $to['type'] ) {
 			case 'number':
@@ -493,7 +495,7 @@ class Leiho_Collections_Values {
 				}
 				return array(
 					'url'    => $url,
-					'title'  => isset( $link['title'] ) && is_scalar( $link['title'] ) ? sanitize_text_field( (string) $link['title'] ) : '',
+					'title'  => isset( $link['title'] ) && is_scalar( $link['title'] ) ? Leiho_Text::clean( $link['title'] ) : '',
 					'target' => isset( $link['target'] ) && '_blank' === $link['target'] ? '_blank' : '',
 				);
 
@@ -505,6 +507,11 @@ class Leiho_Collections_Values {
 				return self::fits( $to, $text, $ok );
 
 			case 'richtext':
+				// Un texte brut devient du HTML : « < » et « & » échappés (sans
+				// doubler une entité déjà là, « &lt; » enregistré avant ce correctif).
+				if ( isset( $from['type'] ) && 'text' === $from['type'] ) {
+					$text = htmlspecialchars( $text, ENT_NOQUOTES, 'UTF-8', false );
+				}
 				// Un champ code garde son HTML tel quel ; en texte riche, il passe
 				// le même filtre qu'une saisie. Ce que le filtre retirerait reste
 				// dans la colonne archivée, rien n'est perdu.
@@ -515,11 +522,16 @@ class Leiho_Collections_Values {
 				return self::fits( $to, $text, $ok );
 
 			case 'text':
-				if ( sanitize_textarea_field( $text ) !== $text ) {
+				// Même nettoyage qu'une saisie (sauts de ligne admis, comme avant) :
+				// ce qu'il changerait (balises) reste dans la colonne archivée.
+				if ( Leiho_Text::clean( $plain, true ) !== $plain ) {
 					$ok = false;
 					return null;
 				}
-				return self::fits( $to, $text, $ok );
+				return self::fits( $to, $plain, $ok );
+
+			case 'code':
+				return self::fits( $to, $plain, $ok );
 
 			default:
 				return self::fits( $to, $text, $ok );

@@ -172,6 +172,7 @@ class Fake_WPDB {
 }
 $GLOBALS['wpdb'] = new Fake_WPDB();
 
+require __DIR__ . '/../includes/class-leiho-text.php';
 require __DIR__ . '/../includes/adapters/interface-leiho-adapter.php';
 require __DIR__ . '/../includes/adapters/abstract-leiho-field-adapter.php';
 require __DIR__ . '/../includes/adapters/class-leiho-acf-adapter.php';
@@ -456,6 +457,58 @@ check( 'vider un champ = NULL', array( 'tone' ) === $adapter->save_values( 2, ar
 check( 'select vide servi en chaîne vide', '' === $adapter->get_content( 2 )['tone'] );
 check( 'autre type de post ignoré', array() === $adapter->get_schema( 9 ) && array() === $adapter->get_content( 9 ) );
 
+/* --- Texte gardé tel que saisi (Leiho_Text) --- */
+// sanitize_text_field() changeait « < » en « &lt; » et retirait les espaces de
+// début et de fin : le front affichait « &lt; » et collait les mots.
+$cases = array(
+	'< 1 000 UFC/L'  => '< 1 000 UFC/L',
+	'a < b'          => 'a < b',
+	'x<1'            => 'x<1',
+	'<3'             => '<3',
+	'5 > 4'          => '5 > 4',
+	'&amp; already'  => '&amp; already',
+	'  lead'         => '  lead',
+	'trail  '        => 'trail  ',
+	' suite'         => ' suite',
+	'a  b'           => 'a  b',
+	'-10%de remise'  => '-10%de remise',
+	'a <b>x</b> b'   => 'a x b',
+	'<script>alert(1)</script>ok' => 'ok',
+	"c\x01d\x7Fe\tf" => "cde\tf",
+);
+foreach ( $cases as $in => $out ) {
+	$r = $adapter->save_values( 2, array( 'price' => $in ) );
+	check( 'texte tel que saisi : ' . json_encode( $in ), array( 'price' ) === $r['saved'] && $out === $adapter->get_content( 2 )['price'], array( $r, $adapter->get_content( 2 )['price'] ) );
+}
+$adapter->save_values( 2, array( 'price' => '< 1 000 UFC/L' ) );
+check( 'texte : « < » brut en base, pas d’entité', '< 1 000 UFC/L' === $GLOBALS['wpdb']->get_var( 'SELECT f_price FROM wp_leiho_service WHERE post_id = 2' ) );
+$adapter->save_values( 2, array( 'price' => "ligne 1\nligne 2" ) );
+check( 'texte sur une ligne : saut de ligne → espace', 'ligne 1 ligne 2' === $adapter->get_content( 2 )['price'] );
+check( 'balise jamais fermée retirée jusqu’à la fin', 'a ' === Leiho_Text::clean( 'a <img src=x onerror=alert(1)' ) );
+check( 'balise : attribut entre guillemets avec >', 't' === Leiho_Text::clean( '<a title="x>y">t</a>' ) );
+check( 'commentaire retiré', 'k' === Leiho_Text::clean( '<!-- c -->k' ) );
+check( 'textarea : sauts de ligne gardés, \r\n normalisés', "l1\n\nl2 " === Leiho_Text::clean( "l1\r\n\rl2 ", true ) );
+check( 'UTF-8 invalide : vide', '' === Leiho_Text::clean( "\xff\xfe" ) );
+check( 'balises imbriquées : pas de <script> reconstitué', false === strpos( Leiho_Text::clean( '<scr<script>x</script>ipt>alert(1)' ), '<script' ) );
+$r = $adapter->save_values( 2, array( 'price' => '   ' ) );
+check( 'espaces seuls : gardés (pas requis)', '   ' === $adapter->get_content( 2 )['price'], $r );
+$adapter->save_values( 2, array( 'price' => '120 €' ) ); // Valeur attendue par les migrations plus bas.
+$r = $adapter->save_values( 1, array( 'hero_title' => '   ' ) );
+check( 'espaces seuls : vide pour un champ requis', 'required' === $r['errors']['hero_title'], $r );
+
+// Libellé d'un lien : même règle qu'un texte sur une ligne.
+$adapter->save_values( 1, array( 'contact.cta' => array( 'url' => 'https://x.fr', 'title' => '< Retour ', 'target' => '' ) ) );
+check( 'lien : libellé tel que saisi', '< Retour ' === $adapter->get_content( 1 )['contact']['cta']['title'], $adapter->get_content( 1 )['contact'] );
+
+// Texte riche : « &lt; » (un « < » écrit comme texte) jamais doublé en « &amp;lt; ».
+$adapter->save_values( 1, array( 'sections.0.body' => '<p>&lt; 1 000 UFC/L &amp; plus</p>' ) );
+$schema_value = array_values( array_filter( $adapter->get_schema( 1 )[0]['fields'], function ( $x ) { return 'sections' === $x['path']; } ) )[0]['value'][0]['body'];
+check( 'texte riche : &lt; stocké tel quel', '<p>&lt; 1 000 UFC/L &amp; plus</p>' === $schema_value, $schema_value );
+$adapter->save_values( 1, array( 'sections.0.body' => $schema_value ) ); // Relu puis renvoyé par l'éditeur.
+$body = $adapter->get_content( 1 )['sections'][0]['body'];
+check( 'texte riche : aller-retour sans double encodage', false === strpos( $body, '&amp;lt;' ) && false !== strpos( $body, '&lt; 1 000 UFC/L &amp; plus' ), $body );
+check( 'texte riche : export sans double encodage', false === strpos( json_encode( $adapter->get_content( 1 ) ), '&amp;lt;' ) );
+
 /* =====================================================================
  * Migrations avec données
  * =================================================================== */
@@ -538,6 +591,10 @@ Leiho_Collections_Values::convert( 'javascript:alert(1)', array( 'type' => 'code
 check( 'code → lien javascript: : échec', false === $ok );
 Leiho_Collections_Values::convert( '<b>x</b>', array( 'type' => 'code' ), $to( array( 'name' => 'a', 'type' => 'text' ) ), $ok );
 check( 'code → texte avec balises : échec', false === $ok );
+check( 'texte → texte : espaces gardés', ' suite' === Leiho_Collections_Values::convert( ' suite', array( 'type' => 'text' ), $to( array( 'name' => 'a', 'type' => 'text' ) ), $ok ) && $ok );
+check( 'texte → texte riche : < et & échappés', 'a &lt; b &amp; c' === Leiho_Collections_Values::convert( 'a < b & c', array( 'type' => 'text' ), $to( array( 'name' => 'a', 'type' => 'richtext' ) ), $ok ) && $ok );
+check( 'texte → texte riche : entité d’avant le correctif pas doublée', '&lt; 1 000' === Leiho_Collections_Values::convert( '&lt; 1 000', array( 'type' => 'text' ), $to( array( 'name' => 'a', 'type' => 'richtext' ) ), $ok ) && $ok );
+check( 'code → texte : « < » isolé accepté', 'x < 1' === Leiho_Collections_Values::convert( 'x < 1', array( 'type' => 'code' ), $to( array( 'name' => 'a', 'type' => 'text' ) ), $ok ) && $ok );
 
 /* =====================================================================
  * Révisions

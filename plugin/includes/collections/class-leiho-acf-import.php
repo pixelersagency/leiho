@@ -1140,12 +1140,7 @@ class Leiho_ACF_Import {
 				case 'text':
 					if ( ! empty( $field['max_length'] ) && is_scalar( $value ) ) {
 						// Même nettoyage que l'éditeur avant de compter.
-						$text = (string) $value;
-						if ( ! empty( $field['multiline'] ) && function_exists( 'sanitize_textarea_field' ) ) {
-							$text = sanitize_textarea_field( $text );
-						} elseif ( empty( $field['multiline'] ) && function_exists( 'sanitize_text_field' ) ) {
-							$text = sanitize_text_field( $text );
-						}
+						$text   = Leiho_Text::clean( $value, ! empty( $field['multiline'] ) );
 						$length = function_exists( 'mb_strlen' ) ? mb_strlen( $text ) : strlen( $text );
 						if ( $length > (int) $field['max_length'] ) {
 							self::over( $found, $path, 'max_length', (int) $field['max_length'], $length, $post_id );

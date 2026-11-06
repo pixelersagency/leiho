@@ -319,7 +319,7 @@ Leiho Collections is a content model built into Leiho: "Strapi or Webflow collec
 
 - **Entries are WordPress posts** (one post type per collection): roles, drafts, scheduling, trash, revisions, the media library, SEO and multilingual plugins keep working.
 - **Field values live in one table per collection** (`wp_leiho_<collection>`), one row per entry, not in postmeta: typed, indexed columns for scalar fields, JSON for lists, blocks and groups. MySQL 5.7+, MariaDB and the SQLite drop-in.
-- **Field types**: text, rich text, code, number, boolean, date, date-time, select (single or multiple), slug, email, URL, color, image, file, gallery, link, reference (to another collection, one or many), list, blocks and group, nested freely.
+- **Field types**: text, rich text, code, number, boolean, date, date-time, select (single or multiple), slug, email, URL, color, image, file, gallery, link, reference (to another collection, one or many), list, blocks and group, nested freely. A text is stored as typed (`<`, `&` and surrounding spaces kept, HTML tags removed) and served as plain text: escape it when you render it, as frameworks do by default. A code field also keeps HTML tags; render it as text too.
 - **Schema as code**: export the schema to `leiho.schema.json`, keep it in your front-end repository, import it on another site.
 - **Safe migrations**: renaming a field is free (fields have a stable `key`), a type change copies values into a new column, and removed or retyped columns are archived, never dropped. `dry_run` shows the plan first.
 - **Revisions** include field values: restoring a revision restores the fields too.

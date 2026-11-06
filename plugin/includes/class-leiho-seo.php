@@ -401,7 +401,9 @@ class Leiho_Seo {
 		if ( ! is_string( $value ) ) {
 			return '';
 		}
-		$text = html_entity_decode( wp_strip_all_tags( $value ), ENT_QUOTES, 'UTF-8' );
+		// Leiho_Text::strip_tags() plutôt que wp_strip_all_tags() : un texte
+		// « x<1 » ou « <3 » n'est pas une balise et reste.
+		$text = html_entity_decode( Leiho_Text::strip_tags( $value ), ENT_QUOTES, 'UTF-8' );
 		return trim( preg_replace( '/\s+/u', ' ', $text ) );
 	}
 

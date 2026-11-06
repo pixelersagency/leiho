@@ -30,6 +30,7 @@ define( 'LEIHO_FILE', __FILE__ );
 define( 'LEIHO_DIR', plugin_dir_path( __FILE__ ) );
 define( 'LEIHO_URL', plugin_dir_url( __FILE__ ) );
 
+require_once LEIHO_DIR . 'includes/class-leiho-text.php';
 require_once LEIHO_DIR . 'includes/adapters/interface-leiho-adapter.php';
 require_once LEIHO_DIR . 'includes/adapters/abstract-leiho-field-adapter.php';
 require_once LEIHO_DIR . 'includes/adapters/class-leiho-acf-adapter.php';

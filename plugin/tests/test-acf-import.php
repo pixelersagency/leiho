@@ -224,6 +224,7 @@ class Fake_WPDB {
 }
 $GLOBALS['wpdb'] = new Fake_WPDB();
 
+require __DIR__ . '/../includes/class-leiho-text.php';
 require __DIR__ . '/../includes/adapters/interface-leiho-adapter.php';
 require __DIR__ . '/../includes/adapters/abstract-leiho-field-adapter.php';
 require __DIR__ . '/../includes/adapters/class-leiho-acf-adapter.php';
@@ -398,7 +399,18 @@ $GLOBALS['acf_values'][10] = array_merge(
 $GLOBALS['acf_values'][11] = array_merge( contenu( 11, 1 ), array( 'field_prix' => '89.5', 'field_vedette' => '0', 'field_badge' => 'Nouveau', 'field_niveau' => '' ) );
 $GLOBALS['acf_values'][12] = array_merge( contenu( 12, 2 ), array( 'field_niveau' => 'zzz', 'field_badge' => 'Nouveau' ) ); // Choix inconnu : échec.
 $GLOBALS['acf_values'][13] = array( 'field_h1' => 'Brouillon <b>gras</b>', 'field_badge' => 'Nouveau' ); // Texte réécrit par la validation : écart.
-$GLOBALS['acf_values'][20] = array_merge( contenu( 20, 3 ), array() );
+// Valeurs que sanitize_text_field() altérait (« < » → « &lt; », espaces de
+// début et de fin retirés) : importées à l'identique, aucun écart.
+$GLOBALS['acf_values'][20] = array_merge(
+	contenu( 20, 3 ),
+	array(
+		'field_camel'    => '< 1 000 UFC/L',
+		'field_hero'     => " suite
+x<1, <3, 5 > 4, &amp; déjà  ",
+		'field_stats'    => array( array( 'field_stats_n' => '< 1 000', 'field_stats_l' => ' suite' ) ),
+		'field_sections' => array( array( 'field_s_faq' => array( array( 'field_f_q' => 'Moins de 1 000 ? ', 'field_f_r' => '<p>&lt; 1 000 UFC/L</p>' ) ) ) ),
+	)
+);
 $GLOBALS['acf_values'][21] = array( 'field_h1' => str_repeat( 'x', 80 ) ); // Plus long que maxlength : limite élargie par l'aperçu.
 
 // Valeurs stockées par ACF : une méta de référence par valeur (compteur de l'aperçu).
@@ -497,6 +509,8 @@ $blocks = Leiho_ACF_Import::to_input( $acf['blocs'], $raw['field_blocs'] );
 check( 'flexible : _layout, layout disparu ignoré', array( 'texte', 'image-pleine', 'chiffres' ) === array_column( $blocks, '_layout' ) && 8 === $blocks[1]['image'] && 'Légende' === $blocks[1]['legendeImage'], $blocks );
 check( 'groupe', array( 'tel' => '04 72 00 00 00', 'ville' => 11 ) === Leiho_ACF_Import::to_input( $acf['coordonnees'], $raw['field_coord'] ) );
 check( 'forme canonique : 5 et 5.0 égaux', Leiho_ACF_Import::canonical( array( 'a' => 5.0 ) ) === Leiho_ACF_Import::canonical( array( 'a' => 5 ) ) );
+check( 'forme canonique honnête : espaces et entités comptent', Leiho_ACF_Import::canonical( ' suite' ) !== Leiho_ACF_Import::canonical( 'suite' ) && Leiho_ACF_Import::canonical( '< 1' ) !== Leiho_ACF_Import::canonical( '&lt; 1' ) );
+check( 'texte ACF passé tel quel à l\'écriture', '< 1 000 UFC/L' === Leiho_ACF_Import::to_input( $acf['h1'], '< 1 000 UFC/L' ) && ' suite' === Leiho_ACF_Import::to_input( $acf['h1'], ' suite' ) );
 check( 'DECIMAL entier relu en entier', 5 === Leiho_Collections_Values::number( '5.000000' ) && 89.5 === Leiho_Collections_Values::number( '89.500000' ) );
 
 /* =====================================================================
@@ -647,6 +661,10 @@ $record = Leiho_ACF_Import::start( 'pole' );
 while ( ! is_wp_error( $record ) && ! Leiho_ACF_Import::finished( $record ) ) { $record = Leiho_ACF_Import::step( 'pole', 10 ); }
 check( 'import sans échec ni écart : basculé directement', 'done' === $record['status'] && 0 === $record['failed'] && 0 === $record['different'] && 2 === $record['imported'] && 'leiho' === Leiho_ACF_Import::engine( 'pole' ), $record );
 check( 'valeur hors limite importée entière', str_repeat( 'x', 80 ) === served( 21 )['h1'] && json( $before[20] ) === json( served( 20 ) ) );
+$served = served( 20 );
+check( 'import : « < 1 000 UFC/L » identique', '< 1 000 UFC/L' === $served['heroTitle'] && '< 1 000' === $served['hero_stats'][0]['nombre'], $served );
+check( 'import : espaces de début et de fin gardés', ' suite' === $served['hero_stats'][0]['label'] && " suite\nx<1, <3, 5 > 4, &amp; déjà  " === $served['hero_body'] && 'Moins de 1 000 ? ' === $served['sections'][0]['faq'][0]['question'], $served );
+check( 'import : texte riche sans double encodage', false === strpos( json( $served ), '&amp;lt;' ) && false !== strpos( $served['sections'][0]['faq'][0]['reponse'], '&lt; 1 000 UFC/L' ), $served['sections'][0]['faq'][0] );
 check( 'limites gardées dans le rapport', 'h1' === $record['limits'][0]['path'] );
 Leiho_ACF_Import::rollback( 'pole' );
 

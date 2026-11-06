@@ -342,10 +342,9 @@ class Leiho_AI_Translate {
 		if ( 'html' === $format ) {
 			return trim( wp_kses_post( $text ) );
 		}
-		if ( 'multiline' === $format ) {
-			return trim( sanitize_textarea_field( $text ) );
-		}
-		return trim( sanitize_text_field( $text ) );
+		// Texte brut : « < » gardé tel quel (pas de « &lt; »), comme une saisie.
+		// Le trim retire les espaces ajoutés par le modèle, pas ceux du texte.
+		return trim( Leiho_Text::clean( $text, 'multiline' === $format ) );
 	}
 
 	/**

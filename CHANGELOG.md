@@ -2,6 +2,16 @@
 
 All notable changes to Leiho (called Okno until 1.0.0-beta.11) are documented here. The project follows [Semantic Versioning](https://semver.org/). The plugin and the bridge package share one version number.
 
+## [Unreleased]
+
+### Fixed
+
+- **Text fields keep what you typed.** Text fields (Leiho Collections text and multiline text, ACF text and textarea edited with Leiho, link labels) went through WordPress's `sanitize_text_field()`, which changed legitimate values: a `<` on its own was saved as `&lt;` (so "< 1 000 UFC/L" showed as "&lt; 1 000 UFC/L" on the site), leading and trailing spaces were removed (words stuck together when a front end builds a sentence from several fields), double spaces were merged and sequences such as `%de` were dropped. Values are now stored exactly as typed and escaped when they are displayed. What is still removed: HTML tags (their text and the spaces around them stay: `a <b>x</b> b` gives `a x b`; a tag left open, such as `a <img src=x`, is removed up to the end of the value), invalid UTF-8 and control characters; a single-line text still turns line breaks into spaces. Use a *code* field to keep HTML as typed. Values saved before this fix keep their `&lt;`: save them again (or run the ACF import again) to correct them.
+- **ACF import of such values reports no difference.** An ACF text such as "< 1 000 UFC/L" or " suite" now imports identically, so the import no longer stops in *needs review* because of them.
+- **Changing a text field into rich text escapes `<` and `&`.** The converted value displays the same text instead of being refused; an existing `&lt;` is not escaped twice.
+- **AI translations keep `<`** in text fields instead of writing `&lt;`, and search descriptions built from text fields keep `x<1` or `<3`.
+- **`llms.txt` and Markdown responses** are sent with `X-Content-Type-Options: nosniff`, so a browser never reads them as HTML.
+
 ## [1.0.0-rc.2] — 2026-11-06
 
 ### Fixed

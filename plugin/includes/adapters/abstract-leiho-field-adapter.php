@@ -823,10 +823,11 @@ abstract class Leiho_Field_Adapter implements Leiho_Adapter_Interface, Leiho_Con
 
 		switch ( $type ) {
 			case 'text':
-				return $this->within_length( $field, sanitize_text_field( (string) $value ), $error );
-
 			case 'textarea':
-				return $this->within_length( $field, sanitize_textarea_field( (string) $value ), $error );
+				// Texte gardé tel que saisi (ni entités, ni trim) : balises et
+				// caractères de contrôle retirés, échappement à l'affichage.
+				// Voir Leiho_Text::clean().
+				return $this->within_length( $field, Leiho_Text::clean( $value, 'textarea' === $type ), $error );
 
 			case 'wysiwyg':
 				return wp_kses_post( (string) $value );
@@ -1009,7 +1010,8 @@ abstract class Leiho_Field_Adapter implements Leiho_Adapter_Interface, Leiho_Con
 
 		return array(
 			'url'    => '' === $url ? '' : esc_url_raw( $url ),
-			'title'  => sanitize_text_field( (string) ( isset( $value['title'] ) ? $value['title'] : '' ) ),
+			// Libellé : texte brut sur une ligne, comme un champ text.
+			'title'  => Leiho_Text::clean( isset( $value['title'] ) ? $value['title'] : '' ),
 			'target' => '_blank' === $target ? '_blank' : '',
 		);
 	}

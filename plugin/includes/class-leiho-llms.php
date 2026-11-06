@@ -595,6 +595,8 @@ class Leiho_Llms {
 		}
 		$response = new WP_REST_Response( null, 200, $headers );
 		$response->header( 'Content-Type', $type . '; charset=utf-8' );
+		// Du texte, jamais interprété comme du HTML par un navigateur qui devine.
+		$response->header( 'X-Content-Type-Options', 'nosniff' );
 		add_filter(
 			'rest_pre_serve_request',
 			static function ( $served, $result ) use ( $response, $body ) {

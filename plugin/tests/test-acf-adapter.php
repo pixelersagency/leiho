@@ -119,5 +119,14 @@ assert_true( 'texte trop long refusé', 'too_long' === $result['errors']['titre'
 $result = $adapter->save_values( 1, array( 'titre' => str_repeat( 'é', 20 ) ) );
 assert_true( 'limite comptée en caractères, pas en octets', array( 'titre' ) === $result['saved'], $result );
 
+/* --- Texte ACF gardé tel que saisi (même moteur que les Collections) --- */
+$result = $adapter->save_values( 1, array( 'titre' => '< 1 000 UFC/L', 'reglages.adresse' => ' suite' ) );
+assert_true( 'texte : « < » isolé gardé, pas d\'entité', '< 1 000 UFC/L' === $GLOBALS['store']['field_titre'], $result );
+assert_true( 'texte : espace de début gardé', ' suite' === $GLOBALS['store']['field_reglages']['field_adresse'], $GLOBALS['store']['field_reglages'] );
+$adapter->save_values( 1, array( 'titre' => 'a <b>x</b> b<img src=x onerror=alert(1)' ) );
+assert_true( 'texte : balises retirées, espaces autour gardés', 'a x b' === $GLOBALS['store']['field_titre'], $GLOBALS['store'] );
+$adapter->save_values( 1, array( 'reglages.lien' => array( 'url' => 'https://a.fr', 'title' => '< Retour ' ) ) );
+assert_true( 'lien : libellé tel que saisi', '< Retour ' === $GLOBALS['store']['field_reglages']['field_lien']['title'], $GLOBALS['store']['field_reglages'] );
+
 echo empty( $GLOBALS['failed'] ) ? "\nTOUS LES TESTS PASSENT\n" : "\nÉCHECS\n";
 exit( empty( $GLOBALS['failed'] ) ? 0 : 1 );

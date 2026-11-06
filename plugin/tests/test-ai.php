@@ -202,6 +202,7 @@ class WP_Query {
 function mysql2date( $f, $d, $t = true ) { return '2026-11-04T10:00:00+00:00'; }
 abstract class Leiho_Field_Adapter {}
 
+require __DIR__ . '/../includes/class-leiho-text.php';
 require __DIR__ . '/../includes/class-leiho-activity.php';
 require __DIR__ . '/../includes/ai/class-leiho-ai-prompt.php';
 require __DIR__ . '/../includes/ai/class-leiho-ai-brand.php';
@@ -831,6 +832,7 @@ Leiho_Schema::$by_locale = array(
 	'en' => $tr_schema( 'Air audit', '<p>We <strong>measure</strong> the air.</p>', array( array( 'title' => 'Visit', 'image' => 5 ), array( 'title' => 'Report', 'image' => 6 ) ), '<div>x</div>' ),
 	'fr' => $tr_schema( 'Audit de l’air', '', array( array( 'title' => 'Visite', 'image' => 5 ), array( 'title' => '', 'image' => 6 ) ), '' ),
 );
+check( 'traduction : « < » gardé, pas d\'entité', '< 1 000 UFC/L' === Leiho_AI_Translate::clean( ' < 1 000 UFC/L ', 'text' ) && "a < b\nx<1" === Leiho_AI_Translate::clean( "a < b\nx<1\n", 'multiline' ) && 'a x' === Leiho_AI_Translate::clean( 'a <b>x</b>', 'text' ) );
 $units = Leiho_AI_Translate::units( 90, 'fr' );
 $by    = array_column( $units['units'], null, 'path' );
 check( 'traduction : textes traduisibles seulement (pas de code, pas de champ partagé)', array( '_title', 'intro', 'cta', 'steps.0.title', 'steps.1.title' ) === array_keys( $by ), array_keys( $by ) );
