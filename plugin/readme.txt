@@ -4,7 +4,7 @@ Tags: headless, acf, visual editor, nextjs, astro
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.0.0-rc.1
+Stable tag: 1.0.0-rc.2
 License: GPL-2.0-or-later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -48,6 +48,9 @@ Leiho removes its own settings, tokens, history table and internal post meta, an
 Parts of the Leiho app's layout and styles (three-pane Collections view, list rows, field settings, dialogs) are derived from Stacki (https://github.com/flowtricks/stacki), Copyright (c) 2026 Timothy Ricks, MIT License. The full license text ships in licenses/stacki-MIT.txt.
 
 == Changelog ==
+
+= 1.0.0-rc.2 =
+* Safer ACF import: a content type no longer switches to Leiho when values failed or differ (it waits in a "needs review" state), field groups attached to a single entry are detected, and values over an ACF limit are found before the import. Publishing with Coolify always rebuilds the site, and the headless robots.txt keeps media crawlable.
 
 = 1.0.0-rc.1 =
 * Languages for Leiho Collections: one entry for every language, translatable or shared fields, a language switch in the editor, translation with AI, and translation abilities for agents. Search and AI: schema.org data, descriptions and FAQ from your fields, llms.txt and Markdown for every entry. A security review of the whole plugin: protected content hidden from the content API, signed updates, safer agents, editor and bridge.
