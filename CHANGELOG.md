@@ -2,7 +2,7 @@
 
 All notable changes to Leiho (called Okno until 1.0.0-beta.11) are documented here. The project follows [Semantic Versioning](https://semver.org/). The plugin and the bridge package share one version number.
 
-## [Unreleased]
+## [1.0.0-rc.2] — 2026-11-06
 
 ### Fixed
 
@@ -11,11 +11,6 @@ All notable changes to Leiho (called Okno until 1.0.0-beta.11) are documented he
 - **Changing a text field into rich text escapes `<` and `&`.** The converted value displays the same text instead of being refused; an existing `&lt;` is not escaped twice.
 - **AI translations keep `<`** in text fields instead of writing `&lt;`, and search descriptions built from text fields keep `x<1` or `<3`.
 - **`llms.txt` and Markdown responses** are sent with `X-Content-Type-Options: nosniff`, so a browser never reads them as HTML.
-
-## [1.0.0-rc.2] — 2026-11-06
-
-### Fixed
-
 - **Publishing with Coolify rebuilds the site.** Coolify's webhook URL ends in `force=false`, and publishing content doesn't change the commit: Coolify reused the previous image and skipped the build, so published content never reached the site. Leiho now always asks for a fresh build.
 - **ACF import never switches a content type to Leiho when values failed or differ.** An import that ends with a refused value or a value served differently used to switch the type to Leiho anyway, so the content API could serve emptied fields and the next build would publish empty pages. Such an import now stops in a *needs review* state: ACF keeps serving the type, the report (failures and differences) stays available in the import window, the REST status and `wp leiho acf-import run`, which now exits with an error. Once reviewed, either go back to ACF (fix the values, then import again) or switch anyway with *Switch to Leiho anyway*, `POST /collections/import-acf/accept` or `wp leiho acf-import accept <type>` (`run --accept` does it in one go).
 - **ACF field groups attached to specific entries are part of the import.** A group shown on one entry only (location rule *Post is equal to …*) was ignored by the preview and the import. It is now listed (with its entries), and when such a group defines a field with the same name but a different shape than another group (a repeater here, a flexible content there), the preview names the field and refuses the import instead of losing values. `!=` rules don't attach a group to an entry.

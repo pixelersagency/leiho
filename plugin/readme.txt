@@ -50,7 +50,7 @@ Parts of the Leiho app's layout and styles (three-pane Collections view, list ro
 == Changelog ==
 
 = 1.0.0-rc.2 =
-* Safer ACF import: a content type no longer switches to Leiho when values failed or differ (it waits in a "needs review" state), field groups attached to a single entry are detected, and values over an ACF limit are found before the import. Publishing with Coolify always rebuilds the site, and the headless robots.txt keeps media crawlable.
+* Text fields keep what you typed (a "<" or leading and trailing spaces are no longer altered). Safer ACF import: a content type no longer switches to Leiho when values failed or differ (it waits in a "needs review" state), field groups attached to a single entry are detected, and values over an ACF limit are found before the import. Publishing with Coolify always rebuilds the site, and the headless robots.txt keeps media crawlable.
 
 = 1.0.0-rc.1 =
 * Languages for Leiho Collections: one entry for every language, translatable or shared fields, a language switch in the editor, translation with AI, and translation abilities for agents. Search and AI: schema.org data, descriptions and FAQ from your fields, llms.txt and Markdown for every entry. A security review of the whole plugin: protected content hidden from the content API, signed updates, safer agents, editor and bridge.
