@@ -838,6 +838,30 @@ class Leiho_Content {
 				return $post;
 			}
 		}
+
+		// « Champ qui contient l'URL » d'un type servi par Leiho Collections : la
+		// valeur est dans la table de la collection, pas en postmeta. Même borne.
+		$key = Leiho_Plugin::settings()['path_meta_key'];
+		foreach ( '' !== $key ? $types : array() as $type ) {
+			$field = Leiho_Url_Mapper::collection_field( $type, $key );
+			if ( ! $field ) {
+				continue;
+			}
+			global $wpdb;
+			$table  = Leiho_Collections_Store::ident( Leiho_Collections_Store::table( $field['id'] ) );
+			$column = Leiho_Collections_Store::ident( $field['column'] );
+			$marks  = implode( ', ', array_fill( 0, count( $variants ), '%s' ) );
+			$ids    = $wpdb->get_col( $wpdb->prepare( "SELECT `post_id` FROM {$table} WHERE {$column} IN ({$marks}) LIMIT 20", ...$variants ) ); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.DirectDatabaseQuery -- Table et colonne validées par le store ; valeurs préparées.
+			foreach ( (array) $ids as $id ) {
+				$post = get_post( (int) $id );
+				if ( ! $post || 'publish' !== $post->post_status || ( false === $protected && '' !== $post->post_password ) ) {
+					continue;
+				}
+				if ( untrailingslashit( $mapper->path( $post ) ) === untrailingslashit( $path ) ) {
+					return $post;
+				}
+			}
+		}
 		return null;
 	}
 

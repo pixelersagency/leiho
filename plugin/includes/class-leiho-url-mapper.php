@@ -44,7 +44,12 @@ class Leiho_Url_Mapper {
 
 		$settings = Leiho_Plugin::settings();
 		if ( '' !== $settings['path_meta_key'] ) {
-			$meta_path = get_post_meta( $post->ID, $settings['path_meta_key'], true );
+			// Type servi par Leiho Collections : le champ vit dans la table de la
+			// collection (la postmeta d'avant un import ACF n'est plus tenue à jour).
+			$meta_path = self::collection_value( $post, $settings['path_meta_key'] );
+			if ( null === $meta_path ) {
+				$meta_path = get_post_meta( $post->ID, $settings['path_meta_key'], true );
+			}
 			if ( is_string( $meta_path ) && '' !== trim( $meta_path ) ) {
 				return '/' . ltrim( trim( $meta_path ), '/' );
 			}
@@ -67,6 +72,55 @@ class Leiho_Url_Mapper {
 		);
 
 		return '/' . ltrim( $path, '/' );
+	}
+
+	/**
+	 * Champ de collection qui porte ce nom, si le type est servi par Leiho
+	 * Collections (collection native, ou import ACF basculé).
+	 *
+	 * @param string $post_type Post type.
+	 * @param string $name      Nom du champ (réglage path_meta_key).
+	 * @return array{id:string,key:string,column:string}|null null : lire la postmeta.
+	 */
+	public static function collection_field( $post_type, $name ) {
+		if ( '' === (string) $name || ! class_exists( 'Leiho_Collections' ) || ! class_exists( 'Leiho_Collections_Store' ) ) {
+			return null;
+		}
+		$collection = Leiho_Collections::for_post_type( (string) $post_type );
+		if ( ! $collection ) {
+			return null;
+		}
+		// Type importé depuis ACF mais pas encore basculé (ou à examiner) : ACF sert encore.
+		if ( class_exists( 'Leiho_ACF_Import' ) && 'acf' === Leiho_ACF_Import::engine( (string) $post_type ) ) {
+			return null;
+		}
+		$state = Leiho_Collections_Store::collection_state( $collection['id'] );
+		foreach ( isset( $collection['fields'] ) ? $collection['fields'] : array() as $field ) {
+			if ( isset( $field['name'], $field['key'] ) && $name === $field['name'] && isset( $state['columns'][ $field['key'] ]['column'] ) ) {
+				return array(
+					'id'     => $collection['id'],
+					'key'    => $field['key'],
+					'column' => $state['columns'][ $field['key'] ]['column'],
+				);
+			}
+		}
+		return null;
+	}
+
+	/**
+	 * Valeur du champ « chemin » lue dans la collection.
+	 *
+	 * @param WP_Post $post Post.
+	 * @param string  $name Nom du champ.
+	 * @return string|null null si le type n'a pas ce champ dans une collection servie.
+	 */
+	private static function collection_value( $post, $name ) {
+		$field = self::collection_field( $post->post_type, $name );
+		if ( ! $field ) {
+			return null;
+		}
+		$values = Leiho_Collections_Store::values( $field['id'], (int) $post->ID );
+		return isset( $values[ $field['key'] ] ) && is_scalar( $values[ $field['key'] ] ) ? (string) $values[ $field['key'] ] : '';
 	}
 
 	/**

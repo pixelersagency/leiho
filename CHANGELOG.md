@@ -2,6 +2,12 @@
 
 All notable changes to Leiho (called Okno until 1.0.0-beta.11) are documented here. The project follows [Semantic Versioning](https://semver.org/). The plugin and the bridge package share one version number.
 
+## [Unreleased]
+
+### Fixed
+
+- **"Field holding the URL" works for content types served by Leiho Collections.** The path setting read the field from WordPress post meta only. Once a type is served by a Leiho collection (a collection of its own, or an ACF import switched to Leiho), the field lives in the collection's table: entries created afterwards got no path, and a path changed in Leiho kept its old value, so the preview, the headless redirect and the `path` of the content API didn't match the front end. Leiho now reads the collection's field when the type has one with that name (post meta otherwise), and finds an entry by that path the same way.
+
 ## [1.0.0-rc.2] — 2026-11-06
 
 ### Fixed

@@ -86,7 +86,7 @@ function wp_parse_args( $a, $d ) { return array_merge( $d, (array) $a ); }
 class Leiho_Plugin {
 	public static function title( $p ) { return get_the_title( $p ); }
 	public static function settings() {
-		$settings = array( 'front_url' => '', 'url_patterns' => array( 'service' => '/services/{slug}' ), 'path_meta_key' => '', 'post_types' => array() );
+		$settings = array( 'front_url' => '', 'url_patterns' => array( 'service' => '/services/{slug}' ), 'path_meta_key' => isset( $GLOBALS['path_meta_key'] ) ? $GLOBALS['path_meta_key'] : '', 'post_types' => array() );
 		// Le vrai Leiho_Plugin::settings() passe par le filtre leiho_settings.
 		return class_exists( 'Leiho_Collections' ) ? Leiho_Collections::settings( $settings ) : $settings;
 	}
@@ -141,6 +141,9 @@ class Fake_WPDB {
 	public function get_row( $sql, $o = null ) {
 		$rows = $this->get_results( $sql );
 		return $rows ? $rows[0] : null;
+	}
+	public function get_col( $sql ) {
+		return array_map( 'reset', $this->get_results( $sql ) );
 	}
 	public function get_var( $sql ) {
 		$row = $this->get_row( $sql );
@@ -493,6 +496,23 @@ check( 'balises imbriquées : pas de <script> reconstitué', false === strpos( L
 $r = $adapter->save_values( 2, array( 'price' => '   ' ) );
 check( 'espaces seuls : gardés (pas requis)', '   ' === $adapter->get_content( 2 )['price'], $r );
 $adapter->save_values( 2, array( 'price' => '120 €' ) ); // Valeur attendue par les migrations plus bas.
+
+// « Champ qui contient l'URL » (path_meta_key) d'un type servi par Collections :
+// lu dans la table de la collection, pas en postmeta (retour Dyese).
+$adapter->save_values( 3, array( 'code' => 'air-surfaces' ) );
+$mapper                    = new Leiho_Url_Mapper();
+$GLOBALS['path_meta_key']  = 'code';
+check( 'chemin : champ de la collection', '/air-surfaces' === $mapper->path( get_post( 3 ) ), $mapper->path( get_post( 3 ) ) );
+check( 'chemin : chaque entrée a le sien', '/audit-seo' === $mapper->path( get_post( 2 ) ), $mapper->path( get_post( 2 ) ) );
+$adapter->save_values( 3, array( 'code' => 'air-et-surfaces' ) );
+Leiho_Collections_Store::flush();
+check( 'chemin : suit une modification dans Leiho', '/air-et-surfaces' === $mapper->path( get_post( 3 ) ), $mapper->path( get_post( 3 ) ) );
+$GLOBALS['path_meta_key']  = 'route';
+check( 'chemin : champ absent de la collection → postmeta puis motif', '/services/slug-3' === $mapper->path( get_post( 3 ) ) );
+check( 'collection_field : rien pour un type sans collection', null === Leiho_Url_Mapper::collection_field( 'page', 'code' ) );
+unset( $GLOBALS['path_meta_key'] );
+Leiho_Collections_Store::delete( 'service', 3 ); // L'entrée 3 n'avait pas de valeurs : les migrations plus bas comptent les lignes.
+Leiho_Collections_Store::flush();
 $r = $adapter->save_values( 1, array( 'hero_title' => '   ' ) );
 check( 'espaces seuls : vide pour un champ requis', 'required' === $r['errors']['hero_title'], $r );
 
