@@ -178,7 +178,10 @@ def main():
     # extensions avec le même domaine, mais xgettext ne la voit pas.
     with open(os.path.join(PLUGIN, 'leiho.php'), encoding='utf-8') as fh:
         m = re.search(r'^ \* Description:\s*(.+)$', fh.read(), re.M)
-    if m:
+    # Déjà présente si le code PHP réutilise la même chaîne (mise à jour) : pas de doublon.
+    with open(pot, encoding='utf-8') as fh:
+        known = fh.read()
+    if m and ('msgid "%s"' % po_escape(m.group(1).strip())) not in known:
         with open(pot, 'a', encoding='utf-8') as fh:
             fh.write('\n#. Description of the plugin\n#: leiho.php\nmsgid "%s"\nmsgstr ""\n' % po_escape(m.group(1).strip()))
 
