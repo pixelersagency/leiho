@@ -633,7 +633,9 @@ class Leiho_App {
 			}
 			$collection = class_exists( 'Leiho_Collections' ) ? Leiho_Collections::for_post_type( $name ) : null;
 			$import     = class_exists( 'Leiho_ACF_Import' ) ? Leiho_ACF_Import::record( $name ) : null;
-			// Pendant son import, un type reste servi (et présenté) par ACF.
+			// Pendant son import, et tant qu'un import en échec ou en écart
+			// attend d'être examiné (« review »), un type reste servi (et
+			// présenté) par ACF.
 			if ( $import && 'done' !== $import['status'] ) {
 				$collection = null;
 			}

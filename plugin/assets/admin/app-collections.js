@@ -427,7 +427,9 @@
 		return h( 'div', { class: 'leiho-detail__card' }, h( 'div', { class: 'leiho-danger-zone' }, [
 			h( 'div', {}, [
 				h( 'h3', { text: __( 'Go back to ACF', 'leiho' ) } ),
-				h( 'p', { class: 'leiho-muted', text: date
+				h( 'p', { class: 'leiho-muted', text: info.needs_review
+					? __( 'The import finished with failures or differences and waits for review: ACF still serves this content type. Open its entries to read the report and switch to Leiho, or go back to ACF.', 'leiho' )
+					: date
 					? /* translators: %s: date of the import. */
 					  sprintf( __( 'Imported from ACF on %s. ACF still has the values of that day: going back serves them again and deletes the Leiho values of this collection.', 'leiho' ), date )
 					: __( 'ACF still has the values of the import day: going back serves them again and deletes the Leiho values of this collection.', 'leiho' ) } ),

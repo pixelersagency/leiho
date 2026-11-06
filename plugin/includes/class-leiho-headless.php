@@ -84,8 +84,33 @@ class Leiho_Headless {
 		return $response;
 	}
 
+	/**
+	 * Rien à explorer sur le CMS… sauf les médias : un front headless sert
+	 * souvent ses images depuis /wp-content/uploads/ du CMS, elles doivent
+	 * rester indexables (Google Images, aperçus). Les pages du CMS restent
+	 * hors index par X-Robots-Tag.
+	 *
+	 * @return string
+	 */
 	public static function robots_txt() {
-		return "User-agent: *\nDisallow: /\n";
+		return "User-agent: *\nAllow: " . self::uploads_path() . "\nDisallow: /\n";
+	}
+
+	/**
+	 * Chemin des médias sur le CMS (« /wp-content/uploads/ » par défaut).
+	 *
+	 * @return string
+	 */
+	private static function uploads_path() {
+		$path = '';
+		if ( function_exists( 'wp_upload_dir' ) ) {
+			$uploads = wp_upload_dir( null, false );
+			if ( is_array( $uploads ) && ! empty( $uploads['baseurl'] ) ) {
+				$path = (string) wp_parse_url( $uploads['baseurl'], PHP_URL_PATH );
+			}
+		}
+		$path = '/' . trim( $path, '/' );
+		return '/' === $path ? '/wp-content/uploads/' : $path . '/';
 	}
 
 	/**

@@ -13,9 +13,13 @@ defined( 'ABSPATH' ) || exit;
  *    l'éditeur (Leiho_Collections::save_entry). Un échec n'arrête pas l'import :
  *    il est listé. Chaque entrée est vérifiée : la valeur servie par Leiho est
  *    comparée à celle que servait ACF.
- * 3. Bascule : l'import terminé, le type est servi par Leiho (option
- *    leiho_acf_import, post_type → état) ; les groupes ACF restent en place
- *    mais ne s'appliquent plus à ce type.
+ * 3. Bascule : l'import terminé sans échec ni écart, le type est servi par
+ *    Leiho (option leiho_acf_import, post_type → état « done ») ; les groupes
+ *    ACF restent en place mais ne s'appliquent plus à ce type. Avec un échec
+ *    ou un écart, l'import s'arrête en « review » : ACF sert toujours le type,
+ *    le rapport attend une décision (accept() : bascule quand même ;
+ *    rollback() : retour à ACF, puis nouvel import une fois les valeurs
+ *    corrigées).
  * 4. Retour : le type est rendu à ACF (valeurs d'origine, intactes) et la
  *    table Leiho supprimée. Ce qui a été modifié dans Leiho depuis l'import
  *    n'est pas réécrit dans ACF.
@@ -34,6 +38,14 @@ class Leiho_ACF_Import {
 
 	/** Échecs et écarts gardés dans le rapport (les compteurs restent exacts). */
 	const MAX_REPORTED = 200;
+
+	/** Entrées lues par l'aperçu pour relever les valeurs hors limites. */
+	const SCAN_LIMIT = 1000;
+
+	/** États d'un import : en cours, à examiner (ACF sert encore), basculé. */
+	const STATUS_RUNNING = 'running';
+	const STATUS_REVIEW  = 'review';
+	const STATUS_DONE    = 'done';
 
 	/** Types ACF repris tels quels ou presque : type ACF → type Leiho. */
 	const TYPE_MAP = array(
@@ -137,8 +149,20 @@ class Leiho_ACF_Import {
 	}
 
 	/**
+	 * L'import a-t-il fini de copier les entrées (basculé ou à examiner) ?
+	 *
+	 * @param array $record Enregistrement.
+	 * @return bool
+	 */
+	public static function finished( $record ) {
+		return is_array( $record ) && isset( $record['status'] ) && in_array( $record['status'], array( self::STATUS_DONE, self::STATUS_REVIEW ), true );
+	}
+
+	/**
 	 * Moteur qui sert les champs d'un type : « leiho » une fois l'import
-	 * terminé, « acf » pendant l'import, null si le type n'a jamais été importé.
+	 * basculé (« done »), « acf » pendant l'import et tant qu'un import en
+	 * échec ou en écart attend d'être examiné (« review »), null si le type
+	 * n'a jamais été importé.
 	 *
 	 * @param string $post_type Type.
 	 * @return string|null
@@ -150,7 +174,7 @@ class Leiho_ACF_Import {
 		}
 		// Collection retirée du schéma depuis (import d'un leiho.schema.json…) :
 		// ACF reprend la main plutôt que de laisser le type sans champs.
-		return 'done' === $record['status'] && class_exists( 'Leiho_Collections' ) && Leiho_Collections::get( (string) $post_type ) ? 'leiho' : 'acf';
+		return self::STATUS_DONE === $record['status'] && class_exists( 'Leiho_Collections' ) && Leiho_Collections::get( (string) $post_type ) ? 'leiho' : 'acf';
 	}
 
 	/**
@@ -185,6 +209,8 @@ class Leiho_ACF_Import {
 			'imported'     => (int) $record['imported'],
 			'failed'       => (int) $record['failed'],
 			'differences'  => (int) $record['different'],
+			'needs_review' => self::STATUS_REVIEW === $record['status'],
+			'can_accept'   => self::STATUS_REVIEW === $record['status'],
 			'can_rollback' => self::acf_available(),
 		);
 	}
@@ -246,10 +272,11 @@ class Leiho_ACF_Import {
 
 	/**
 	 * Groupes ACF actifs rattachés au type, dans l'ordre d'ACF (celui du
-	 * contenu servi).
+	 * contenu servi). Un groupe rattaché à des entrées précises du type
+	 * (« post == 104 ») en fait partie : ACF le sert sur ces entrées.
 	 *
 	 * @param string $post_type Type.
-	 * @return array<int,array{key:string,title:string,conditional:bool,location:array,fields:array}>
+	 * @return array<int,array{key:string,title:string,conditional:bool,entries:int[],location:array,fields:array}>
 	 */
 	public static function groups_for( $post_type ) {
 		if ( ! self::acf_available() ) {
@@ -262,17 +289,65 @@ class Leiho_ACF_Import {
 			}
 			$location = isset( $group['location'] ) ? $group['location'] : array();
 			$target   = Leiho_ACF_Adapter::targets( $location, $post_type );
-			if ( null === $target ) {
+			$entries  = self::entry_ids( $location, $post_type );
+			if ( null === $target && ! $entries ) {
 				continue;
 			}
 			$fields = acf_get_fields( $group );
 			$out[]  = array(
 				'key'         => (string) $group['key'],
 				'title'       => (string) $group['title'],
-				'conditional' => (bool) $target,
+				// Rattaché à certaines entrées seulement : sous condition.
+				'conditional' => null === $target ? true : (bool) $target,
+				'entries'     => $entries,
 				'location'    => $location,
 				'fields'      => is_array( $fields ) ? $fields : array(),
 			);
+		}
+		return $out;
+	}
+
+	/**
+	 * Entrées du type auxquelles une branche des règles ACF rattache le
+	 * groupe nommément (« post == 104 », « page == 12 »). Une branche est un
+	 * ET : elle ne désigne une entrée que si aucune de ses règles ne l'exclut
+	 * (« post_type == » un autre type, écran étranger au contenu, deux entrées
+	 * différentes). « post != 104 » ne rattache rien : il restreint seulement.
+	 *
+	 * @param array  $location  Règles ACF.
+	 * @param string $post_type Type.
+	 * @return int[]
+	 */
+	public static function entry_ids( $location, $post_type ) {
+		$content = array( 'post_type', 'post', 'page', 'post_template', 'post_status', 'page_template', 'page_type', 'page_parent', 'post_category', 'post_format', 'post_taxonomy' );
+		$out     = array();
+		foreach ( (array) $location as $branch ) {
+			$id    = 0;
+			$valid = true;
+			foreach ( (array) $branch as $rule ) {
+				$param    = isset( $rule['param'] ) ? (string) $rule['param'] : '';
+				$operator = isset( $rule['operator'] ) ? (string) $rule['operator'] : '==';
+				$value    = isset( $rule['value'] ) ? $rule['value'] : '';
+				if ( ! in_array( $param, $content, true ) ) {
+					$valid = false; // Options, utilisateur, taxonomie… : pas une entrée.
+					break;
+				}
+				if ( 'post_type' === $param ) {
+					if ( ( '==' === $operator && $value !== $post_type ) || ( '!=' === $operator && $value === $post_type ) ) {
+						$valid = false;
+						break;
+					}
+				} elseif ( ( 'post' === $param || 'page' === $param ) && '==' === $operator && is_numeric( $value ) ) {
+					if ( $id && (int) $value !== $id ) {
+						$valid = false; // Deux entrées dans un même ET : jamais vrai.
+						break;
+					}
+					$id = (int) $value;
+				}
+			}
+			if ( $valid && $id > 0 && $post_type === get_post_type( $id ) && ! in_array( $id, $out, true ) ) {
+				$out[] = $id;
+			}
 		}
 		return $out;
 	}
@@ -384,12 +459,21 @@ class Leiho_ACF_Import {
 		);
 
 		// Champs racine dans l'ordre des groupes. Même nom dans deux groupes :
-		// ACF sert la dernière définition à la place de la première.
+		// ACF sert la dernière définition à la place de la première — quand les
+		// deux groupes s'appliquent à toutes les entrées. Si l'un ne vaut que
+		// pour certaines entrées (règle d'emplacement, entrée nommée), chaque
+		// entrée a sa propre définition : deux formes différentes ne tiennent
+		// pas dans un seul champ Leiho (conflit, import refusé).
 		$roots      = array();
+		$origins    = array(); // nom → { title, conditional, shape } de la définition retenue.
+		$conflicts  = array();
 		$report     = array();
 		$root_taken = array();
 		foreach ( $groups as $group ) {
-			if ( ! empty( $group['conditional'] ) ) {
+			$entries = isset( $group['entries'] ) ? array_map( 'intval', (array) $group['entries'] ) : array();
+			if ( $entries ) {
+				self::lose( $ctx, 'entry_group', $group['title'] . ' (#' . implode( ', #', $entries ) . ')' );
+			} elseif ( ! empty( $group['conditional'] ) ) {
 				self::lose( $ctx, 'location', $group['title'] );
 			}
 			$nodes = array();
@@ -399,15 +483,32 @@ class Leiho_ACF_Import {
 				if ( null === $mapped['field'] ) {
 					continue;
 				}
-				if ( isset( $roots[ $mapped['field']['name'] ] ) ) {
-					self::lose( $ctx, 'duplicate', $mapped['field']['name'] );
+				$name  = $mapped['field']['name'];
+				$shape = self::shape( $mapped['field'] );
+				if ( isset( $roots[ $name ] ) ) {
+					$previous = $origins[ $name ];
+					if ( $previous['shape'] !== $shape && ( $previous['conditional'] || ! empty( $group['conditional'] ) ) ) {
+						self::lose( $ctx, 'conflict', $name . ' (' . $previous['title'] . ': ' . $previous['type'] . ', ' . $group['title'] . ': ' . $mapped['field']['type'] . ')' );
+						if ( ! in_array( $name, $conflicts, true ) ) {
+							$conflicts[] = $name;
+						}
+					} else {
+						self::lose( $ctx, 'duplicate', $name );
+					}
 				}
-				$roots[ $mapped['field']['name'] ] = $mapped['field'];
+				$roots[ $name ]   = $mapped['field'];
+				$origins[ $name ] = array(
+					'title'       => (string) $group['title'],
+					'conditional' => ! empty( $group['conditional'] ),
+					'shape'       => $shape,
+					'type'        => $mapped['field']['type'],
+				);
 			}
 			$report[] = array(
 				'key'         => $group['key'],
 				'title'       => $group['title'],
 				'conditional' => ! empty( $group['conditional'] ),
+				'entries'     => $entries,
 				'fields'      => $nodes,
 			);
 		}
@@ -427,10 +528,49 @@ class Leiho_ACF_Import {
 			'collection' => $collection,
 			'groups'     => $report,
 			'lost'       => $ctx['lost'],
+			'conflicts'  => $conflicts,
 			'counts'     => array(
 				'fields' => $ctx['fields'],
 			),
 		);
+	}
+
+	/**
+	 * Forme d'un champ Leiho : ce qui décide du JSON servi (type, multiple,
+	 * sous-champs, blocs), sans libellés ni limites.
+	 *
+	 * @param array $field Champ Leiho (build()).
+	 * @return string
+	 */
+	public static function shape( $field ) {
+		return (string) json_encode( self::shape_of( $field ) );
+	}
+
+	private static function shape_of( $field ) {
+		$out = array( 't' => isset( $field['type'] ) ? $field['type'] : '' );
+		if ( ! empty( $field['multiple'] ) ) {
+			$out['m'] = 1;
+		}
+		if ( isset( $field['fields'] ) && is_array( $field['fields'] ) ) {
+			$out['f'] = array();
+			foreach ( $field['fields'] as $sub ) {
+				$out['f'][ $sub['name'] ] = self::shape_of( $sub );
+			}
+			ksort( $out['f'] );
+		}
+		if ( isset( $field['blocks'] ) && is_array( $field['blocks'] ) ) {
+			$out['b'] = array();
+			foreach ( $field['blocks'] as $block ) {
+				$subs = array();
+				foreach ( $block['fields'] as $sub ) {
+					$subs[ $sub['name'] ] = self::shape_of( $sub );
+				}
+				ksort( $subs );
+				$out['b'][ $block['name'] ] = $subs;
+			}
+			ksort( $out['b'] );
+		}
+		return $out;
 	}
 
 	/**
@@ -963,6 +1103,185 @@ class Leiho_ACF_Import {
 	}
 
 	/* ---------------------------------------------------------------------
+	 * Valeurs hors limites (pure : testable sans WordPress)
+	 * ------------------------------------------------------------------- */
+
+	/**
+	 * Relève, dans les valeurs d'une entrée, ce qui dépasse une limite que
+	 * Leiho_Collections::save_entry() appliquera : lignes d'une liste ou de
+	 * blocs (max, min), blocs d'un type (max, min), éléments d'une galerie ou
+	 * d'une relation (max), longueur d'un texte (max_length), bornes d'un
+	 * nombre (min, max). ACF ne les vérifie que dans son écran d'édition : une
+	 * valeur écrite par code (import, update_field) peut les dépasser.
+	 * « required » n'est pas relevé : une valeur vide n'est jamais écrite par
+	 * l'import, donc jamais refusée.
+	 *
+	 * @param array  $fields  Champs Leiho (build()).
+	 * @param array  $values  nom => valeur d'écriture (to_input()).
+	 * @param int    $post_id Entrée.
+	 * @param array  $found   chemin|règle → { path, rule, limit, found, entries } (entrée/sortie).
+	 * @param string $prefix  Chemin du parent (« sections/colonnes »).
+	 * @return void
+	 */
+	public static function scan_limits( $fields, $values, $post_id, &$found, $prefix = '' ) {
+		if ( ! is_array( $values ) ) {
+			return;
+		}
+		foreach ( (array) $fields as $field ) {
+			$name = $field['name'];
+			if ( ! array_key_exists( $name, $values ) || null === $values[ $name ] ) {
+				continue;
+			}
+			$value = $values[ $name ];
+			$path  = '' === $prefix ? $name : $prefix . '/' . $name;
+			$max   = isset( $field['max'] ) && is_numeric( $field['max'] ) ? 0 + $field['max'] : null;
+			$min   = isset( $field['min'] ) && is_numeric( $field['min'] ) ? 0 + $field['min'] : null;
+			switch ( $field['type'] ) {
+				case 'text':
+					if ( ! empty( $field['max_length'] ) && is_scalar( $value ) ) {
+						// Même nettoyage que l'éditeur avant de compter.
+						$text = (string) $value;
+						if ( ! empty( $field['multiline'] ) && function_exists( 'sanitize_textarea_field' ) ) {
+							$text = sanitize_textarea_field( $text );
+						} elseif ( empty( $field['multiline'] ) && function_exists( 'sanitize_text_field' ) ) {
+							$text = sanitize_text_field( $text );
+						}
+						$length = function_exists( 'mb_strlen' ) ? mb_strlen( $text ) : strlen( $text );
+						if ( $length > (int) $field['max_length'] ) {
+							self::over( $found, $path, 'max_length', (int) $field['max_length'], $length, $post_id );
+						}
+					}
+					break;
+
+				case 'number':
+					if ( is_numeric( $value ) ) {
+						if ( null !== $max && $value > $max ) {
+							self::over( $found, $path, 'max', $max, 0 + $value, $post_id );
+						}
+						if ( null !== $min && $value < $min ) {
+							self::over( $found, $path, 'min', $min, 0 + $value, $post_id );
+						}
+					}
+					break;
+
+				case 'gallery':
+				case 'reference':
+					if ( is_array( $value ) && $max > 0 && count( $value ) > $max ) {
+						self::over( $found, $path, 'max', $max, count( $value ), $post_id );
+					}
+					break;
+
+				case 'group':
+					self::scan_limits( $field['fields'], $value, $post_id, $found, $path );
+					break;
+
+				case 'list':
+					if ( ! is_array( $value ) ) {
+						break;
+					}
+					if ( $max > 0 && count( $value ) > $max ) {
+						self::over( $found, $path, 'max', $max, count( $value ), $post_id );
+					}
+					if ( $min > 0 && count( $value ) < $min ) {
+						self::over( $found, $path, 'min', $min, count( $value ), $post_id );
+					}
+					foreach ( $value as $row ) {
+						self::scan_limits( $field['fields'], $row, $post_id, $found, $path );
+					}
+					break;
+
+				case 'blocks':
+					if ( ! is_array( $value ) ) {
+						break;
+					}
+					if ( $max > 0 && count( $value ) > $max ) {
+						self::over( $found, $path, 'max', $max, count( $value ), $post_id );
+					}
+					$blocks = array();
+					foreach ( $field['blocks'] as $block ) {
+						$blocks[ $block['name'] ] = $block;
+					}
+					$counts = array();
+					foreach ( $value as $row ) {
+						$layout = is_array( $row ) && isset( $row['_layout'] ) ? (string) $row['_layout'] : '';
+						if ( ! isset( $blocks[ $layout ] ) ) {
+							continue;
+						}
+						$counts[ $layout ] = isset( $counts[ $layout ] ) ? $counts[ $layout ] + 1 : 1;
+						self::scan_limits( $blocks[ $layout ]['fields'], $row, $post_id, $found, $path . '/' . $layout );
+					}
+					foreach ( $blocks as $layout => $block ) {
+						$count = isset( $counts[ $layout ] ) ? $counts[ $layout ] : 0;
+						if ( ! empty( $block['max'] ) && $count > (int) $block['max'] ) {
+							self::over( $found, $path . '/' . $layout, 'max', (int) $block['max'], $count, $post_id );
+						}
+						if ( ! empty( $block['min'] ) && $count < (int) $block['min'] ) {
+							self::over( $found, $path . '/' . $layout, 'min', (int) $block['min'], $count, $post_id );
+						}
+					}
+					break;
+			}
+		}
+	}
+
+	private static function over( &$found, $path, $rule, $limit, $value, $post_id ) {
+		$id = $path . '|' . $rule;
+		if ( ! isset( $found[ $id ] ) ) {
+			$found[ $id ] = array(
+				'path'    => $path,
+				'rule'    => $rule,
+				'limit'   => $limit,
+				'found'   => $value,
+				'entries' => array(),
+			);
+		}
+		// max, max_length : la plus grande valeur existante ; min : la plus petite.
+		$found[ $id ]['found'] = 'min' === $rule ? min( $found[ $id ]['found'], $value ) : max( $found[ $id ]['found'], $value );
+		if ( ! in_array( (int) $post_id, $found[ $id ]['entries'], true ) ) {
+			$found[ $id ]['entries'][] = (int) $post_id;
+		}
+	}
+
+	/**
+	 * Élargit les limites des champs à ce qui existe déjà : aucune valeur
+	 * n'est refusée par l'import, aucune ligne n'est perdue. Les limites
+	 * élargies sont listées dans l'aperçu ; on peut les resserrer ensuite dans
+	 * les réglages de la collection (les entrées hors limites devront alors
+	 * être corrigées à leur prochaine modification).
+	 *
+	 * @param array  $fields Champs Leiho (entrée/sortie).
+	 * @param array  $found  scan_limits().
+	 * @param string $prefix Chemin du parent.
+	 * @return void
+	 */
+	public static function relax_limits( &$fields, $found, $prefix = '' ) {
+		foreach ( $fields as &$field ) {
+			$path = '' === $prefix ? $field['name'] : $prefix . '/' . $field['name'];
+			foreach ( array( 'max', 'min', 'max_length' ) as $rule ) {
+				if ( isset( $found[ $path . '|' . $rule ] ) ) {
+					$field[ $rule ] = $found[ $path . '|' . $rule ]['found'];
+				}
+			}
+			if ( isset( $field['fields'] ) && is_array( $field['fields'] ) ) {
+				self::relax_limits( $field['fields'], $found, $path );
+			}
+			if ( isset( $field['blocks'] ) && is_array( $field['blocks'] ) ) {
+				foreach ( $field['blocks'] as &$block ) {
+					$block_path = $path . '/' . $block['name'];
+					foreach ( array( 'max', 'min' ) as $rule ) {
+						if ( isset( $found[ $block_path . '|' . $rule ] ) ) {
+							$block[ $rule ] = $found[ $block_path . '|' . $rule ]['found'];
+						}
+					}
+					self::relax_limits( $block['fields'], $found, $block_path );
+				}
+				unset( $block );
+			}
+		}
+		unset( $field );
+	}
+
+	/* ---------------------------------------------------------------------
 	 * Aperçu
 	 * ------------------------------------------------------------------- */
 
@@ -984,7 +1303,7 @@ class Leiho_ACF_Import {
 			$location = isset( $group['location'] ) ? $group['location'] : array();
 			$used     = false;
 			foreach ( $all as $type ) {
-				if ( null !== Leiho_ACF_Adapter::targets( $location, $type ) ) {
+				if ( null !== Leiho_ACF_Adapter::targets( $location, $type ) || self::entry_ids( $location, $type ) ) {
 					$used = true;
 					if ( ! in_array( $type, $types, true ) ) {
 						$types[] = $type;
@@ -1058,7 +1377,10 @@ class Leiho_ACF_Import {
 	private static function blocker( $post_type, $origin ) {
 		$record = self::record( $post_type );
 		if ( $record ) {
-			return 'done' === $record['status'] ? __( 'Already imported into Leiho.', 'leiho' ) : '';
+			if ( self::STATUS_REVIEW === $record['status'] ) {
+				return __( 'The import finished with failures or differences: ACF still serves this content type. Review the report, then switch to Leiho anyway or go back to ACF.', 'leiho' );
+			}
+			return self::STATUS_DONE === $record['status'] ? __( 'Already imported into Leiho.', 'leiho' ) : '';
 		}
 		if ( ! self::acf_available() ) {
 			return __( 'ACF (or Secure Custom Fields) isn’t active.', 'leiho' );
@@ -1103,7 +1425,38 @@ class Leiho_ACF_Import {
 		);
 
 		$errors = array();
+		$limits = array();
+		$found  = array();
+		$over   = array(); // Entrées ayant au moins une valeur hors limites.
+		$scan   = 0;
+		if ( '' === $reason && $built['conflicts'] ) {
+			$reason = sprintf(
+				/* translators: %s: field names. */
+				__( 'Some fields have a different shape depending on the entry, because several ACF groups define them differently: %s. One Leiho field can’t hold both shapes. Rename one of them in ACF (and move its values), then preview again.', 'leiho' ),
+				implode( ', ', $built['conflicts'] )
+			);
+		}
 		if ( '' === $reason ) {
+			// Valeurs existantes hors limites : les limites du schéma généré
+			// sont élargies à ce qui existe, rien n'est refusé ni perdu.
+			$scan = self::scan_entries( $post_type, $groups, $built['collection'], $found );
+			self::relax_limits( $built['collection']['fields'], $found );
+			foreach ( $found as $item ) {
+				foreach ( $item['entries'] as $id ) {
+					$over[ $id ] = true;
+				}
+				$item['count']   = count( $item['entries'] );
+				$item['entries'] = array_slice( $item['entries'], 0, 20 );
+				$limits[]        = $item;
+			}
+			if ( $limits ) {
+				$items = array();
+				foreach ( $limits as $item ) {
+					$items[] = sprintf( '%s: %s %s → %s (#%s)', $item['path'], $item['rule'], $item['limit'], $item['found'], implode( ', #', array_slice( $item['entries'], 0, 5 ) ) . ( $item['count'] > 5 ? ', …' : '' ) );
+				}
+				$built['lost']['limits'] = $items;
+			}
+
 			$ids = array_merge( class_exists( 'Leiho_Collections' ) ? Leiho_Collections::post_types() : array(), array( $post_type ) );
 			Leiho_Collections_Schema::normalize_collection( $built['collection'], '', $errors, $ids );
 			if ( ! $built['collection']['fields'] ) {
@@ -1122,13 +1475,50 @@ class Leiho_ACF_Import {
 			'groups'     => $built['groups'],
 			'lost'       => self::lost_messages( $built['lost'], $origin, $post_type ),
 			'collection' => $built['collection'],
+			'conflicts'  => $built['conflicts'],
+			'limits'     => $limits,
 			'counts'     => array(
 				'entries' => self::count_entries( $post_type ),
 				'fields'  => $built['counts']['fields'],
 				'values'  => self::count_values( $post_type, $groups ),
+				'scanned' => $scan,
+				'limits'  => count( $over ),
 			),
 			'status'     => $record ? $record['status'] : null,
 		);
+	}
+
+	/**
+	 * Lit les valeurs ACF des entrées (SCAN_LIMIT au plus) et relève celles
+	 * qui sortent des limites de la collection générée.
+	 *
+	 * @param string $post_type  Type.
+	 * @param array  $groups     Groupes.
+	 * @param array  $collection Collection générée.
+	 * @param array  $found      scan_limits() (sortie).
+	 * @return int Entrées lues.
+	 */
+	private static function scan_entries( $post_type, $groups, $collection, &$found ) {
+		global $wpdb;
+		$map = self::field_map_for( $groups, $collection );
+		if ( ! $map ) {
+			return 0;
+		}
+		$ids = $wpdb->get_col(
+			$wpdb->prepare(
+				"SELECT ID FROM {$wpdb->posts} WHERE post_type = %s AND post_status NOT IN ('auto-draft','inherit') ORDER BY ID ASC LIMIT %d",
+				$post_type,
+				self::SCAN_LIMIT
+			)
+		);
+		foreach ( $ids as $id ) {
+			$values = array();
+			foreach ( $map as $name => $field ) {
+				$values[ $name ] = self::to_input( $field, get_field( $field['key'], (int) $id, false ) );
+			}
+			self::scan_limits( $collection['fields'], $values, (int) $id, $found );
+		}
+		return count( $ids );
 	}
 
 	/**
@@ -1162,6 +1552,9 @@ class Leiho_ACF_Import {
 			'clone'          => __( 'Clone fields without cloned fields are not carried over (a seamless clone is replaced by its fields, a clone shown as a group becomes a group).', 'leiho' ),
 			'name'           => __( 'Fields or layouts whose name can’t be used as an API name are not carried over.', 'leiho' ),
 			'duplicate'      => __( 'Several groups define a field with the same name: Leiho keeps the last definition, as ACF served it.', 'leiho' ),
+			'conflict'       => __( 'Several groups define a field with the same name but a different shape, and ACF picks one or the other depending on the entry: these fields block the import.', 'leiho' ),
+			'entry_group'    => __( 'Some groups are attached to specific entries of this content type: their fields become available on every entry.', 'leiho' ),
+			'limits'         => __( 'Some existing values exceed limits that ACF only checks in its own editor: the Leiho collection raises (or lowers) these limits to fit them, so nothing is refused or lost. You can tighten them later in the collection settings.', 'leiho' ),
 			'conditional'    => __( 'Conditional logic is dropped: these fields are always shown in the editor.', 'leiho' ),
 			'default'        => __( 'Default values are not carried over: existing entries keep their value, new entries start empty.', 'leiho' ),
 			'location'       => __( 'Location rules other than the content type are dropped: the fields of these groups become available on every entry.', 'leiho' ),
@@ -1303,7 +1696,7 @@ class Leiho_ACF_Import {
 		}
 
 		$record = array(
-			'status'    => 'running',
+			'status'    => self::STATUS_RUNNING,
 			'origin'    => $origin,
 			'args'      => $args,
 			'groups'    => wp_list_pluck( $preview['groups'], 'key' ),
@@ -1319,6 +1712,7 @@ class Leiho_ACF_Import {
 			'different' => 0,
 			'failures'  => array(),
 			'diffs'     => array(),
+			'limits'    => $preview['limits'],
 		);
 		self::save_record( $post_type, $record );
 
@@ -1333,7 +1727,9 @@ class Leiho_ACF_Import {
 	}
 
 	/**
-	 * Copie le lot d'entrées suivant ; termine l'import après le dernier.
+	 * Copie le lot d'entrées suivant ; termine l'import après le dernier :
+	 * « done » (bascule vers Leiho) si chaque entrée a été reprise à
+	 * l'identique, « review » (ACF sert toujours) au moindre échec ou écart.
 	 *
 	 * @param string $post_type Type.
 	 * @param int    $limit     Entrées par lot.
@@ -1346,7 +1742,7 @@ class Leiho_ACF_Import {
 		if ( ! $record ) {
 			return new WP_Error( 'leiho_not_started', __( 'This import hasn’t started.', 'leiho' ), array( 'status' => 404 ) );
 		}
-		if ( 'done' === $record['status'] ) {
+		if ( self::finished( $record ) ) {
 			return $record;
 		}
 		if ( ! self::acf_available() ) {
@@ -1388,25 +1784,68 @@ class Leiho_ACF_Import {
 		remove_filter( 'leiho_collections_save_revision', '__return_false' );
 
 		if ( $all ) {
-			$record['status']   = 'done';
+			// Une valeur refusée ou servie autrement : jamais de bascule sans
+			// décision. Le front publierait sinon des pages vidées.
+			$record['status']   = $record['failed'] || $record['different'] ? self::STATUS_REVIEW : self::STATUS_DONE;
 			$record['finished'] = time();
 			$record['total']    = max( (int) $record['total'], (int) $record['done'] );
 		}
 		self::save_record( $post_type, $record );
 
-		if ( 'done' === $record['status'] ) {
-			if ( class_exists( 'Leiho_Content' ) ) {
-				Leiho_Content::invalidate();
-			}
+		if ( self::STATUS_DONE === $record['status'] ) {
+			self::switched( $post_type, $record );
+		} elseif ( self::STATUS_REVIEW === $record['status'] ) {
 			/**
-			 * Un import ACF → Leiho est terminé : le type est servi par Leiho.
+			 * Un import ACF → Leiho a fini de copier les entrées avec des échecs
+			 * ou des écarts : ACF sert toujours le type, le rapport attend une
+			 * décision (accept() ou rollback()).
 			 *
 			 * @param string $post_type Type.
 			 * @param array  $record    Enregistrement.
 			 */
-			do_action( 'leiho_acf_imported', $post_type, $record );
+			do_action( 'leiho_acf_import_needs_review', $post_type, $record );
 		}
 		return $record;
+	}
+
+	/**
+	 * Bascule quand même un import en « review » : Leiho sert le type avec
+	 * les valeurs importées (les échecs restent vides, les écarts servis tels
+	 * que Leiho les a gardés). Le rapport reste consultable.
+	 *
+	 * @param string $post_type Type.
+	 * @return array|WP_Error Enregistrement.
+	 */
+	public static function accept( $post_type ) {
+		$record = self::record( $post_type );
+		if ( ! $record ) {
+			return new WP_Error( 'leiho_not_imported', __( 'This content type wasn’t imported from ACF.', 'leiho' ), array( 'status' => 404 ) );
+		}
+		if ( self::STATUS_REVIEW !== $record['status'] ) {
+			return new WP_Error( 'leiho_not_in_review', __( 'Only an import waiting for review can be switched to Leiho this way.', 'leiho' ), array( 'status' => 409 ) );
+		}
+		if ( ! class_exists( 'Leiho_Collections' ) || ! Leiho_Collections::get( $post_type ) ) {
+			return new WP_Error( 'leiho_not_found', __( 'Unknown collection.', 'leiho' ), array( 'status' => 404 ) );
+		}
+		$record['status']      = self::STATUS_DONE;
+		$record['accepted']    = time();
+		$record['accepted_by'] = get_current_user_id();
+		self::save_record( $post_type, $record );
+		self::switched( $post_type, $record );
+		return $record;
+	}
+
+	private static function switched( $post_type, $record ) {
+		if ( class_exists( 'Leiho_Content' ) ) {
+			Leiho_Content::invalidate();
+		}
+		/**
+		 * Un import ACF → Leiho est terminé : le type est servi par Leiho.
+		 *
+		 * @param string $post_type Type.
+		 * @param array  $record    Enregistrement.
+		 */
+		do_action( 'leiho_acf_imported', $post_type, $record );
 	}
 
 	/**
@@ -1417,8 +1856,17 @@ class Leiho_ACF_Import {
 	 * @return array<string,array>
 	 */
 	private static function field_map( $post_type, $collection ) {
+		return self::field_map_for( self::groups_for( $post_type ), $collection );
+	}
+
+	/**
+	 * @param array $groups     Groupes (groups_for()).
+	 * @param array $collection Collection.
+	 * @return array<string,array>
+	 */
+	private static function field_map_for( $groups, $collection ) {
 		$acf = array();
-		foreach ( self::groups_for( $post_type ) as $group ) {
+		foreach ( $groups as $group ) {
 			foreach ( $group['fields'] as $field ) {
 				if ( isset( $field['name'] ) && '' !== (string) $field['name'] ) {
 					$acf[ (string) $field['name'] ] = $field; // Le dernier gagne, comme dans ACF.
@@ -1606,6 +2054,7 @@ class Leiho_ACF_Import {
 	 * GET  /collections/import-acf/preview?post_type=    aperçu
 	 * POST /collections/import-acf/run      {post_type}  démarre, puis copie un lot par appel
 	 * GET  /collections/import-acf/status?post_type=     état d'un import
+	 * POST /collections/import-acf/accept   {post_type, confirm}  bascule un import à examiner
 	 * POST /collections/import-acf/rollback {post_type, confirm}
 	 *
 	 * @return void
@@ -1655,6 +2104,16 @@ class Leiho_ACF_Import {
 			array(
 				'methods'             => WP_REST_Server::READABLE,
 				'callback'            => array( __CLASS__, 'rest_status' ),
+				'permission_callback' => $admin,
+				'args'                => $type,
+			)
+		);
+		register_rest_route(
+			Leiho_Rest::NS,
+			$base . '/accept',
+			array(
+				'methods'             => WP_REST_Server::CREATABLE,
+				'callback'            => array( __CLASS__, 'rest_accept' ),
 				'permission_callback' => $admin,
 				'args'                => $type,
 			)
@@ -1711,6 +2170,15 @@ class Leiho_ACF_Import {
 		return rest_ensure_response( self::public_record( $post_type, $record ) );
 	}
 
+	public static function rest_accept( WP_REST_Request $request ) {
+		$post_type = sanitize_key( (string) $request->get_param( 'post_type' ) );
+		if ( $post_type !== (string) $request->get_param( 'confirm' ) ) {
+			return new WP_Error( 'leiho_confirm', __( 'Set confirm to the content type to switch it to Leiho despite the failures and differences of its import.', 'leiho' ), array( 'status' => 400 ) );
+		}
+		$result = self::accept( $post_type );
+		return is_wp_error( $result ) ? $result : rest_ensure_response( self::public_record( $post_type, $result ) );
+	}
+
 	public static function rest_rollback( WP_REST_Request $request ) {
 		$post_type = sanitize_key( (string) $request->get_param( 'post_type' ) );
 		if ( $post_type !== (string) $request->get_param( 'confirm' ) ) {
@@ -1732,6 +2200,10 @@ class Leiho_ACF_Import {
 		$record['post_type'] = $post_type;
 		$record['started']   = gmdate( 'c', (int) $record['started'] );
 		$record['finished']  = $record['finished'] ? gmdate( 'c', (int) $record['finished'] ) : null;
+		if ( ! empty( $record['accepted'] ) ) {
+			$record['accepted'] = gmdate( 'c', (int) $record['accepted'] );
+		}
+		$record['needs_review'] = self::STATUS_REVIEW === $record['status'];
 		return $record;
 	}
 }
@@ -1745,6 +2217,7 @@ if ( defined( 'WP_CLI' ) && WP_CLI && class_exists( 'WP_CLI_Command' ) ) {
 	 *     wp leiho acf-import list
 	 *     wp leiho acf-import preview ville
 	 *     wp leiho acf-import run ville
+	 *     wp leiho acf-import accept ville --yes
 	 *     wp leiho acf-import rollback ville --yes
 	 */
 	class Leiho_ACF_Import_Command extends WP_CLI_Command {
@@ -1787,12 +2260,15 @@ if ( defined( 'WP_CLI' ) && WP_CLI && class_exists( 'WP_CLI_Command' ) ) {
 		 *
 		 * [--batch=<n>]
 		 * : Entries per batch. Default 100.
+		 *
+		 * [--accept]
+		 * : Switch to Leiho even if some values failed or differ. Without it, such an import waits for review and ACF keeps serving the type.
 		 */
 		public function run( $args, $assoc ) {
 			$type   = sanitize_key( $args[0] );
 			$batch  = isset( $assoc['batch'] ) ? max( 1, (int) $assoc['batch'] ) : 100;
 			$record = Leiho_ACF_Import::record( $type ) ? Leiho_ACF_Import::record( $type ) : Leiho_ACF_Import::start( $type );
-			while ( ! is_wp_error( $record ) && 'done' !== $record['status'] ) {
+			while ( ! is_wp_error( $record ) && ! Leiho_ACF_Import::finished( $record ) ) {
 				$record = Leiho_ACF_Import::step( $type, $batch );
 				if ( ! is_wp_error( $record ) ) {
 					WP_CLI::log( sprintf( '%d / %d', $record['done'], $record['total'] ) );
@@ -1807,7 +2283,42 @@ if ( defined( 'WP_CLI' ) && WP_CLI && class_exists( 'WP_CLI_Command' ) ) {
 			foreach ( $record['diffs'] as $diff ) {
 				WP_CLI::warning( sprintf( '#%d %s differs: %s → %s', $diff['post_id'], $diff['field'], $diff['before'], $diff['after'] ) );
 			}
-			WP_CLI::success( sprintf( '%d entries, %d imported, %d failures, %d differences.', $record['done'], $record['imported'], $record['failed'], $record['different'] ) );
+			foreach ( isset( $record['limits'] ) ? (array) $record['limits'] : array() as $limit ) {
+				WP_CLI::log( sprintf( 'Limit widened to fit existing values: %s %s %s → %s (%d entries).', $limit['path'], $limit['rule'], $limit['limit'], $limit['found'], $limit['count'] ) );
+			}
+			if ( 'review' === $record['status'] && ! empty( $assoc['accept'] ) ) {
+				$record = Leiho_ACF_Import::accept( $type );
+				if ( is_wp_error( $record ) ) {
+					WP_CLI::error( $record->get_error_message() );
+				}
+			}
+			$summary = sprintf( '%d entries, %d imported, %d failures, %d differences.', $record['done'], $record['imported'], $record['failed'], $record['different'] );
+			if ( 'review' === $record['status'] ) {
+				WP_CLI::error( sprintf( '%s Not switched to Leiho: ACF still serves %s. Fix the values in ACF, then `wp leiho acf-import rollback %s --yes` and run again; or switch anyway with `wp leiho acf-import accept %s`.', $summary, $type, $type, $type ) );
+			}
+			WP_CLI::success( $summary . ' ' . sprintf( '%s is served by Leiho.', $type ) );
+		}
+
+		/**
+		 * Switches an import that waits for review to Leiho, despite its failures and differences.
+		 *
+		 * <post_type>
+		 * : Content type.
+		 *
+		 * [--yes]
+		 * : Skip the confirmation.
+		 */
+		public function accept( $args, $assoc ) {
+			$type   = sanitize_key( $args[0] );
+			$record = Leiho_ACF_Import::record( $type );
+			if ( $record ) {
+				WP_CLI::confirm( sprintf( 'Switch %s to Leiho? %d failures (left empty) and %d differences are served as Leiho kept them.', $type, $record['failed'], $record['different'] ), $assoc );
+			}
+			$result = Leiho_ACF_Import::accept( $type );
+			if ( is_wp_error( $result ) ) {
+				WP_CLI::error( $result->get_error_message() );
+			}
+			WP_CLI::success( sprintf( '%s is served by Leiho.', $type ) );
 		}
 
 		/**

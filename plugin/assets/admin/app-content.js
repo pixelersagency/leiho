@@ -462,8 +462,10 @@
 	}
 
 	function importButton( t, withLabel ) {
-		var running = t.acfImport && 'running' === t.acfImport.status;
-		var label = running ? __( 'Resume the import into Leiho', 'leiho' ) : __( 'Import into Leiho', 'leiho' );
+		var status = t.acfImport ? t.acfImport.status : null;
+		var label = 'running' === status
+			? __( 'Resume the import into Leiho', 'leiho' )
+			: 'review' === status ? __( 'Review the import into Leiho', 'leiho' ) : __( 'Import into Leiho', 'leiho' );
 		if ( withLabel ) {
 			return h( 'button', { type: 'button', class: 'leiho-btn', onClick: function () {
 				openImport( t );
@@ -540,7 +542,13 @@
 				h( 'h3', { class: 'leiho-group-label' }, [
 					/* translators: %s: ACF field group title. */
 					sprintf( __( 'Field group “%s”', 'leiho' ), g.title ),
-					g.conditional ? h( 'span', { class: 'leiho-pill leiho-pill--warn', text: __( 'Extra location rules', 'leiho' ) } ) : null,
+					g.entries && g.entries.length
+						? h( 'span', { class: 'leiho-pill leiho-pill--warn', text: sprintf(
+							/* translators: %s: entry ids (#104, #106). */
+							__( 'Only on entries %s', 'leiho' ),
+							'#' + g.entries.join( ', #' )
+						) } )
+						: g.conditional ? h( 'span', { class: 'leiho-pill leiho-pill--warn', text: __( 'Extra location rules', 'leiho' ) } ) : null,
 				] ),
 				h( 'ul', { class: 'leiho-acf-map' }, rows ),
 			] ) );
@@ -589,9 +597,11 @@
 				h( 'span', { class: 'leiho-pill' + ( rec.failed ? ' leiho-pill--error' : '' ), text: sprintf( _n( '%d failure', '%d failures', rec.failed, 'leiho' ), rec.failed ) } ),
 				h( 'span', { class: 'leiho-pill' + ( rec.different ? ' leiho-pill--warn' : '' ), text: sprintf( _n( '%d difference', '%d differences', rec.different, 'leiho' ), rec.different ) } ),
 			] ),
-			h( 'p', { text: rec.failed || rec.different
-				? __( 'The content type is now served by Leiho. The values below were refused or changed by Leiho’s checks; ACF still holds the originals. Correct them in Leiho.', 'leiho' )
-				: __( 'The content type is now served by Leiho, and every entry gives the front end the same values as before.', 'leiho' ) } ),
+			'review' === rec.status
+				? h( 'div', { class: 'leiho-notice leiho-notice--warn', role: 'alert' }, h( 'p', { text: __( 'Not switched to Leiho: ACF still serves this content type, so the front end is unchanged. The values below were refused or changed by Leiho’s checks. Fix them in ACF, go back to ACF and import again — or switch to Leiho anyway and correct them in Leiho.', 'leiho' ) } ) )
+				: h( 'p', { text: rec.failed || rec.different
+					? __( 'The content type is now served by Leiho. The values below were refused or changed by Leiho’s checks; ACF still holds the originals. Correct them in Leiho.', 'leiho' )
+					: __( 'The content type is now served by Leiho, and every entry gives the front end the same values as before.', 'leiho' ) } ),
 		];
 		if ( rec.failures && rec.failures.length ) {
 			out.push( h( 'h3', { class: 'leiho-group-label', text: __( 'Failures', 'leiho' ) } ) );
@@ -639,15 +649,50 @@
 
 		function finish( rec ) {
 			show( resultBody( t.name, rec ) );
+			if ( 'review' === rec.status ) {
+				App.announce( __( 'Import finished with failures or differences: waiting for review.', 'leiho' ) );
+				setActions( dialog, [
+					{ label: __( 'Close', 'leiho' ), onClick: function () {
+						dialog.close();
+					} },
+					{ label: __( 'Go back to ACF', 'leiho' ), danger: true, onClick: function () {
+						rollbackImport( t.name, t.label );
+					} },
+					{ label: __( 'Switch to Leiho anyway', 'leiho' ), primary: true, onClick: accept },
+				] );
+				return;
+			}
 			App.announce( __( 'Import finished.', 'leiho' ) );
 			setActions( dialog, [ { label: __( 'Open the collection', 'leiho' ), primary: true, onClick: function () {
 				window.location.href = cfg.urls.collections + '&type=' + encodeURIComponent( t.name ) + '&panel=fields';
 			} } ] );
 		}
 
+		function accept() {
+			App.confirm( {
+				/* translators: %s: content type. */
+				title: sprintf( __( 'Switch “%s” to Leiho anyway?', 'leiho' ), t.label ),
+				message: __( 'Leiho serves this content type from now on. Refused values stay empty and differing values are served as Leiho kept them: the front end changes for these entries. ACF keeps its values; you can still go back to ACF.', 'leiho' ),
+				confirmLabel: __( 'Switch to Leiho', 'leiho' ),
+				danger: true,
+				typeToConfirm: t.name,
+			} ).then( function ( ok ) {
+				if ( ! ok ) {
+					return;
+				}
+				App.api( { path: IMPORT_API + '/accept', method: 'POST', data: { post_type: t.name, confirm: t.name } } )
+					.then( function ( rec ) {
+						finish( rec );
+					} )
+					.catch( function ( err ) {
+						App.toast( App.errorMessage( err, __( 'Couldn’t switch to Leiho.', 'leiho' ) ), true );
+					} );
+			} );
+		}
+
 		function run() {
 			return App.api( { path: IMPORT_API + '/run', method: 'POST', data: { post_type: t.name } } ).then( function ( rec ) {
-				if ( 'done' === rec.status ) {
+				if ( 'done' === rec.status || 'review' === rec.status ) {
 					finish( rec );
 					return;
 				}
@@ -676,6 +721,14 @@
 
 		if ( t.acfImport && 'running' === t.acfImport.status ) {
 			start();
+			return;
+		}
+		if ( t.acfImport && 'review' === t.acfImport.status ) {
+			App.api( { path: IMPORT_API + '/status?post_type=' + encodeURIComponent( t.name ) } )
+				.then( finish )
+				.catch( function ( err ) {
+					show( h( 'div', { class: 'leiho-notice leiho-notice--error', role: 'alert' }, h( 'p', { text: App.errorMessage( err, __( 'Couldn’t read the import report.', 'leiho' ) ) } ) ) );
+				} );
 			return;
 		}
 
