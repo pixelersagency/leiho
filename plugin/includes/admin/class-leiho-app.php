@@ -649,7 +649,7 @@ class Leiho_App {
 				'singleton'  => $collection && 'singleton' === $collection['kind'],
 				// Une collection sans chemin (témoignages, réglages…) n'a pas de page
 				// sur le site : elle s'édite en formulaire.
-				'hasPages'   => $collection && empty( $collection['external'] ) ? ! empty( $settings['url_patterns'][ $name ] ) : true,
+				'hasPages'   => $collection && empty( $collection['external'] ) ? Leiho_Admin::has_pages( $name ) : true,
 				// Type déclaré hors de Leiho (thème, extension, ACF) dont Leiho a repris les champs.
 				'external'   => $collection && ! empty( $collection['external'] ),
 				// Champs ACF importables dans Leiho Collections (administrateurs).

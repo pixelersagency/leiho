@@ -343,14 +343,50 @@ class Leiho_Admin {
 	 * @return string[]
 	 */
 	public static function form_types() {
-		$settings = Leiho_Plugin::settings();
-		$out      = array();
+		$out = array();
 		foreach ( Leiho_Collections::post_types() as $type ) {
-			if ( empty( $settings['url_patterns'][ $type ] ) ) {
+			if ( ! self::has_pages( $type ) ) {
 				$out[] = $type;
 			}
 		}
 		return $out;
+	}
+
+	/**
+	 * Les entrées de ce type ont-elles une page sur le site ? Oui pour tout
+	 * type hors Collections. Pour une collection : un motif d'URL, ou le champ
+	 * « qui contient l'URL » parmi ses champs, ou des entrées qui portent leur
+	 * propre adresse (_leiho_path, cas d'un import ACF sans motif). Sans rien
+	 * de tout ça (témoignages, réglages…), elle s'édite en formulaire.
+	 *
+	 * @param string $type Post type.
+	 * @return bool
+	 */
+	public static function has_pages( $type ) {
+		static $cache = array();
+		$settings = Leiho_Plugin::settings();
+		$key      = md5( wp_json_encode( array( $type, $settings['url_patterns'], $settings['path_meta_key'] ) ) );
+		if ( isset( $cache[ $key ] ) ) {
+			return $cache[ $key ];
+		}
+		if ( ! class_exists( 'Leiho_Collections' ) || ! Leiho_Collections::for_post_type( $type ) || ! empty( $settings['url_patterns'][ $type ] ) ) {
+			return $cache[ $key ] = true;
+		}
+		if ( '' !== $settings['path_meta_key'] && Leiho_Url_Mapper::collection_field( $type, $settings['path_meta_key'] ) ) {
+			return $cache[ $key ] = true;
+		}
+		$with_path = get_posts(
+			array(
+				'post_type'      => $type,
+				'post_status'    => 'any',
+				'posts_per_page' => 1,
+				'fields'         => 'ids',
+				'meta_key'       => Leiho_Url_Mapper::META_PATH, // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key -- Une ligne, une fois par requête.
+				'meta_compare'   => '!=',
+				'meta_value'     => '', // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_value
+			)
+		);
+		return $cache[ $key ] = ! empty( $with_path );
 	}
 
 	/**

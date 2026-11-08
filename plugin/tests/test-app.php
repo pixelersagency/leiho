@@ -13,7 +13,7 @@ define( 'LEIHO_FILE', LEIHO_DIR . 'leiho.php' );
 define( 'LEIHO_VERSION', 'test' );
 
 $GLOBALS['caps']     = array( 'edit_posts' => true );
-$GLOBALS['settings'] = array( 'editor_landing' => true, 'post_types' => array( 'page' ), 'url_patterns' => array() );
+$GLOBALS['settings'] = array( 'editor_landing' => true, 'post_types' => array( 'page' ), 'url_patterns' => array(), 'path_meta_key' => '' );
 $GLOBALS['hooks']    = array();
 $GLOBALS['routes']   = array();
 $GLOBALS['pages']    = array();
@@ -83,7 +83,15 @@ function plugin_basename( $f ) { return 'leiho/leiho.php'; }
 function get_post_type( $id ) { return isset( $GLOBALS['post_types'][ $id ] ) ? $GLOBALS['post_types'][ $id ] : false; }
 final class Leiho_Collections {
 	public static function post_types() { return array( 'temoignage', 'service' ); }
+	public static function for_post_type( $t ) { return in_array( $t, self::post_types(), true ) ? array( 'id' => $t ) : null; }
 }
+final class Leiho_Url_Mapper {
+	const META_PATH = '_leiho_path';
+	// Champ « qui contient l'URL » présent dans la collection : réglé par le test.
+	public static function collection_field( $type, $name ) { return isset( $GLOBALS['path_fields'][ $type ] ) && $name === $GLOBALS['path_fields'][ $type ] ? array( 'id' => $type ) : null; }
+}
+// Entrées portant _leiho_path, par type.
+function get_posts( $args ) { return ! empty( $GLOBALS['with_path'][ $args['post_type'] ] ) ? array( 1 ) : array(); }
 $GLOBALS['post_types'] = array( 12 => 'temoignage', 30 => 'service', 40 => 'page' );
 
 require LEIHO_DIR . 'includes/admin/class-leiho-icons.php';
@@ -145,6 +153,17 @@ check( 'collection sans URL : son entrée dans Collections', $base . '&type=temo
 check( 'collection avec URL : éditeur visuel', 'https://wp.test/wp-admin/admin.php?page=leiho&view=editor&post=30' === Leiho_Admin::edit_url( 30 ) );
 check( 'page : éditeur visuel', 'https://wp.test/wp-admin/admin.php?page=leiho&view=editor&post=40' === Leiho_Admin::edit_url( 40 ) );
 $GLOBALS['settings']['url_patterns'] = array();
+// Sans motif, mais chemin porté par un champ de la collection ou par _leiho_path (import ACF, retour Dyese).
+$GLOBALS['settings']['path_meta_key'] = 'route';
+$GLOBALS['path_fields']               = array( 'service' => 'route' );
+check( 'collection, champ URL : éditeur visuel', 'https://wp.test/wp-admin/admin.php?page=leiho&view=editor&post=30' === Leiho_Admin::edit_url( 30 ), Leiho_Admin::edit_url( 30 ) );
+check( 'form_types sans le type à champ URL', array( 'temoignage' ) === Leiho_Admin::form_types(), Leiho_Admin::form_types() );
+$GLOBALS['path_fields'] = array();
+$GLOBALS['with_path']   = array( 'service' => true );
+check( 'collection, entrées avec _leiho_path : éditeur visuel', 'https://wp.test/wp-admin/admin.php?page=leiho&view=editor&post=30' === Leiho_Admin::edit_url( 30 ) );
+$GLOBALS['with_path'] = array();
+$GLOBALS['settings']['path_meta_key'] = ''; // Nouvelle clé de cache (le cache vaut pour une requête).
+check( 'collection sans aucun chemin : formulaire', $base . '&type=service&id=30' === Leiho_Admin::edit_url( 30 ), Leiho_Admin::edit_url( 30 ) );
 
 /* --- Anciennes pages --- */
 

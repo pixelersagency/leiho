@@ -2,6 +2,12 @@
 
 All notable changes to Leiho (called Okno until 1.0.0-beta.11) are documented here. The project follows [Semantic Versioning](https://semver.org/). The plugin and the bridge package share one version number.
 
+## [Unreleased]
+
+### Fixed
+
+- **The visual editor opens collections whose pages get their address from a field.** A Leiho collection without a URL pattern was treated as having no pages on the site and always opened as a form, even when its entries got their path from the "Field holding the URL" setting or from their own address (typical after an ACF import). A collection now has pages when it has a URL pattern, when the field holding the URL is one of its fields, or when its entries carry their own address.
+
 ## [1.0.0-rc.3] — 2026-11-06
 
 ### Fixed
