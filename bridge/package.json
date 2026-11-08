@@ -1,6 +1,6 @@
 {
 	"name": "leiho",
-	"version": "1.0.0-rc.3",
+	"version": "1.0.0-rc.4",
 	"description": "Pont postMessage de l'éditeur visuel Leiho : rend n'importe quel site (React, Next.js, Remix, Vite, Nuxt, SvelteKit, Astro, HTML) éditable depuis WordPress. Zéro dépendance, inactif hors de l'éditeur.",
 	"keywords": [
 		"wordpress",

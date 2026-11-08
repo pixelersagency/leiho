@@ -4,7 +4,7 @@ Tags: headless, acf, visual editor, nextjs, astro
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.0.0-rc.3
+Stable tag: 1.0.0-rc.4
 License: GPL-2.0-or-later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -48,6 +48,9 @@ Leiho removes its own settings, tokens, history table and internal post meta, an
 Parts of the Leiho app's layout and styles (three-pane Collections view, list rows, field settings, dialogs) are derived from Stacki (https://github.com/flowtricks/stacki), Copyright (c) 2026 Timothy Ricks, MIT License. The full license text ships in licenses/stacki-MIT.txt.
 
 == Changelog ==
+
+= 1.0.0-rc.4 =
+* The visual editor opens collections whose pages get their address from a field or from their own address (typical after an ACF import) instead of sending them to the form view.
 
 = 1.0.0-rc.3 =
 * The "Field holding the URL" setting reads the field from the collection when a content type is served by Leiho Collections, so new and edited entries get the right path.
