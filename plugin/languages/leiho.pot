@@ -5636,20 +5636,56 @@ msgstr ""
 msgid "These tables were left as they were, because a Leiho table with the same name already holds data: %s"
 msgstr ""
 
-#: includes/class-leiho-login.php:95
+#: includes/class-leiho-login.php:92
 msgid "The login address must be 4 to 50 characters long."
 msgstr ""
 
-#: includes/class-leiho-login.php:98
+#: includes/class-leiho-login.php:95
 msgid "This login address is reserved by WordPress or too easy to guess."
 msgstr ""
 
-#: includes/class-leiho-login.php:101
+#: includes/class-leiho-login.php:98
 msgid "A page already uses this address."
 msgstr ""
 
-#: includes/class-leiho-login.php:249
-msgid "Edited with Leiho"
+#: includes/class-leiho-login.php:274
+msgid "Reset your password"
+msgstr ""
+
+#: includes/class-leiho-login.php:275
+msgid "Enter your username or e-mail address: you will receive a link to choose a new password."
+msgstr ""
+
+#: includes/class-leiho-login.php:278
+msgid "Choose a new password"
+msgstr ""
+
+#: includes/class-leiho-login.php:282
+msgid "Create an account"
+msgstr ""
+
+#. translators: %s: site name.
+#: includes/class-leiho-login.php:284
+#, php-format
+msgid "on %s"
+msgstr ""
+
+#: includes/class-leiho-login.php:287
+msgid "Check your inbox"
+msgstr ""
+
+#: includes/class-leiho-login.php:291
+msgid "Log in"
+msgstr ""
+
+#. translators: %s: site name.
+#: includes/class-leiho-login.php:293
+#, php-format
+msgid "to %s"
+msgstr ""
+
+#: includes/class-leiho-login.php:347
+msgid "Edited with"
 msgstr ""
 
 #: includes/class-leiho-native-fields.php:94

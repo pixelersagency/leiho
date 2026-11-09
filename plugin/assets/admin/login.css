@@ -1,216 +1,504 @@
-/* Leiho login page: wp-login.php restyled, dark, with the site's name and icon. */
+/*
+ * Leiho login page (wp-login.php). Same look as leiho.dev: black, lime dot
+ * field, Geist. Every rule starts with "html body.leiho-login" and colours
+ * are !important, so another login branding (plugin, mu-plugin, theme)
+ * can't leave half of it in place.
+ */
 
-body.login {
-	--lh-bg: #0a0a0a;
-	--lh-card: #141414;
-	--lh-line: rgba( 255, 255, 255, 0.1 );
-	--lh-ink: #f5f5f5;
-	--lh-muted: #a3a3a3;
-	--lh-accent: #c5ff3e;
-	--lh-accent-hover: #b4f01f;
-	--lh-on-accent: #0a0a0a;
+html body.leiho-login {
+	--lh-bg: #000;
+	--lh-surface: #0e0e0d;
+	--lh-surface-2: #171716;
+	--lh-line: #242422;
+	--lh-fg: #f5f5f4;
+	--lh-muted: #9a9a94;
+	--lh-faint: #5f5f5a;
+	--lh-lime: #c5ff3e;
+	--lh-lime-hover: #b4f01f;
+	--lh-on-lime: #0a0a0a;
 	--lh-error: #ff6b5e;
-	background-color: var( --lh-bg );
-	background-image: radial-gradient( rgba( 197, 255, 62, 0.2 ) 1px, transparent 1.5px );
-	background-size: 22px 22px;
-	background-position: center;
-	color: var( --lh-ink );
-	font-family: -apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", system-ui, sans-serif;
-	display: flex;
+	--lh-font: "Leiho Geist", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+	display: flex !important;
 	flex-direction: column;
-	justify-content: center;
 	min-height: 100vh;
+	margin: 0;
+	padding: 0;
+	background: var(--lh-bg) !important;
+	color: var(--lh-fg) !important;
+	font-family: var(--lh-font) !important;
+	font-size: 15px;
+	-webkit-font-smoothing: antialiased;
 }
 
-body.login::before {
+/* Dot field fading out from the centre, and a lime glow above the card. */
+html body.leiho-login::before {
 	content: "";
 	position: fixed;
 	inset: 0;
-	background: radial-gradient( ellipse at center, transparent 0%, var( --lh-bg ) 70% );
+	z-index: 0;
+	background-image: radial-gradient( rgba( 197, 255, 62, 0.22 ) 1px, transparent 1.6px );
+	background-size: 24px 24px;
+	background-position: center;
+	-webkit-mask-image: radial-gradient( ellipse 70% 60% at 50% 40%, #000 0%, transparent 75% );
+	mask-image: radial-gradient( ellipse 70% 60% at 50% 40%, #000 0%, transparent 75% );
 	pointer-events: none;
 }
 
-#login {
+html body.leiho-login::after {
+	content: "";
+	position: fixed;
+	left: 50%;
+	top: 8%;
+	width: 560px;
+	height: 360px;
+	transform: translateX( -50% );
+	background: radial-gradient( 50% 50% at 50% 50%, rgba( 197, 255, 62, 0.08 ), transparent 70% );
+	filter: blur( 30px );
+	z-index: 0;
+	pointer-events: none;
+}
+
+html body.leiho-login *,
+html body.leiho-login *::before,
+html body.leiho-login *::after {
+	box-sizing: border-box;
+}
+
+html body.leiho-login #login {
 	position: relative;
-	width: 360px;
+	z-index: 1;
+	width: 380px;
 	max-width: calc( 100vw - 32px );
-	padding: 0;
-	margin: 0 auto;
+	margin: auto;
+	padding: 48px 0 32px;
 }
 
-.login h1 a {
-	width: 56px;
-	height: 56px;
-	background-size: contain;
-	background-position: center;
-	border-radius: 14px;
-	margin: 0 auto 14px;
-}
+/* ── Site icon ───────────────────────────────────────────────────── */
 
-/* Site name under the icon (content set inline by Leiho_Login::styles()). */
-.login h1::after {
-	display: block;
-	color: var( --lh-ink );
-	font-size: 18px;
-	font-weight: 600;
-	letter-spacing: -0.01em;
-	line-height: 1.3;
-}
-
-.login h1 {
+html body.leiho-login #login h1 {
+	margin: 0 0 22px;
 	text-align: center;
-	margin-bottom: 16px;
 }
 
-.login form {
-	background: var( --lh-card );
-	border: 1px solid var( --lh-line );
-	border-radius: 14px;
-	box-shadow: 0 24px 64px rgba( 0, 0, 0, 0.5 );
-	padding: 28px 24px 24px;
-	margin-top: 8px;
+html body.leiho-login #login h1 a {
+	display: block;
+	width: 48px;
+	height: 48px;
+	margin: 0 auto;
+	padding: 0;
+	background-color: transparent !important;
+	background-size: contain !important;
+	background-position: center !important;
+	background-repeat: no-repeat !important;
+	border-radius: 12px;
+	text-indent: -9999px;
+	overflow: hidden;
+	outline-offset: 4px;
 }
 
-.login label,
-.login form .forgetmenot label {
-	color: var( --lh-muted );
+html body.leiho-login #login h1::before,
+html body.leiho-login #login h1::after {
+	content: none !important;
+}
+
+/* ── Screen title ────────────────────────────────────────────────── */
+
+html body.leiho-login .leiho-login-head {
+	margin: 0 0 24px;
+	text-align: center;
+}
+
+html body.leiho-login .leiho-login-head h2 {
+	margin: 0;
+	color: var(--lh-fg) !important;
+	font-family: var(--lh-font) !important;
+	font-size: 26px;
+	font-weight: 500;
+	letter-spacing: -0.03em;
+	line-height: 1.15;
+}
+
+html body.leiho-login .leiho-login-head p {
+	margin: 8px 0 0;
+	color: var(--lh-muted) !important;
+	font-size: 15px;
+	line-height: 1.5;
+	text-wrap: balance;
+}
+
+/* ── Card ────────────────────────────────────────────────────────── */
+
+html body.leiho-login #login form {
+	margin: 0;
+	padding: 24px;
+	background: var(--lh-surface) !important;
+	border: 1px solid var(--lh-line) !important;
+	border-radius: 16px !important;
+	box-shadow: 0 40px 100px -40px rgba( 0, 0, 0, 0.8 ), 0 0 0 1px rgba( 255, 255, 255, 0.02 ) inset !important;
+	color: var(--lh-fg) !important;
+	overflow: visible;
+}
+
+html body.leiho-login #login form p,
+html body.leiho-login #login form .user-pass-wrap {
+	margin: 0 0 16px;
+}
+
+html body.leiho-login #login label {
+	display: inline-block;
+	margin: 0 0 8px;
+	color: var(--lh-muted) !important;
+	font-family: var(--lh-font) !important;
+	font-size: 14px;
+	font-weight: 500;
+	line-height: 1.4;
+}
+
+html body.leiho-login .leiho-login-passrow {
+	display: flex;
+	align-items: baseline;
+	justify-content: space-between;
+	gap: 12px;
+}
+
+html body.leiho-login .leiho-login-forgot {
+	color: var(--lh-muted) !important;
 	font-size: 13px;
+	text-decoration: none;
+	white-space: nowrap;
 }
 
-.login input[type="text"],
-.login input[type="password"],
-.login input[type="email"] {
-	background: rgba( 255, 255, 255, 0.05 );
-	border: 1px solid var( --lh-line );
-	border-radius: 8px;
-	color: var( --lh-ink );
-	font-size: 16px;
-	padding: 8px 12px;
-	box-shadow: none;
-	min-height: 42px;
+html body.leiho-login .leiho-login-forgot:hover,
+html body.leiho-login .leiho-login-forgot:focus {
+	color: var(--lh-lime) !important;
 }
 
-.login input[type="text"]:focus,
-.login input[type="password"]:focus,
-.login input[type="email"]:focus {
-	border-color: var( --lh-accent );
-	box-shadow: 0 0 0 3px rgba( 197, 255, 62, 0.18 );
+html body.leiho-login #login input[type="text"],
+html body.leiho-login #login input[type="email"],
+html body.leiho-login #login input[type="password"] {
+	width: 100%;
+	height: 44px;
+	min-height: 44px;
+	margin: 0;
+	padding: 0 14px;
+	background: var(--lh-surface-2) !important;
+	border: 1px solid var(--lh-line) !important;
+	border-radius: 10px !important;
+	box-shadow: none !important;
+	color: var(--lh-fg) !important;
+	font-family: var(--lh-font) !important;
+	font-size: 15px;
+	line-height: 1;
+	transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+html body.leiho-login #login input::placeholder {
+	color: var(--lh-faint) !important;
+}
+
+html body.leiho-login #login input[type="text"]:focus,
+html body.leiho-login #login input[type="email"]:focus,
+html body.leiho-login #login input[type="password"]:focus {
+	border-color: var(--lh-lime) !important;
+	box-shadow: 0 0 0 3px rgba( 197, 255, 62, 0.18 ) !important;
 	outline: none;
 }
 
-.login .button.wp-hide-pw {
-	color: var( --lh-muted );
-	min-height: 42px;
+/* Browser autofill keeps the dark field. */
+html body.leiho-login #login input:-webkit-autofill {
+	-webkit-text-fill-color: var(--lh-fg);
+	-webkit-box-shadow: 0 0 0 40px var(--lh-surface-2) inset !important;
+	caret-color: var(--lh-fg);
 }
 
-.login .button.wp-hide-pw:focus {
-	border-color: var( --lh-accent );
-	box-shadow: none;
+html body.leiho-login #login .wp-pwd {
+	position: relative;
 }
 
-.login input[type="checkbox"] {
-	background: transparent;
-	border-color: var( --lh-line );
+html body.leiho-login #login .wp-pwd input[type="password"],
+html body.leiho-login #login .wp-pwd input[type="text"] {
+	padding-right: 48px;
 }
 
-.login input[type="checkbox"]:checked::before {
-	filter: invert( 1 ) sepia( 1 ) saturate( 8 ) hue-rotate( 40deg );
-}
-
-.login .button-primary,
-.wp-core-ui .button-primary {
-	background: var( --lh-accent );
-	border: 0;
-	border-radius: 8px;
-	color: var( --lh-on-accent );
-	font-weight: 600;
-	min-height: 40px;
-	padding: 0 18px;
-	text-shadow: none;
-	box-shadow: none;
-}
-
-.login .button-primary:hover,
-.login .button-primary:focus,
-.wp-core-ui .button-primary:hover,
-.wp-core-ui .button-primary:focus {
-	background: var( --lh-accent-hover );
-	color: var( --lh-on-accent );
-	box-shadow: 0 0 0 3px rgba( 197, 255, 62, 0.22 );
-}
-
-.login #nav,
-.login #backtoblog {
-	text-align: center;
+html body.leiho-login #login .button.wp-hide-pw {
+	position: absolute;
+	top: 0;
+	right: 0;
+	width: 44px;
+	height: 44px;
+	min-height: 44px;
 	padding: 0;
-	margin: 16px 0 0;
+	background: transparent !important;
+	border: 0 !important;
+	box-shadow: none !important;
+	color: var(--lh-muted) !important;
 }
 
-.login #nav a,
-.login #backtoblog a,
-.login .privacy-policy-page-link a,
-.leiho-login-by a {
-	color: var( --lh-muted );
-	text-decoration: none;
+html body.leiho-login #login .button.wp-hide-pw:hover,
+html body.leiho-login #login .button.wp-hide-pw:focus {
+	color: var(--lh-fg) !important;
+}
+
+html body.leiho-login #login .button.wp-hide-pw .dashicons {
+	top: 0;
+	width: 20px;
+	height: 20px;
+	font-size: 20px;
+}
+
+/* Remember me, then a full-width button. */
+html body.leiho-login #login .forgetmenot {
+	float: none;
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	margin: 4px 0 20px;
+}
+
+html body.leiho-login #login .forgetmenot label {
+	margin: 0;
+	color: var(--lh-muted) !important;
+	font-weight: 400;
+}
+
+html body.leiho-login #login input[type="checkbox"] {
+	width: 18px;
+	height: 18px;
+	min-width: 18px;
+	margin: 0;
+	background: var(--lh-surface-2) !important;
+	border: 1px solid var(--lh-line) !important;
+	border-radius: 5px;
+	box-shadow: none !important;
+}
+
+html body.leiho-login #login input[type="checkbox"]:checked {
+	background: var(--lh-lime) !important;
+	border-color: var(--lh-lime) !important;
+}
+
+html body.leiho-login #login input[type="checkbox"]:checked::before {
+	content: "";
+	display: block;
+	width: 5px;
+	height: 9px;
+	margin: 2px auto 0;
+	border: solid var(--lh-on-lime);
+	border-width: 0 2px 2px 0;
+	transform: rotate( 45deg );
+	filter: none;
+}
+
+html body.leiho-login #login input[type="checkbox"]:focus {
+	box-shadow: 0 0 0 3px rgba( 197, 255, 62, 0.18 ) !important;
+	outline: none;
+}
+
+/* WordPress 7 "?" help next to "Remember Me". */
+html body.leiho-login #login .forgetmenot .button,
+html body.leiho-login #login .forgetmenot [class*="tooltip"] {
+	color: var(--lh-faint) !important;
+	background: transparent !important;
+	border: 0 !important;
+	box-shadow: none !important;
+}
+
+html body.leiho-login #login .submit {
+	float: none;
+	clear: both;
+	margin: 0;
+	padding: 0;
+}
+
+html body.leiho-login #login .button-primary,
+html body.leiho-login #login input[type="submit"] {
+	float: none;
+	display: block;
+	width: 100%;
+	height: 44px;
+	min-height: 44px;
+	margin: 0;
+	padding: 0 20px;
+	background: var(--lh-lime) !important;
+	border: 0 !important;
+	border-radius: 10px !important;
+	box-shadow: none !important;
+	color: var(--lh-on-lime) !important;
+	font-family: var(--lh-font) !important;
+	font-size: 15px;
+	font-weight: 600;
+	line-height: 44px;
+	text-shadow: none !important;
+	cursor: pointer;
+	transition: background-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+html body.leiho-login #login .button-primary:hover,
+html body.leiho-login #login input[type="submit"]:hover {
+	background: var(--lh-lime-hover) !important;
+}
+
+html body.leiho-login #login .button-primary:focus,
+html body.leiho-login #login input[type="submit"]:focus {
+	box-shadow: 0 0 0 3px rgba( 197, 255, 62, 0.28 ) !important;
+	outline: none;
+}
+
+html body.leiho-login #login .button-primary:active,
+html body.leiho-login #login input[type="submit"]:active {
+	transform: scale( 0.98 );
+}
+
+/* Password strength and hints on "choose a new password". */
+html body.leiho-login #login #pass-strength-result {
+	margin: 8px 0 0;
+	border-radius: 8px;
+	border: 1px solid var(--lh-line);
+	background: var(--lh-surface-2);
+	color: var(--lh-fg);
+}
+
+html body.leiho-login #login .description,
+html body.leiho-login #login .indicator-hint {
+	color: var(--lh-muted) !important;
 	font-size: 13px;
 }
 
-.login #nav a:hover,
-.login #backtoblog a:hover,
-.leiho-login-by a:hover {
-	color: var( --lh-accent );
+html body.leiho-login #login .reset-pass-submit {
+	display: flex;
+	flex-direction: column-reverse;
+	gap: 10px;
 }
 
-.login #login_error,
-.login .message,
-.login .notice,
-.login .success {
-	background: var( --lh-card );
-	border: 1px solid var( --lh-line );
-	border-left: 3px solid var( --lh-accent );
-	border-radius: 10px;
-	box-shadow: none;
-	color: var( --lh-ink );
+html body.leiho-login #login .reset-pass-submit .button:not( .button-primary ) {
+	float: none;
+	width: 100%;
+	height: 40px;
+	background: transparent !important;
+	border: 1px solid var(--lh-line) !important;
+	border-radius: 10px !important;
+	color: var(--lh-muted) !important;
 }
 
-.login #login_error,
-.login .notice-error {
-	border-left-color: var( --lh-error );
+/* ── Messages and errors ─────────────────────────────────────────── */
+
+html body.leiho-login #login .message,
+html body.leiho-login #login .notice,
+html body.leiho-login #login .success,
+html body.leiho-login #login #login_error {
+	margin: 0 0 16px;
+	padding: 12px 14px;
+	background: var(--lh-surface) !important;
+	border: 1px solid var(--lh-line) !important;
+	border-left: 3px solid var(--lh-lime) !important;
+	border-radius: 10px !important;
+	box-shadow: none !important;
+	color: var(--lh-fg) !important;
+	font-size: 14px;
+	line-height: 1.5;
 }
 
-.login #login_error a,
-.login .message a {
-	color: var( --lh-accent );
+html body.leiho-login #login #login_error,
+html body.leiho-login #login .notice-error {
+	border-left-color: var(--lh-error) !important;
 }
 
-.login .language-switcher {
-	position: relative;
+html body.leiho-login #login .message a,
+html body.leiho-login #login .notice a,
+html body.leiho-login #login #login_error a {
+	color: var(--lh-lime) !important;
 }
 
-.login .language-switcher label .dashicons,
-.login #language-switcher select {
-	color: var( --lh-muted );
-}
+/* ── Links under the card ────────────────────────────────────────── */
 
-.login #language-switcher select {
-	background-color: var( --lh-card );
-	border-color: var( --lh-line );
-}
-
-.leiho-login-by {
-	position: relative;
+html body.leiho-login #login #nav {
+	margin: 20px 0 0;
+	padding: 0;
+	color: var(--lh-faint);
 	text-align: center;
-	margin: 24px 0 0;
-	opacity: 0.7;
+	font-size: 14px;
+}
+
+html body.leiho-login #login #nav a {
+	color: var(--lh-muted) !important;
+	text-decoration: none;
+}
+
+html body.leiho-login #login #nav a:hover,
+html body.leiho-login #login #nav a:focus {
+	color: var(--lh-lime) !important;
+}
+
+/* WordPress's own extras: the Leiho page has none. */
+html body.leiho-login #backtoblog,
+html body.leiho-login .privacy-policy-page-link,
+html body.leiho-login .language-switcher {
+	display: none !important;
+}
+
+/* ── leiho.dev badge ─────────────────────────────────────────────── */
+
+html body.leiho-login .leiho-login-badge {
+	position: relative;
+	z-index: 1;
+	display: inline-flex;
+	align-items: center;
+	gap: 8px;
+	align-self: center;
+	height: 34px;
+	margin: 0 0 28px;
+	padding: 0 14px;
+	border: 1px solid var(--lh-line);
+	border-radius: 999px;
+	background: color-mix( in srgb, var(--lh-bg) 70%, transparent );
+	color: var(--lh-muted) !important;
+	font-size: 13px;
+	text-decoration: none;
+	transition: border-color 0.2s ease, color 0.2s ease;
+}
+
+html body.leiho-login .leiho-login-badge i {
+	width: 7px;
+	height: 7px;
+	border-radius: 50%;
+	background: var(--lh-lime);
+	box-shadow: 0 0 0 3px rgba( 197, 255, 62, 0.18 );
+}
+
+html body.leiho-login .leiho-login-badge b {
+	margin-left: -3px;
+	color: var(--lh-fg);
+	font-weight: 500;
+}
+
+html body.leiho-login .leiho-login-badge:hover,
+html body.leiho-login .leiho-login-badge:focus {
+	border-color: color-mix( in srgb, var(--lh-lime) 50%, var(--lh-line) );
+	color: var(--lh-fg) !important;
+}
+
+/* The session-expired login inside wp-admin: no badge. */
+html body.leiho-login.interim-login .leiho-login-badge {
+	display: none;
 }
 
 @media ( prefers-reduced-motion: no-preference ) {
-	.login form {
-		animation: leiho-login-in 0.35s ease-out both;
+	html body.leiho-login #login {
+		animation: leiho-login-in 0.4s cubic-bezier( 0.22, 0.61, 0.36, 1 ) both;
 	}
 }
 
 @keyframes leiho-login-in {
-	from { opacity: 0; transform: translateY( 6px ); }
+	from { opacity: 0; transform: translateY( 8px ); }
 	to { opacity: 1; transform: none; }
+}
+
+@media ( max-width: 480px ) {
+	html body.leiho-login #login {
+		padding-top: 32px;
+	}
+
+	html body.leiho-login #login form {
+		padding: 20px;
+	}
 }

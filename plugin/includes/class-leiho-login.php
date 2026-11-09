@@ -31,10 +31,7 @@ class Leiho_Login {
 		$settings = Leiho_Plugin::settings();
 
 		if ( ! empty( $settings['login_style'] ) ) {
-			add_action( 'login_enqueue_scripts', array( __CLASS__, 'styles' ) );
-			add_filter( 'login_headerurl', array( __CLASS__, 'header_url' ) );
-			add_filter( 'login_headertext', array( __CLASS__, 'header_text' ) );
-			add_action( 'login_footer', array( __CLASS__, 'footer' ) );
+			add_action( 'login_init', array( __CLASS__, 'restyle' ) );
 		}
 
 		$slug = self::clean( isset( $settings['login_slug'] ) ? $settings['login_slug'] : '' );
@@ -196,13 +193,111 @@ class Leiho_Login {
 	 * ------------------------------------------------------------------- */
 
 	/**
+	 * Page de connexion Leiho : seulement sur wp-login.php (login_init).
+	 * Ce qui fait « WordPress » disparaît (choix de langue, lien vers le
+	 * site, politique de confidentialité) ; chaque écran a son titre.
+	 *
+	 * @return void
+	 */
+	public static function restyle() {
+		// Priorité tardive : passe après un autre habillage (extension, mu-plugin).
+		add_action( 'login_enqueue_scripts', array( __CLASS__, 'styles' ), 99 );
+		add_filter( 'login_body_class', array( __CLASS__, 'body_class' ) );
+		add_filter( 'login_headerurl', array( __CLASS__, 'header_url' ), 99 );
+		add_filter( 'login_headertext', array( __CLASS__, 'header_text' ), 99 );
+		add_filter( 'login_message', array( __CLASS__, 'heading' ), 99 );
+		add_filter( 'login_display_language_dropdown', '__return_false', 99 );
+		add_filter( 'login_site_html_link', '__return_empty_string', 99 );
+		add_filter( 'the_privacy_policy_link', '__return_empty_string', 99 );
+		add_action( 'login_footer', array( __CLASS__, 'footer' ), 99 );
+	}
+
+	/**
+	 * @param array $classes Classes du body.
+	 * @return array
+	 */
+	public static function body_class( $classes ) {
+		$classes[] = 'leiho-login';
+		return $classes;
+	}
+
+	/**
 	 * @return void
 	 */
 	public static function styles() {
 		wp_enqueue_style( 'leiho-login', LEIHO_URL . 'assets/admin/login.css', array( 'login' ), LEIHO_VERSION );
 		$icon = function_exists( 'get_site_icon_url' ) ? get_site_icon_url( 160 ) : '';
 		$logo = '' !== $icon ? $icon : LEIHO_URL . 'assets/img/leiho-mark.svg';
-		wp_add_inline_style( 'leiho-login', '.login h1 a{background-image:url("' . esc_url( $logo ) . '")}.login h1::after{content:"' . self::css_string( wp_specialchars_decode( get_bloginfo( 'name' ), ENT_QUOTES ) ) . '"}' );
+		$font = LEIHO_URL . 'assets/fonts/';
+		wp_add_inline_style(
+			'leiho-login',
+			"@font-face{font-family:'Leiho Geist';font-style:normal;font-display:swap;font-weight:100 900;src:url('" . esc_url( $font . 'geist-latin-ext-wght-normal.woff2' ) . "') format('woff2-variations');unicode-range:U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF}"
+			. "@font-face{font-family:'Leiho Geist';font-style:normal;font-display:swap;font-weight:100 900;src:url('" . esc_url( $font . 'geist-latin-wght-normal.woff2' ) . "') format('woff2-variations');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}"
+			. 'html body.leiho-login #login h1 a{background-image:url("' . esc_url( $logo ) . '")!important}'
+		);
+	}
+
+	/**
+	 * Écran affiché, d'après l'action demandée à wp-login.php.
+	 *
+	 * @return string login | lostpassword | resetpass | register | checkemail
+	 */
+	public static function screen() {
+		// phpcs:disable WordPress.Security.NonceVerification.Recommended -- Affichage seulement.
+		$action = isset( $_REQUEST['action'] ) ? sanitize_key( wp_unslash( $_REQUEST['action'] ) ) : 'login';
+		if ( isset( $_GET['checkemail'] ) ) {
+			return 'checkemail';
+		}
+		// phpcs:enable
+		if ( in_array( $action, array( 'lostpassword', 'retrievepassword' ), true ) ) {
+			return 'lostpassword';
+		}
+		if ( in_array( $action, array( 'rp', 'resetpass' ), true ) ) {
+			return 'resetpass';
+		}
+		if ( 'register' === $action ) {
+			return 'register';
+		}
+		return 'login';
+	}
+
+	/**
+	 * Titre de l'écran, au-dessus du message de WordPress.
+	 *
+	 * @param string $message Message de WordPress (déjà en HTML).
+	 * @return string
+	 */
+	public static function heading( $message ) {
+		$site = wp_specialchars_decode( get_bloginfo( 'name' ), ENT_QUOTES );
+		switch ( self::screen() ) {
+			case 'lostpassword':
+				$title = __( 'Reset your password', 'leiho' );
+				$sub   = __( 'Enter your username or e-mail address: you will receive a link to choose a new password.', 'leiho' );
+				break;
+			case 'resetpass':
+				$title = __( 'Choose a new password', 'leiho' );
+				$sub   = '';
+				break;
+			case 'register':
+				$title = __( 'Create an account', 'leiho' );
+				/* translators: %s: site name. */
+				$sub = sprintf( __( 'on %s', 'leiho' ), $site );
+				break;
+			case 'checkemail':
+				$title = __( 'Check your inbox', 'leiho' );
+				$sub   = '';
+				break;
+			default:
+				$title = __( 'Log in', 'leiho' );
+				/* translators: %s: site name. */
+				$sub = sprintf( __( 'to %s', 'leiho' ), $site );
+		}
+		// Le message d'instructions de WordPress répète le sous-titre.
+		if ( 'lostpassword' === self::screen() ) {
+			$message = '';
+		}
+		$head = '<div class="leiho-login-head"><h2>' . esc_html( $title ) . '</h2>' . ( '' !== $sub ? '<p>' . esc_html( $sub ) . '</p>' : '' ) . '</div>';
+		return $head . $message;
 	}
 
 	/**
@@ -241,12 +336,38 @@ class Leiho_Login {
 	}
 
 	/**
+	 * Badge de leiho.dev en bas de page, et « Mot de passe oublié ? » rangé à
+	 * côté du champ mot de passe.
+	 *
 	 * @return void
 	 */
 	public static function footer() {
 		printf(
-			'<p class="leiho-login-by"><a href="https://leiho.dev" target="_blank" rel="noopener">%s</a></p>',
-			esc_html__( 'Edited with Leiho', 'leiho' )
+			'<a class="leiho-login-badge" href="https://leiho.dev" target="_blank" rel="noopener"><i aria-hidden="true"></i><span>%1$s</span> <b>Leiho</b></a>',
+			esc_html__( 'Edited with', 'leiho' )
 		);
+		?>
+		<script>
+		( function () {
+			var nav = document.getElementById( 'nav' );
+			var lost = nav && nav.querySelector( 'a[href*="action=lostpassword"]' );
+			var label = document.querySelector( '#loginform label[for="user_pass"]' );
+			if ( ! lost || ! label ) {
+				return;
+			}
+			var row = document.createElement( 'div' );
+			row.className = 'leiho-login-passrow';
+			label.parentNode.insertBefore( row, label );
+			row.appendChild( label );
+			lost.className = 'leiho-login-forgot';
+			row.appendChild( lost );
+			// Ce qui reste dans #nav : « Inscription » éventuelle, sans séparateur orphelin.
+			nav.innerHTML = nav.innerHTML.replace( /^\s*\|\s*|\s*\|\s*$/g, '' );
+			if ( ! nav.textContent.trim() ) {
+				nav.hidden = true;
+			}
+		} )();
+		</script>
+		<?php
 	}
 }

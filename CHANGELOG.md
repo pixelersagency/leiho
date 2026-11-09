@@ -2,6 +2,12 @@
 
 All notable changes to Leiho (called Okno until 1.0.0-beta.11) are documented here. The project follows [Semantic Versioning](https://semver.org/). The plugin and the bridge package share one version number.
 
+## [Unreleased]
+
+### Changed
+
+- **Leiho login page, redesigned.** Same look as leiho.dev (black background, lime dot field, Geist font). Each screen has its own title ("Log in to …", "Reset your password", "Choose a new password", "Check your inbox"), "Lost your password?" sits next to the password field, and the button spans the card. WordPress's extras are gone: language switcher, link back to the site, privacy policy link. The leiho.dev badge sits at the bottom of the page. The page now wins over another login branding (plugin, mu-plugin or theme) instead of mixing with it: turn the Leiho login page off in the Security tab to keep your own.
+
 ## [1.0.0-rc.5] — 2026-11-09
 
 ### Added
@@ -317,6 +323,7 @@ First public release.
 - Managed regions (`data-okno-managed`) explain where to edit content Okno doesn't own.
 - Explicit sections (`data-okno-section`, `data-okno-layout`) take precedence over auto-detected ones.
 
+[Unreleased]: https://github.com/pixelersagency/leiho/compare/v1.0.0-rc.5...HEAD
 [1.0.0-rc.5]: https://github.com/pixelersagency/leiho/releases/tag/v1.0.0-rc.5
 [1.0.0-rc.4]: https://github.com/pixelersagency/leiho/releases/tag/v1.0.0-rc.4
 [1.0.0-rc.3]: https://github.com/pixelersagency/leiho/releases/tag/v1.0.0-rc.3

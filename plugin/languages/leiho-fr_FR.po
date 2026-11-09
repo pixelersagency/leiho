@@ -5468,21 +5468,55 @@ msgstr "Les réglages, les types de contenu, l’historique et les jetons ont é
 msgid "These tables were left as they were, because a Leiho table with the same name already holds data: %s"
 msgstr "Ces tables ont été laissées telles quelles, car une table Leiho du même nom contient déjà des données : %s"
 
-#: includes/class-leiho-login.php:95
+#: includes/class-leiho-login.php:92
 msgid "The login address must be 4 to 50 characters long."
 msgstr "L’adresse de connexion doit faire de 4 à 50 caractères."
 
-#: includes/class-leiho-login.php:98
+#: includes/class-leiho-login.php:95
 msgid "This login address is reserved by WordPress or too easy to guess."
 msgstr "Cette adresse de connexion est réservée par WordPress ou trop facile à deviner."
 
-#: includes/class-leiho-login.php:101
+#: includes/class-leiho-login.php:98
 msgid "A page already uses this address."
 msgstr "Une page utilise déjà cette adresse."
 
-#: includes/class-leiho-login.php:249
-msgid "Edited with Leiho"
-msgstr "Édité avec Leiho"
+#: includes/class-leiho-login.php:274
+msgid "Reset your password"
+msgstr "Réinitialiser le mot de passe"
+
+#: includes/class-leiho-login.php:275
+msgid "Enter your username or e-mail address: you will receive a link to choose a new password."
+msgstr "Saisissez votre identifiant ou votre adresse e-mail : vous recevrez un lien pour choisir un nouveau mot de passe."
+
+#: includes/class-leiho-login.php:278
+msgid "Choose a new password"
+msgstr "Choisissez un nouveau mot de passe"
+
+#: includes/class-leiho-login.php:282
+msgid "Create an account"
+msgstr "Créer un compte"
+
+#. translators: %s: site name.
+#: includes/class-leiho-login.php:284
+msgid "on %s"
+msgstr "sur %s"
+
+#: includes/class-leiho-login.php:287
+msgid "Check your inbox"
+msgstr "Consultez votre boîte de réception"
+
+#: includes/class-leiho-login.php:291
+msgid "Log in"
+msgstr "Se connecter"
+
+#. translators: %s: site name.
+#: includes/class-leiho-login.php:293
+msgid "to %s"
+msgstr "à %s"
+
+#: includes/class-leiho-login.php:347
+msgid "Edited with"
+msgstr "Édité avec"
 
 #: includes/class-leiho-native-fields.php:94
 msgid "Short summary shown in lists and shared links. Leave empty to use the start of the content."
