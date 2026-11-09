@@ -3,7 +3,7 @@
  * Plugin Name:       Leiho
  * Plugin URI:        https://github.com/pixelersagency/leiho
  * Description:       Visual editor and content API for headless front ends (Astro, Next.js, …), right inside wp-admin. Define your content types in Leiho, or keep your existing ACF fields.
- * Version:           1.0.0-rc.5
+ * Version:           1.0.0-rc.6
  * Requires at least: 6.0
  * Requires PHP:      7.4
  * Author:            Pixelers
@@ -25,7 +25,7 @@ if ( defined( 'LEIHO_VERSION' ) ) {
 	return;
 }
 
-define( 'LEIHO_VERSION', '1.0.0-rc.5' );
+define( 'LEIHO_VERSION', '1.0.0-rc.6' );
 define( 'LEIHO_FILE', __FILE__ );
 define( 'LEIHO_DIR', plugin_dir_path( __FILE__ ) );
 define( 'LEIHO_URL', plugin_dir_url( __FILE__ ) );
