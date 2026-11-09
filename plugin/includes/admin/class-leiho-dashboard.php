@@ -1071,8 +1071,11 @@ CODE;
 	public static function start_prompt( $fw, $case, $ctx ) {
 		$lines   = array();
 		$lines[] = __( 'We’re going to make this site editable with Leiho, the visual editor for WordPress. Leiho has precise instructions to follow throughout the project; you’ll find them below. Read them in full before writing any code, and follow them for every component.', 'leiho' );
+		$fields  = Leiho_Plugin::fields_plugin();
+		$model   = '' !== $fields['name'] ? $fields['name'] : 'Leiho Collections';
 		$lines[] = 'new' === $case
-			? __( 'We’re starting from scratch. Build the site and its ACF content model, following the instructions from the very first component. Finish with the checklist.', 'leiho' )
+			/* translators: %s: where the content model is built (ACF, ACF PRO, Secure Custom Fields or Leiho Collections). */
+			? sprintf( __( 'We’re starting from scratch. Build the site and its content model in %s, following the instructions from the very first component. Finish with the checklist.', 'leiho' ), $model )
 			: __( 'The site already exists. Install the bridge, then annotate every piece of displayed content with its matching WordPress field, following the instructions. Finish with the checklist.', 'leiho' );
 
 		$facts = array(
@@ -1084,6 +1087,10 @@ CODE;
 				/* translators: %s: site address. */
 				? sprintf( __( 'Site address: %s', 'leiho' ), $ctx['front'] )
 				: __( 'Site address: not set yet in Leiho.', 'leiho' ),
+			'' !== $fields['name']
+				/* translators: %s: fields plugin (ACF, ACF PRO, Secure Custom Fields). */
+				? sprintf( __( 'Custom fields: %s is active. Model new content there, and Leiho edits it.', 'leiho' ), $fields['name'] )
+				: __( 'Custom fields: no ACF on this WordPress. Create the content types and their fields in Leiho → Collections (or with the /wp-json/leiho/v1/collections API): wherever the instructions say ACF, use a Leiho collection — same field types, including repeaters and flexible blocks, same paths in the content API.', 'leiho' ),
 		);
 		$lines[] = '- ' . implode( "\n- ", $facts );
 		$lines[] = __( 'Here are the snippets for this framework, already filled in with these addresses. Adapt file names and paths to the project.', 'leiho' );
@@ -1584,7 +1591,7 @@ CODE;
 						<label for="leiho_path_meta_key"><?php esc_html_e( 'Field holding the URL', 'leiho' ); ?></label>
 						<div>
 							<input type="text" id="leiho_path_meta_key" name="leiho_settings[path_meta_key]" value="<?php echo esc_attr( $settings['path_meta_key'] ); ?>" placeholder="page_path">
-							<span class="leiho-help"><?php esc_html_e( 'Optional. Name of an ACF field or meta key that holds each item’s actual URL (for example /services/audit). Takes priority over the patterns above.', 'leiho' ); ?></span>
+							<span class="leiho-help"><?php esc_html_e( 'Optional. Name of a field (Leiho collection, ACF) or meta key that holds each item’s actual URL (for example /services/audit). Takes priority over the patterns above.', 'leiho' ); ?></span>
 						</div>
 					</div>
 				</section>
@@ -2170,6 +2177,16 @@ CODE;
 				</div>
 			<?php endif; ?>
 
+			<?php // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Simple drapeau d'affichage. ?>
+			<?php $login_err = isset( $_GET['leiho_login_error'] ) ? (string) get_transient( 'leiho_login_error_' . get_current_user_id() ) : ''; ?>
+			<?php if ( '' !== $login_err ) : ?>
+				<?php delete_transient( 'leiho_login_error_' . get_current_user_id() ); ?>
+				<div class="leiho-notice leiho-notice--error" role="alert">
+					<span class="leiho-dot leiho-dot--error"></span>
+					<strong><?php echo esc_html( $login_err ); ?></strong>
+				</div>
+			<?php endif; ?>
+
 			<?php if ( in_array( $zero_flag, array( 'installed', 'restored' ), true ) ) : ?>
 				<div class="leiho-notice leiho-notice--ok" role="status">
 					<span class="leiho-dot leiho-dot--ok"></span>
@@ -2213,13 +2230,40 @@ CODE;
 							?>
 						</div>
 					</div>
+				</section>
+
+				<section class="leiho-form-section">
+					<h2><?php esc_html_e( 'Login', 'leiho' ); ?></h2>
+					<p class="leiho-help"><?php esc_html_e( 'The page where you and your clients log in.', 'leiho' ); ?></p>
 					<div class="leiho-row">
-						<span class="leiho-row__label"><?php esc_html_e( 'Login', 'leiho' ); ?></span>
+						<label for="leiho_login_slug"><?php esc_html_e( 'Login address', 'leiho' ); ?></label>
+						<div>
+							<div class="leiho-inline-field">
+								<span class="leiho-muted"><?php echo esc_html( untrailingslashit( home_url() ) . '/' ); ?></span>
+								<input type="text" id="leiho_login_slug" name="leiho_settings[login_slug]" value="<?php echo esc_attr( $settings['login_slug'] ); ?>" placeholder="<?php esc_attr_e( 'e.g. my-office', 'leiho' ); ?>" pattern="[A-Za-z0-9-]{4,50}" autocomplete="off" spellcheck="false">
+							</div>
+							<?php if ( '' !== $settings['login_slug'] && ! Leiho_Login::rescue() ) : ?>
+								<?php /* translators: %s: login URL. */ ?>
+								<span class="leiho-help"><strong><?php echo esc_html( sprintf( __( 'Log in at %s — bookmark it.', 'leiho' ), Leiho_Login::url( $settings['login_slug'] ) ) ); ?></strong></span>
+							<?php elseif ( Leiho_Login::rescue() ) : ?>
+								<span class="leiho-help"><?php esc_html_e( 'LEIHO_DEFAULT_LOGIN is set in wp-config.php: the usual login page is used. Remove that line to use the address above.', 'leiho' ); ?></span>
+							<?php endif; ?>
+							<span class="leiho-help"><?php esc_html_e( 'Optional. Moves the login page to this address: wp-login.php and wp-admin answer “not found” to visitors, which stops bots trying passwords. The administrator gets the new address by e-mail. Locked out? Add define( \'LEIHO_DEFAULT_LOGIN\', true ); to wp-config.php. Empty = the usual wp-login.php.', 'leiho' ); ?></span>
+						</div>
+					</div>
+					<div class="leiho-row">
+						<span class="leiho-row__label"><?php esc_html_e( 'Protection', 'leiho' ); ?></span>
 						<div class="leiho-checks">
 							<?php
 							/* translators: 1: number of attempts, 2: minutes. */
 							$check( 'security_login', __( 'Protect the login page', 'leiho' ), sprintf( __( 'Errors no longer say whether a username exists, and %1$d failed attempts block that username from that address for %2$d minutes.', 'leiho' ), Leiho_Headless::LOGIN_MAX, (int) ( Leiho_Headless::LOGIN_WINDOW / 60 ) ) );
 							?>
+						</div>
+					</div>
+					<div class="leiho-row">
+						<span class="leiho-row__label"><?php esc_html_e( 'Look', 'leiho' ); ?></span>
+						<div class="leiho-checks">
+							<?php $check( 'login_style', __( 'Leiho login page', 'leiho' ), __( 'Dark login page with your site’s name and icon (Settings → General → Site Icon), instead of the WordPress logo.', 'leiho' ) ); ?>
 						</div>
 					</div>
 				</section>

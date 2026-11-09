@@ -722,6 +722,7 @@ class Leiho_App {
 			'canCollections' => Leiho_Collections_Rest::can_manage(),
 			// Champs des types qui ne sont pas des collections Leiho : ACF (ou le thème).
 			'acf'            => function_exists( 'acf_get_field_groups' ),
+			'acfName'        => '' !== Leiho_Plugin::fields_plugin()['name'] ? Leiho_Plugin::fields_plugin()['name'] : 'ACF',
 			'acfUrl'         => function_exists( 'acf_get_field_groups' ) && current_user_can( 'manage_options' ) ? admin_url( 'edit.php?post_type=acf-field-group' ) : '',
 			'canUpload'      => current_user_can( 'upload_files' ),
 			'publish'        => array(

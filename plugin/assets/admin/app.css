@@ -5778,3 +5778,16 @@ mark.leiho-ai-flag {
 	width: 100%;
 	margin: 0;
 }
+
+/* Champ précédé d'un préfixe fixe (adresse de connexion). */
+.leiho-app .leiho-inline-field {
+	display: flex;
+	align-items: center;
+	gap: 6px;
+	flex-wrap: wrap;
+}
+
+.leiho-app .leiho-inline-field input {
+	flex: 1 1 180px;
+	min-width: 0;
+}

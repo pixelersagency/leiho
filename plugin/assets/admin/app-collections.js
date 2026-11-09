@@ -536,7 +536,7 @@
 			return h( 'div', { class: 'leiho-detail__card' }, [
 				h( 'h3', { text: __( 'General', 'leiho' ) } ),
 				h( 'p', { class: 'leiho-muted', text: 'acf' === d.source
-					? __( 'These fields come from ACF. The content type itself (labels, URL, features) is still declared where it was: in ACF, the theme or a plugin. Leiho manages its fields.', 'leiho' )
+					? sprintf( /* translators: %s: fields plugin (ACF, ACF PRO, Secure Custom Fields). */ __( 'These fields come from %1$s. The content type itself (labels, URL, features) is still declared where it was: in %1$s, the theme or a plugin. Leiho manages its fields.', 'leiho' ), cfg.acfName || 'ACF' )
 					: __( 'This content type is declared by the theme or a plugin. Leiho manages its fields.', 'leiho' ) } ),
 				h( 'div', { class: 'leiho-settings-grid' }, [
 					h( 'div', { class: 'leiho-setting' }, [

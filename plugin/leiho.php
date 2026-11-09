@@ -62,6 +62,7 @@ require_once LEIHO_DIR . 'includes/class-leiho-cache.php';
 require_once LEIHO_DIR . 'includes/class-leiho-types.php';
 require_once LEIHO_DIR . 'includes/class-leiho-headless.php';
 require_once LEIHO_DIR . 'includes/class-leiho-zero.php';
+require_once LEIHO_DIR . 'includes/class-leiho-login.php';
 require_once LEIHO_DIR . 'includes/class-leiho-updater.php';
 require_once LEIHO_DIR . 'includes/class-leiho-legacy.php';
 require_once LEIHO_DIR . 'includes/ai/class-leiho-ai-prompt.php';
@@ -140,6 +141,7 @@ final class Leiho_Plugin {
 		Leiho_ACF_Import::init();
 		Leiho_Headless::init();
 		Leiho_Zero::init();
+		Leiho_Login::init();
 		Leiho_Activity::init();
 		Leiho_Updater::init();
 		Leiho_AI::init();
@@ -222,6 +224,8 @@ final class Leiho_Plugin {
 			'headless_comments'   => false,
 			'security_file_edit'  => false,
 			'security_login'      => false,
+			'login_slug'          => '', // Adresse de connexion déplacée ('' : wp-login.php).
+			'login_style'         => true, // Page de connexion aux couleurs de Leiho.
 		);
 		$saved = get_option( self::OPTION_SETTINGS, array() );
 
@@ -246,6 +250,38 @@ final class Leiho_Plugin {
 		Leiho_Headless::seed_defaults();
 		Leiho_Deploy_Manager::schedule_cleanup();
 		Leiho_Activity::install();
+	}
+
+	/**
+	 * Extension de champs installée : ACF, ACF PRO ou Secure Custom Fields
+	 * (même API, même nom de fonctions). Nom vide : aucune, les types de
+	 * contenu se créent dans Leiho Collections.
+	 *
+	 * @return array{slug:string,name:string}
+	 */
+	public static function fields_plugin() {
+		if ( ! function_exists( 'acf_get_field_groups' ) ) {
+			return array(
+				'slug' => '',
+				'name' => '',
+			);
+		}
+		if ( ( defined( 'ACF_BASENAME' ) && false !== strpos( (string) ACF_BASENAME, 'secure-custom-fields' ) ) || class_exists( 'SCF\\Meta\\Post' ) ) {
+			return array(
+				'slug' => 'scf',
+				'name' => 'Secure Custom Fields',
+			);
+		}
+		if ( defined( 'ACF_PRO' ) && ACF_PRO ) {
+			return array(
+				'slug' => 'acf_pro',
+				'name' => 'ACF PRO',
+			);
+		}
+		return array(
+			'slug' => 'acf',
+			'name' => 'ACF',
+		);
 	}
 
 	/**

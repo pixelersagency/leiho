@@ -35,6 +35,14 @@ function get_template_directory() { return $GLOBALS['theme_dir']; }
 
 require __DIR__ . '/../includes/class-leiho-headless.php';
 require __DIR__ . '/../includes/class-leiho-zero.php';
+require __DIR__ . '/../includes/class-leiho-login.php';
+function sanitize_title( $t ) { return strtolower( trim( preg_replace( '/[^A-Za-z0-9]+/', '-', $t ), '-' ) ); }
+function home_url( $p = '' ) { return 'https://cms.test' . $p; }
+function wp_parse_url( $u, $c = -1 ) { return parse_url( $u, $c ); }
+function set_url_scheme( $u, $s ) { return preg_replace( '#^\w+://#', $s . '://', $u ); }
+function wp_unslash( $v ) { return $v; }
+function get_post_types( $a ) { return array( 'page' ); }
+function get_page_by_path( $p ) { return 'about' === $p ? (object) array( 'ID' => 2 ) : null; }
 
 $failures = 0;
 function check( $label, $ok, $debug = null ) {
@@ -99,6 +107,19 @@ check( 'thème : types, champs ACF et menus trouvés (vendor et 3e niveau ignor�
 $GLOBALS['stylesheet'] = 'leiho-zero';
 check( 'Leiho Zero actif : rien à signaler', array() === Leiho_Zero::theme_code() );
 array_map( 'unlink', array( $dir . '/functions.php', $dir . '/inc/fields.php', $dir . '/inc/deep/deeper/too-deep.php', $dir . '/vendor/lib.php' ) );
+
+// Adresse de connexion.
+check( 'adresse : nettoyée', 'mon-bureau' === Leiho_Login::clean( ' Mon Bureau! ' ) );
+check( 'adresse : trop courte refusée', is_wp_error( Leiho_Login::validate( 'abc' ) ) );
+check( 'adresse : réservée refusée (login, wp-…)', is_wp_error( Leiho_Login::validate( 'login' ) ) && is_wp_error( Leiho_Login::validate( 'wp-secret' ) ) );
+check( 'adresse : page existante refusée', is_wp_error( Leiho_Login::validate( 'about' ) ) );
+check( 'adresse : libre acceptée', true === Leiho_Login::validate( 'mon-bureau' ) );
+check( 'route : /mon-bureau servie', 'serve' === Leiho_Login::match( '/mon-bureau', 'mon-bureau' ) );
+check( 'route : wp-login.php bloqué (sous-dossier compris)', 'block' === Leiho_Login::match( '/wp-login.php', 'mon-bureau' ) && 'block' === Leiho_Login::match( '/wp/wp-login.php', 'mon-bureau' ) );
+check( 'route : autre page libre', '' === Leiho_Login::match( '/mon-bureau/x', 'mon-bureau' ) && '' === Leiho_Login::match( '/', 'mon-bureau' ) );
+$_SERVER['REQUEST_URI'] = '/mon-bureau/?action=lostpassword';
+check( 'chemin demandé : sans requête ni barre finale', '/mon-bureau' === Leiho_Login::request_path(), Leiho_Login::request_path() );
+check( 'nom du site en CSS : guillemets et balises échappés', false === strpos( Leiho_Login::css_string( 'A"</style>' ), '"' ) && false === strpos( Leiho_Login::css_string( 'A"</style>' ), '<' ) );
 
 // Le thème livré se lit comme un thème.
 $style = (string) file_get_contents( __DIR__ . '/../theme/leiho-zero/style.css' );

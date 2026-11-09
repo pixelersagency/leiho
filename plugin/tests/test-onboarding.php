@@ -35,6 +35,7 @@ function human_time_diff( $t ) { return '5 mins'; }
 
 final class Leiho_Plugin {
 	public static function settings() { return $GLOBALS['settings']; }
+	public static function fields_plugin() { return isset( $GLOBALS['fields_plugin'] ) ? $GLOBALS['fields_plugin'] : array( 'slug' => 'acf', 'name' => 'ACF' ); }
 }
 final class Leiho_Admin {
 	public static function wp_origin() { return 'https://cms.exemple.fr'; }
@@ -108,6 +109,12 @@ check( 'consigne : framework et adresses', false !== strpos( $prompt, 'Framework
 check( 'consigne : extraits du framework', false !== strpos( $prompt, 'src/hooks.server.ts' ) && false !== strpos( $prompt, '+layout.svelte' ) && false !== strpos( $prompt, "```\n" ) );
 check( 'consigne : site existant, finit sur le dépôt', 'Site repository:' === substr( $prompt, -strlen( 'Site repository:' ) ) );
 check( 'consigne : nouveau site, finit sur le brief', 'Site idea or brief:' === substr( Leiho_Dashboard::start_prompt( $frameworks['next'], 'new', $ctx ), -strlen( 'Site idea or brief:' ) ) );
+$with_acf = Leiho_Dashboard::start_prompt( $frameworks['next'], 'new', $ctx );
+check( 'consigne : ACF détecté, modèle dans ACF', false !== strpos( $with_acf, 'content model in ACF' ) && false !== strpos( $with_acf, 'Custom fields: ACF is active' ) );
+$GLOBALS['fields_plugin'] = array( 'slug' => '', 'name' => '' );
+$no_acf = Leiho_Dashboard::start_prompt( $frameworks['next'], 'new', $ctx );
+check( 'consigne : sans ACF, modèle dans Leiho Collections', false !== strpos( $no_acf, 'content model in Leiho Collections' ) && false !== strpos( $no_acf, 'no ACF on this WordPress' ) );
+unset( $GLOBALS['fields_plugin'] );
 check( 'consigne : variantes d’hébergeur toutes données', false !== strpos( Leiho_Dashboard::start_prompt( $frameworks['astro'], 'existing', $ctx ), 'Vercel — vercel.json' ) );
 $GLOBALS['settings']['front_url'] = '';
 check( 'consigne : adresse du site absente signalée', false !== strpos( Leiho_Dashboard::start_prompt( $frameworks['next'], 'existing', Leiho_Dashboard::start_context() ), 'not set yet' ) );

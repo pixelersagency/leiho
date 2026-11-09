@@ -385,9 +385,9 @@
 			] ),
 			h( 'div', { class: 'leiho-detail__body' }, h( 'div', { class: 'leiho-empty-state' }, [
 				h( 'span', { class: 'leiho-empty-state__icon' }, icon( 'settings', 22 ) ),
-				h( 'h3', { text: acf ? __( 'Fields managed in ACF', 'leiho' ) : __( 'Fields managed by WordPress', 'leiho' ) } ),
+				h( 'h3', { text: acf ? sprintf( /* translators: %s: fields plugin (ACF, ACF PRO, Secure Custom Fields). */ __( 'Fields managed in %s', 'leiho' ), cfg.acfName || 'ACF' ) : __( 'Fields managed by WordPress', 'leiho' ) } ),
 				h( 'p', { text: acf
-					? __( 'This content type and its fields are defined in Advanced Custom Fields (or by the theme). Leiho edits their values; change the fields themselves in ACF.', 'leiho' )
+					? sprintf( /* translators: %s: fields plugin (ACF, ACF PRO, Secure Custom Fields). */ __( 'This content type and its fields are defined in %1$s (or by the theme). Leiho edits their values; change the fields themselves in %1$s.', 'leiho' ), cfg.acfName || 'ACF' )
 					: __( 'This content type and its fields are defined by WordPress, the theme or a plugin. Leiho edits their values.', 'leiho' ) } ),
 				canImport( t )
 					? h( 'p', { class: 'leiho-muted', text: __( 'You can also move these fields into Leiho: Leiho then defines and stores them, and ACF is no longer needed for this content type. Nothing is deleted from ACF, and you can go back.', 'leiho' ) } )
@@ -395,7 +395,7 @@
 				h( 'div', { class: 'leiho-actions' }, [
 					canImport( t ) ? importButton( t, true ) : null,
 					acf && cfg.acfUrl
-						? h( 'a', { class: 'leiho-btn leiho-btn--quiet', href: cfg.acfUrl }, [ icon( 'external' ), __( 'Open the ACF field groups', 'leiho' ) ] )
+						? h( 'a', { class: 'leiho-btn leiho-btn--quiet', href: cfg.acfUrl }, [ icon( 'external' ), sprintf( /* translators: %s: fields plugin (ACF, ACF PRO, Secure Custom Fields). */ __( 'Open the %s field groups', 'leiho' ), cfg.acfName || 'ACF' ) ] )
 						: null,
 				] ),
 			] ) ),

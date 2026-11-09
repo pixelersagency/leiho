@@ -759,10 +759,39 @@ class Leiho_Admin {
 		}
 		check_admin_referer( 'leiho_save_security' );
 
-		$input = isset( $_POST['leiho_settings'] ) && is_array( $_POST['leiho_settings'] ) ? wp_unslash( $_POST['leiho_settings'] ) : array(); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
-		update_option( Leiho_Plugin::OPTION_SETTINGS, self::sanitize_security( $input, Leiho_Plugin::settings() ) );
+		$input    = isset( $_POST['leiho_settings'] ) && is_array( $_POST['leiho_settings'] ) ? wp_unslash( $_POST['leiho_settings'] ) : array(); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+		$before   = Leiho_Plugin::settings();
+		$settings = self::sanitize_security( $input, $before );
 
-		wp_safe_redirect( Leiho_App::url( 'security', array( 'leiho_saved' => '1' ) ) );
+		// Page de connexion : réglée ici seulement, jamais par un agent.
+		$settings['login_style'] = ! empty( $input['login_style'] );
+		$slug                    = Leiho_Login::clean( isset( $input['login_slug'] ) ? $input['login_slug'] : '' );
+		$args                    = array( 'leiho_saved' => '1' );
+		if ( '' !== $slug ) {
+			$valid = Leiho_Login::validate( $slug );
+			if ( is_wp_error( $valid ) ) {
+				set_transient( 'leiho_login_error_' . get_current_user_id(), $valid->get_error_message(), 120 );
+				$args = array( 'leiho_login_error' => '1' );
+				$slug = $before['login_slug'];
+			}
+		}
+		$settings['login_slug'] = $slug;
+
+		update_option( Leiho_Plugin::OPTION_SETTINGS, $settings );
+
+		// Nouvelle adresse : l'administrateur du site la reçoit par e-mail,
+		// pour ne pas rester dehors s'il ne l'a pas notée.
+		if ( '' !== $slug && $slug !== $before['login_slug'] ) {
+			wp_mail(
+				get_option( 'admin_email' ),
+				/* translators: %s: site name. */
+				sprintf( __( '[%s] New login address', 'leiho' ), wp_specialchars_decode( get_bloginfo( 'name' ), ENT_QUOTES ) ),
+				/* translators: 1: login URL. */
+				sprintf( __( "The login page of this WordPress has moved. Log in from now on at:\n\n%1\$s\n\nwp-login.php and wp-admin no longer answer visitors. If you lose this address, add this line to wp-config.php to get the usual login page back:\n\ndefine( 'LEIHO_DEFAULT_LOGIN', true );", 'leiho' ), Leiho_Login::url( $slug ) )
+			);
+		}
+
+		wp_safe_redirect( Leiho_App::url( 'security', $args ) );
 		exit;
 	}
 

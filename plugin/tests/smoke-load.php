@@ -66,6 +66,8 @@ function wp_remote_retrieve_body( $r ) { return '{}'; }
 function wp_remote_retrieve_header( $r, $h ) { return ''; }
 function is_wp_error( $t ) { return $t instanceof WP_Error; }
 function wp_json_encode( $v ) { return json_encode( $v ); }
+function sanitize_title( $v ) { return strtolower( trim( preg_replace( '/[^A-Za-z0-9]+/', '-', (string) $v ), '-' ) ); }
+function is_multisite() { return false; }
 function sanitize_key( $v ) { return strtolower( preg_replace( '/[^a-z0-9_\-]/i', '', (string) $v ) ); }
 function sanitize_text_field( $v ) { return trim( strip_tags( (string) $v ) ); }
 function sanitize_textarea_field( $v ) { return trim( strip_tags( (string) $v ) ); }
