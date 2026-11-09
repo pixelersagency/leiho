@@ -9,11 +9,9 @@ defined( 'ABSPATH' ) || exit;
  * aussi édités dans l'éditeur visuel) ; ces champs-ci portent form_only :
  * l'éditeur visuel ne les affiche pas.
  *
- * Contenu écrit avec l'éditeur de blocs : s'il n'a que des blocs courants
- * (Leiho_Blocks), il est édité en HTML et redevient des blocs à
- * l'enregistrement. Sinon le champ est en lecture seule, avec un lien vers
- * l'éditeur WordPress, et le serveur refuse toute écriture
- * (blocks_protected).
+ * Contenu écrit avec l'éditeur de blocs : édité en HTML et rendu en blocs à
+ * l'enregistrement (Leiho_Blocks) ; les blocs que Leiho ne convertit pas
+ * restent verrouillés dans le texte et reviennent intacts.
  */
 class Leiho_Native_Fields {
 
@@ -78,21 +76,14 @@ class Leiho_Native_Fields {
 			$field['toolbar'] = 'full';
 			$field['media']   = current_user_can( 'upload_files' );
 			if ( self::has_blocks( $post->post_content ) ) {
-				$unsupported = Leiho_Blocks::unsupported( $post->post_content );
-				if ( $unsupported ) {
-					// Lecture seule : un aperçu en texte, et l'éditeur de blocs.
-					$field['blocks']      = true;
-					$field['readonly']    = true;
-					$field['value']       = null;
-					$field['preview']     = wp_trim_words( wp_strip_all_tags( strip_shortcodes( (string) $post->post_content ) ), 60 );
-					$field['edit_url']    = (string) get_edit_post_link( $post->ID, 'raw' );
-					$field['unsupported'] = $unsupported;
-				} else {
-					// Blocs courants : édités en HTML, rendus en blocs à l'enregistrement.
-					$field['value']        = Leiho_Blocks::to_html( $post->post_content );
-					$field['block_editor'] = true;
-					$field['help']         = __( 'Written with the WordPress block editor. Leiho saves it back as blocks, so you can keep editing it in either place.', 'leiho' );
-				}
+				// Édité en HTML, rendu en blocs à l'enregistrement ; les blocs que
+				// Leiho ne convertit pas restent verrouillés dans le texte.
+				$field['value']        = Leiho_Blocks::to_html( $post->post_content );
+				$field['block_editor'] = true;
+				$field['edit_url']     = (string) get_edit_post_link( $post->ID, 'raw' );
+				$field['help']         = Leiho_Blocks::unsupported( $post->post_content )
+					? __( 'Written with the WordPress block editor. Leiho saves it back as blocks. Grey boxes are blocks Leiho doesn’t change (tables, buttons, columns…): edit them in WordPress.', 'leiho' )
+					: __( 'Written with the WordPress block editor. Leiho saves it back as blocks, so you can keep editing it in either place.', 'leiho' );
 			}
 			$fields[] = $field;
 		}
@@ -368,12 +359,8 @@ class Leiho_Native_Fields {
 					} elseif ( ! is_string( $value ) ) {
 						$error = 'invalid';
 					} elseif ( self::has_blocks( $post->post_content ) ) {
-						if ( Leiho_Blocks::unsupported( $post->post_content ) ) {
-							$error = 'blocks_protected';
-						} else {
-							// L'éditeur envoie le format classique (paragraphes implicites).
-							$postarr['post_content'] = Leiho_Blocks::from_html( self::filter_html( wpautop( $value ) ), $post->post_content );
-						}
+						// L'éditeur envoie le format classique (paragraphes implicites).
+						$postarr['post_content'] = Leiho_Blocks::from_html( self::filter_html( wpautop( $value ) ), $post->post_content );
 					} else {
 						$postarr['post_content'] = self::filter_html( $value );
 					}

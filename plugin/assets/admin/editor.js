@@ -3200,7 +3200,10 @@
 			'body{font-family:-apple-system,BlinkMacSystemFont,"Inter","Segoe UI",system-ui,sans-serif;font-size:15px;line-height:1.6;margin:12px 16px;}' +
 			'a{color:' + token( '--leiho-accent-ink', '#3d6b00' ) + ';}' +
 			'blockquote{margin:0 0 1em;padding-left:14px;border-left:3px solid ' + token( '--leiho-line-strong', '#cccccc' ) + ';color:' + token( '--leiho-muted', '#555555' ) + ';}' +
-			'::selection{background:' + token( '--leiho-accent-soft', 'rgba(197,255,62,.3)' ) + ';}'
+			'::selection{background:' + token( '--leiho-accent-soft', 'rgba(197,255,62,.3)' ) + ';}' +
+			// Blocs de l'éditeur de blocs que Leiho ne modifie pas (Leiho_Blocks).
+			'.leiho-locked-block{margin:0 0 1em;padding:10px 12px;border:1px dashed ' + token( '--leiho-line-strong', '#cccccc' ) + ';border-radius:8px;background:' + token( '--leiho-input', 'rgba(0,0,0,.05)' ) + ';color:' + token( '--leiho-muted', '#555555' ) + ';font-size:13px;line-height:1.5;cursor:default;user-select:none;}' +
+			'.leiho-locked-block strong{color:' + token( '--leiho-ink', '#171717' ) + ';font-weight:600;}'
 		);
 	}
 

@@ -183,7 +183,7 @@ check( 'contenu en blocs courants : réécrit en blocs', 'BLOCKS(<p>écrasé</p>
 $columns = post( 12, 'post', array( 'post_content' => "<!-- wp:columns -->\n<div class=\"wp-block-columns\"></div>\n<!-- /wp:columns -->" ) );
 $values  = array( '_content' => '<p>écrasé</p>' );
 $r       = Leiho_Native_Fields::prepare( $columns, $values );
-check( 'contenu en blocs non convertibles : écriture refusée', 'blocks_protected' === ( $r['errors']['_content'] ?? '' ) && ! isset( $r['postarr']['post_content'] ) );
+check( 'contenu avec blocs non convertibles : réécrit aussi (blocs verrouillés gardés par Leiho_Blocks)', 'BLOCKS(<p>écrasé</p>)' === ( $r['postarr']['post_content'] ?? '' ) && empty( $r['errors'] ) );
 
 /* Validation --------------------------------------------------------- */
 

@@ -44,6 +44,8 @@ function serialize_block( $block ) {
 	return get_comment_delimited_block_content( $block['blockName'], $block['attrs'], $out );
 }
 function wpautop( $v ) { return $v; }
+function __( $s, $d = '' ) { return $s; }
+function esc_html( $v ) { return htmlspecialchars( (string) $v, ENT_QUOTES, 'UTF-8' ); }
 require __DIR__ . '/../includes/class-leiho-blocks.php';
 
 $failures = 0;
@@ -79,6 +81,18 @@ check( 'citation', false !== strpos( $new, '<!-- wp:quote --><blockquote class="
 check( 'séparateur', false !== strpos( $new, '<!-- wp:separator -->' ) );
 check( 'image de la médiathèque', false !== strpos( $new, '<!-- wp:image {"id":12,"sizeSlug":"medium","linkDestination":"none"} --><figure class="wp-block-image size-medium"><img src="/a.jpg" alt="A" class="wp-image-12"/></figure>' ), $new );
 check( 'élément sans équivalent : HTML libre gardé', false !== strpos( $new, '<div class="x">libre</div>' ) && false === strpos( $new, 'wp:html' ) );
+
+// Bloc non convertible : encadré verrouillé, remis intact.
+$mixed = "<!-- wp:paragraph -->\n<p>Avant.</p>\n<!-- /wp:paragraph -->\n\n<!-- wp:table -->\n<figure class=\"wp-block-table\"><table><tbody><tr><td>A</td><td>B</td></tr></tbody></table></figure>\n<!-- /wp:table -->\n\n<!-- wp:paragraph -->\n<p>Après.</p>\n<!-- /wp:paragraph -->";
+$html  = Leiho_Blocks::to_html( $mixed );
+check( 'bloc non convertible : encadré verrouillé avec son rang', false !== strpos( $html, 'data-leiho-block="2"' ) && false !== strpos( $html, 'contenteditable="false"' ) && false === strpos( $html, '<table' ), $html );
+check( 'contenu mixte : aller-retour identique', $mixed === Leiho_Blocks::from_html( $html, $mixed ), Leiho_Blocks::from_html( $html, $mixed ) );
+// TinyMCE retire contenteditable et kses aussi : data-leiho-block suffit.
+$edited = str_replace( array( 'Après.', ' contenteditable="false"' ), array( 'Après modifié.', '' ), $html );
+$out    = Leiho_Blocks::from_html( $edited, $mixed );
+check( 'contenu mixte modifié : tableau intact, paragraphe modifié', false !== strpos( $out, "<!-- wp:table -->\n<figure class=\"wp-block-table\"><table>" ) && false !== strpos( $out, '<p>Après modifié.</p>' ), $out );
+check( 'encadré supprimé : bloc retiré', false === strpos( Leiho_Blocks::from_html( '<p>Avant.</p>', $mixed ), 'wp:table' ) );
+check( 'rang inventé : ignoré', false === strpos( Leiho_Blocks::from_html( '<div data-leiho-block="99">x</div><div data-leiho-block="1">x</div>', $mixed ), '<!--' ) );
 
 echo $failures ? "\nÉCHECS.\n" : "\nTOUS LES TESTS PASSENT\n";
 exit( $failures ? 1 : 0 );

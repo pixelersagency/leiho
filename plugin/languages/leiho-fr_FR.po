@@ -27,7 +27,7 @@ msgstr "Formulation interdite : %s"
 msgid "Changes"
 msgstr "Modifications"
 
-#: assets/admin/ai.js:418 assets/admin/editor.js:4142
+#: assets/admin/ai.js:418 assets/admin/editor.js:4145
 #: includes/admin/class-leiho-app.php:88 includes/class-leiho-activity.php:248
 msgid "AI"
 msgstr "IA"
@@ -349,12 +349,12 @@ msgstr "« %s » créée en brouillon."
 msgid "Couldn’t create the draft."
 msgstr "Impossible de créer le brouillon."
 
-#: assets/admin/ai.js:1159 assets/admin/editor.js:4169
+#: assets/admin/ai.js:1159 assets/admin/editor.js:4172
 #: includes/admin/class-leiho-dashboard.php:280
 msgid "No"
 msgstr "Non"
 
-#: assets/admin/ai.js:1159 assets/admin/editor.js:4169
+#: assets/admin/ai.js:1159 assets/admin/editor.js:4172
 #: includes/admin/class-leiho-dashboard.php:280
 msgid "Yes"
 msgstr "Oui"
@@ -376,7 +376,7 @@ msgid "Save the AI context"
 msgstr "Enregistrer le contexte d’IA"
 
 #: assets/admin/ai.js:1242 assets/admin/editor.js:252
-#: assets/admin/editor.js:3934
+#: assets/admin/editor.js:3937
 msgid "Saving…"
 msgstr "Enregistrement…"
 
@@ -583,8 +583,7 @@ msgstr "Des sous-champs regroupés."
 msgid "Main text (WordPress editor)"
 msgstr "Texte principal (éditeur WordPress)"
 
-#: assets/admin/app-collections.js:66
-#: includes/class-leiho-native-fields.php:101
+#: assets/admin/app-collections.js:66 includes/class-leiho-native-fields.php:92
 msgid "Excerpt"
 msgstr "Extrait"
 
@@ -670,7 +669,7 @@ msgstr "Elle disparaît de Leiho et de l’API de contenu. Ses entrées et leurs
 #: assets/admin/app-collections.js:400 assets/admin/app-collections.js:771
 #: assets/admin/app-collections.js:1055 assets/admin/app-collections.js:1465
 #: assets/admin/app-collections.js:1473 assets/admin/app-collections.js:1859
-#: assets/admin/editor.js:3442
+#: assets/admin/editor.js:3445
 msgid "Remove"
 msgstr "Retirer"
 
@@ -992,7 +991,7 @@ msgid "Changing the type of a saved field moves its values to a new column; valu
 msgstr "Changer le type d’un champ enregistré déplace ses valeurs dans une nouvelle colonne ; celles qui ne se convertissent pas restent dans la colonne archivée."
 
 #: assets/admin/app-collections.js:1187 assets/admin/app-collections.js:1489
-#: assets/admin/editor.js:3720
+#: assets/admin/editor.js:3723
 msgid "Label"
 msgstr "Libellé"
 
@@ -1326,7 +1325,7 @@ msgid "Separated by commas. The first one is the default language: its content s
 msgstr "Séparés par des virgules. La première est la langue par défaut : son contenu reste où il est. Laissez vide pour un site en une seule langue ; les traductions déjà écrites sont gardées."
 
 #: assets/admin/app-collections.js:1911 assets/admin/app-media.js:218
-#: assets/admin/editor.js:4072 includes/admin/class-leiho-admin.php:545
+#: assets/admin/editor.js:4075 includes/admin/class-leiho-admin.php:545
 #: includes/admin/class-leiho-dashboard.php:1704
 #: includes/admin/class-leiho-dashboard.php:1870
 #: includes/admin/class-leiho-dashboard.php:2294
@@ -1898,8 +1897,8 @@ msgstr "%1$s — %2$s, %3$s"
 #. translators: 1: file name, 2: error message.
 #: assets/admin/app-content.js:1124 assets/admin/app-content.js:1130
 #: assets/admin/app-media.js:326 assets/admin/editor.js:1993
-#: assets/admin/editor.js:3146 assets/admin/editor.js:3639
-#: assets/admin/editor.js:3894
+#: assets/admin/editor.js:3146 assets/admin/editor.js:3642
+#: assets/admin/editor.js:3897
 msgid "%1$s: %2$s"
 msgstr "%1$s : %2$s"
 
@@ -2038,7 +2037,7 @@ msgstr "Impossible de charger la médiathèque."
 
 #. translators: %d: number of items.
 #. translators: %d: number of media items.
-#: assets/admin/app-media.js:141 assets/admin/editor.js:4176
+#: assets/admin/app-media.js:141 assets/admin/editor.js:4179
 #: includes/admin/class-leiho-dashboard.php:298
 msgid "%d item"
 msgid_plural "%d items"
@@ -2123,19 +2122,19 @@ msgstr "Tapez %s pour confirmer"
 msgid "Confirm"
 msgstr "Confirmer"
 
-#: assets/admin/app.js:396 assets/admin/editor.js:4205
+#: assets/admin/app.js:396 assets/admin/editor.js:4208
 msgid "just now"
 msgstr "à l’instant"
 
 #. translators: %d: number of minutes.
-#: assets/admin/app.js:400 assets/admin/editor.js:4209
+#: assets/admin/app.js:400 assets/admin/editor.js:4212
 msgid "%d minute ago"
 msgid_plural "%d minutes ago"
 msgstr[0] "il y a %d min"
 msgstr[1] "il y a %d min"
 
 #. translators: %d: number of hours.
-#: assets/admin/app.js:404 assets/admin/editor.js:4214
+#: assets/admin/app.js:404 assets/admin/editor.js:4217
 msgid "%d hour ago"
 msgid_plural "%d hours ago"
 msgstr[0] "il y a %d h"
@@ -2145,13 +2144,13 @@ msgstr[1] "il y a %d h"
 msgid "Something went wrong."
 msgstr "Un problème est survenu."
 
-#: assets/admin/app.js:450 assets/admin/editor.js:4601
+#: assets/admin/app.js:450 assets/admin/editor.js:4604
 #: includes/admin/class-leiho-admin.php:543
 #: includes/admin/class-leiho-app.php:563
 msgid "Switch to dark theme"
 msgstr "Passer au thème sombre"
 
-#: assets/admin/app.js:450 assets/admin/editor.js:4601
+#: assets/admin/app.js:450 assets/admin/editor.js:4604
 msgid "Switch to light theme"
 msgstr "Passer au thème clair"
 
@@ -2194,7 +2193,7 @@ msgid "Publish (unpublished changes)"
 msgstr "Publier (modifications non publiées)"
 
 #: assets/admin/app.js:646 assets/admin/app.js:672 assets/admin/app.js:707
-#: assets/admin/editor.js:4376
+#: assets/admin/editor.js:4379
 msgid "Publishing…"
 msgstr "Mise en ligne…"
 
@@ -2606,350 +2605,350 @@ msgstr "Ligne %d"
 msgid "%1$s — %2$d"
 msgstr "%1$s — %2$d"
 
-#: assets/admin/editor.js:3245
+#: assets/admin/editor.js:3248
 msgid "Heading 2"
 msgstr "Titre 2"
 
-#: assets/admin/editor.js:3245
+#: assets/admin/editor.js:3248
 msgid "Heading 3"
 msgstr "Titre 3"
 
-#: assets/admin/editor.js:3245
+#: assets/admin/editor.js:3248
 msgid "Heading 4"
 msgstr "Titre 4"
 
-#: assets/admin/editor.js:3245
+#: assets/admin/editor.js:3248
 msgid "Paragraph"
 msgstr "Paragraphe"
 
-#: assets/admin/editor.js:3287
+#: assets/admin/editor.js:3290
 msgid "This content was written with the WordPress block editor. To keep its blocks intact, edit it in WordPress."
 msgstr "Ce contenu a été écrit avec l’éditeur de blocs de WordPress. Pour garder ses blocs intacts, modifiez-le dans WordPress."
 
-#: assets/admin/editor.js:3299
+#: assets/admin/editor.js:3302
 msgid "Open in the WordPress editor"
 msgstr "Ouvrir dans l’éditeur WordPress"
 
-#: assets/admin/editor.js:3382
+#: assets/admin/editor.js:3385
 msgid "The media library isn’t available."
 msgstr "La médiathèque n’est pas disponible."
 
-#: assets/admin/editor.js:3434 assets/admin/editor.js:3456
+#: assets/admin/editor.js:3437 assets/admin/editor.js:3459
 msgid "Replace"
 msgstr "Remplacer"
 
-#: assets/admin/editor.js:3436 assets/admin/editor.js:3458
-#: assets/admin/editor.js:3469
+#: assets/admin/editor.js:3439 assets/admin/editor.js:3461
+#: assets/admin/editor.js:3472
 msgid "Choose an image"
 msgstr "Choisir une image"
 
-#: assets/admin/editor.js:3437 assets/admin/editor.js:3459
-#: assets/admin/editor.js:3469
+#: assets/admin/editor.js:3440 assets/admin/editor.js:3462
+#: assets/admin/editor.js:3472
 msgid "Choose a file"
 msgstr "Choisir un fichier"
 
 #. translators: 1: shape of the image slot (e.g. “wide (1.78:1)”), 2: shape of the chosen image.
-#: assets/admin/editor.js:3497
+#: assets/admin/editor.js:3500
 msgid "This image will be cropped: the slot is %1$s, the image is %2$s. Check the framing in the preview."
 msgstr "Cette image sera recadrée : l’emplacement est %1$s, l’image est %2$s. Vérifiez le cadrage dans l’aperçu."
 
-#: assets/admin/editor.js:3522
+#: assets/admin/editor.js:3525
 msgid "Alternative text saved on the image."
 msgstr "Texte alternatif enregistré sur l’image."
 
 #. translators: %s: aspect ratio, e.g. 1.78 (as in 1.78:1).
-#: assets/admin/editor.js:3548
+#: assets/admin/editor.js:3551
 msgid "wide (%s:1)"
 msgstr "en largeur (%s:1)"
 
 #. translators: %s: aspect ratio, e.g. 1.50 (as in 1:1.50).
-#: assets/admin/editor.js:3552
+#: assets/admin/editor.js:3555
 msgid "tall (1:%s)"
 msgstr "en hauteur (1:%s)"
 
-#: assets/admin/editor.js:3554
+#: assets/admin/editor.js:3557
 msgid "almost square"
 msgstr "presque carré"
 
-#: assets/admin/editor.js:3597
+#: assets/admin/editor.js:3600
 msgid "Move earlier"
 msgstr "Déplacer avant"
 
-#: assets/admin/editor.js:3609
+#: assets/admin/editor.js:3612
 msgid "Move later"
 msgstr "Déplacer après"
 
-#: assets/admin/editor.js:3621
+#: assets/admin/editor.js:3624
 msgid "Remove from gallery"
 msgstr "Retirer de la galerie"
 
 #. translators: %d: image position in the gallery.
-#: assets/admin/editor.js:3643
+#: assets/admin/editor.js:3646
 msgid "image %d"
 msgstr "image %d"
 
-#: assets/admin/editor.js:3658
+#: assets/admin/editor.js:3661
 msgid "+ Add images"
 msgstr "+ Ajouter des images"
 
-#: assets/admin/editor.js:3660
+#: assets/admin/editor.js:3663
 msgid "Add to gallery"
 msgstr "Ajouter à la galerie"
 
-#: assets/admin/editor.js:3704
+#: assets/admin/editor.js:3707
 msgid "https://… or /contact"
 msgstr "https://… ou /contact"
 
-#: assets/admin/editor.js:3737
+#: assets/admin/editor.js:3740
 msgid "Open in a new tab"
 msgstr "Ouvrir dans un nouvel onglet"
 
-#: assets/admin/editor.js:3758
+#: assets/admin/editor.js:3761
 msgid "Search or add…"
 msgstr "Rechercher ou ajouter…"
 
-#: assets/admin/editor.js:3758 assets/admin/ui.js:725
+#: assets/admin/editor.js:3761 assets/admin/ui.js:725
 msgid "Search…"
 msgstr "Rechercher…"
 
-#: assets/admin/editor.js:3783 assets/admin/editor.js:3826
+#: assets/admin/editor.js:3786 assets/admin/editor.js:3829
 msgid "No items available."
 msgstr "Aucun élément disponible."
 
-#: assets/admin/editor.js:3838
+#: assets/admin/editor.js:3841
 msgid "This field is required."
 msgstr "Ce champ est obligatoire."
 
-#: assets/admin/editor.js:3839
+#: assets/admin/editor.js:3842
 msgid "Text is too long for this field."
 msgstr "Texte trop long pour ce champ."
 
-#: assets/admin/editor.js:3840
+#: assets/admin/editor.js:3843
 msgid "WordPress refused to save (content is locked or a plugin is blocking it)."
 msgstr "WordPress a refusé l’écriture (contenu verrouillé ou extension qui bloque)."
 
-#: assets/admin/editor.js:3841
+#: assets/admin/editor.js:3844
 msgid "Invalid email address."
 msgstr "Adresse e-mail invalide."
 
-#: assets/admin/editor.js:3842 assets/admin/editor.js:3843
+#: assets/admin/editor.js:3845 assets/admin/editor.js:3846
 msgid "Invalid or out-of-range number."
 msgstr "Nombre invalide ou hors limites."
 
-#: assets/admin/editor.js:3844
+#: assets/admin/editor.js:3847
 msgid "This choice isn’t allowed."
 msgstr "Choix non autorisé."
 
-#: assets/admin/editor.js:3845
+#: assets/admin/editor.js:3848
 msgid "File not found or not allowed."
 msgstr "Fichier introuvable ou non autorisé."
 
-#: assets/admin/editor.js:3846
+#: assets/admin/editor.js:3849
 msgid "Linked content not found."
 msgstr "Contenu lié introuvable."
 
-#: assets/admin/editor.js:3847
+#: assets/admin/editor.js:3850
 msgid "Category not found."
 msgstr "Catégorie introuvable."
 
-#: assets/admin/editor.js:3848
+#: assets/admin/editor.js:3851
 msgid "Invalid color."
 msgstr "Couleur invalide."
 
-#: assets/admin/editor.js:3849
+#: assets/admin/editor.js:3852
 msgid "Invalid link."
 msgstr "Lien invalide."
 
-#: assets/admin/editor.js:3850
+#: assets/admin/editor.js:3853
 msgid "Invalid date."
 msgstr "Date invalide."
 
-#: assets/admin/editor.js:3851
+#: assets/admin/editor.js:3854
 msgid "This person can’t write this type of content."
 msgstr "Cette personne ne peut pas écrire ce type de contenu."
 
-#: assets/admin/editor.js:3852
+#: assets/admin/editor.js:3855
 msgid "Only an administrator or an editor can put HTML tags in a code field."
 msgstr "Seul un administrateur ou un éditeur peut mettre des balises HTML dans un champ code."
 
-#: assets/admin/editor.js:3853
+#: assets/admin/editor.js:3856
 msgid "This parent isn’t allowed (same type only, and not one of its own sub-entries)."
 msgstr "Ce parent n’est pas possible (même type uniquement, et pas l’une de ses propres sous-entrées)."
 
-#: assets/admin/editor.js:3854
+#: assets/admin/editor.js:3857
 msgid "This content uses blocks: edit it in the WordPress editor."
 msgstr "Ce contenu utilise des blocs : modifiez-le dans l’éditeur WordPress."
 
-#: assets/admin/editor.js:3855
+#: assets/admin/editor.js:3858
 msgid "You aren’t allowed to change this field."
 msgstr "Vous n’avez pas le droit de modifier ce champ."
 
-#: assets/admin/editor.js:3856
+#: assets/admin/editor.js:3859
 msgid "Invalid value."
 msgstr "Valeur invalide."
 
-#: assets/admin/editor.js:3857
+#: assets/admin/editor.js:3860
 msgid "Linked item not found."
 msgstr "Élément lié introuvable."
 
-#: assets/admin/editor.js:3858
+#: assets/admin/editor.js:3861
 msgid "Malformed field group: reload the page."
 msgstr "Groupe de champs mal formé : rechargez la page."
 
-#: assets/admin/editor.js:3859
+#: assets/admin/editor.js:3862
 msgid "Malformed rows: reload the page."
 msgstr "Lignes mal formées : rechargez la page."
 
-#: assets/admin/editor.js:3860
+#: assets/admin/editor.js:3863
 msgid "Not enough rows for this field."
 msgstr "Pas assez de lignes pour ce champ."
 
-#: assets/admin/editor.js:3861
+#: assets/admin/editor.js:3864
 msgid "Too many rows for this field."
 msgstr "Trop de lignes pour ce champ."
 
-#: assets/admin/editor.js:3862
+#: assets/admin/editor.js:3865
 msgid "Too many items selected."
 msgstr "Trop d’éléments sélectionnés."
 
-#: assets/admin/editor.js:3863
+#: assets/admin/editor.js:3866
 msgid "Unknown block type: reload the page."
 msgstr "Type de bloc inconnu : rechargez la page."
 
-#: assets/admin/editor.js:3864
+#: assets/admin/editor.js:3867
 msgid "This row no longer exists: reload the page."
 msgstr "Cette ligne n’existe plus : rechargez la page."
 
-#: assets/admin/editor.js:3865
+#: assets/admin/editor.js:3868
 msgid "WordPress doesn’t know this field: reload the page."
 msgstr "Champ inconnu de WordPress : rechargez la page."
 
-#: assets/admin/editor.js:3866
+#: assets/admin/editor.js:3869
 msgid "Leiho doesn’t support this field type."
 msgstr "Type de champ non géré par Leiho."
 
 #. translators: %s: technical error code.
-#: assets/admin/editor.js:3871
+#: assets/admin/editor.js:3874
 msgid "Value rejected (%s)."
 msgstr "Valeur refusée (%s)."
 
-#: assets/admin/editor.js:3907
+#: assets/admin/editor.js:3910
 msgid "This content was changed elsewhere: your changes were not saved."
 msgstr "Ce contenu a changé ailleurs : vos modifications n’ont pas été écrites."
 
-#: assets/admin/editor.js:3908
+#: assets/admin/editor.js:3911
 msgid "This content was changed elsewhere since you opened it.\n\nLoad the latest version? Your unsaved changes will be lost."
 msgstr "Ce contenu a été modifié ailleurs depuis son ouverture.\n\nRecharger la version à jour ? Vos modifications non enregistrées seront perdues."
 
 #. translators: 1: field name, 2: error message.
-#: assets/admin/editor.js:3983
+#: assets/admin/editor.js:3986
 msgid "%1$s (%2$s)"
 msgstr "%1$s (%2$s)"
 
 #. translators: 1: number of fields not saved, 2: list of the fields and their errors.
-#: assets/admin/editor.js:4043
+#: assets/admin/editor.js:4046
 msgid "%1$d field wasn’t saved: %2$s."
 msgid_plural "%1$d fields weren’t saved: %2$s."
 msgstr[0] "%1$d champ n’a pas été enregistré : %2$s."
 msgstr[1] "%1$d champs n’ont pas été enregistrés : %2$s."
 
-#: assets/admin/editor.js:4050
+#: assets/admin/editor.js:4053
 msgid "Saved: it’s live."
 msgstr "Enregistré : c’est en ligne."
 
-#: assets/admin/editor.js:4052
+#: assets/admin/editor.js:4055
 msgid "Saved. It will be published automatically."
 msgstr "Enregistré. La mise en ligne se fera automatiquement."
 
-#: assets/admin/editor.js:4054
+#: assets/admin/editor.js:4057
 msgid "Saved. Click “Publish” to put it live."
 msgstr "Enregistré. Cliquez sur « Publier » pour mettre en ligne."
 
-#: assets/admin/editor.js:4067
+#: assets/admin/editor.js:4070
 msgid "Saving failed."
 msgstr "Échec de l’enregistrement."
 
-#: assets/admin/editor.js:4089 includes/admin/class-leiho-app.php:609
+#: assets/admin/editor.js:4092 includes/admin/class-leiho-app.php:609
 msgid "Loading…"
 msgstr "Chargement…"
 
-#: assets/admin/editor.js:4101
+#: assets/admin/editor.js:4104
 msgid "No changes saved on this page yet."
 msgstr "Aucune modification enregistrée sur cette page pour l’instant."
 
-#: assets/admin/editor.js:4113
+#: assets/admin/editor.js:4116
 msgid "Couldn’t load the history."
 msgstr "Impossible de charger l’historique."
 
-#: assets/admin/editor.js:4125
+#: assets/admin/editor.js:4128
 msgid "Show this field"
 msgstr "Afficher ce champ"
 
-#: assets/admin/editor.js:4134 includes/admin/class-leiho-dashboard.php:219
+#: assets/admin/editor.js:4137 includes/admin/class-leiho-dashboard.php:219
 msgid "Unknown user"
 msgstr "Utilisateur inconnu"
 
-#: assets/admin/editor.js:4150 assets/admin/editor.js:4152
+#: assets/admin/editor.js:4153 assets/admin/editor.js:4155
 #: includes/admin/class-leiho-dashboard.php:260
 msgid "empty"
 msgstr "vide"
 
 #. translators: %s: media library ID of the image or file.
-#: assets/admin/editor.js:4166
+#: assets/admin/editor.js:4169
 msgid "Image #%s"
 msgstr "Image n°%s"
 
-#: assets/admin/editor.js:4218
+#: assets/admin/editor.js:4221
 msgid "yesterday"
 msgstr "hier"
 
 #. translators: %d: number of days.
-#: assets/admin/editor.js:4221
+#: assets/admin/editor.js:4224
 msgid "%d day ago"
 msgid_plural "%d days ago"
 msgstr[0] "il y a %d jour"
 msgstr[1] "il y a %d jours"
 
-#: assets/admin/editor.js:4254 assets/admin/editor.js:4406
+#: assets/admin/editor.js:4257 assets/admin/editor.js:4409
 msgid "Couldn’t start the deployment."
 msgstr "Échec du déclenchement du déploiement."
 
-#: assets/admin/editor.js:4278
+#: assets/admin/editor.js:4281
 msgid "Building…"
 msgstr "Build en cours…"
 
 #. translators: %d: estimated number of minutes before the site is live.
-#: assets/admin/editor.js:4282
+#: assets/admin/editor.js:4285
 msgid "Deployment triggered — live in ~%d min"
 msgstr "Déploiement déclenché — en ligne dans ~%d min"
 
-#: assets/admin/editor.js:4285
+#: assets/admin/editor.js:4288
 msgid "The site should be live now."
 msgstr "Le site devrait être en ligne."
 
-#: assets/admin/editor.js:4291
+#: assets/admin/editor.js:4294
 msgid "Live ✓"
 msgstr "En ligne ✓"
 
 #. translators: %s: error message from the deployment service.
-#: assets/admin/editor.js:4297
+#: assets/admin/editor.js:4300
 msgid "Deployment failed — %s"
 msgstr "Échec du déploiement — %s"
 
-#: assets/admin/editor.js:4298
+#: assets/admin/editor.js:4301
 msgid "Deployment failed"
 msgstr "Échec du déploiement"
 
-#: assets/admin/editor.js:4311
+#: assets/admin/editor.js:4314
 msgid "Logs"
 msgstr "Logs"
 
 #. translators: %d: number of seconds before automatic publishing.
-#: assets/admin/editor.js:4375
+#: assets/admin/editor.js:4378
 msgid "Publishing in %d s"
 msgstr "Mise en ligne dans %d s"
 
-#: assets/admin/editor.js:4377
+#: assets/admin/editor.js:4380
 msgid "Your saved changes go live automatically. Click “Publish” to do it now."
 msgstr "Vos modifications enregistrées seront mises en ligne automatiquement. Cliquez sur « Publier » pour le faire tout de suite."
 
@@ -3380,7 +3379,7 @@ msgstr "Chaque enregistrement fait depuis l’éditeur apparaîtra ici : qui a m
 
 #: includes/admin/class-leiho-dashboard.php:131
 #: includes/admin/class-leiho-dashboard.php:1600
-#: includes/class-leiho-native-fields.php:198
+#: includes/class-leiho-native-fields.php:189
 msgid "Publishing"
 msgstr "Mise en ligne"
 
@@ -4343,7 +4342,7 @@ msgid "Start a new conversation and check the connection with “List the WordPr
 msgstr "Ouvrez une nouvelle conversation et vérifiez la connexion avec « Liste les capacités WordPress que tu peux utiliser sur mon site. » Puis, par exemple :"
 
 #: includes/admin/class-leiho-dashboard.php:2123
-#: includes/class-leiho-native-fields.php:77
+#: includes/class-leiho-native-fields.php:75
 msgid "Content"
 msgstr "Contenu"
 
@@ -5432,6 +5431,11 @@ msgstr "Agent IA · Réglages modifiés"
 msgid "AI agent · Secret changed"
 msgstr "Agent IA · Secret modifié"
 
+#. translators: %s: block name (Table, Buttons…).
+#: includes/class-leiho-blocks.php:118
+msgid "%s block — edit it in WordPress"
+msgstr "Bloc %s — à modifier dans WordPress"
+
 #: includes/class-leiho-content.php:172
 msgid "A valid Leiho content token is required."
 msgstr "Un jeton de contenu Leiho valide est requis."
@@ -5486,93 +5490,97 @@ msgstr "Les réglages, les types de contenu, l’historique et les jetons ont é
 msgid "These tables were left as they were, because a Leiho table with the same name already holds data: %s"
 msgstr "Ces tables ont été laissées telles quelles, car une table Leiho du même nom contient déjà des données : %s"
 
-#: includes/class-leiho-login.php:92
+#: includes/class-leiho-login.php:98
 msgid "The login address must be 4 to 50 characters long."
 msgstr "L’adresse de connexion doit faire de 4 à 50 caractères."
 
-#: includes/class-leiho-login.php:95
+#: includes/class-leiho-login.php:101
 msgid "This login address is reserved by WordPress or too easy to guess."
 msgstr "Cette adresse de connexion est réservée par WordPress ou trop facile à deviner."
 
-#: includes/class-leiho-login.php:98
+#: includes/class-leiho-login.php:104
 msgid "A page already uses this address."
 msgstr "Une page utilise déjà cette adresse."
 
-#: includes/class-leiho-login.php:274
+#: includes/class-leiho-login.php:280
 msgid "Reset your password"
 msgstr "Réinitialiser le mot de passe"
 
-#: includes/class-leiho-login.php:275
+#: includes/class-leiho-login.php:281
 msgid "Enter your username or e-mail address: you will receive a link to choose a new password."
 msgstr "Saisissez votre identifiant ou votre adresse e-mail : vous recevrez un lien pour choisir un nouveau mot de passe."
 
-#: includes/class-leiho-login.php:278
+#: includes/class-leiho-login.php:284
 msgid "Choose a new password"
 msgstr "Choisissez un nouveau mot de passe"
 
-#: includes/class-leiho-login.php:282
+#: includes/class-leiho-login.php:288
 msgid "Create an account"
 msgstr "Créer un compte"
 
 #. translators: %s: site name.
-#: includes/class-leiho-login.php:284
+#: includes/class-leiho-login.php:290
 msgid "on %s"
 msgstr "sur %s"
 
-#: includes/class-leiho-login.php:287
+#: includes/class-leiho-login.php:293
 msgid "Check your inbox"
 msgstr "Consultez votre boîte de réception"
 
-#: includes/class-leiho-login.php:291
+#: includes/class-leiho-login.php:297
 msgid "Log in"
 msgstr "Se connecter"
 
 #. translators: %s: site name.
-#: includes/class-leiho-login.php:293
+#: includes/class-leiho-login.php:299
 msgid "to %s"
 msgstr "à %s"
 
-#: includes/class-leiho-login.php:347
+#: includes/class-leiho-login.php:353
 msgid "Edited with"
 msgstr "Édité avec"
 
-#: includes/class-leiho-native-fields.php:94
+#: includes/class-leiho-native-fields.php:85
+msgid "Written with the WordPress block editor. Leiho saves it back as blocks. Grey boxes are blocks Leiho doesn’t change (tables, buttons, columns…): edit them in WordPress."
+msgstr "Écrit avec l’éditeur de blocs de WordPress. Leiho l’enregistre de nouveau en blocs. Les encadrés gris sont des blocs que Leiho ne modifie pas (tableaux, boutons, colonnes…) : modifiez-les dans WordPress."
+
+#: includes/class-leiho-native-fields.php:86
 msgid "Written with the WordPress block editor. Leiho saves it back as blocks, so you can keep editing it in either place."
 msgstr "Écrit avec l’éditeur de blocs de WordPress. Leiho l’enregistre de nouveau en blocs : vous pouvez continuer à le modifier ici comme dans WordPress."
 
-#: includes/class-leiho-native-fields.php:104
+#: includes/class-leiho-native-fields.php:95
 msgid "Short summary shown in lists and shared links. Leave empty to use the start of the content."
 msgstr "Court résumé affiché dans les listes et les liens partagés. Laissez vide pour reprendre le début du contenu."
 
-#: includes/class-leiho-native-fields.php:160
+#: includes/class-leiho-native-fields.php:151
 msgid "Classification"
 msgstr "Classement"
 
-#: includes/class-leiho-native-fields.php:169
+#: includes/class-leiho-native-fields.php:160
 msgid "URL slug"
 msgstr "Adresse (slug)"
 
-#: includes/class-leiho-native-fields.php:171
+#: includes/class-leiho-native-fields.php:162
 msgid "The last part of the address. Lowercase letters, digits and hyphens."
 msgstr "La fin de l’adresse. Minuscules, chiffres et tirets."
 
-#: includes/class-leiho-native-fields.php:175
+#: includes/class-leiho-native-fields.php:166
 msgid "Publish date"
 msgstr "Date de publication"
 
-#: includes/class-leiho-native-fields.php:176
+#: includes/class-leiho-native-fields.php:167
 msgid "A future date schedules a published entry."
 msgstr "Une date future programme une entrée publiée."
 
-#: includes/class-leiho-native-fields.php:180
+#: includes/class-leiho-native-fields.php:171
 msgid "Author"
 msgstr "Auteur"
 
-#: includes/class-leiho-native-fields.php:186
+#: includes/class-leiho-native-fields.php:177
 msgid "Parent"
 msgstr "Parent"
 
-#: includes/class-leiho-native-fields.php:191
+#: includes/class-leiho-native-fields.php:182
 msgid "Order"
 msgstr "Ordre"
 

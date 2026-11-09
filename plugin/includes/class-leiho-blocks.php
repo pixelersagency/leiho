@@ -18,9 +18,11 @@ defined( 'ABSPATH' ) || exit;
  *   - ce qui n'a pas d'équivalent sûr reste en HTML libre (bloc
  *     « Classique » dans l'éditeur de blocs), sans rien perdre.
  *
- * Un contenu qui contient d'autres blocs (colonnes, groupes, galeries,
- * blocs d'extensions…) reste en lecture seule : les convertir en HTML les
- * casserait.
+ * Les autres blocs (colonnes, tableaux, boutons, blocs d'extensions…) ne
+ * passent pas par le HTML : ils apparaissent dans l'éditeur comme un encadré
+ * verrouillé (data-leiho-block = leur rang dans le contenu d'origine) et
+ * sont remis tels quels à l'enregistrement. Le reste de l'article reste
+ * éditable.
  */
 class Leiho_Blocks {
 
@@ -65,16 +67,57 @@ class Leiho_Blocks {
 	}
 
 	/**
-	 * HTML à éditer : le contenu sans ses commentaires de blocs.
+	 * HTML à éditer : blocs courants sans leurs commentaires, autres blocs
+	 * en encadrés verrouillés.
 	 *
 	 * @param string $content post_content.
 	 * @return string
 	 */
 	public static function to_html( $content ) {
-		$html = preg_replace( '/<!--\s*\/?wp:[^>]*?-->/s', '', (string) $content );
+		$parts = array();
+		foreach ( parse_blocks( (string) $content ) as $index => $block ) {
+			$unsupported = array();
+			self::collect( $block, true, $unsupported );
+			$parts[] = $unsupported ? self::locked( $block, $index ) : self::strip( serialize_block( $block ) );
+		}
+		$html = implode( '', $parts );
 		// Espaces laissés entre les blocs.
-		$html = preg_replace( "/>\s*\n\s*</", ">\n<", (string) $html );
+		$html = preg_replace( "/>\s*\n\s*</", ">\n<", $html );
 		return trim( (string) $html );
+	}
+
+	/**
+	 * @param string $serialized Bloc sérialisé.
+	 * @return string Son HTML sans commentaires de blocs.
+	 */
+	private static function strip( $serialized ) {
+		return (string) preg_replace( '/<!--\s*\/?wp:[^>]*?-->/s', '', (string) $serialized );
+	}
+
+	/**
+	 * Encadré d'un bloc que Leiho ne modifie pas : son nom et le début de
+	 * son texte.
+	 *
+	 * @param array $block Bloc.
+	 * @param int   $index Rang dans le contenu d'origine.
+	 * @return string
+	 */
+	private static function locked( array $block, $index ) {
+		$label = (string) $block['blockName'];
+		if ( class_exists( 'WP_Block_Type_Registry' ) ) {
+			$type = WP_Block_Type_Registry::get_instance()->get_registered( $block['blockName'] );
+			if ( $type && ! empty( $type->title ) ) {
+				$label = (string) $type->title;
+			}
+		}
+		$text = trim( (string) preg_replace( '/\s+/u', ' ', wp_strip_all_tags( str_replace( '<', ' <', self::strip( serialize_block( $block ) ) ) ) ) );
+		if ( function_exists( 'mb_strlen' ) && mb_strlen( $text ) > 140 ) {
+			$text = mb_substr( $text, 0, 140 ) . '…';
+		}
+		/* translators: %s: block name (Table, Buttons…). */
+		$title = sprintf( __( '%s block — edit it in WordPress', 'leiho' ), $label );
+		return '<div class="leiho-locked-block" contenteditable="false" data-leiho-block="' . (int) $index . '"><strong>' . esc_html( $title ) . '</strong>'
+			. ( '' !== $text ? '<br>' . esc_html( $text ) : '' ) . '</div>';
 	}
 
 	/**
@@ -87,13 +130,14 @@ class Leiho_Blocks {
 	public static function from_html( $html, $original ) {
 		// Blocs d'origine, retrouvés par leur HTML : une file par forme (deux
 		// paragraphes identiques gardent chacun leur bloc).
-		$known = array();
-		foreach ( parse_blocks( (string) $original ) as $block ) {
+		$known  = array();
+		$blocks = parse_blocks( (string) $original );
+		foreach ( $blocks as $block ) {
 			if ( null === $block['blockName'] ) {
 				continue;
 			}
 			$serialized = serialize_block( $block );
-			$key        = self::canonical( self::to_html( $serialized ) );
+			$key        = self::canonical( self::strip( $serialized ) );
 			if ( '' !== $key ) {
 				$known[ $key ][] = $serialized;
 			}
@@ -101,6 +145,14 @@ class Leiho_Blocks {
 
 		$out = array();
 		foreach ( self::nodes( $html ) as $node ) {
+			// Bloc verrouillé : remis tel quel (supprimé si l'encadré l'a été).
+			if ( XML_ELEMENT_NODE === $node->nodeType && $node->hasAttribute( 'data-leiho-block' ) ) {
+				$index = $node->getAttribute( 'data-leiho-block' );
+				if ( ctype_digit( $index ) && isset( $blocks[ (int) $index ] ) && null !== $blocks[ (int) $index ]['blockName'] ) {
+					$out[] = serialize_block( $blocks[ (int) $index ] );
+				}
+				continue;
+			}
 			$outer = self::outer( $node );
 			$key   = self::canonical( $outer );
 			if ( '' === $key ) {
