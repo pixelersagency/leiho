@@ -372,16 +372,30 @@
 			}
 		}
 
-		function applyToElement( el, value, fieldType ) {
+		/**
+		 * @param {Element} el        Élément annoté.
+		 * @param {*}       value     Valeur du champ.
+		 * @param {string}  fieldType Type de champ.
+		 * @param {boolean} explicit  Valeur changée par l'utilisateur pendant cette
+		 *                            édition (fieldUpdate), pas seulement chargée.
+		 */
+		function applyToElement( el, value, fieldType, explicit ) {
 			if ( 'image' === fieldType ) {
+				const url = value && 'object' === typeof value ? value.url || '' : value || '';
+				// Champ jamais rempli : le front affiche souvent une image de repli
+				// (src, srcset ou fond CSS du gabarit). On n'y touche pas, sauf si
+				// l'utilisateur vient de vider le champ.
+				if ( ! url && ! explicit ) {
+					return;
+				}
+				const src = safeUrl( url );
 				const img = 'IMG' === el.tagName ? el : el.querySelector( 'img' );
 				if ( img ) {
-					if ( img.getAttribute( 'src' ) !== safeUrl( value || '' ) ) {
-						img.setAttribute( 'src', safeUrl( value || '' ) );
+					if ( img.getAttribute( 'src' ) !== src ) {
+						img.setAttribute( 'src', src );
 						img.removeAttribute( 'srcset' );
 					}
 				} else {
-					const src = safeUrl( value || '' );
 					el.style.backgroundImage = src ? 'url("' + src.replace( /["\\\n]/g, '' ) + '")' : '';
 				}
 			} else if ( 'color_picker' === fieldType ) {
@@ -416,7 +430,7 @@
 				overrides.forEach( ( item, key ) => {
 					const entry = fields.get( key );
 					if ( entry && ! entry.refresh ) {
-						entry.els.forEach( ( el ) => applyToElement( el, item.value, item.fieldType ) );
+						entry.els.forEach( ( el ) => applyToElement( el, item.value, item.fieldType, !! item.explicit ) );
 					}
 				} );
 			} finally {
@@ -610,7 +624,7 @@
 				applyOverrides();
 				uncloak();
 			} else if ( 'fieldUpdate' === data.type ) {
-				overrides.set( data.postId + ':' + data.path, { value: data.value, fieldType: data.fieldType } );
+				overrides.set( data.postId + ':' + data.path, { value: data.value, fieldType: data.fieldType, explicit: true } );
 				applyOverrides();
 			} else if ( 'focusField' === data.type ) {
 				const entry = fields.get( data.postId + ':' + data.path );
