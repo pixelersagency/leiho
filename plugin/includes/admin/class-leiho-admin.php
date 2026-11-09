@@ -20,6 +20,7 @@ class Leiho_Admin {
 		add_action( 'admin_menu', array( $this, 'register_menu' ) );
 		add_action( 'admin_enqueue_scripts', array( $this, 'enqueue' ) );
 		add_action( 'admin_post_leiho_save_settings', array( $this, 'handle_save_settings' ) );
+		add_action( 'admin_post_leiho_save_security', array( $this, 'handle_save_security' ) );
 		add_action( 'admin_post_leiho_save_ai', array( $this, 'handle_save_ai' ) );
 		add_action( 'admin_bar_menu', array( $this, 'admin_bar' ), 80 );
 		add_filter( 'plugin_action_links_' . plugin_basename( LEIHO_FILE ), array( $this, 'action_links' ) );
@@ -730,11 +731,39 @@ class Leiho_Admin {
 		$settings['content_access']      = isset( $input['content_access'] ) && 'token' === $input['content_access'] ? 'token' : 'public';
 		$settings['content_cache']       = ! empty( $input['content_cache'] );
 		$settings['editor_landing']      = ! empty( $input['editor_landing'] );
-		foreach ( Leiho_Headless::FLAGS as $flag ) {
-			$settings[ $flag ] = ! empty( $input[ $flag ] );
-		}
 
 		return $settings;
+	}
+
+	/**
+	 * Réglages de l'onglet Sécurité, au format de son formulaire : une clé
+	 * absente vaut une case décochée.
+	 *
+	 * @param array $input    Saisie.
+	 * @param array $settings Réglages actuels.
+	 * @return array
+	 */
+	public static function sanitize_security( array $input, array $settings ) {
+		foreach ( Leiho_Headless::KEYS as $key ) {
+			$settings[ $key ] = ! empty( $input[ $key ] );
+		}
+		return $settings;
+	}
+
+	/**
+	 * @return void
+	 */
+	public function handle_save_security() {
+		if ( ! current_user_can( 'manage_options' ) ) {
+			wp_die( esc_html__( 'Access denied.', 'leiho' ) );
+		}
+		check_admin_referer( 'leiho_save_security' );
+
+		$input = isset( $_POST['leiho_settings'] ) && is_array( $_POST['leiho_settings'] ) ? wp_unslash( $_POST['leiho_settings'] ) : array(); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+		update_option( Leiho_Plugin::OPTION_SETTINGS, self::sanitize_security( $input, Leiho_Plugin::settings() ) );
+
+		wp_safe_redirect( Leiho_App::url( 'security', array( 'leiho_saved' => '1' ) ) );
+		exit;
 	}
 
 	/**

@@ -96,6 +96,13 @@ class Leiho_App {
 				'icon'  => 'settings',
 				'nav'   => true,
 			),
+			// Back-office headless, durcissement, thème Leiho Zero.
+			'security'    => array(
+				'label' => __( 'Security', 'leiho' ),
+				'cap'   => 'manage_options',
+				'icon'  => 'shield',
+				'nav'   => true,
+			),
 			'start'       => array(
 				'label' => __( 'Get started', 'leiho' ),
 				'cap'   => 'manage_options',

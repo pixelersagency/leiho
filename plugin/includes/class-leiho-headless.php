@@ -11,15 +11,35 @@ defined( 'ABSPATH' ) || exit;
  *                      cms.monsite.fr en double du vrai site ;
  *   headless_redirect  une page publique de WordPress redirige (301) vers la
  *                      même page sur le front ;
- *   headless_lockdown  surface d'attaque réduite : XML-RPC coupé, liste des
- *                      utilisateurs fermée aux visiteurs, version masquée.
+ *   headless_lockdown  surface d'attaque réduite : XML-RPC et pingbacks
+ *                      coupés, liste des utilisateurs et pages d'auteur
+ *                      fermées aux visiteurs, version masquée.
  *
- * Rien de tout ça ne touche wp-admin, la connexion, l'API REST du contenu ni
- * l'aperçu des brouillons.
+ * Et, dans l'onglet Sécurité :
+ *
+ *   security_file_edit éditeur de fichiers des thèmes et extensions coupé
+ *                      (DISALLOW_FILE_EDIT) ;
+ *   security_login     erreurs de connexion qui ne disent plus si
+ *                      l'identifiant existe, essais limités par IP ;
+ *   headless_comments  commentaires coupés (hors réglages d'office : un
+ *                      front peut s'en servir).
+ *
+ * Rien de tout ça ne touche wp-admin, la connexion des comptes, l'API REST du
+ * contenu, les mots de passe d'application (agents) ni l'aperçu des brouillons.
  */
 class Leiho_Headless {
 
-	const FLAGS = array( 'headless_noindex', 'headless_redirect', 'headless_lockdown' );
+	/** Réglages activés d'office à la première installation. */
+	const FLAGS = array( 'headless_noindex', 'headless_redirect', 'headless_lockdown', 'security_file_edit', 'security_login' );
+
+	/** Tous les réglages de l'onglet Sécurité. */
+	const KEYS = array( 'headless_noindex', 'headless_redirect', 'headless_comments', 'headless_lockdown', 'security_file_edit', 'security_login' );
+
+	/** Essais de connexion ratés avant blocage, par IP et identifiant. */
+	const LOGIN_MAX = 5;
+
+	/** Durée du blocage, en secondes. */
+	const LOGIN_WINDOW = 900;
 
 	/**
 	 * @return void
@@ -47,6 +67,29 @@ class Leiho_Headless {
 			remove_action( 'wp_head', 'wp_generator' );
 			remove_action( 'wp_head', 'rsd_link' );
 			remove_action( 'wp_head', 'wlwmanifest_link' );
+			add_filter( 'wp_headers', array( __CLASS__, 'drop_pingback_header' ) );
+			add_action( 'template_redirect', array( __CLASS__, 'hide_author_pages' ), -1 );
+		}
+
+		// Constante lue par map_meta_cap() à chaque vérification : la définir
+		// ici suffit, et décocher la case la retire à la requête suivante.
+		if ( ! empty( $settings['security_file_edit'] ) && ! defined( 'DISALLOW_FILE_EDIT' ) ) {
+			define( 'DISALLOW_FILE_EDIT', true );
+		}
+
+		if ( ! empty( $settings['security_login'] ) ) {
+			add_filter( 'authenticate', array( __CLASS__, 'login_gate' ), 99, 2 );
+			add_action( 'wp_login_failed', array( __CLASS__, 'login_failed' ), 10, 2 );
+			add_action( 'wp_login', array( __CLASS__, 'login_succeeded' ) );
+		}
+
+		if ( ! empty( $settings['headless_comments'] ) ) {
+			add_filter( 'comments_open', '__return_false', 20 );
+			add_filter( 'pings_open', '__return_false', 20 );
+			add_action( 'init', array( __CLASS__, 'drop_comment_support' ), 100 );
+			add_filter( 'rest_endpoints', array( __CLASS__, 'hide_comments_endpoint' ) );
+			add_action( 'admin_menu', array( __CLASS__, 'hide_comments_menu' ) );
+			add_action( 'admin_bar_menu', array( __CLASS__, 'hide_comments_bar' ), 999 );
 		}
 	}
 
@@ -185,5 +228,156 @@ class Leiho_Headless {
 			}
 		}
 		return $endpoints;
+	}
+	/**
+	 * @param array $headers En-têtes HTTP.
+	 * @return array
+	 */
+	public static function drop_pingback_header( $headers ) {
+		unset( $headers['X-Pingback'] );
+		return $headers;
+	}
+
+	/**
+	 * ?author=1 puis /author/admin/ donnent l'identifiant de connexion :
+	 * page introuvable pour les visiteurs.
+	 *
+	 * @return void
+	 */
+	public static function hide_author_pages() {
+		if ( is_user_logged_in() || ! is_author() ) {
+			return;
+		}
+		global $wp_query;
+		$wp_query->set_404();
+		status_header( 404 );
+		nocache_headers();
+	}
+
+	/* ---------------------------------------------------------------------
+	 * Connexion
+	 * ------------------------------------------------------------------- */
+
+	/**
+	 * Adresse du visiteur. REMOTE_ADDR seule : un en-tête X-Forwarded-For se
+	 * falsifie. Derrière un proxy (Cloudflare…), le filtre leiho_login_ip
+	 * donne la vraie adresse.
+	 *
+	 * @return string
+	 */
+	public static function client_ip() {
+		$ip = isset( $_SERVER['REMOTE_ADDR'] ) ? (string) $_SERVER['REMOTE_ADDR'] : ''; // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Haché, jamais affiché.
+		/**
+		 * Adresse retenue pour limiter les essais de connexion.
+		 *
+		 * @param string $ip REMOTE_ADDR.
+		 */
+		return (string) apply_filters( 'leiho_login_ip', $ip );
+	}
+
+	/**
+	 * Clé du compteur : IP et identifiant ensemble, pour qu'un attaquant ne
+	 * bloque pas tout un réseau partagé, ni un compte depuis une autre IP.
+	 *
+	 * @param string $username Identifiant saisi.
+	 * @return string
+	 */
+	private static function login_key( $username ) {
+		return 'leiho_login_' . md5( self::client_ip() . '|' . strtolower( trim( (string) $username ) ) );
+	}
+
+	/**
+	 * Avant la vérification du mot de passe… et après : WordPress a déjà
+	 * répondu (priorité 20), Leiho bloque ou rend l'erreur générique.
+	 *
+	 * @param WP_User|WP_Error|null $user     Résultat de l'authentification.
+	 * @param string                $username Identifiant saisi.
+	 * @return WP_User|WP_Error|null
+	 */
+	public static function login_gate( $user, $username ) {
+		if ( '' === trim( (string) $username ) ) {
+			return $user;
+		}
+		if ( (int) get_transient( self::login_key( $username ) ) >= self::LOGIN_MAX ) {
+			return new WP_Error(
+				'leiho_login_locked',
+				/* translators: %d: minutes. */
+				sprintf( __( '<strong>Error:</strong> too many failed attempts. Try again in %d minutes.', 'leiho' ), (int) ( self::LOGIN_WINDOW / 60 ) )
+			);
+		}
+		if ( is_wp_error( $user ) && array_intersect( $user->get_error_codes(), array( 'invalid_username', 'invalid_email', 'incorrect_password' ) ) ) {
+			return new WP_Error(
+				'leiho_login_failed',
+				__( '<strong>Error:</strong> the username or password is incorrect.', 'leiho' ) . ' <a href="' . esc_url( wp_lostpassword_url() ) . '">' . __( 'Lost your password?', 'leiho' ) . '</a>'
+			);
+		}
+		return $user;
+	}
+
+	/**
+	 * @param string        $username Identifiant saisi.
+	 * @param WP_Error|null $error    Erreur (WordPress 5.4+).
+	 * @return void
+	 */
+	public static function login_failed( $username, $error = null ) {
+		if ( '' === trim( (string) $username ) || ( is_wp_error( $error ) && in_array( 'leiho_login_locked', $error->get_error_codes(), true ) ) ) {
+			return;
+		}
+		$key = self::login_key( $username );
+		set_transient( $key, (int) get_transient( $key ) + 1, self::LOGIN_WINDOW );
+	}
+
+	/**
+	 * @param string $username Identifiant.
+	 * @return void
+	 */
+	public static function login_succeeded( $username ) {
+		delete_transient( self::login_key( $username ) );
+	}
+
+	/* ---------------------------------------------------------------------
+	 * Commentaires
+	 * ------------------------------------------------------------------- */
+
+	/**
+	 * @return void
+	 */
+	public static function drop_comment_support() {
+		foreach ( get_post_types() as $type ) {
+			remove_post_type_support( $type, 'comments' );
+			remove_post_type_support( $type, 'trackbacks' );
+		}
+	}
+
+	/**
+	 * @param array $endpoints Routes REST.
+	 * @return array
+	 */
+	public static function hide_comments_endpoint( $endpoints ) {
+		if ( is_user_logged_in() ) {
+			return $endpoints;
+		}
+		foreach ( array_keys( $endpoints ) as $route ) {
+			if ( 0 === strpos( $route, '/wp/v2/comments' ) ) {
+				unset( $endpoints[ $route ] );
+			}
+		}
+		return $endpoints;
+	}
+
+	/**
+	 * @return void
+	 */
+	public static function hide_comments_menu() {
+		remove_menu_page( 'edit-comments.php' );
+		remove_submenu_page( 'options-general.php', 'options-discussion.php' );
+	}
+
+	/**
+	 * @param WP_Admin_Bar $bar Barre d'admin.
+	 * @return void
+	 */
+	public static function hide_comments_bar( $bar ) {
+		$bar->remove_node( 'comments' );
 	}
 }

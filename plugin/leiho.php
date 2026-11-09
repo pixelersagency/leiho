@@ -61,6 +61,7 @@ require_once LEIHO_DIR . 'includes/class-leiho-llms.php';
 require_once LEIHO_DIR . 'includes/class-leiho-cache.php';
 require_once LEIHO_DIR . 'includes/class-leiho-types.php';
 require_once LEIHO_DIR . 'includes/class-leiho-headless.php';
+require_once LEIHO_DIR . 'includes/class-leiho-zero.php';
 require_once LEIHO_DIR . 'includes/class-leiho-updater.php';
 require_once LEIHO_DIR . 'includes/class-leiho-legacy.php';
 require_once LEIHO_DIR . 'includes/ai/class-leiho-ai-prompt.php';
@@ -138,6 +139,7 @@ final class Leiho_Plugin {
 		Leiho_Collections::init();
 		Leiho_ACF_Import::init();
 		Leiho_Headless::init();
+		Leiho_Zero::init();
 		Leiho_Activity::init();
 		Leiho_Updater::init();
 		Leiho_AI::init();
@@ -217,6 +219,9 @@ final class Leiho_Plugin {
 			'headless_noindex'    => false,
 			'headless_redirect'   => false,
 			'headless_lockdown'   => false,
+			'headless_comments'   => false,
+			'security_file_edit'  => false,
+			'security_login'      => false,
 		);
 		$saved = get_option( self::OPTION_SETTINGS, array() );
 

@@ -2,6 +2,20 @@
 
 All notable changes to Leiho (called Okno until 1.0.0-beta.11) are documented here. The project follows [Semantic Versioning](https://semver.org/). The plugin and the bridge package share one version number.
 
+## [Unreleased]
+
+### Added
+
+- **Security tab.** The "WordPress as a back office" options move out of Settings into their own tab, next to new hardening options:
+  - **Turn off the theme and plugin file editor** (same as `DISALLOW_FILE_EDIT`).
+  - **Protect the login page**: login errors no longer say whether a username exists, and 5 failed attempts block that username from that address for 15 minutes. Behind a proxy such as Cloudflare, the `leiho_login_ip` filter gives the real visitor address.
+  - **Turn comments off**: comments and pings closed, Comments menu hidden, comments API closed to visitors. Off by default, since a front end can use comments.
+  - **Lock down WordPress** now also removes the `X-Pingback` header and returns a 404 for author pages (`?author=1`, `/author/…/`) to visitors, so login names can't be listed.
+  - New installs get the file editor and login protection on. Sites that already have Leiho keep their current behaviour until an administrator changes these options.
+  - Application passwords, used by AI agents, keep working.
+- **Leiho Zero.** An empty theme shipped with Leiho, for a WordPress that only serves as a back office: no styles, no scripts, no templates, while featured images and menus keep working in wp-admin. One button in the Security tab installs and activates it, and another one restores the previous theme. Before switching, Leiho reads the active theme's code and lists what would stop working with it (`register_post_type`, `acf_add_local_field_group`, `register_nav_menus`…).
+- **Agents can change the new options** through `leiho/update-settings` (`headless_comments`, `security_file_edit`, `security_login`).
+
 ## [1.0.0-rc.4] — 2026-11-08
 
 ### Fixed
@@ -300,6 +314,7 @@ First public release.
 - Managed regions (`data-okno-managed`) explain where to edit content Okno doesn't own.
 - Explicit sections (`data-okno-section`, `data-okno-layout`) take precedence over auto-detected ones.
 
+[Unreleased]: https://github.com/pixelersagency/leiho/compare/v1.0.0-rc.4...HEAD
 [1.0.0-rc.4]: https://github.com/pixelersagency/leiho/releases/tag/v1.0.0-rc.4
 [1.0.0-rc.3]: https://github.com/pixelersagency/leiho/releases/tag/v1.0.0-rc.3
 [1.0.0-rc.2]: https://github.com/pixelersagency/leiho/releases/tag/v1.0.0-rc.2

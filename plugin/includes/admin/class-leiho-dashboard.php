@@ -29,6 +29,9 @@ class Leiho_Dashboard {
 			case 'ai':
 				self::render_ai();
 				break;
+			case 'security':
+				self::render_security();
+				break;
 			default:
 				self::render_home();
 		}
@@ -2134,6 +2137,161 @@ CODE;
 		<?php
 	}
 
+	/* =====================================================================
+	 * Sécurité
+	 * =================================================================== */
+
+	/**
+	 * Onglet Sécurité : WordPress en back-office, durcissement, Leiho Zero.
+	 *
+	 * @return void
+	 */
+	private static function render_security() {
+		$settings = Leiho_Plugin::settings();
+		$check    = static function ( $key, $label, $help = '' ) use ( $settings ) {
+			?>
+			<label class="leiho-inline-check"><input type="checkbox" name="leiho_settings[<?php echo esc_attr( $key ); ?>]" value="1" <?php checked( ! empty( $settings[ $key ] ) ); ?>> <?php echo esc_html( $label ); ?></label>
+			<?php if ( '' !== $help ) : ?>
+				<span class="leiho-help"><?php echo esc_html( $help ); ?></span>
+			<?php endif; ?>
+			<?php
+		};
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Simple drapeau d'affichage.
+		$zero_flag = isset( $_GET['leiho_zero'] ) ? sanitize_key( wp_unslash( $_GET['leiho_zero'] ) ) : '';
+		$zero_err  = 'error' === $zero_flag ? Leiho_Zero::consume_error() : '';
+		?>
+		<div class="leiho-page">
+
+			<?php // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Simple drapeau d'affichage. ?>
+			<?php if ( isset( $_GET['leiho_saved'] ) ) : ?>
+				<div class="leiho-notice leiho-notice--ok" role="status">
+					<span class="leiho-dot leiho-dot--ok"></span>
+					<strong><?php esc_html_e( 'Settings saved.', 'leiho' ); ?></strong>
+				</div>
+			<?php endif; ?>
+
+			<?php if ( in_array( $zero_flag, array( 'installed', 'restored' ), true ) ) : ?>
+				<div class="leiho-notice leiho-notice--ok" role="status">
+					<span class="leiho-dot leiho-dot--ok"></span>
+					<strong><?php echo esc_html( 'installed' === $zero_flag ? __( 'Leiho Zero is now the active theme.', 'leiho' ) : __( 'The previous theme is active again.', 'leiho' ) ); ?></strong>
+				</div>
+			<?php elseif ( '' !== $zero_err ) : ?>
+				<div class="leiho-notice leiho-notice--error" role="alert">
+					<span class="leiho-dot leiho-dot--error"></span>
+					<strong><?php echo esc_html( $zero_err ); ?></strong>
+				</div>
+			<?php endif; ?>
+
+			<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>">
+				<input type="hidden" name="action" value="leiho_save_security">
+				<?php wp_nonce_field( 'leiho_save_security' ); ?>
+
+				<section class="leiho-form-section">
+					<h2><?php esc_html_e( 'WordPress as a back office', 'leiho' ); ?></h2>
+					<p class="leiho-help"><?php esc_html_e( 'Your visitors use the front end. These options keep WordPress out of their way and out of search engines. wp-admin, login, the content API and draft previews are not affected.', 'leiho' ); ?></p>
+					<div class="leiho-row">
+						<span class="leiho-row__label"><?php esc_html_e( 'Visitors', 'leiho' ); ?></span>
+						<div class="leiho-checks">
+							<?php
+							$check( 'headless_noindex', __( 'Keep WordPress out of search engines (noindex, robots.txt, no sitemap)', 'leiho' ) );
+							$check( 'headless_redirect', __( 'Redirect WordPress pages to the same page on the site', 'leiho' ) );
+							$check( 'headless_comments', __( 'Turn comments off', 'leiho' ), __( 'Closes comments and pings everywhere and hides the Comments menu. Leave it unchecked if your front end shows or collects comments.', 'leiho' ) );
+							?>
+						</div>
+					</div>
+				</section>
+
+				<section class="leiho-form-section">
+					<h2><?php esc_html_e( 'Hardening', 'leiho' ); ?></h2>
+					<p class="leiho-help"><?php esc_html_e( 'Simple measures that close the usual doors. Application passwords, used by AI agents, keep working. For a firewall or two-factor login, use a dedicated security plugin.', 'leiho' ); ?></p>
+					<div class="leiho-row">
+						<span class="leiho-row__label"><?php esc_html_e( 'WordPress', 'leiho' ); ?></span>
+						<div class="leiho-checks">
+							<?php
+							$check( 'headless_lockdown', __( 'Lock down WordPress', 'leiho' ), __( 'XML-RPC and pingbacks off, user list and author pages hidden from visitors, version hidden.', 'leiho' ) );
+							$check( 'security_file_edit', __( 'Turn off the theme and plugin file editor', 'leiho' ), __( 'Nobody can change PHP code from wp-admin, even with a stolen administrator account.', 'leiho' ) );
+							?>
+						</div>
+					</div>
+					<div class="leiho-row">
+						<span class="leiho-row__label"><?php esc_html_e( 'Login', 'leiho' ); ?></span>
+						<div class="leiho-checks">
+							<?php
+							/* translators: 1: number of attempts, 2: minutes. */
+							$check( 'security_login', __( 'Protect the login page', 'leiho' ), sprintf( __( 'Errors no longer say whether a username exists, and %1$d failed attempts block that username from that address for %2$d minutes.', 'leiho' ), Leiho_Headless::LOGIN_MAX, (int) ( Leiho_Headless::LOGIN_WINDOW / 60 ) ) );
+							?>
+						</div>
+					</div>
+				</section>
+
+				<div class="leiho-savebar">
+					<span></span>
+					<div class="leiho-actions" style="margin:0">
+						<button type="submit" class="leiho-btn"><?php esc_html_e( 'Save', 'leiho' ); ?></button>
+					</div>
+				</div>
+			</form>
+
+			<?php self::render_zero(); ?>
+		</div>
+		<?php
+	}
+
+	/**
+	 * Thème : Leiho Zero ou thème actuel, et ce que le thème actuel déclare.
+	 *
+	 * @return void
+	 */
+	private static function render_zero() {
+		$theme    = wp_get_theme();
+		$active   = Leiho_Zero::is_active();
+		$can      = Leiho_Zero::can_manage();
+		$previous = $active ? Leiho_Zero::previous() : null;
+		$code     = $active ? array() : Leiho_Zero::theme_code();
+		?>
+		<section class="leiho-form-section">
+			<h2><?php esc_html_e( 'Theme', 'leiho' ); ?></h2>
+			<p class="leiho-help"><?php esc_html_e( 'Your front end is the site: the WordPress theme is never shown, but its code still loads on every admin page and API request. Leiho Zero is an empty theme that loads nothing and keeps featured images and menus.', 'leiho' ); ?></p>
+
+			<div class="leiho-row">
+				<span class="leiho-row__label"><?php esc_html_e( 'Active theme', 'leiho' ); ?></span>
+				<div>
+					<strong><?php echo esc_html( $theme->get( 'Name' ) ); ?></strong>
+					<?php if ( $active ) : ?>
+						<span class="leiho-pill leiho-pill--ok"><?php esc_html_e( 'Nothing loads', 'leiho' ); ?></span>
+					<?php elseif ( $code ) : ?>
+						<span class="leiho-help"><?php esc_html_e( 'This theme declares code that would stop working with another theme. Move it to a plugin (or into Leiho Collections) before switching:', 'leiho' ); ?></span>
+						<span class="leiho-help"><?php foreach ( $code as $fn ) : ?><code><?php echo esc_html( $fn ); ?></code> <?php endforeach; ?></span>
+					<?php else : ?>
+						<span class="leiho-help"><?php esc_html_e( 'No content types, fields or menus declared in this theme’s code: you can switch safely.', 'leiho' ); ?></span>
+					<?php endif; ?>
+				</div>
+			</div>
+
+			<?php if ( ! $can ) : ?>
+				<p class="leiho-help"><?php esc_html_e( 'Only an administrator who can install themes can change it.', 'leiho' ); ?></p>
+			<?php elseif ( $active ) : ?>
+				<?php if ( $previous ) : ?>
+					<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" class="leiho-actions">
+						<input type="hidden" name="action" value="leiho_zero_restore">
+						<?php wp_nonce_field( 'leiho_zero_restore' ); ?>
+						<?php /* translators: %s: theme name. */ ?>
+						<button type="submit" class="leiho-btn leiho-btn--quiet"><?php echo esc_html( sprintf( __( 'Go back to %s', 'leiho' ), $previous->get( 'Name' ) ) ); ?></button>
+					</form>
+				<?php endif; ?>
+			<?php else : ?>
+				<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" class="leiho-actions">
+					<input type="hidden" name="action" value="leiho_zero_install">
+					<?php wp_nonce_field( 'leiho_zero_install' ); ?>
+					<button type="submit" class="leiho-btn<?php echo $code ? ' leiho-btn--quiet' : ''; ?>"><?php esc_html_e( 'Install and activate Leiho Zero', 'leiho' ); ?></button>
+					<?php /* translators: %s: theme name. */ ?>
+					<span class="leiho-muted"><?php echo esc_html( sprintf( __( '%s stays installed: you can go back in one click.', 'leiho' ), $theme->get( 'Name' ) ) ); ?></span>
+				</form>
+			<?php endif; ?>
+		</section>
+		<?php
+	}
+
 	/**
 	 * Réglages de l'API de contenu et du durcissement headless.
 	 *
@@ -2197,19 +2355,6 @@ CODE;
 			<?php endif; ?>
 		</section>
 
-		<section class="leiho-form-section">
-			<h2><?php esc_html_e( 'WordPress as a back office', 'leiho' ); ?></h2>
-			<p class="leiho-help"><?php esc_html_e( 'Your visitors use the front end. These options keep WordPress out of their way and out of search engines. wp-admin, login, the content API and draft previews are not affected.', 'leiho' ); ?></p>
-
-			<div class="leiho-row">
-				<span class="leiho-row__label"><?php esc_html_e( 'Protection', 'leiho' ); ?></span>
-				<div class="leiho-checks">
-					<label><input type="checkbox" name="leiho_settings[headless_noindex]" value="1" <?php checked( $settings['headless_noindex'] ); ?>> <?php esc_html_e( 'Keep WordPress out of search engines (noindex, robots.txt, no sitemap)', 'leiho' ); ?></label>
-					<label><input type="checkbox" name="leiho_settings[headless_redirect]" value="1" <?php checked( $settings['headless_redirect'] ); ?>> <?php esc_html_e( 'Redirect WordPress pages to the same page on the site', 'leiho' ); ?></label>
-					<label><input type="checkbox" name="leiho_settings[headless_lockdown]" value="1" <?php checked( $settings['headless_lockdown'] ); ?>> <?php esc_html_e( 'Lock down WordPress (XML-RPC off, user list hidden from visitors, version hidden)', 'leiho' ); ?></label>
-				</div>
-			</div>
-		</section>
 		<?php
 	}
 

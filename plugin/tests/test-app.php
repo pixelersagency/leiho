@@ -132,7 +132,7 @@ $nav = array_keys(
 		}
 	)
 );
-check( 'navigation : sept vues (IA comprise), plus d\'onglet Contenus', array( 'home', 'editor', 'collections', 'media', 'deploys', 'ai', 'settings' ) === $nav, $nav );
+check( 'navigation : huit vues (IA et Sécurité comprises), plus d\'onglet Contenus', array( 'home', 'editor', 'collections', 'media', 'deploys', 'ai', 'settings', 'security' ) === $nav, $nav );
 
 /* --- Contenus et Formulaire fondus dans Collections --- */
 

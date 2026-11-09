@@ -43,6 +43,7 @@ jobs:
           php plugin/tests/test-legacy.php
           php plugin/tests/test-onboarding.php
           php plugin/tests/test-seo.php
+          php plugin/tests/test-security.php
           php plugin/tests/smoke-load.php
 
   bridge:
