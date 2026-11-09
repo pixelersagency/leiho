@@ -4,7 +4,7 @@ Tags: headless, acf, visual editor, nextjs, astro
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.0.0-rc.4
+Stable tag: 1.0.0-rc.5
 License: GPL-2.0-or-later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -48,6 +48,13 @@ Leiho removes its own settings, tokens, history table and internal post meta, an
 Parts of the Leiho app's layout and styles (three-pane Collections view, list rows, field settings, dialogs) are derived from Stacki (https://github.com/flowtricks/stacki), Copyright (c) 2026 Timothy Ricks, MIT License. The full license text ships in licenses/stacki-MIT.txt.
 
 == Changelog ==
+
+= 1.0.0-rc.5 =
+* New Security tab: the "WordPress as a back office" options move there, with new hardening (file editor off, login errors that don't reveal usernames, failed attempts limited, comments off, author pages hidden).
+* Login address: move the login page to an address of your choice; wp-login.php and wp-admin answer "not found" to visitors. A window helps you bookmark the new address, and the administrator receives it by e-mail.
+* Leiho login page: dark, with the site's name and icon.
+* Leiho Zero: an empty theme for a back-office WordPress, installed and activated in one click, with a way back.
+* Texts name the fields plugin in use (ACF, ACF PRO, Secure Custom Fields), and the Get started prompt uses Leiho Collections when no ACF is installed.
 
 = 1.0.0-rc.4 =
 * The visual editor opens collections whose pages get their address from a field or from their own address (typical after an ACF import) instead of sending them to the form view.

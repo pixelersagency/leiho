@@ -2,7 +2,7 @@
 
 All notable changes to Leiho (called Okno until 1.0.0-beta.11) are documented here. The project follows [Semantic Versioning](https://semver.org/). The plugin and the bridge package share one version number.
 
-## [Unreleased]
+## [1.0.0-rc.5] — 2026-11-09
 
 ### Added
 
@@ -317,7 +317,7 @@ First public release.
 - Managed regions (`data-okno-managed`) explain where to edit content Okno doesn't own.
 - Explicit sections (`data-okno-section`, `data-okno-layout`) take precedence over auto-detected ones.
 
-[Unreleased]: https://github.com/pixelersagency/leiho/compare/v1.0.0-rc.4...HEAD
+[1.0.0-rc.5]: https://github.com/pixelersagency/leiho/releases/tag/v1.0.0-rc.5
 [1.0.0-rc.4]: https://github.com/pixelersagency/leiho/releases/tag/v1.0.0-rc.4
 [1.0.0-rc.3]: https://github.com/pixelersagency/leiho/releases/tag/v1.0.0-rc.3
 [1.0.0-rc.2]: https://github.com/pixelersagency/leiho/releases/tag/v1.0.0-rc.2
