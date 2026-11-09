@@ -38,6 +38,7 @@ class Leiho_AI_Admin_Abilities {
 		'headless_redirect',
 		'headless_lockdown',
 		'headless_comments',
+		'headless_menus',
 		'security_file_edit',
 		'security_login',
 	);
@@ -98,7 +99,7 @@ class Leiho_AI_Admin_Abilities {
 			),
 			'leiho/update-settings'  => array(
 				'label'               => __( 'Update the settings', 'leiho' ),
-				'description'         => __( 'Administrators only. Changes technical settings of Leiho, validated like the Settings screen. Only the keys given change. Keys: post_types (array), url_patterns (object: content type => pattern with {slug} or {id}), path_meta_key, deploy_driver (live, build_hook, github, github_commit, coolify or empty), build_hook_eta (minutes), gh_branch, gh_workflow (file name), min_deploy_interval (seconds), auto_deploy, auto_deploy_delay (seconds, at least 15), content_access (public or token), content_cache, editor_landing, headless_noindex, headless_redirect, headless_lockdown, headless_comments, security_file_edit, security_login. The site, preview, build hook and Coolify addresses and the GitHub repository are not changed by agents: an administrator sets them in Leiho → Settings. Pass dry_run to see the changes without saving. Returns the changes and the result of the related checks. Secrets go through leiho/set-secret.', 'leiho' ),
+				'description'         => __( 'Administrators only. Changes technical settings of Leiho, validated like the Settings screen. Only the keys given change. Keys: post_types (array), url_patterns (object: content type => pattern with {slug} or {id}), path_meta_key, deploy_driver (live, build_hook, github, github_commit, coolify or empty), build_hook_eta (minutes), gh_branch, gh_workflow (file name), min_deploy_interval (seconds), auto_deploy, auto_deploy_delay (seconds, at least 15), content_access (public or token), content_cache, editor_landing, headless_noindex, headless_redirect, headless_lockdown, headless_comments, headless_menus, security_file_edit, security_login. The site, preview, build hook and Coolify addresses and the GitHub repository are not changed by agents: an administrator sets them in Leiho → Settings. Pass dry_run to see the changes without saving. Returns the changes and the result of the related checks. Secrets go through leiho/set-secret.', 'leiho' ),
 				'category'            => Leiho_AI_Abilities::CATEGORY,
 				'input_schema'        => array(
 					'type'                 => 'object',

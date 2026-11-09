@@ -54,7 +54,10 @@ The login page uses the Geist font (https://github.com/vercel/geist-font), Copyr
 = 1.0.0-rc.5 =
 * New Security tab: the "WordPress as a back office" options move there, with new hardening (file editor off, login errors that don't reveal usernames, failed attempts limited, comments off, author pages hidden).
 * Login address: move the login page to an address of your choice; wp-login.php and wp-admin answer "not found" to visitors. A window helps you bookmark the new address, and the administrator receives it by e-mail.
-* Leiho login page: dark, with the site's name and icon.
+* Leiho login page: same look as leiho.dev, a title per screen, no WordPress extras, and it wins over another login branding.
+* Content written with the block editor can be edited in Leiho and saved back as blocks (paragraphs, headings, lists, quotes, images, separators), for every content type.
+* Option to hide the content types edited in Leiho from the WordPress menu.
+* Leiho favicon while the site has no icon of its own.
 * Leiho Zero: an empty theme for a back-office WordPress, installed and activated in one click, with a way back.
 * Texts name the fields plugin in use (ACF, ACF PRO, Secure Custom Fields), and the Get started prompt uses Leiho Collections when no ACF is installed.
 

@@ -113,6 +113,7 @@ class Leiho_Plugin {
 			'headless_redirect'   => false,
 			'headless_lockdown'   => false,
 			'headless_comments'   => false,
+			'headless_menus'      => false,
 			'security_file_edit'  => false,
 			'security_login'      => false,
 		);
@@ -148,7 +149,7 @@ class Leiho_Legacy {
 }
 class Leiho_Headless {
 	const FLAGS = array( 'headless_noindex', 'headless_redirect', 'headless_lockdown', 'security_file_edit', 'security_login' );
-	const KEYS  = array( 'headless_noindex', 'headless_redirect', 'headless_comments', 'headless_lockdown', 'security_file_edit', 'security_login' );
+	const KEYS  = array( 'headless_noindex', 'headless_redirect', 'headless_comments', 'headless_menus', 'headless_lockdown', 'security_file_edit', 'security_login' );
 }
 class Leiho_App { public static function url( $v = '', $args = array() ) { return 'https://cms.test/wp-admin/admin.php?page=leiho&view=' . $v; } }
 /** Contrôle GitHub factice : enregistre ses appels, lit le PAT comme le vrai. */

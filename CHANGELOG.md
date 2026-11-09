@@ -2,12 +2,6 @@
 
 All notable changes to Leiho (called Okno until 1.0.0-beta.11) are documented here. The project follows [Semantic Versioning](https://semver.org/). The plugin and the bridge package share one version number.
 
-## [Unreleased]
-
-### Changed
-
-- **Leiho login page, redesigned.** Same look as leiho.dev (black background, lime dot field, Geist font). Each screen has its own title ("Log in to …", "Reset your password", "Choose a new password", "Check your inbox"), "Lost your password?" sits next to the password field, and the button spans the card. WordPress's extras are gone: language switcher, link back to the site, privacy policy link. The leiho.dev badge sits at the bottom of the page. The page now wins over another login branding (plugin, mu-plugin or theme) instead of mixing with it: turn the Leiho login page off in the Security tab to keep your own.
-
 ## [1.0.0-rc.5] — 2026-11-09
 
 ### Added
@@ -21,9 +15,12 @@ All notable changes to Leiho (called Okno until 1.0.0-beta.11) are documented he
   - Application passwords, used by AI agents, keep working.
 - **Leiho Zero.** An empty theme shipped with Leiho, for a WordPress that only serves as a back office: no styles, no scripts, no templates, while featured images and menus keep working in wp-admin. One button in the Security tab installs and activates it, and another one restores the previous theme. Before switching, Leiho reads the active theme's code and lists what would stop working with it (`register_post_type`, `acf_add_local_field_group`, `register_nav_menus`…).
 - **Login address.** In the Security tab, the login page can move to an address of your choice (for example `/my-office/`). `wp-login.php` and `wp-admin` then answer "not found" to visitors, and every login, logout, lost-password and e-mail link points to the new address. Right after saving, a window shows the address with a Copy button, the bookmark shortcut for your system (⌘ D or Ctrl + D), a button to drag to the bookmarks bar and a link to open the login page. The administrator also receives the address by e-mail. Locked out: `define( 'LEIHO_DEFAULT_LOGIN', true );` in `wp-config.php` brings the usual login page back. Off until an address is set. Not available on multisite.
-- **Leiho login page.** A dark login page with the site's name and icon (the Leiho mark when the site has no icon), instead of the WordPress logo. It's on by default and can be turned off in the Security tab.
+- **Leiho login page.** Same look as leiho.dev (black background, lime dot field, Geist font). Each screen has its own title ("Log in to …", "Reset your password", "Choose a new password", "Check your inbox"), "Lost your password?" sits next to the password field, and the button spans the card. WordPress's extras are gone: language switcher, link back to the site, privacy policy link. The leiho.dev badge sits at the bottom of the page. The page now wins over another login branding (plugin, mu-plugin or theme) instead of mixing with it: turn the Leiho login page off in the Security tab to keep your own.
 - **Texts follow the fields plugin in use.** Leiho tells ACF, ACF PRO and Secure Custom Fields apart and names the right one in the editor. The "Get started" prompt asks the agent to build the content model in that plugin or, when none is installed, in Leiho Collections, with the matching instructions.
-- **Agents can change the new options** through `leiho/update-settings` (`headless_comments`, `security_file_edit`, `security_login`).
+- **Edit block-editor content in Leiho, and back in WordPress.** Content written with the WordPress block editor was read-only in Leiho. When it's made of common blocks (paragraphs, headings, lists, quotes, images, separators), Leiho now edits it and saves it back as blocks: unchanged blocks are kept as they were, settings included, and edited ones become native blocks the block editor opens without any warning. This works for posts, pages and every content type with a content field. Content with other blocks (columns, groups, galleries, plugin blocks) stays read-only, with a link to the block editor.
+- **Hide content edited in Leiho from the WordPress menu** (Security tab, off by default). The content types edited in Leiho, Leiho collections included, leave the WordPress sidebar and the "New" menu. Their screens still open from a direct link.
+- **Leiho favicon** in wp-admin, on the login page and at `/favicon.ico` while the site has no icon of its own (Settings → General → Site Icon).
+- **Agents can change the new options** through `leiho/update-settings` (`headless_comments`, `headless_menus`, `security_file_edit`, `security_login`).
 
 ## [1.0.0-rc.4] — 2026-11-08
 
@@ -323,7 +320,6 @@ First public release.
 - Managed regions (`data-okno-managed`) explain where to edit content Okno doesn't own.
 - Explicit sections (`data-okno-section`, `data-okno-layout`) take precedence over auto-detected ones.
 
-[Unreleased]: https://github.com/pixelersagency/leiho/compare/v1.0.0-rc.5...HEAD
 [1.0.0-rc.5]: https://github.com/pixelersagency/leiho/releases/tag/v1.0.0-rc.5
 [1.0.0-rc.4]: https://github.com/pixelersagency/leiho/releases/tag/v1.0.0-rc.4
 [1.0.0-rc.3]: https://github.com/pixelersagency/leiho/releases/tag/v1.0.0-rc.3

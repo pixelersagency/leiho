@@ -387,26 +387,43 @@ html body.leiho-login #login .notice,
 html body.leiho-login #login .success,
 html body.leiho-login #login #login_error {
 	margin: 0 0 16px;
-	padding: 12px 14px;
-	background: var(--lh-surface) !important;
+	padding: 11px 14px;
+	background: var(--lh-surface-2) !important;
 	border: 1px solid var(--lh-line) !important;
-	border-left: 3px solid var(--lh-lime) !important;
 	border-radius: 10px !important;
 	box-shadow: none !important;
-	color: var(--lh-fg) !important;
+	color: var(--lh-muted) !important;
 	font-size: 14px;
 	line-height: 1.5;
 }
 
+html body.leiho-login #login .message strong,
+html body.leiho-login #login .notice strong,
+html body.leiho-login #login #login_error strong {
+	color: var(--lh-fg);
+	font-weight: 500;
+}
+
+/* Errors: a tinted panel, no coloured edge. */
 html body.leiho-login #login #login_error,
 html body.leiho-login #login .notice-error {
-	border-left-color: var(--lh-error) !important;
+	background: rgba( 255, 107, 94, 0.07 ) !important;
+	border-color: rgba( 255, 107, 94, 0.22 ) !important;
+	color: #f0c4bf !important;
+}
+
+html body.leiho-login #login #login_error strong,
+html body.leiho-login #login .notice-error strong {
+	color: #ffd9d4;
 }
 
 html body.leiho-login #login .message a,
 html body.leiho-login #login .notice a,
 html body.leiho-login #login #login_error a {
-	color: var(--lh-lime) !important;
+	color: var(--lh-fg) !important;
+	text-decoration: underline;
+	text-decoration-color: rgba( 255, 255, 255, 0.3 );
+	text-underline-offset: 3px;
 }
 
 /* ── Links under the card ────────────────────────────────────────── */

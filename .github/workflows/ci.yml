@@ -44,6 +44,8 @@ jobs:
           php plugin/tests/test-onboarding.php
           php plugin/tests/test-seo.php
           php plugin/tests/test-security.php
+          curl -fsSL https://wordpress.org/latest.tar.gz | tar xz -C "$RUNNER_TEMP"
+          WP_DIR="$RUNNER_TEMP/wordpress" php plugin/tests/test-blocks.php
           php plugin/tests/smoke-load.php
 
   bridge:

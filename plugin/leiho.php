@@ -52,6 +52,7 @@ require_once LEIHO_DIR . 'includes/deploy/class-leiho-deploy-manager.php';
 require_once LEIHO_DIR . 'includes/class-leiho-secrets.php';
 require_once LEIHO_DIR . 'includes/class-leiho-url-mapper.php';
 require_once LEIHO_DIR . 'includes/class-leiho-activity.php';
+require_once LEIHO_DIR . 'includes/class-leiho-blocks.php';
 require_once LEIHO_DIR . 'includes/class-leiho-native-fields.php';
 require_once LEIHO_DIR . 'includes/class-leiho-schema.php';
 require_once LEIHO_DIR . 'includes/class-leiho-rest.php';
@@ -222,6 +223,7 @@ final class Leiho_Plugin {
 			'headless_redirect'   => false,
 			'headless_lockdown'   => false,
 			'headless_comments'   => false,
+			'headless_menus'      => false, // Types édités dans Leiho retirés du menu de WordPress.
 			'security_file_edit'  => false,
 			'security_login'      => false,
 			'login_slug'          => '', // Adresse de connexion déplacée ('' : wp-login.php).

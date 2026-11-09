@@ -83,6 +83,15 @@ function wp_insert_term( $name, $tax ) {
 }
 function wp_set_object_terms( $post_id, $ids, $tax ) { $GLOBALS['obj_terms'][ $post_id ][ $tax ] = $ids; return $ids; }
 
+/** Conversion en blocs factice : la vraie demande l'analyseur de blocs de WordPress. */
+class Leiho_Blocks {
+	public static function unsupported( $c ) { return false !== strpos( (string) $c, 'wp:columns' ) ? array( 'core/columns' ) : array(); }
+	public static function to_html( $c ) { return trim( preg_replace( '/<!--.*?-->/s', '', (string) $c ) ); }
+	public static function from_html( $html, $original ) { return 'BLOCKS(' . $html . ')'; }
+}
+if ( ! function_exists( 'wpautop' ) ) {
+	function wpautop( $v ) { return false === strpos( $v, '<p' ) ? '<p>' . $v . '</p>' : $v; }
+}
 require __DIR__ . '/../includes/class-leiho-native-fields.php';
 
 function check( $label, $cond, $dump = null ) {
@@ -169,7 +178,12 @@ check( 'terme d’une autre taxonomie refusé', 'invalid_term' === ( $r['errors'
 $blocks = post( 11, 'post', array( 'post_content' => "<!-- wp:paragraph -->\n<p>Blocs</p>\n<!-- /wp:paragraph -->" ) );
 $values = array( '_content' => '<p>écrasé</p>' );
 $r      = Leiho_Native_Fields::prepare( $blocks, $values );
-check( 'contenu en blocs : écriture refusée', 'blocks_protected' === ( $r['errors']['_content'] ?? '' ) && ! isset( $r['postarr']['post_content'] ) );
+check( 'contenu en blocs courants : réécrit en blocs', 'BLOCKS(<p>écrasé</p>)' === ( $r['postarr']['post_content'] ?? '' ) && empty( $r['errors'] ), $r );
+
+$columns = post( 12, 'post', array( 'post_content' => "<!-- wp:columns -->\n<div class=\"wp-block-columns\"></div>\n<!-- /wp:columns -->" ) );
+$values  = array( '_content' => '<p>écrasé</p>' );
+$r       = Leiho_Native_Fields::prepare( $columns, $values );
+check( 'contenu en blocs non convertibles : écriture refusée', 'blocks_protected' === ( $r['errors']['_content'] ?? '' ) && ! isset( $r['postarr']['post_content'] ) );
 
 /* Validation --------------------------------------------------------- */
 

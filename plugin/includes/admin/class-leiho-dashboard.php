@@ -2216,6 +2216,26 @@ CODE;
 							?>
 						</div>
 					</div>
+					<div class="leiho-row">
+						<span class="leiho-row__label"><?php esc_html_e( 'Back office', 'leiho' ); ?></span>
+						<div class="leiho-checks">
+							<?php
+							$hidden = array();
+							foreach ( Leiho_Headless::leiho_types() as $type_name ) {
+								$type_object = get_post_type_object( $type_name );
+								if ( $type_object ) {
+									$hidden[] = $type_object->labels->name;
+								}
+							}
+							$check(
+								'headless_menus',
+								__( 'Hide content edited in Leiho from the WordPress menu', 'leiho' ),
+								/* translators: %s: list of content types. */
+								sprintf( __( 'Removes %s from the WordPress sidebar and “New” menu: they’re edited in Leiho. Their screens still open from a direct link.', 'leiho' ), $hidden ? implode( ', ', $hidden ) : __( 'the content types edited in Leiho', 'leiho' ) )
+							);
+							?>
+						</div>
+					</div>
 				</section>
 
 				<section class="leiho-form-section">

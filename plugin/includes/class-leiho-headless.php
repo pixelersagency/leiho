@@ -33,7 +33,7 @@ class Leiho_Headless {
 	const FLAGS = array( 'headless_noindex', 'headless_redirect', 'headless_lockdown', 'security_file_edit', 'security_login' );
 
 	/** Tous les réglages de l'onglet Sécurité. */
-	const KEYS = array( 'headless_noindex', 'headless_redirect', 'headless_comments', 'headless_lockdown', 'security_file_edit', 'security_login' );
+	const KEYS = array( 'headless_noindex', 'headless_redirect', 'headless_comments', 'headless_menus', 'headless_lockdown', 'security_file_edit', 'security_login' );
 
 	/** Essais de connexion ratés avant blocage, par IP et identifiant. */
 	const LOGIN_MAX = 5;
@@ -81,6 +81,11 @@ class Leiho_Headless {
 			add_filter( 'authenticate', array( __CLASS__, 'login_gate' ), 99, 2 );
 			add_action( 'wp_login_failed', array( __CLASS__, 'login_failed' ), 10, 2 );
 			add_action( 'wp_login', array( __CLASS__, 'login_succeeded' ) );
+		}
+
+		if ( ! empty( $settings['headless_menus'] ) ) {
+			add_action( 'admin_menu', array( __CLASS__, 'hide_type_menus' ), 999 );
+			add_action( 'admin_bar_menu', array( __CLASS__, 'hide_type_new_links' ), 999 );
 		}
 
 		if ( ! empty( $settings['headless_comments'] ) ) {
@@ -379,5 +384,47 @@ class Leiho_Headless {
 	 */
 	public static function hide_comments_bar( $bar ) {
 		$bar->remove_node( 'comments' );
+	}
+
+	/* ---------------------------------------------------------------------
+	 * Menu de WordPress
+	 * ------------------------------------------------------------------- */
+
+	/**
+	 * Types édités dans Leiho (réglages, collections comprises) : leur menu
+	 * WordPress fait doublon avec Leiho.
+	 *
+	 * @return string[]
+	 */
+	public static function leiho_types() {
+		$settings = Leiho_Plugin::settings();
+		/**
+		 * Types retirés du menu de WordPress par l'option « Masquer du menu ».
+		 *
+		 * @param string[] $types Types édités dans Leiho.
+		 */
+		return array_values( array_unique( (array) apply_filters( 'leiho_hidden_menu_types', (array) $settings['post_types'] ) ) );
+	}
+
+	/**
+	 * Les écrans restent accessibles par leur adresse : seuls les menus
+	 * disparaissent.
+	 *
+	 * @return void
+	 */
+	public static function hide_type_menus() {
+		foreach ( self::leiho_types() as $type ) {
+			remove_menu_page( 'post' === $type ? 'edit.php' : 'edit.php?post_type=' . $type );
+		}
+	}
+
+	/**
+	 * @param WP_Admin_Bar $bar Barre d'admin.
+	 * @return void
+	 */
+	public static function hide_type_new_links( $bar ) {
+		foreach ( self::leiho_types() as $type ) {
+			$bar->remove_node( 'new-' . $type );
+		}
 	}
 }

@@ -34,6 +34,12 @@ class Leiho_Login {
 			add_action( 'login_init', array( __CLASS__, 'restyle' ) );
 		}
 
+		// Favicon Leiho tant que le site n'a pas d'icône (Réglages → Général).
+		foreach ( array( 'admin_head', 'login_head', 'wp_head' ) as $hook ) {
+			add_action( $hook, array( __CLASS__, 'favicon' ), 99 );
+		}
+		add_action( 'do_faviconico', array( __CLASS__, 'favicon_ico' ), 5 );
+
 		$slug = self::clean( isset( $settings['login_slug'] ) ? $settings['login_slug'] : '' );
 		if ( '' === $slug || self::rescue() || is_multisite() || ( defined( 'WP_CLI' ) && WP_CLI ) ) {
 			return;
@@ -369,5 +375,45 @@ class Leiho_Login {
 		} )();
 		</script>
 		<?php
+	}
+
+	/* ---------------------------------------------------------------------
+	 * Favicon
+	 * ------------------------------------------------------------------- */
+
+	/**
+	 * @return bool Le site a sa propre icône.
+	 */
+	private static function has_icon() {
+		return function_exists( 'has_site_icon' ) && has_site_icon();
+	}
+
+	/**
+	 * @return void
+	 */
+	public static function favicon() {
+		if ( self::has_icon() ) {
+			return;
+		}
+		printf(
+			'<link rel="icon" href="%1$s" sizes="any"><link rel="icon" href="%2$s" type="image/svg+xml"><link rel="apple-touch-icon" href="%3$s">' . "\n",
+			esc_url( LEIHO_URL . 'assets/img/favicon.ico' ),
+			esc_url( LEIHO_URL . 'assets/img/leiho-mark.svg' ),
+			esc_url( LEIHO_URL . 'assets/img/favicon-96x96.png' )
+		);
+	}
+
+	/**
+	 * /favicon.ico demandé à WordPress (sans fichier à la racine) : celui de
+	 * Leiho plutôt que le logo WordPress.
+	 *
+	 * @return void
+	 */
+	public static function favicon_ico() {
+		if ( self::has_icon() ) {
+			return;
+		}
+		wp_safe_redirect( LEIHO_URL . 'assets/img/favicon.ico', 302, 'Leiho' );
+		exit;
 	}
 }
