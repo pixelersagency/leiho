@@ -5791,3 +5791,69 @@ mark.leiho-ai-flag {
 	flex: 1 1 180px;
 	min-width: 0;
 }
+
+/* Nouvelle adresse de connexion : fenêtre « ajoutez-la à vos favoris ». */
+.leiho-app .leiho-dialog--bookmark {
+	width: 500px;
+	animation: leiho-bookmark-in 0.22s ease-out both;
+}
+
+.leiho-app .leiho-bookmark__url {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	padding: 6px 6px 6px 12px;
+	border: 1px solid var(--leiho-accent-line);
+	border-radius: var(--leiho-radius);
+	background: var(--leiho-accent-soft);
+}
+
+.leiho-app .leiho-bookmark__url code {
+	flex: 1;
+	min-width: 0;
+	overflow-wrap: anywhere;
+	background: none;
+	padding: 0;
+	color: var(--leiho-ink);
+	font-size: var(--leiho-text-sm, 13px);
+	font-weight: 600;
+}
+
+.leiho-app .leiho-bookmark__ways {
+	display: flex;
+	flex-direction: column;
+	gap: 10px;
+	margin: 0;
+	padding-left: 20px;
+	line-height: 1.55;
+}
+
+.leiho-app .leiho-bookmark__drag {
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+	margin-top: 6px;
+	padding: 4px 10px;
+	border: 1px dashed var(--leiho-line-strong);
+	border-radius: 999px;
+	background: var(--leiho-surface);
+	color: var(--leiho-ink);
+	font-size: var(--leiho-text-sm, 13px);
+	text-decoration: none;
+	cursor: grab;
+}
+
+.leiho-app .leiho-bookmark__drag:hover {
+	border-color: var(--leiho-accent-line);
+}
+
+@keyframes leiho-bookmark-in {
+	from { opacity: 0; transform: translateY( 8px ) scale( 0.98 ); }
+	to { opacity: 1; transform: none; }
+}
+
+@media ( prefers-reduced-motion: reduce ) {
+	.leiho-app .leiho-dialog--bookmark {
+		animation: none;
+	}
+}

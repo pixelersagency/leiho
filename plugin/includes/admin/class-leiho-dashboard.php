@@ -2279,6 +2279,54 @@ CODE;
 			<?php self::render_zero(); ?>
 		</div>
 		<?php
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Simple drapeau d'affichage.
+		if ( isset( $_GET['leiho_login_new'] ) && '' !== $settings['login_slug'] && ! Leiho_Login::rescue() ) {
+			self::render_login_bookmark( Leiho_Login::url( $settings['login_slug'] ) );
+		}
+	}
+
+	/**
+	 * Fenêtre affichée juste après le choix d'une adresse de connexion : un
+	 * site ne peut pas ajouter un favori lui-même, alors tout est fait pour
+	 * que ce soit un geste (raccourci, glisser, copier).
+	 *
+	 * @param string $url Adresse de connexion.
+	 * @return void
+	 */
+	private static function render_login_bookmark( $url ) {
+		/* translators: %s: site name. */
+		$label = sprintf( __( '%s — log in', 'leiho' ), wp_specialchars_decode( get_bloginfo( 'name' ), ENT_QUOTES ) );
+		?>
+		<div class="leiho-backdrop" data-leiho-bookmark>
+			<div class="leiho-dialog leiho-dialog--bookmark" role="dialog" aria-modal="true" aria-labelledby="leiho-bookmark-title">
+				<div class="leiho-dialog__head">
+					<h2 id="leiho-bookmark-title"><?php esc_html_e( 'Keep your new login address', 'leiho' ); ?></h2>
+					<button type="button" class="leiho-icon-btn" data-leiho-bookmark-close aria-label="<?php esc_attr_e( 'Close', 'leiho' ); ?>">&times;</button>
+				</div>
+				<div class="leiho-dialog__body">
+					<p><?php esc_html_e( 'From now on, you log in here. wp-login.php and wp-admin no longer answer visitors: save this address before closing.', 'leiho' ); ?></p>
+					<div class="leiho-bookmark__url">
+						<code><?php echo esc_html( $url ); ?></code>
+						<button type="button" class="leiho-btn leiho-btn--quiet" data-leiho-copy="<?php echo esc_attr( $url ); ?>"><?php esc_html_e( 'Copy', 'leiho' ); ?></button>
+					</div>
+					<ol class="leiho-bookmark__ways">
+						<li data-leiho-bookmark-keys data-mac="<?php echo esc_attr( sprintf( /* translators: %s: keyboard shortcut. */ __( 'Open the login page, then press %s to add it to your bookmarks.', 'leiho' ), '⌘ D' ) ); ?>" data-touch="<?php esc_attr_e( 'Open the login page, then add it to your bookmarks or home screen from the browser’s menu.', 'leiho' ); ?>">
+							<?php echo esc_html( sprintf( /* translators: %s: keyboard shortcut. */ __( 'Open the login page, then press %s to add it to your bookmarks.', 'leiho' ), 'Ctrl + D' ) ); ?>
+						</li>
+						<li>
+							<?php esc_html_e( 'Or drag this button to your bookmarks bar:', 'leiho' ); ?>
+							<a class="leiho-bookmark__drag" href="<?php echo esc_url( $url ); ?>" draggable="true" title="<?php esc_attr_e( 'Drag to the bookmarks bar', 'leiho' ); ?>"><?php Leiho_Icons::render( 'shield', 14 ); ?> <?php echo esc_html( $label ); ?></a>
+						</li>
+					</ol>
+					<p class="leiho-help"><?php esc_html_e( 'A copy was also sent to the site administrator’s e-mail address.', 'leiho' ); ?></p>
+				</div>
+				<div class="leiho-dialog__actions">
+					<button type="button" class="leiho-btn leiho-btn--quiet" data-leiho-bookmark-close><?php esc_html_e( 'I saved it', 'leiho' ); ?></button>
+					<a class="leiho-btn" href="<?php echo esc_url( $url ); ?>" target="_blank" rel="noopener"><?php esc_html_e( 'Open the login page', 'leiho' ); ?></a>
+				</div>
+			</div>
+		</div>
+		<?php
 	}
 
 	/**

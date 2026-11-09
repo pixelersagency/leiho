@@ -458,3 +458,52 @@
 		} );
 	}
 } )();
+
+/* ── Nouvelle adresse de connexion : fenêtre « ajoutez-la à vos favoris » ── */
+( function () {
+	var box = document.querySelector( '[data-leiho-bookmark]' );
+	if ( ! box ) {
+		return;
+	}
+
+	// Raccourci du bon système ; sur mobile, le menu du navigateur.
+	var keys = box.querySelector( '[data-leiho-bookmark-keys]' );
+	var platform = ( navigator.userAgentData && navigator.userAgentData.platform ) || navigator.platform || '';
+	var touch = window.matchMedia && window.matchMedia( '(pointer: coarse)' ).matches;
+	if ( keys && touch ) {
+		keys.textContent = keys.getAttribute( 'data-touch' );
+	} else if ( keys && /mac|iphone|ipad/i.test( platform ) ) {
+		keys.textContent = keys.getAttribute( 'data-mac' );
+	}
+
+	// Ne plus la montrer au rechargement de la page.
+	if ( window.history && window.history.replaceState ) {
+		var url = new URL( window.location.href );
+		url.searchParams.delete( 'leiho_login_new' );
+		window.history.replaceState( null, '', url.toString() );
+	}
+
+	var opener = document.activeElement;
+	var close = function () {
+		box.remove();
+		document.removeEventListener( 'keydown', onKey );
+		if ( opener && opener.focus ) {
+			opener.focus();
+		}
+	};
+	var onKey = function ( event ) {
+		if ( 'Escape' === event.key ) {
+			close();
+		}
+	};
+	document.addEventListener( 'keydown', onKey );
+	box.addEventListener( 'click', function ( event ) {
+		if ( event.target === box || event.target.closest( '[data-leiho-bookmark-close]' ) ) {
+			close();
+		}
+	} );
+	var first = box.querySelector( '[data-leiho-copy]' );
+	if ( first ) {
+		first.focus();
+	}
+} )();

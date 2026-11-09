@@ -171,7 +171,7 @@ class Leiho_Admin {
 			return;
 		}
 
-		if ( in_array( $view, array( 'home', 'start', 'settings', 'deploys', 'ai' ), true ) ) {
+		if ( in_array( $view, array( 'home', 'start', 'settings', 'deploys', 'ai', 'security' ), true ) ) {
 			$this->enqueue_dashboard();
 			$this->enqueue_shell( $view );
 			if ( 'ai' === $view ) {
@@ -776,6 +776,9 @@ class Leiho_Admin {
 			}
 		}
 		$settings['login_slug'] = $slug;
+		if ( '' !== $slug && $slug !== $before['login_slug'] ) {
+			$args['leiho_login_new'] = '1'; // Fenêtre « ajoutez-la à vos favoris ».
+		}
 
 		update_option( Leiho_Plugin::OPTION_SETTINGS, $settings );
 
