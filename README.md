@@ -23,7 +23,7 @@
 
 [Français](README.fr.md) · [Changelog](CHANGELOG.md) · [Bridge package](bridge/) · [Framework examples](examples/)
 
-> **Status: 1.0.0-rc.1 (release candidate).** The interface is in English and French (it follows the WordPress site language).
+> **Status: 1.0.0-rc.6 (release candidate).** The interface is in English and French (it follows the WordPress site language).
 
 ---
 
