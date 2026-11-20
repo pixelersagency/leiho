@@ -4,7 +4,7 @@ Tags: headless, acf, visual editor, nextjs, astro
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.0.0-rc.7
+Stable tag: 1.0.0-rc.8
 License: GPL-2.0-or-later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -50,6 +50,9 @@ Parts of the Leiho app's layout and styles (three-pane Collections view, list ro
 The login page uses the Geist font (https://github.com/vercel/geist-font), Copyright 2024 The Geist Project Authors, SIL Open Font License 1.1. The license ships in licenses/geist-OFL.txt.
 
 == Changelog ==
+
+= 1.0.0-rc.8 =
+* Login page: autofilled fields stay dark, and the "Remember me" box is aligned.
 
 = 1.0.0-rc.7 =
 * Photo galleries without layout settings: add several photos at once, drag to reorder, remove. In the post body (a Photos button, saved as a WordPress Gallery block) and in gallery fields, with a live preview.
