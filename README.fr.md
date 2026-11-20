@@ -23,7 +23,7 @@
 
 [English](README.md) · [Changelog](CHANGELOG.md) · [Paquet bridge](bridge/) · [Exemples par framework](examples/)
 
-> **État : 1.0.0-rc.8 (version candidate).** L’interface est en français et en anglais (elle suit la langue du site WordPress).
+> **État : 1.0.0-rc.9 (version candidate).** L’interface est en français et en anglais (elle suit la langue du site WordPress).
 
 ---
 
@@ -220,7 +220,7 @@ import { field, block } from 'leiho';
 
 L'éditeur ajoute plusieurs photos d'un coup (dans n'importe quel ordre), les réordonne en les faisant glisser et en retire. Aucun réglage de mise en page : c'est le site qui décide du rendu.
 
-**Dans le corps d'un article** (`_content`), le bouton **Photos** de l'éditeur de contenu crée une galerie à l'endroit du curseur ; un clic sur une galerie permet d'en changer les photos. Elle est enregistrée comme le bloc Galerie de WordPress (`core/gallery`, un `core/image` par photo) : l'éditeur de blocs l'ouvre comme une galerie ordinaire, et une galerie faite dans l'éditeur de blocs se modifie dans Leiho. Un article classique qui reçoit une galerie est enregistré en blocs. L'API de contenu sert le bloc rendu : `figure.wp-block-gallery > figure.wp-block-image > img` (+ `figcaption` s'il y a une légende).
+**Dans le corps d'un article** (`_content`), **Ajouter une galerie**, à côté de **Ajouter un média**, crée une galerie à l'endroit du curseur ; un clic sur une galerie permet d'en changer les photos ou de la supprimer. Elle est enregistrée comme le bloc Galerie de WordPress (`core/gallery`, un `core/image` par photo) : l'éditeur de blocs l'ouvre comme une galerie ordinaire, et une galerie faite dans l'éditeur de blocs se modifie dans Leiho. Un article classique qui reçoit une galerie est enregistré en blocs. L'API de contenu sert le bloc rendu : `figure.wp-block-gallery > figure.wp-block-image > img` (+ `figcaption` s'il y a une légende).
 
 Pour modifier le corps dans l'éditeur visuel, annotez-le : `<div {...field(article, '_content', { html: true })} set:html={article.content} />`.
 

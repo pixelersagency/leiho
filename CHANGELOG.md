@@ -2,6 +2,16 @@
 
 All notable changes to Leiho (called Okno until 1.0.0-beta.11) are documented here. The project follows [Semantic Versioning](https://semver.org/). The plugin and the bridge package share one version number.
 
+## [1.0.0-rc.9] — 2026-11-20
+
+### Changed
+
+- **"Add a gallery" sits next to "Add media"**, with the same look, instead of a "Photos" button in the text toolbar.
+
+### Added
+
+- **"Delete the gallery"** in the photo gallery window removes the gallery from the text (Ctrl+Z brings it back).
+
 ## [1.0.0-rc.8] — 2026-11-20
 
 ### Fixed
@@ -353,6 +363,7 @@ First public release.
 - Managed regions (`data-okno-managed`) explain where to edit content Okno doesn't own.
 - Explicit sections (`data-okno-section`, `data-okno-layout`) take precedence over auto-detected ones.
 
+[1.0.0-rc.9]: https://github.com/pixelersagency/leiho/releases/tag/v1.0.0-rc.9
 [1.0.0-rc.8]: https://github.com/pixelersagency/leiho/releases/tag/v1.0.0-rc.8
 [1.0.0-rc.7]: https://github.com/pixelersagency/leiho/releases/tag/v1.0.0-rc.7
 [1.0.0-rc.6]: https://github.com/pixelersagency/leiho/releases/tag/v1.0.0-rc.6

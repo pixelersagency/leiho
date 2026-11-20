@@ -23,7 +23,7 @@
 
 [Français](README.fr.md) · [Changelog](CHANGELOG.md) · [Bridge package](bridge/) · [Framework examples](examples/)
 
-> **Status: 1.0.0-rc.8 (release candidate).** The interface is in English and French (it follows the WordPress site language).
+> **Status: 1.0.0-rc.9 (release candidate).** The interface is in English and French (it follows the WordPress site language).
 
 ---
 
@@ -228,7 +228,7 @@ Client-side navigation (React Router, Next.js links, `history.pushState`) and re
 
 Editors add several photos at once (in any order), reorder them by dragging and remove them. There is no layout setting: the front end decides how a gallery looks.
 
-**In the post body** (`_content`), the **Photos** button of the content editor creates a gallery where the cursor is; clicking a gallery changes its photos. It is saved as WordPress's own Gallery block (`core/gallery`, one `core/image` per photo), so the block editor opens it as a regular Gallery block, and galleries made in the block editor can be edited in Leiho. A classic post that receives a gallery is saved as blocks. The content API serves the rendered block:
+**In the post body** (`_content`), **Add a gallery**, next to **Add media**, creates a gallery where the cursor is; clicking a gallery changes its photos or deletes it. It is saved as WordPress's own Gallery block (`core/gallery`, one `core/image` per photo), so the block editor opens it as a regular Gallery block, and galleries made in the block editor can be edited in Leiho. A classic post that receives a gallery is saved as blocks. The content API serves the rendered block:
 
 ```html
 <figure class="wp-block-gallery has-nested-images columns-default is-cropped …">
