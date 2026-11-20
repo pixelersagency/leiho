@@ -2063,3 +2063,8 @@ html.leiho-fullscreen .mce-floatpanel {
 	color: var(--leiho-muted);
 	font-size: var(--leiho-text-sm, 13px);
 }
+
+/* Galerie de photos : « Supprimer la galerie » à gauche, loin de « OK ». */
+.leiho-dialog__actions > .leiho-btn--danger:first-child {
+	margin-right: auto;
+}

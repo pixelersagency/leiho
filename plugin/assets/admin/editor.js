@@ -3400,7 +3400,7 @@
 				editorApi.initialize( editorId, {
 					tinymce: {
 						toolbar1: full
-							? 'formatselect,bold,italic,link,unlink,bullist,numlist,blockquote,alignleft,aligncenter' + ( galleries ? ',leihogallery' : '' ) + ',undo,redo'
+							? 'formatselect,bold,italic,link,unlink,bullist,numlist,blockquote,alignleft,aligncenter,undo,redo'
 							: 'bold,italic,bullist,numlist,link,unlink,undo,redo',
 						block_formats: full
 							? __( 'Paragraph', 'leiho' ) + '=p;' + __( 'Heading 2', 'leiho' ) + '=h2;' + __( 'Heading 3', 'leiho' ) + '=h3;' + __( 'Heading 4', 'leiho' ) + '=h4'
@@ -3941,6 +3941,15 @@
 			body: body,
 			wide: true,
 			actions: [
+				// Retire la galerie du texte (Ctrl+Z la remet).
+				{
+					label: __( 'Delete the gallery', 'leiho' ),
+					danger: true,
+					onClick: function ( close ) {
+						close();
+						onSave( [] );
+					},
+				},
 				{ label: __( 'Cancel', 'leiho' ) },
 				{
 					label: __( 'Done', 'leiho' ),
@@ -3993,9 +4002,10 @@
 	}
 
 	/**
-	 * Galeries dans le contenu (TinyMCE) : bouton « Photos » (nouvelle
-	 * galerie, ou la galerie sélectionnée), clic sur une galerie pour en
-	 * changer les photos. Une galerie n'est pas éditable comme du texte.
+	 * Galeries dans le contenu (TinyMCE) : bouton « Ajouter une galerie » à
+	 * côté de « Ajouter un média » (nouvelle galerie, ou la galerie
+	 * sélectionnée), clic sur une galerie pour en changer les photos. Une
+	 * galerie n'est pas éditable comme du texte.
 	 */
 	function setupGalleries( ed, changed ) {
 		function lock() {
@@ -4036,18 +4046,31 @@
 			} );
 		}
 
-		ed.addButton( 'leihogallery', {
-			icon: 'gallery',
-			text: __( 'Photos', 'leiho' ),
-			tooltip: __( 'Add a photo gallery', 'leiho' ),
-			onclick: function () {
+		// Même bouton que « Ajouter un média », juste à côté.
+		ed.on( 'init', function () {
+			var wrap = document.getElementById( 'wp-' + ed.id + '-wrap' ) || ( ed.getContainer() && ed.getContainer().closest( '.wp-editor-wrap' ) );
+			var bar = document.getElementById( 'wp-' + ed.id + '-media-buttons' ) || ( wrap && wrap.querySelector( '.wp-media-buttons' ) );
+			if ( ! bar || bar.querySelector( '.leiho-insert-gallery' ) ) {
+				return;
+			}
+			var btn = document.createElement( 'button' );
+			btn.type = 'button';
+			btn.className = 'button leiho-insert-gallery';
+			var icon = document.createElement( 'span' );
+			icon.className = 'wp-media-buttons-icon dashicons dashicons-format-gallery';
+			icon.setAttribute( 'aria-hidden', 'true' );
+			btn.appendChild( icon );
+			btn.appendChild( document.createTextNode( ' ' + __( 'Add a gallery', 'leiho' ) ) );
+			btn.addEventListener( 'click', function ( event ) {
+				event.preventDefault();
 				var current = ed.dom.getParent( ed.selection.getNode(), 'figure.wp-block-gallery' );
 				if ( current ) {
 					edit( current );
 				} else {
 					create();
 				}
-			},
+			} );
+			bar.appendChild( btn );
 		} );
 		ed.on( 'click', function ( event ) {
 			var figure = ed.dom.getParent( event.target, 'figure.wp-block-gallery' );

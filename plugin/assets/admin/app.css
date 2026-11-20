@@ -4908,7 +4908,8 @@ body.leiho-app-body .mce-menu .mce-menu-item:focus {
 	clear: both;
 }
 
-.leiho-app .wp-media-buttons .button.insert-media {
+.leiho-app .wp-media-buttons .button.insert-media,
+.leiho-app .wp-media-buttons .button.leiho-insert-gallery {
 	display: inline-flex;
 	align-items: center;
 	gap: 6px;
@@ -4925,13 +4926,28 @@ body.leiho-app-body .mce-menu .mce-menu-item:focus {
 	box-shadow: none;
 }
 
-.leiho-app .wp-media-buttons .button.insert-media:hover {
+.leiho-app .wp-media-buttons .button.insert-media:hover,
+.leiho-app .wp-media-buttons .button.leiho-insert-gallery:hover {
 	background: var(--leiho-active);
 	color: var(--leiho-ink);
 }
 
 .leiho-app .wp-media-buttons .wp-media-buttons-icon::before {
 	color: var(--leiho-muted);
+}
+
+/* « Ajouter une galerie », à côté de « Ajouter un média ». */
+.leiho-app .wp-media-buttons .button.leiho-insert-gallery {
+	margin-left: 6px;
+}
+
+.leiho-app .wp-media-buttons .leiho-insert-gallery .wp-media-buttons-icon {
+	display: inline-block;
+	width: 18px;
+	height: 18px;
+	margin: 0;
+	font-size: 18px;
+	line-height: 18px;
 }
 
 .leiho-app .wp-editor-tabs {
