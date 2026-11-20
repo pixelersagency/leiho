@@ -128,6 +128,7 @@ Les attributs écrits par ces fonctions :
 | `data-wp-post="12"` | Conteneur : ID du contenu WordPress auquel appartiennent les champs dedans |
 | `data-wp-field="chemin"` | Élément qui affiche ce champ |
 | `data-leiho-apply="html"` | La valeur contient du balisage (un `<span>` d'accent dans un titre, un wysiwyg) |
+| `data-leiho-apply="gallery"` | Champ galerie : un enfant par image (`field(page, 'photos', { gallery: true })`) |
 | `data-leiho-section="Libellé"` | Nom de la section dans l'arbre de structure de l'éditeur |
 | `data-leiho-layout="sections.2"` | La section est la ligne 2 du flexible content `sections` : le client peut l'ajouter, la déplacer, la dupliquer, la supprimer |
 | `data-leiho-refresh="save"` | Pas d'aperçu instantané : l'éditeur recharge la page après enregistrement (rendu complexe) |
@@ -140,7 +141,7 @@ Les attributs écrits par ces fonctions :
 - Champ simple : `hero_titre`
 - Ligne d'un repeater ou d'un flexible content : `cartes.0.titre`, `sections.2.intro`
 - Sous-champ d'un group : `coordonnees.telephone`
-- Champs natifs : `_title` (titre du contenu), `_thumbnail` (image mise en avant)
+- Champs natifs : `_title` (titre du contenu), `_thumbnail` (image mise en avant), `_content` (corps de l'article, HTML rendu : annoter avec `{ html: true }`)
 
 Le chemin d'un élément de liste utilise l'**index de rendu** : dans un `map`, construis-le
 avec l'index de la boucle, pas avec un identifiant.
@@ -172,6 +173,27 @@ l'image mise en avant. Chaque emplacement d'image a un **format fixé par la mis
 
 Remplacer une image par une autre de format différent ne doit jamais changer la taille du
 composant. L'éditeur prévient le client quand l'image choisie sera fortement recadrée.
+
+### Galeries
+
+Des photos montrées ensemble (une fête, un atelier) forment une galerie, jamais un nombre fixe
+de champs image, et le client ne règle ni colonnes ni tailles : le front les met en page.
+
+- Dans un gabarit : un champ **galerie** ACF. Affichez un enfant par image dans le conteneur
+  annoté, pour que l'aperçu le refasse en direct sur le modèle du premier :
+
+  ```jsx
+  <ul className="leiho-gallery" {...field(page, 'photos', { gallery: true })}>
+    {page.fields.photos.map((photo) => (
+      <li key={photo.id}><img src={photo.sizes.large?.url ?? photo.url} alt={photo.alt} loading="lazy" /></li>
+    ))}
+  </ul>
+  ```
+
+- Dans le corps d'un article : le client ajoute un bloc Galerie (depuis Leiho ou l'éditeur de
+  blocs). Stylez `.wp-block-gallery` dans le CSS du corps d'article, sinon les photos
+  s'afficheront les unes sous les autres.
+- `leiho/gallery.css` donne un rendu par défaut pour les deux (grille automatique de carrés).
 
 ### Composer une page
 

@@ -81,6 +81,13 @@
 		bridgeReady: false,
 		bridgeVersion: 0,
 		handshakeTimer: null,
+		pingTimer: null,
+		frameToken: 0, // Chargement en cours de l'iframe (les pings d'un ancien chargement s'arrêtent).
+		// Contenu pas encore sur le site : montré dans la page d'un contenu publié
+		// du même type ({ id, title, preview_url }), que le bridge lui rattache.
+		standIn: null,
+		adoptSent: false,
+		standInWarned: false,
 		deployId: cfg.activeDeploy || '',
 		deployPollTimer: null,
 		tinymceIds: [],
@@ -629,7 +636,29 @@
 		state.bridgeReady = true;
 		state.bridgeVersion = data.version || 1;
 		clearTimeout( state.handshakeTimer );
+		clearInterval( state.pingTimer );
 		els.frameHelp.hidden = true;
+
+		// Brouillon montré dans la page modèle : on demande d'abord au bridge de
+		// rattacher la page au brouillon, et on attend son annonce suivante. La
+		// page modèle elle-même n'est jamais éditée d'ici.
+		if ( state.standIn && state.post && data.posts && data.posts[ String( state.standIn.id ) ] ) {
+			var from = String( state.standIn.id );
+			if ( state.bridgeVersion >= 6 ) {
+				if ( ! state.adoptSent ) {
+					state.adoptSent = true;
+					postToFrame( { type: 'adopt', from: from, to: String( state.post.id ) } );
+				}
+				return;
+			}
+			var posts = Object.assign( {}, data.posts );
+			delete posts[ from ];
+			data = Object.assign( {}, data, { posts: posts } );
+			if ( ! state.standInWarned ) {
+				state.standInWarned = true;
+				toast( __( 'To preview drafts in the page of another entry, update leiho-bridge.js on the site (version 6).', 'leiho' ), true );
+			}
+		}
 
 		// Navigation client (pushState d'une app React, Next…) : le site a changé
 		// de page sans recharger l'iframe. On bascule l'éditeur sur ce contenu.
@@ -755,7 +784,26 @@
 			case 'file':
 				return meta.url || '';
 			case 'wysiwyg':
+				// Contenu principal : seulement le HTML rendu par WordPress
+				// (renderMainContent), pas le texte brut de l'éditeur.
+				if ( 'full' === def.toolbar ) {
+					return meta.rendered !== undefined ? meta.rendered : null;
+				}
 				return meta.rendered !== undefined ? meta.rendered : value || '';
+			case 'gallery':
+				// Bridge 6 : la galerie se refait en direct ; avant, rechargement.
+				if ( state.bridgeVersion < 6 ) {
+					return null;
+				}
+				return ( meta.items || [] ).map( function ( item ) {
+					return {
+						id: item.id,
+						url: item.preview || item.url || '',
+						alt: item.alt || '',
+						width: item.preview ? item.width || 0 : 0,
+						height: item.preview ? item.height || 0 : 0,
+					};
+				} );
 			case 'select':
 				return def.options && def.options[ value ] !== undefined ? def.options[ value ] : value || '';
 			case 'post_object':
@@ -763,7 +811,6 @@
 			case 'link':
 				return value && 'object' === typeof value ? value : { url: value || '' };
 			case 'true_false':
-			case 'gallery':
 			case 'relationship':
 			case 'taxonomy':
 			case 'repeater':
@@ -824,7 +871,47 @@
 			} );
 		} );
 		postToFrame( { type: 'init', values: values } );
+
+		// Brouillon dans la page modèle : son contenu, rendu par WordPress.
+		var content = state.standIn && state.post ? state.fields[ fieldKey( String( state.post.id ), '_content' ) ] : null;
+		if ( content && ! ( content.meta && undefined !== content.meta.rendered ) ) {
+			renderMainContent( content );
+		}
 	}
+
+	/** Mise à jour d'aperçu immédiate (sans l'anti-rebond partagé de pushPreview). */
+	function sendFieldUpdate( postId, path, value, fieldType ) {
+		var known = state.knownFields[ fieldKey( postId, path ) ];
+		if ( ! state.bridgeReady || ! known || known.refresh ) {
+			return;
+		}
+		postToFrame( { type: 'fieldUpdate', postId: postId, path: path, value: value, fieldType: fieldType } );
+	}
+
+	/**
+	 * Contenu principal rendu par WordPress tel que le site le recevra
+	 * (blocs, galeries, shortcodes, embeds), puis envoyé à l'aperçu. Rien
+	 * n'est enregistré.
+	 */
+	var renderSeq = 0;
+	function renderMainContent( field ) {
+		if ( FORM || ! field ) {
+			return;
+		}
+		var seq = ++renderSeq;
+		apiFetch( { path: '/leiho/v1/render/' + field._post, method: 'POST', data: { html: field.value || '' } } )
+			.then( function ( res ) {
+				if ( seq !== renderSeq || ! res || 'string' !== typeof res.html ) {
+					return;
+				}
+				field.meta = Object.assign( {}, field.meta || {}, { rendered: res.html } );
+				sendFieldUpdate( field._post, field.path, res.html, 'wysiwyg' );
+			} )
+			.catch( function () {
+				/* Aperçu seulement : l'enregistrement dira s'il y a un problème. */
+			} );
+	}
+	var renderMainContentSoon = debounce( renderMainContent, 400 );
 
 	var pushPreview = debounce( function ( postId, path, value, fieldType ) {
 		if ( ! state.bridgeReady ) {
@@ -1707,7 +1794,13 @@
 				setButtons();
 				return;
 			}
+			// Le schéma donne l'adresse dans la langue éditée (/fr/…), et la page
+			// modèle d'un contenu qui n'est pas encore sur le site (sauf si
+			// l'iframe est déjà sur sa page : navigation dans le site).
+			state.standIn = options.keepFrame ? null : schema.stand_in || null;
+			state.previewUrl = schema.preview_url || post.preview_url;
 			if ( options.keepFrame ) {
+				renderStandInBar( '' );
 				// L'iframe est déjà sur la bonne page (navigation client du site) :
 				// on rejoue son handshake au lieu de la recharger.
 				if ( options.ready ) {
@@ -1716,24 +1809,52 @@
 					hydrateFrame();
 				}
 			} else {
-				// Le schéma donne l'adresse dans la langue éditée (/fr/…).
-				loadFrame( schema.preview_url || post.preview_url );
+				loadFrame( postFrameUrl() );
 			}
 			switchTab( 'structure' );
 			setButtons();
 		} );
 	}
 
+	/** Adresse de l'aperçu du contenu ouvert : la sienne, ou sa page modèle. */
+	function postFrameUrl() {
+		if ( state.standIn && state.standIn.preview_url ) {
+			return state.standIn.preview_url;
+		}
+		return state.previewUrl || ( state.post && state.post.preview_url ) || '';
+	}
+
 	function loadFrame( url ) {
 		state.bridgeReady = false;
 		state.knownFields = {};
+		state.adoptSent = false;
 		els.framePlaceholder.hidden = true;
 		els.frameHelp.hidden = true;
 		els.frame.hidden = false;
 
 		var sep = url.indexOf( '?' ) === -1 ? '?' : '&';
 		state.frameUrl = url;
+		var token = ++state.frameToken;
+		clearInterval( state.pingTimer );
+		// Le bridge s'annonce une fois en démarrant ; si cette annonce se perd
+		// (script du site chargé avant ou pendant que l'iframe change de page),
+		// on la lui redemande une fois la page chargée, jusqu'à sa réponse.
+		els.frame.onload = function () {
+			if ( token !== state.frameToken || state.bridgeReady ) {
+				return;
+			}
+			var tries = 0;
+			clearInterval( state.pingTimer );
+			state.pingTimer = setInterval( function () {
+				if ( token !== state.frameToken || state.bridgeReady || ++tries > 8 ) {
+					clearInterval( state.pingTimer );
+					return;
+				}
+				postToFrame( { type: 'ping' } );
+			}, 750 );
+		};
 		els.frame.src = url + sep + 'leiho=' + Date.now();
+		renderStandInBar( url );
 
 		clearTimeout( state.handshakeTimer );
 		state.handshakeTimer = setTimeout( function () {
@@ -1741,6 +1862,28 @@
 				els.frameHelp.hidden = false;
 			}
 		}, cfg.handshakeTimeout || 8000 );
+	}
+
+	/** Bandeau « Aperçu du brouillon » quand l'iframe montre la page modèle. */
+	function renderStandInBar( url ) {
+		var show = !! ( state.standIn && state.standIn.preview_url === url );
+		if ( ! els.standInBar ) {
+			if ( ! show || ! els.frameWrap ) {
+				return;
+			}
+			els.standInBar = document.createElement( 'div' );
+			els.standInBar.className = 'leiho-standin-bar';
+			els.standInBar.setAttribute( 'role', 'status' );
+			els.frameWrap.insertBefore( els.standInBar, els.frameWrap.firstChild );
+		}
+		els.standInBar.hidden = ! show;
+		if ( show ) {
+			els.standInBar.textContent = sprintf(
+				/* translators: %s: title of the published entry whose page shows the draft. */
+				__( 'Draft preview: this content isn’t on the site yet, so it is shown in the page of “%s”. What doesn’t come from this content (date, lists…) is that page’s.', 'leiho' ),
+				state.standIn.title
+			);
+		}
 	}
 
 	/* ------------------------------------------------------------------ *
@@ -2211,8 +2354,9 @@
 				main.groups.forEach( function ( group ) {
 					group.fields.forEach( function ( f ) {
 						// Contenu, extrait, taxonomies, adresse… : formulaire de
-						// Collections seulement, l'aperçu ne les montre pas.
-						if ( f.form_only && ! FORM ) {
+						// Collections seulement, sauf quand le site les annote
+						// (data-wp-field="_content") : la page les montre alors.
+						if ( f.form_only && ! FORM && ! state.knownFields[ fieldKey( f._post, f.path ) ] ) {
 							return;
 						}
 						if ( ! covered[ fieldKey( f._post, f.path ) ] ) {
@@ -3201,6 +3345,12 @@
 			'a{color:' + token( '--leiho-accent-ink', '#3d6b00' ) + ';}' +
 			'blockquote{margin:0 0 1em;padding-left:14px;border-left:3px solid ' + token( '--leiho-line-strong', '#cccccc' ) + ';color:' + token( '--leiho-muted', '#555555' ) + ';}' +
 			'::selection{background:' + token( '--leiho-accent-soft', 'rgba(197,255,62,.3)' ) + ';}' +
+			// Galeries : vignettes en grille, un clic ouvre « Modifier les photos ».
+			'figure.wp-block-gallery{display:grid;grid-template-columns:repeat(auto-fill,minmax(84px,1fr));gap:6px;margin:0 0 1em;padding:30px 8px 8px;position:relative;border:1px dashed ' + token( '--leiho-line-strong', '#cccccc' ) + ';border-radius:8px;background:' + token( '--leiho-input', 'rgba(0,0,0,.05)' ) + ';cursor:pointer;}' +
+			'figure.wp-block-gallery::before{content:' + JSON.stringify( __( 'Photo gallery — click to change the photos', 'leiho' ) ) + ';position:absolute;top:7px;left:10px;right:10px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:12px;font-weight:600;color:' + token( '--leiho-muted', '#555555' ) + ';}' +
+			'figure.wp-block-gallery figure{margin:0;}' +
+			'figure.wp-block-gallery img{display:block;width:100%;height:auto;aspect-ratio:1;object-fit:cover;border-radius:5px;}' +
+			'figure.wp-block-gallery figcaption{grid-column:1/-1;font-size:13px;}' +
 			// Blocs de l'éditeur de blocs que Leiho ne modifie pas (Leiho_Blocks).
 			'.leiho-locked-block{margin:0 0 1em;padding:10px 12px;border:1px dashed ' + token( '--leiho-line-strong', '#cccccc' ) + ';border-radius:8px;background:' + token( '--leiho-input', 'rgba(0,0,0,.05)' ) + ';color:' + token( '--leiho-muted', '#555555' ) + ';font-size:13px;line-height:1.5;cursor:default;user-select:none;}' +
 			'.leiho-locked-block strong{color:' + token( '--leiho-ink', '#171717' ) + ';font-weight:600;}'
@@ -3232,17 +3382,25 @@
 				return;
 			}
 			last = content;
+			if ( full ) {
+				// Contenu principal : l'aperçu reçoit le HTML que WordPress en
+				// rendra (paragraphes, galeries…), pas le texte brut de l'éditeur.
+				ctx.write( content, {} );
+				renderMainContentSoon( ctx.topField );
+				return;
+			}
 			// L'aperçu reçoit le HTML brut ; le bridge le filtre comme
 			// wp_kses_post() le fera à l'enregistrement (E3).
 			ctx.write( content, { rendered: content } );
 		}, 200 );
+		var galleries = !! ( full && ctx.def.media );
 
 		if ( editorApi && editorApi.initialize ) {
 			setTimeout( function () {
 				editorApi.initialize( editorId, {
 					tinymce: {
 						toolbar1: full
-							? 'formatselect,bold,italic,link,unlink,bullist,numlist,blockquote,alignleft,aligncenter,undo,redo'
+							? 'formatselect,bold,italic,link,unlink,bullist,numlist,blockquote,alignleft,aligncenter' + ( galleries ? ',leihogallery' : '' ) + ',undo,redo'
 							: 'bold,italic,bullist,numlist,link,unlink,undo,redo',
 						block_formats: full
 							? __( 'Paragraph', 'leiho' ) + '=p;' + __( 'Heading 2', 'leiho' ) + '=h2;' + __( 'Heading 3', 'leiho' ) + '=h3;' + __( 'Heading 4', 'leiho' ) + '=h4'
@@ -3256,6 +3414,11 @@
 						content_style: editorContentStyle(),
 						height: full ? 360 : 180,
 						setup: function ( ed ) {
+							if ( galleries ) {
+								setupGalleries( ed, function () {
+									sync( ed.getContent() );
+								} );
+							}
 							ed.on( 'init', function () {
 								last = normalizeHtml( ed.getContent() );
 							} );
@@ -3558,94 +3721,155 @@
 	}
 
 	function buildGallery( ctx ) {
-		var container = document.createElement( 'div' );
-		container.className = 'leiho-gallery-field';
-
-		var grid = document.createElement( 'ul' );
-		grid.className = 'leiho-gallery-grid';
-		container.appendChild( grid );
-
 		function items() {
 			var meta = ctx.readMeta() || {};
 			return Array.isArray( meta.items ) ? meta.items : [];
 		}
-
-		function commit( list ) {
+		var editor = galleryEditor( items(), function ( list ) {
 			ctx.write(
 				list.map( function ( item ) {
 					return item.id;
 				} ),
 				{ items: list },
-				true
+				// Bridge 6 : la galerie se refait en direct. Avant : rechargement après save.
+				state.bridgeVersion < 6
 			);
-			render();
+		} );
+		editor.el.classList.add( 'leiho-gallery-field' );
+		return editor.el;
+	}
+
+	/* ------------------------------------------------------------------ *
+	 * Galeries : gestionnaire de photos (champ galerie, galerie du contenu)
+	 * ------------------------------------------------------------------ */
+
+	/** Image de la médiathèque → élément de galerie (vignette, aperçu, texte alternatif). */
+	function galleryItemFromAttachment( att ) {
+		var sizes = att.sizes || {};
+		var thumb = sizes.medium || sizes.thumbnail || sizes.large || sizes.full || {};
+		var large = sizes.large || sizes.full || { url: att.url, width: att.width, height: att.height };
+		return {
+			id: att.id,
+			url: thumb.url || att.url,
+			title: att.title || '',
+			alt: att.alt || '',
+			preview: large.url || att.url,
+			width: large.width || 0,
+			height: large.height || 0,
+		};
+	}
+
+	/**
+	 * Grille de photos : ajouter plusieurs photos d'un coup, réordonner
+	 * (glisser-déposer, ou flèches au clavier), retirer. Aucun réglage de
+	 * mise en page : le site décide.
+	 *
+	 * @param {Array}    initial  Éléments { id, url, title, alt, preview… }.
+	 * @param {Function} onChange Appelée avec la nouvelle liste.
+	 * @return {{ el: Element, items: Function }}
+	 */
+	function galleryEditor( initial, onChange ) {
+		var list = ( initial || [] ).slice();
+		var container = document.createElement( 'div' );
+		container.className = 'leiho-gallery-editor';
+
+		var grid = document.createElement( 'ul' );
+		grid.className = 'leiho-gallery-grid';
+		container.appendChild( grid );
+
+		var empty = document.createElement( 'p' );
+		empty.className = 'leiho-field-note';
+		empty.textContent = __( 'No photos yet.', 'leiho' );
+		container.appendChild( empty );
+
+		var dragFrom = -1;
+
+		function commit( next, focusIndex ) {
+			list = next;
+			render( focusIndex );
+			onChange( list.slice() );
 		}
 
-		function render() {
+		function move( from, to ) {
+			if ( to < 0 || to >= list.length || from === to ) {
+				return;
+			}
+			var next = list.slice();
+			var item = next.splice( from, 1 )[ 0 ];
+			next.splice( to, 0, item );
+			commit( next, to );
+		}
+
+		function render( focusIndex ) {
 			grid.innerHTML = '';
-			items().forEach( function ( item, index ) {
+			empty.hidden = list.length > 0;
+			list.forEach( function ( item, index ) {
 				var li = document.createElement( 'li' );
 				li.className = 'leiho-gallery-item';
+				li.draggable = true;
 
 				var img = document.createElement( 'img' );
 				img.src = item.url || '';
-				img.alt = item.title || '';
+				img.alt = item.alt || item.title || '';
+				img.draggable = false;
 				li.appendChild( img );
 
+				li.addEventListener( 'dragstart', function ( event ) {
+					dragFrom = index;
+					li.classList.add( 'is-dragging' );
+					if ( event.dataTransfer ) {
+						event.dataTransfer.effectAllowed = 'move';
+						event.dataTransfer.setData( 'text/plain', String( index ) );
+					}
+				} );
+				li.addEventListener( 'dragend', function () {
+					dragFrom = -1;
+					li.classList.remove( 'is-dragging' );
+				} );
+				li.addEventListener( 'dragover', function ( event ) {
+					if ( dragFrom > -1 ) {
+						event.preventDefault();
+						li.classList.add( 'is-drop-target' );
+					}
+				} );
+				li.addEventListener( 'dragleave', function () {
+					li.classList.remove( 'is-drop-target' );
+				} );
+				li.addEventListener( 'drop', function ( event ) {
+					event.preventDefault();
+					li.classList.remove( 'is-drop-target' );
+					if ( dragFrom > -1 ) {
+						move( dragFrom, index );
+					}
+				} );
+
+				var name =
+					item.title ||
+					/* translators: %d: image position in the gallery. */
+					sprintf( __( 'image %d', 'leiho' ), index + 1 );
 				var actions = document.createElement( 'span' );
 				actions.className = 'leiho-gallery-actions';
 				[
-					{
-						label: '←',
-						title: __( 'Move earlier', 'leiho' ),
-						disabled: 0 === index,
-						run: function () {
-							var list = items().slice();
-							var tmp = list[ index - 1 ];
-							list[ index - 1 ] = list[ index ];
-							list[ index ] = tmp;
-							commit( list );
-						},
-					},
-					{
-						label: '→',
-						title: __( 'Move later', 'leiho' ),
-						disabled: index === items().length - 1,
-						run: function () {
-							var list = items().slice();
-							var tmp = list[ index + 1 ];
-							list[ index + 1 ] = list[ index ];
-							list[ index ] = tmp;
-							commit( list );
-						},
-					},
-					{
-						label: '×',
-						title: __( 'Remove from gallery', 'leiho' ),
-						disabled: false,
-						run: function () {
-							var list = items().slice();
-							list.splice( index, 1 );
-							commit( list );
-						},
-					},
+					{ key: 'prev', label: '←', title: __( 'Move earlier', 'leiho' ), disabled: 0 === index, run: function () {
+						move( index, index - 1 );
+					} },
+					{ key: 'next', label: '→', title: __( 'Move later', 'leiho' ), disabled: index === list.length - 1, run: function () {
+						move( index, index + 1 );
+					} },
+					{ key: 'remove', label: '×', title: __( 'Remove from gallery', 'leiho' ), disabled: false, run: function () {
+						var next = list.slice();
+						next.splice( index, 1 );
+						commit( next, Math.min( index, next.length - 1 ) );
+					} },
 				].forEach( function ( action ) {
 					var btn = document.createElement( 'button' );
 					btn.type = 'button';
 					btn.className = 'leiho-repeater-btn';
 					btn.textContent = action.label;
 					btn.title = action.title;
-					btn.setAttribute(
-						'aria-label',
-						sprintf(
-							/* translators: 1: action (e.g. “Move earlier”), 2: image title. */
-							__( '%1$s: %2$s', 'leiho' ),
-							action.title,
-							item.title ||
-								/* translators: %d: image position in the gallery. */
-								sprintf( __( 'image %d', 'leiho' ), index + 1 )
-						)
-					);
+					btn.setAttribute( 'data-action', action.key );
+					/* translators: 1: action (e.g. “Move earlier”), 2: image title. */
+					btn.setAttribute( 'aria-label', sprintf( __( '%1$s: %2$s', 'leiho' ), action.title, name ) );
 					btn.disabled = action.disabled;
 					btn.addEventListener( 'click', action.run );
 					actions.appendChild( btn );
@@ -3653,36 +3877,192 @@
 				li.appendChild( actions );
 				grid.appendChild( li );
 			} );
+			// Le focus reste sur l'image déplacée (clavier).
+			if ( 'number' === typeof focusIndex && focusIndex > -1 && grid.children[ focusIndex ] ) {
+				var keep = grid.children[ focusIndex ].querySelector( 'button:not([disabled])' );
+				if ( keep ) {
+					keep.focus();
+				}
+			}
 		}
 
 		var add = document.createElement( 'button' );
 		add.type = 'button';
 		add.className = 'leiho-btn leiho-btn--quiet';
-		add.textContent = __( '+ Add images', 'leiho' );
+		add.textContent = __( '+ Add photos', 'leiho' );
 		add.addEventListener( 'click', function () {
-			pickMedia( { title: __( 'Add to gallery', 'leiho' ), multiple: true, library: { type: 'image' } } ).then( function (
-				attachments
-			) {
-				if ( ! attachments ) {
+			pickMedia( {
+				title: __( 'Add photos', 'leiho' ),
+				button: { text: __( 'Add to gallery', 'leiho' ) },
+				multiple: 'add',
+				library: { type: 'image' },
+			} ).then( function ( attachments ) {
+				if ( ! attachments || ! attachments.length ) {
 					return;
 				}
-				var list = items().slice();
+				var next = list.slice();
 				attachments.forEach( function ( att ) {
-					if (
-						! list.some( function ( item ) {
-							return item.id === att.id;
-						} )
-					) {
-						list.push( { id: att.id, url: att.url, title: att.title } );
+					var known = next.some( function ( item ) {
+						return item.id === att.id;
+					} );
+					if ( ! known ) {
+						next.push( galleryItemFromAttachment( att ) );
 					}
 				} );
-				commit( list );
+				commit( next );
 			} );
 		} );
 		container.appendChild( add );
 
 		render();
-		return container;
+		return {
+			el: container,
+			items: function () {
+				return list.slice();
+			},
+		};
+	}
+
+	/** Gestionnaire de photos dans une fenêtre : « Enregistrer » rend la liste. */
+	function openGalleryManager( initial, onSave ) {
+		var app = window.LeihoApp;
+		if ( ! app || ! app.modal ) {
+			return;
+		}
+		var editor = galleryEditor( initial, function () {} );
+		var help = document.createElement( 'p' );
+		help.className = 'leiho-field-note';
+		help.textContent = __( 'Add several photos at once, drag them to change the order. The site lays them out on its own.', 'leiho' );
+		var body = document.createElement( 'div' );
+		body.appendChild( help );
+		body.appendChild( editor.el );
+		app.modal( {
+			title: __( 'Photo gallery', 'leiho' ),
+			body: body,
+			wide: true,
+			actions: [
+				{ label: __( 'Cancel', 'leiho' ) },
+				{
+					label: __( 'Done', 'leiho' ),
+					primary: true,
+					onClick: function ( close ) {
+						close();
+						onSave( editor.items() );
+					},
+				},
+			],
+		} );
+	}
+
+	function escAttr( value ) {
+		return String( null == value ? '' : value )
+			.replace( /&/g, '&amp;' )
+			.replace( /"/g, '&quot;' )
+			.replace( /</g, '&lt;' )
+			.replace( />/g, '&gt;' );
+	}
+
+	/** HTML d'une galerie du contenu : le bloc Galerie de WordPress. */
+	function galleryHtml( items ) {
+		return (
+			'<figure class="wp-block-gallery has-nested-images columns-default is-cropped">' +
+			items
+				.map( function ( item ) {
+					return (
+						'<figure class="wp-block-image size-large"><img src="' + escAttr( item.preview || item.url ) + '" alt="' + escAttr( item.alt ) +
+						'" class="wp-image-' + Number( item.id ) + '" /></figure>'
+					);
+				} )
+				.join( '' ) +
+			'</figure>'
+		);
+	}
+
+	/** Photos d'une galerie du contenu (figure.wp-block-gallery). */
+	function galleryItemsFromFigure( figure ) {
+		var out = [];
+		Array.prototype.forEach.call( figure.querySelectorAll( 'img' ), function ( img ) {
+			var match = /\bwp-image-(\d+)\b/.exec( img.getAttribute( 'class' ) || '' );
+			if ( ! match ) {
+				return;
+			}
+			var src = img.getAttribute( 'data-mce-src' ) || img.getAttribute( 'src' ) || '';
+			out.push( { id: Number( match[ 1 ] ), url: src, preview: src, alt: img.getAttribute( 'alt' ) || '', title: '' } );
+		} );
+		return out;
+	}
+
+	/**
+	 * Galeries dans le contenu (TinyMCE) : bouton « Photos » (nouvelle
+	 * galerie, ou la galerie sélectionnée), clic sur une galerie pour en
+	 * changer les photos. Une galerie n'est pas éditable comme du texte.
+	 */
+	function setupGalleries( ed, changed ) {
+		function lock() {
+			Array.prototype.forEach.call( ed.dom.select( 'figure.wp-block-gallery' ), function ( figure ) {
+				figure.setAttribute( 'contenteditable', 'false' );
+			} );
+		}
+		function edit( figure ) {
+			openGalleryManager( galleryItemsFromFigure( figure ), function ( items ) {
+				ed.undoManager.transact( function () {
+					if ( items.length ) {
+						ed.dom.setOuterHTML( figure, galleryHtml( items ) );
+					} else {
+						ed.dom.remove( figure );
+					}
+				} );
+				lock();
+				ed.nodeChanged();
+				changed();
+			} );
+		}
+		function create() {
+			pickMedia( {
+				title: __( 'Add photos', 'leiho' ),
+				button: { text: __( 'Create the gallery', 'leiho' ) },
+				multiple: 'add',
+				library: { type: 'image' },
+			} ).then( function ( attachments ) {
+				if ( ! attachments || ! attachments.length ) {
+					return;
+				}
+				ed.focus();
+				ed.undoManager.transact( function () {
+					ed.insertContent( galleryHtml( attachments.map( galleryItemFromAttachment ) ) + '<p></p>' );
+				} );
+				lock();
+				changed();
+			} );
+		}
+
+		ed.addButton( 'leihogallery', {
+			icon: 'gallery',
+			text: __( 'Photos', 'leiho' ),
+			tooltip: __( 'Add a photo gallery', 'leiho' ),
+			onclick: function () {
+				var current = ed.dom.getParent( ed.selection.getNode(), 'figure.wp-block-gallery' );
+				if ( current ) {
+					edit( current );
+				} else {
+					create();
+				}
+			},
+		} );
+		ed.on( 'click', function ( event ) {
+			var figure = ed.dom.getParent( event.target, 'figure.wp-block-gallery' );
+			if ( figure ) {
+				event.preventDefault();
+				edit( figure );
+			}
+		} );
+		ed.on( 'SetContent', lock );
+		// Le HTML enregistré ne garde pas le verrou d'édition.
+		ed.on( 'PreProcess', function ( event ) {
+			Array.prototype.forEach.call( event.node.querySelectorAll( 'figure.wp-block-gallery[contenteditable]' ), function ( figure ) {
+				figure.removeAttribute( 'contenteditable' );
+			} );
+		} );
 	}
 
 	function buildLink( ctx, id ) {
@@ -3922,7 +4302,7 @@
 		renderInspector();
 		renderStructure();
 		if ( state.post ) {
-			loadFrame( state.post.preview_url );
+			loadFrame( postFrameUrl() );
 		}
 		setButtons();
 	}
@@ -4031,7 +4411,7 @@
 					state.structureStale = false;
 				} else if ( needsReload ) {
 					state.structureStale = false;
-					loadFrame( state.post.preview_url );
+					loadFrame( postFrameUrl() );
 				} else {
 					hydrateFrame();
 				}

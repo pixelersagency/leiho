@@ -50,7 +50,15 @@ class Leiho_Schema {
 			);
 		}
 
+		// Pas encore sur le site : montré dans la page d'un contenu publié.
+		$stand_in = $mapper->stand_in( $post );
+
 		return array(
+			'stand_in'    => $stand_in ? array(
+				'id'          => (int) $stand_in->ID,
+				'title'       => Leiho_Plugin::title( $stand_in ),
+				'preview_url' => $mapper->preview_url( $stand_in ),
+			) : null,
 			'i18n'        => $i18n,
 			'post_id'     => (int) $post_id,
 			'revision'    => self::revision( $post_id ),

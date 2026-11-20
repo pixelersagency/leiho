@@ -1,5 +1,5 @@
 /*!
- * leiho-bridge v5 — standalone (auto-init).
+ * leiho-bridge v6 — standalone (auto-init).
  * Généré par bridge/build.js depuis src/index.js — ne pas éditer à la main.
  *
  * Chargement recommandé (le bridge ne sert qu'à l'éditeur) :
@@ -16,7 +16,7 @@
 	'use strict';
 
 	/**
-	 * leiho v5 — pont postMessage entre un site et l'éditeur Leiho.
+	 * leiho v6 — pont postMessage entre un site et l'éditeur Leiho.
 	 *
 	 * Fonctionne avec n'importe quel front : HTML statique, Astro, Next.js, Remix,
 	 * React (SPA ou rendu serveur), Vue/Nuxt, Svelte/SvelteKit.
@@ -37,6 +37,7 @@
 	 *   data-wp-post="12"              conteneur : ID du contenu WordPress
 	 *   data-wp-field="chemin"         élément éditable (chemins pointés : cartes.0.titre)
 	 *   data-leiho-apply="html"         la valeur est du HTML (balisage interne conservé)
+	 *   data-leiho-apply="gallery"      galerie : un enfant par image, sur le modèle du premier
 	 *   data-leiho-section="Libellé"    section logique (arbre de structure)
 	 *   data-leiho-layout="sections.2"  section portée par une ligne de flexible content
 	 *   data-leiho-refresh="save"       pas d'aperçu instantané, rechargement après enregistrement
@@ -56,7 +57,7 @@
 	 */
 
 	const NS = 'leiho';
-	const VERSION = 5;
+	const VERSION = 6;
 	const HOVER_CLASS = 'leiho-hover';
 	const MANAGED_CLASS = 'leiho-managed-hover';
 	const CLOAK_CLASS = 'leiho-cloak';
@@ -114,6 +115,17 @@
 
 		/** Valeurs d'aperçu en cours : "postId:path" -> { value, fieldType }. */
 		const overrides = new Map();
+
+		/**
+		 * Brouillon montré dans la page d'un autre contenu du même type (il n'a
+		 * pas encore de page sur le site) : id de la page modèle -> id du
+		 * brouillon. Réappliqué à chaque collecte (un re-render remet l'id
+		 * d'origine), oublié au changement de page.
+		 */
+		const adoptions = new Map();
+
+		/** Galerie -> modèle d'un élément (premier enfant d'origine). */
+		const galleryTemplates = new WeakMap();
 
 		/** Dernière collecte : champs et sections présents dans le DOM. */
 		let fields = new Map();
@@ -207,7 +219,17 @@
 			return { post: postIdOf( el ) || null, path: parts.slice( 0, -1 ).join( '.' ), index };
 		}
 
+		function applyAdoptions() {
+			adoptions.forEach( ( to, from ) => {
+				document.querySelectorAll( '[data-wp-post="' + from + '"]' ).forEach( ( el ) => {
+					el.setAttribute( 'data-wp-post', to );
+					el.setAttribute( 'data-leiho-adopted', from );
+				} );
+			} );
+		}
+
 		function collect() {
+			applyAdoptions();
 			const nextFields = new Map();
 			const nextSections = [];
 
@@ -379,8 +401,73 @@
 		 * @param {boolean} explicit  Valeur changée par l'utilisateur pendant cette
 		 *                            édition (fieldUpdate), pas seulement chargée.
 		 */
+		/** Élément de galerie par défaut quand la galerie du site est vide. */
+		function defaultGalleryItem( el ) {
+			const item = document.createElement( 'UL' === el.tagName || 'OL' === el.tagName ? 'li' : 'figure' );
+			const img = document.createElement( 'img' );
+			img.setAttribute( 'loading', 'lazy' );
+			img.setAttribute( 'alt', '' );
+			item.appendChild( img );
+			return item;
+		}
+
+		function fillGalleryItem( node, image ) {
+			const img = 'IMG' === node.tagName ? node : node.querySelector( 'img' );
+			if ( img ) {
+				img.setAttribute( 'src', safeUrl( image.url || '' ) );
+				img.removeAttribute( 'srcset' );
+				img.removeAttribute( 'sizes' );
+				img.setAttribute( 'alt', image.alt || '' );
+				[ 'width', 'height' ].forEach( ( dim ) => {
+					if ( image[ dim ] ) {
+						img.setAttribute( dim, String( Number( image[ dim ] ) || '' ) );
+					} else {
+						img.removeAttribute( dim );
+					}
+				} );
+			}
+			// Lien vers l'image (visionneuse du site) : vers la nouvelle image.
+			const link = 'A' === node.tagName ? node : node.querySelector( 'a[href]' );
+			if ( link && image.url ) {
+				link.setAttribute( 'href', safeUrl( image.url ) );
+			}
+			const caption = node.querySelector( 'figcaption' );
+			if ( caption ) {
+				setText( caption, image.caption || '' );
+			}
+			return node;
+		}
+
+		/**
+		 * Galerie : un enfant par image, cloné sur le premier enfant d'origine
+		 * (le balisage et les classes du site restent les siens).
+		 */
+		function applyGallery( el, value, explicit ) {
+			const images = ( Array.isArray( value ) ? value : [] ).filter( ( image ) => image && 'object' === typeof image );
+			// Jamais remplie : le site montre peut-être des images de repli.
+			if ( ! images.length && ! explicit ) {
+				return;
+			}
+			let template = galleryTemplates.get( el );
+			if ( ! template ) {
+				template = el.firstElementChild ? el.firstElementChild.cloneNode( true ) : defaultGalleryItem( el );
+				galleryTemplates.set( el, template );
+			}
+			const wanted = images.map( ( image ) => safeUrl( image.url || '' ) );
+			const current = [ ...el.children ].map( ( child ) => {
+				const img = 'IMG' === child.tagName ? child : child.querySelector( 'img' );
+				return img ? img.getAttribute( 'src' ) : null;
+			} );
+			if ( wanted.length === current.length && wanted.every( ( url, i ) => url === current[ i ] ) ) {
+				return; // Déjà à jour : pas de mutation, pas de boucle avec l'observateur.
+			}
+			el.replaceChildren( ...images.map( ( image ) => fillGalleryItem( template.cloneNode( true ), image ) ) );
+		}
+
 		function applyToElement( el, value, fieldType, explicit ) {
-			if ( 'image' === fieldType ) {
+			if ( 'gallery' === fieldType || 'gallery' === attr( el, 'apply' ) ) {
+				applyGallery( el, value, explicit );
+			} else if ( 'image' === fieldType ) {
 				const url = value && 'object' === typeof value ? value.url || '' : value || '';
 				// Champ jamais rempli : le front affiche souvent une image de repli
 				// (src, srcset ou fond CSS du gabarit). On n'y touche pas, sauf si
@@ -430,7 +517,11 @@
 				overrides.forEach( ( item, key ) => {
 					const entry = fields.get( key );
 					if ( entry && ! entry.refresh ) {
-						entry.els.forEach( ( el ) => applyToElement( el, item.value, item.fieldType, !! item.explicit ) );
+						// Page d'un autre contenu montrée pour un brouillon : ses images et
+						// galeries ne sont pas des images de repli, une valeur vide s'applique.
+						entry.els.forEach( ( el ) =>
+							applyToElement( el, item.value, item.fieldType, !! item.explicit || !! el.closest( '[data-leiho-adopted]' ) )
+						);
 					}
 				} );
 			} finally {
@@ -484,6 +575,7 @@
 					// précédente ne concernent plus rien.
 					currentUrl = window.location.href;
 					overrides.clear();
+					adoptions.clear();
 				}
 				collect();
 				applyOverrides();
@@ -626,6 +718,23 @@
 			} else if ( 'fieldUpdate' === data.type ) {
 				overrides.set( data.postId + ':' + data.path, { value: data.value, fieldType: data.fieldType, explicit: true } );
 				applyOverrides();
+			} else if ( 'ping' === data.type ) {
+				// L'éditeur n'a pas reçu notre annonce (chargement concurrent) : on la
+				// refait. Page encore en chargement : start() l'enverra.
+				if ( 'loading' === document.readyState ) {
+					return;
+				}
+				collect();
+				announce();
+			} else if ( 'adopt' === data.type ) {
+				const from = String( data.from );
+				const to = String( data.to );
+				if ( /^\d+$/.test( from ) && /^\d+$/.test( to ) && from !== to ) {
+					adoptions.set( from, to );
+					overrides.clear();
+					collect();
+					announce();
+				}
 			} else if ( 'focusField' === data.type ) {
 				const entry = fields.get( data.postId + ':' + data.path );
 				if ( entry && entry.els[ 0 ] ) {

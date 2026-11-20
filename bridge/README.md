@@ -70,7 +70,7 @@ import { field, block } from 'leiho';
 <section {...block(page, 'sections', i, 'Hero')}>…</section>
 ```
 
-`field(page, 'intro', { html: true })` adds `data-leiho-apply="html"`; `{ refresh: true }` adds `data-leiho-refresh="save"`. They are pure functions: use them in server components and at build time. In plain HTML, write the attributes below by hand.
+`field(page, 'intro', { html: true })` adds `data-leiho-apply="html"`; `{ gallery: true }` adds `data-leiho-apply="gallery"`; `{ refresh: true }` adds `data-leiho-refresh="save"`. They are pure functions: use them in server components and at build time. In plain HTML, write the attributes below by hand.
 
 ```html
 <main data-wp-post="12">
@@ -86,6 +86,7 @@ import { field, block } from 'leiho';
 | `data-wp-post="{id}"` | Container: WordPress post ID of the fields inside |
 | `data-wp-field="{path}"` | Editable element: ACF field name, `_title` or `_thumbnail`; dotted paths (`cards.0.title`, `contact.address`) reach into repeaters, flexible content and groups |
 | `data-leiho-apply="html"` | The value contains markup: inject filtered HTML instead of text |
+| `data-leiho-apply="gallery"` | Gallery field: one child per image; the preview rebuilds the children from the first one (its markup and classes are kept) |
 | `data-leiho-refresh="save"` | No live preview; the editor reloads the page after saving |
 | `data-leiho-section="Label"` | Names a section in the editor's Structure tree |
 | `data-leiho-layout="sections.2"` | Binds a section to a flexible content row, so editors can add, move, duplicate and remove it |
@@ -94,6 +95,23 @@ import { field, block } from 'leiho';
 | `data-leiho-edit-url="…"` | wp-admin screen where it's edited (ignored unless it's on the wp-admin origin) |
 
 **Always render annotated elements, even when their value is empty.** An element that isn't in the page can't be filled in live.
+
+### Galleries
+
+```astro
+---
+import 'leiho/gallery.css'; // optional default: automatic grid of squares
+---
+<ul class="leiho-gallery" {...field(page, 'photos', { gallery: true })}>
+  {page.fields.photos.map((photo) => <li><img src={photo.url} alt={photo.alt} loading="lazy" /></li>)}
+</ul>
+```
+
+`leiho/gallery.css` also styles WordPress's Gallery block (`.wp-block-gallery`) in a post body. Variables: `--leiho-gallery-min` (200px), `--leiho-gallery-gap`, `--leiho-gallery-radius`, `--leiho-gallery-ratio`.
+
+### Draft preview
+
+A draft has no page on a static site yet. The editor loads the page of a published entry of the same type and the bridge (version 6) re-binds it to the draft (`data-wp-post` is rewritten, empty values apply), so editors see the draft in the real layout before publishing. Nothing to do on your side.
 
 Header, footer and `<section>` elements are detected as sections automatically; explicit `data-leiho-section` / `data-leiho-layout` annotations take precedence.
 

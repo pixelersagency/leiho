@@ -1188,6 +1188,55 @@ body > .screen-reader-text[role="status"] {
 	padding: 4px;
 }
 
+/* Glisser-déposer pour réordonner. */
+.leiho-gallery-item[draggable="true"] {
+	cursor: grab;
+}
+
+.leiho-gallery-item.is-dragging {
+	opacity: 0.4;
+}
+
+.leiho-gallery-item.is-drop-target {
+	outline: 2px solid var(--leiho-accent, #86c400);
+	outline-offset: 1px;
+}
+
+/* Gestionnaire de photos dans une fenêtre : plus de colonnes. */
+.leiho-dialog .leiho-gallery-editor {
+	margin-top: 14px;
+}
+
+.leiho-dialog .leiho-gallery-grid {
+	grid-template-columns: repeat( auto-fill, minmax( 120px, 1fr ) );
+	max-height: 60vh;
+	overflow: auto;
+}
+
+/* Aperçu d'un brouillon dans la page d'un autre contenu. */
+.leiho-standin-bar {
+	position: absolute;
+	bottom: 12px;
+	left: 50%;
+	z-index: 3;
+	transform: translateX( -50% );
+	width: max-content;
+	max-width: calc( 100% - 24px );
+	padding: 7px 14px;
+	border-radius: 999px;
+	background: var(--leiho-ink, #171717);
+	color: var(--leiho-surface, #ffffff);
+	box-shadow: var(--leiho-shadow);
+	font-size: 12.5px;
+	line-height: 1.4;
+	text-align: center;
+	pointer-events: none;
+}
+
+.leiho-standin-bar[hidden] {
+	display: none;
+}
+
 /* Lien, relations, groupes. */
 .leiho-link-field {
 	display: grid;

@@ -199,14 +199,15 @@ import { field, block } from 'leiho';
 <section {...block(page, 'sections', i, 'Hero')}>…</section>
 ```
 
-`field(page, 'intro', { html: true })` ajoute `data-leiho-apply="html"` ; `{ refresh: true }` ajoute `data-leiho-refresh="save"`. En HTML ou dans des gabarits serveur, écrivez à la main les attributs ci-dessous.
+`field(page, 'intro', { html: true })` ajoute `data-leiho-apply="html"` ; `{ gallery: true }` ajoute `data-leiho-apply="gallery"` (voir [Galeries](#galeries)) ; `{ refresh: true }` ajoute `data-leiho-refresh="save"`. En HTML ou dans des gabarits serveur, écrivez à la main les attributs ci-dessous.
 
 | Attribut | Rôle |
 |---|---|
 | `data-wp-post="12"` | Conteneur : ID du contenu WordPress des champs qu'il contient |
-| `data-wp-field="hero_titre"` | Élément modifiable : nom du champ ACF, ou `_title` / `_thumbnail` |
+| `data-wp-field="hero_titre"` | Élément modifiable : nom du champ ACF, ou `_title` / `_thumbnail` / `_content` (le corps de l'article, avec `data-leiho-apply="html"`) |
 | `data-wp-field="cartes.0.titre"` | Les chemins pointés atteignent repeaters, contenu flexible et groupes |
 | `data-leiho-apply="html"` | La valeur contient du balisage : injectée en HTML filtré plutôt qu'en texte |
+| `data-leiho-apply="gallery"` | Un champ galerie : un enfant par image, refait en direct sur le modèle du premier |
 | `data-leiho-refresh="save"` | Pas d'aperçu en direct ; la page est rechargée après l'enregistrement |
 | `data-leiho-section="Hero"` | Nomme une section dans l'arbre de structure |
 | `data-leiho-layout="sections.2"` | Lie une section à une ligne de contenu flexible : ajout, déplacement, duplication, suppression |
@@ -214,6 +215,30 @@ import { field, block } from 'leiho';
 | `data-leiho-edit-url="…"` | L'écran wp-admin où modifier ce contenu géré |
 
 **Une seule règle :** affichez toujours un élément annoté, même quand sa valeur est vide. `{titre && <h2 data-wp-field="titre">…}` empêche l'édition en direct : un élément absent de la page ne peut pas être rempli.
+
+### Galeries
+
+L'éditeur ajoute plusieurs photos d'un coup (dans n'importe quel ordre), les réordonne en les faisant glisser et en retire. Aucun réglage de mise en page : c'est le site qui décide du rendu.
+
+**Dans le corps d'un article** (`_content`), le bouton **Photos** de l'éditeur de contenu crée une galerie à l'endroit du curseur ; un clic sur une galerie permet d'en changer les photos. Elle est enregistrée comme le bloc Galerie de WordPress (`core/gallery`, un `core/image` par photo) : l'éditeur de blocs l'ouvre comme une galerie ordinaire, et une galerie faite dans l'éditeur de blocs se modifie dans Leiho. Un article classique qui reçoit une galerie est enregistré en blocs. L'API de contenu sert le bloc rendu : `figure.wp-block-gallery > figure.wp-block-image > img` (+ `figcaption` s'il y a une légende).
+
+Pour modifier le corps dans l'éditeur visuel, annotez-le : `<div {...field(article, '_content', { html: true })} set:html={article.content} />`.
+
+**Un champ galerie** (`gallery` d'ACF / SCF, ou de Leiho Collections) est servi comme une liste d'images, dans l'ordre choisi, chacune au format d'un champ image : `{ id, url, alt, title, mime, width, height, sizes }`. Affichez un enfant par image dans un conteneur annoté ; l'aperçu le refait en direct sur le modèle du premier enfant :
+
+```astro
+<ul class="leiho-gallery" {...field(page, 'photos', { gallery: true })}>
+  {page.fields.photos.map((photo) => (
+    <li><img src={photo.sizes.large?.url ?? photo.url} alt={photo.alt} width={photo.width} height={photo.height} loading="lazy" /></li>
+  ))}
+</ul>
+```
+
+**Rendu par défaut** : `import 'leiho/gallery.css'` (ou une copie) donne aux deux galeries une grille automatique de carrés, autant de colonnes que la largeur le permet (200 px minimum), et garde une photo seule à son format. Variables : `--leiho-gallery-min`, `--leiho-gallery-gap`, `--leiho-gallery-radius`, `--leiho-gallery-ratio` ; ou écrivez votre propre CSS pour `.leiho-gallery` et `.wp-block-gallery`.
+
+### Aperçu des brouillons
+
+Un brouillon (ou un contenu en attente, programmé ou privé) n'a pas encore de page sur le site, surtout un site statique. L'éditeur le montre dans la page du dernier contenu publié du même type, avec les valeurs du brouillon, et l'indique. Ce qui ne vient pas du contenu (une date non annotée, une liste d'articles récents) reste celui de cette page. Une page n'emprunte que la page d'une autre page du même modèle. Le filtre `leiho_preview_stand_in` choisit une autre page, ou `null` si le front affiche les brouillons à leur propre adresse. Demande le bridge 6. Le corps d'un article est prévisualisé tel que WordPress le rendra (blocs, galeries, embeds).
 
 ## Modes de mise en ligne
 

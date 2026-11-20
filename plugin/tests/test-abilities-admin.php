@@ -62,7 +62,24 @@ function absint( $v ) { return abs( (int) $v ); }
 function esc_url_raw( $v ) { $v = trim( (string) $v ); return preg_match( '#^https?://#', $v ) ? $v : ''; }
 function untrailingslashit( $v ) { return rtrim( (string) $v, '/\\' ); }
 function trailingslashit( $v ) { return untrailingslashit( $v ) . '/'; }
-function get_post_types( $args = array(), $out = 'names' ) { return array( 'page' => 'page', 'post' => 'post', 'service' => 'service' ); }
+function get_post_types( $args = array(), $out = 'names' ) {
+	$types = array(
+		'page'           => (object) array( 'name' => 'page', 'public' => true, 'show_ui' => true, '_builtin' => true ),
+		'post'           => (object) array( 'name' => 'post', 'public' => true, 'show_ui' => true, '_builtin' => true ),
+		'service'        => (object) array( 'name' => 'service', 'public' => true, 'show_ui' => true, '_builtin' => false ),
+		// Type interne : écran dans wp-admin, pas public (affiché par le front seulement).
+		'temoignage'     => (object) array( 'name' => 'temoignage', 'public' => false, 'show_ui' => true, '_builtin' => false ),
+		'attachment'     => (object) array( 'name' => 'attachment', 'public' => true, 'show_ui' => true, '_builtin' => true ),
+		'acf-field'      => (object) array( 'name' => 'acf-field', 'public' => false, 'show_ui' => true, '_builtin' => false ),
+		'wp_block'       => (object) array( 'name' => 'wp_block', 'public' => false, 'show_ui' => true, '_builtin' => true ),
+		'revision'       => (object) array( 'name' => 'revision', 'public' => false, 'show_ui' => false, '_builtin' => true ),
+	);
+	if ( ! empty( $args['public'] ) ) {
+		$types = array_filter( $types, function ( $t ) { return $t->public; } );
+	}
+	return 'objects' === $out ? $types : array_combine( array_keys( $types ), array_keys( $types ) );
+}
+function post_type_exists( $t ) { return array_key_exists( $t, get_post_types( array(), 'names' ) ); }
 function wp_parse_url( $u, $c = -1 ) { return parse_url( $u, $c ); }
 function admin_url( $p = '' ) { return 'https://cms.test/wp-admin/' . $p; }
 function rest_url( $p = '' ) { return 'https://cms.test/wp-json/' . $p; }
@@ -314,6 +331,9 @@ try {
 }
 $saved = get_option( 'leiho_settings' );
 check( 'formulaire : redirection vers les réglages', false !== strpos( $redirect, 'view=settings' ) );
+check( 'types proposés : publics et internes, sans types techniques', array( 'page', 'post', 'service', 'temoignage' ) === array_keys( Leiho_Admin::content_post_types() ), array_keys( Leiho_Admin::content_post_types() ) );
+$kept = Leiho_Admin::sanitize_settings( array( 'post_types' => array( 'page', 'temoignage', 'acf-field' ) ), Leiho_Plugin::settings() );
+check( 'réglages : type interne gardé, type technique refusé', array( 'page', 'temoignage' ) === $kept['post_types'], $kept['post_types'] );
 check( 'formulaire : validation inchangée', 'https://form.test' === $saved['front_url'] && array( 'page' ) === $saved['post_types'] && array( 'page' => '/{slug}' ) === $saved['url_patterns'] && '' === $saved['deploy_driver'] && true === $saved['auto_deploy'], $saved );
 check( 'formulaire : champs absents = vides / décochés, comme avant', '' === $saved['gh_workflow'] && false === $saved['content_cache'] && 3 === $saved['build_hook_eta'] && 'public' === $saved['content_access'] && 'kept' === $saved['extra_key'], $saved );
 check( 'formulaire : secret remplacé (espaces retirés)', $pat . '2' === Leiho_Secrets::get( 'gh_pat' ) );

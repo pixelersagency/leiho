@@ -180,6 +180,17 @@ $values = array( '_content' => '<p>écrasé</p>' );
 $r      = Leiho_Native_Fields::prepare( $blocks, $values );
 check( 'contenu en blocs courants : réécrit en blocs', 'BLOCKS(<p>écrasé</p>)' === ( $r['postarr']['post_content'] ?? '' ) && empty( $r['errors'] ), $r );
 
+// Galerie ajoutée à un contenu classique : le contenu passe en blocs.
+$classic = post( 13, 'post', array( 'post_content' => "Texte classique" ) );
+$gallery = '<p>Photos</p><figure class="wp-block-gallery has-nested-images columns-default is-cropped"><figure class="wp-block-image size-large"><img src="/7.jpg" alt="" class="wp-image-7" /></figure></figure>';
+$values  = array( '_content' => $gallery );
+$r       = Leiho_Native_Fields::prepare( $classic, $values );
+check( 'galerie dans un contenu classique : enregistré en blocs', 0 === strpos( $r['postarr']['post_content'] ?? '', 'BLOCKS(' ) && empty( $r['errors'] ), $r );
+$values = array( '_content' => '<p>Sans galerie</p><figure class="wp-block-image"><img src="/7.jpg" class="wp-image-7" /></figure>' );
+$r      = Leiho_Native_Fields::prepare( $classic, $values );
+check( 'contenu classique sans galerie : reste classique', 0 !== strpos( $r['postarr']['post_content'] ?? '', 'BLOCKS(' ), $r );
+check( 'has_gallery : classe parmi d’autres, guillemets simples', Leiho_Native_Fields::has_gallery( "<figure class='x wp-block-gallery'>" ) && ! Leiho_Native_Fields::has_gallery( '<div class="wp-block-gallery">' ) && ! Leiho_Native_Fields::has_gallery( null ) );
+
 $columns = post( 12, 'post', array( 'post_content' => "<!-- wp:columns -->\n<div class=\"wp-block-columns\"></div>\n<!-- /wp:columns -->" ) );
 $values  = array( '_content' => '<p>écrasé</p>' );
 $r       = Leiho_Native_Fields::prepare( $columns, $values );

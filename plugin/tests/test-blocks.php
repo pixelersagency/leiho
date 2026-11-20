@@ -94,5 +94,38 @@ check( 'contenu mixte modifié : tableau intact, paragraphe modifié', false !==
 check( 'encadré supprimé : bloc retiré', false === strpos( Leiho_Blocks::from_html( '<p>Avant.</p>', $mixed ), 'wp:table' ) );
 check( 'rang inventé : ignoré', false === strpos( Leiho_Blocks::from_html( '<div data-leiho-block="99">x</div><div data-leiho-block="1">x</div>', $mixed ), '<!--' ) );
 
+// Galerie de l'éditeur de blocs (format imbriqué, WordPress 5.9+).
+$gal = "<!-- wp:paragraph -->\n<p>Photos :</p>\n<!-- /wp:paragraph -->\n\n"
+	. "<!-- wp:gallery {\"columns\":2,\"linkTo\":\"none\"} -->\n<figure class=\"wp-block-gallery has-nested-images columns-2 is-cropped\">"
+	. "<!-- wp:image {\"id\":7,\"sizeSlug\":\"large\",\"linkDestination\":\"none\"} -->\n<figure class=\"wp-block-image size-large\"><img src=\"/7.jpg\" alt=\"Sept\" class=\"wp-image-7\"/></figure>\n<!-- /wp:image -->\n\n"
+	. "<!-- wp:image {\"id\":8,\"sizeSlug\":\"large\",\"linkDestination\":\"none\"} -->\n<figure class=\"wp-block-image size-large\"><img src=\"/8.jpg\" alt=\"\" class=\"wp-image-8\"/></figure>\n<!-- /wp:image -->"
+	. "<figcaption class=\"blocks-gallery-caption wp-element-caption\">Sortie</figcaption></figure>\n<!-- /wp:gallery -->";
+check( 'galerie : éditable', array() === Leiho_Blocks::unsupported( $gal ), Leiho_Blocks::unsupported( $gal ) );
+$html = Leiho_Blocks::to_html( $gal );
+check( 'galerie : HTML sans commentaires, figures gardées', false === strpos( $html, '<!--' ) && false !== strpos( $html, '<figure class="wp-block-gallery' ) && 2 === substr_count( $html, 'wp-block-image' ), $html );
+check( 'galerie : aller-retour identique (réglages gardés)', $gal === Leiho_Blocks::from_html( $html, $gal ), Leiho_Blocks::from_html( $html, $gal ) );
+
+// Ordre changé, une image retirée, une ajoutée : nouvelle galerie Leiho.
+$edited = '<p>Photos :</p><figure class="wp-block-gallery has-nested-images columns-default is-cropped">'
+	. '<figure class="wp-block-image size-large"><img src="/9.jpg" alt="Neuf" class="wp-image-9"/></figure>'
+	. '<figure class="wp-block-image size-large"><img src="/7.jpg" alt="Sept" class="wp-image-7"/></figure></figure>';
+$out = Leiho_Blocks::from_html( $edited, $gal );
+check( 'galerie modifiée : bloc galerie sans réglage de colonnes', false !== strpos( $out, '<!-- wp:gallery {"linkTo":"none"} --><figure class="wp-block-gallery has-nested-images columns-default is-cropped">' ), $out );
+check( 'galerie modifiée : images dans le nouvel ordre', strpos( $out, 'wp-image-9' ) < strpos( $out, 'wp-image-7' ) && false === strpos( $out, 'wp-image-8' ) );
+check( 'galerie modifiée : blocs image intérieurs', false !== strpos( $out, '<!-- wp:image {"id":9,"sizeSlug":"large","linkDestination":"none"} --><figure class="wp-block-image size-large"><img src="/9.jpg" alt="Neuf" class="wp-image-9"/></figure><!-- /wp:image -->' ), $out );
+check( 'galerie modifiée : relue comme galerie éditable', array() === Leiho_Blocks::unsupported( $out ) && 2 === count( array_values( array_filter( parse_blocks( $out ), function ( $b ) { return 'core/gallery' === $b['blockName']; } ) )[0]['innerBlocks'] ), $out );
+check( 'galerie modifiée : légende de galerie', false !== strpos( Leiho_Blocks::from_html( str_replace( '</figure></figure>', '</figure><figcaption>Fête</figcaption></figure>', $edited ), $gal ), '<figcaption class="blocks-gallery-caption wp-element-caption">Fête</figcaption></figure><!-- /wp:gallery -->' ) );
+
+// Images entourées de paragraphes (wpautop) : toujours une galerie.
+$autop = "<figure class=\"wp-block-gallery has-nested-images columns-default is-cropped\">\n<figure class=\"wp-block-image size-large\">\n<p><img src=\"/7.jpg\" alt=\"\" class=\"wp-image-7\"/></p>\n</figure>\n<p><figure class=\"wp-block-image size-large\"><img src=\"/8.jpg\" alt=\"\" class=\"wp-image-8\"/></figure></p>\n</figure>";
+$out   = Leiho_Blocks::from_html( $autop, '' );
+check( 'galerie passée par wpautop : bloc galerie à deux images', false !== strpos( $out, '<!-- wp:gallery' ) && 2 === substr_count( $out, '<!-- wp:image' ) && false === strpos( $out, '<p>' ), $out );
+
+// Image hors médiathèque dans une galerie : pas d'équivalent sûr, HTML libre.
+$foreign = '<figure class="wp-block-gallery"><figure class="wp-block-image"><img src="https://ailleurs.example/x.jpg" alt=""/></figure></figure>';
+check( 'galerie avec image externe : HTML libre', false === strpos( Leiho_Blocks::from_html( $foreign, '' ), 'wp:gallery' ) );
+// Galerie dont une image porte un bloc intérieur inattendu : verrouillée.
+check( 'galerie avec bloc inattendu : non éditable', array( 'core/paragraph' ) === Leiho_Blocks::unsupported( '<!-- wp:gallery --><figure class="wp-block-gallery"><!-- wp:paragraph --><p>x</p><!-- /wp:paragraph --></figure><!-- /wp:gallery -->' ) );
+
 echo $failures ? "\nÉCHECS.\n" : "\nTOUS LES TESTS PASSENT\n";
 exit( $failures ? 1 : 0 );

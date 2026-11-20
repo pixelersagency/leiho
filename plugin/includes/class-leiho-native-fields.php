@@ -41,6 +41,35 @@ class Leiho_Native_Fields {
 	}
 
 	/**
+	 * post_content à enregistrer pour le HTML édité dans Leiho.
+	 *
+	 * L'éditeur envoie le format classique (paragraphes implicites). Un
+	 * contenu en blocs reste en blocs. Une galerie n'a de forme sûre qu'en
+	 * blocs (wpautop casserait ses figures au rendu) : un contenu classique
+	 * qui en reçoit une passe en blocs, comme l'éditeur de blocs le ferait.
+	 *
+	 * @param WP_Post $post Post.
+	 * @param string  $html HTML édité.
+	 * @return string
+	 */
+	public static function content_to_store( $post, $html ) {
+		if ( self::has_blocks( $post->post_content ) || self::has_gallery( $html ) ) {
+			return Leiho_Blocks::from_html( self::filter_html( wpautop( $html ) ), $post->post_content );
+		}
+		return self::filter_html( $html );
+	}
+
+	/**
+	 * Le HTML édité contient-il une galerie (figure.wp-block-gallery) ?
+	 *
+	 * @param mixed $html HTML reçu.
+	 * @return bool
+	 */
+	public static function has_gallery( $html ) {
+		return is_string( $html ) && (bool) preg_match( '/<figure\b[^>]*\bclass\s*=\s*["\'][^"\']*\bwp-block-gallery\b/i', $html );
+	}
+
+	/**
 	 * Taxonomies proposées pour un type : publiques et avec une interface.
 	 *
 	 * @param string $post_type Type.
@@ -358,11 +387,8 @@ class Leiho_Native_Fields {
 						$error = 'unknown_field';
 					} elseif ( ! is_string( $value ) ) {
 						$error = 'invalid';
-					} elseif ( self::has_blocks( $post->post_content ) ) {
-						// L'éditeur envoie le format classique (paragraphes implicites).
-						$postarr['post_content'] = Leiho_Blocks::from_html( self::filter_html( wpautop( $value ) ), $post->post_content );
 					} else {
-						$postarr['post_content'] = self::filter_html( $value );
+						$postarr['post_content'] = self::content_to_store( $post, $value );
 					}
 					break;
 

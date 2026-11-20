@@ -41,13 +41,17 @@ function withPost( entry ) {
  * @param {string}               path    Chemin du champ : 'hero_title', 'cards.0.title', '_title', '_thumbnail'.
  * @param {object}               [options]
  * @param {boolean}              [options.html]    La valeur contient du balisage (injectée en HTML filtré).
+ * @param {boolean}              [options.gallery] Galerie : l'élément contient un enfant par image (aperçu en direct
+ *                                                 sur le modèle du premier enfant).
  * @param {boolean|string}       [options.refresh] Pas d'aperçu en direct : la page est rechargée après l'enregistrement.
  * @param {string}               [options.style]   Champ couleur : propriété CSS à modifier (défaut : color).
  * @returns {Record<string,string>}
  */
 export function field( entry, path, options = {} ) {
 	const attrs = { ...withPost( entry ), 'data-wp-field': String( path ) };
-	if ( options.html ) {
+	if ( options.gallery ) {
+		attrs[ 'data-leiho-apply' ] = 'gallery';
+	} else if ( options.html ) {
 		attrs[ 'data-leiho-apply' ] = 'html';
 	}
 	if ( options.refresh ) {

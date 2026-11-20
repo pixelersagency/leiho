@@ -688,11 +688,41 @@ class Leiho_Admin {
 	 * @param array $settings Réglages actuels (clés hors formulaire gardées).
 	 * @return array
 	 */
+	/**
+	 * Types de contenu qu'on peut confier à Leiho : les types publics, et les
+	 * types internes qui ont un écran dans wp-admin (show_ui) sans être
+	 * publics (contenus affichés par le front seulement : témoignages,
+	 * partenaires…). Pas les types techniques de WordPress ni des extensions
+	 * de champs.
+	 *
+	 * @return WP_Post_Type[] Nom => type.
+	 */
+	public static function content_post_types() {
+		$out = array();
+		foreach ( get_post_types( array(), 'objects' ) as $name => $type ) {
+			if ( 'attachment' === $name || 0 === strpos( $name, 'wp_' ) || 0 === strpos( $name, 'acf-' ) || 0 === strpos( $name, 'scf-' ) ) {
+				continue;
+			}
+			if ( ! empty( $type->public ) || ( ! empty( $type->show_ui ) && empty( $type->_builtin ) ) ) {
+				$out[ $name ] = $type;
+			}
+		}
+		return $out;
+	}
+
 	public static function sanitize_settings( array $input, array $settings ) {
 		$settings['front_url']   = esc_url_raw( isset( $input['front_url'] ) ? untrailingslashit( trim( $input['front_url'] ) ) : '' );
 		$settings['preview_url'] = esc_url_raw( isset( $input['preview_url'] ) ? untrailingslashit( trim( $input['preview_url'] ) ) : '' );
 
-		$public_types           = get_post_types( array( 'public' => true ), 'names' );
+		// Types proposés dans le formulaire, plus ceux déjà choisis qui existent
+		// encore : un type interne (témoignages, partenaires…) cochable ou
+		// ajouté avant n'est pas retiré en silence à l'enregistrement.
+		$public_types = array_keys( self::content_post_types() );
+		foreach ( isset( $settings['post_types'] ) ? (array) $settings['post_types'] : array() as $kept ) {
+			if ( is_string( $kept ) && post_type_exists( $kept ) && ! in_array( $kept, $public_types, true ) ) {
+				$public_types[] = $kept;
+			}
+		}
 		$requested_types        = isset( $input['post_types'] ) && is_array( $input['post_types'] ) ? $input['post_types'] : array();
 		$settings['post_types'] = array_values( array_intersect( $requested_types, $public_types ) );
 		if ( empty( $settings['post_types'] ) ) {

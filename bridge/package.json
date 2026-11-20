@@ -43,7 +43,8 @@
 		},
 		"./ai-ready": {
 			"import": "./src/ai-ready.js"
-		}
+		},
+		"./gallery.css": "./gallery.css"
 	},
 	"scripts": {
 		"build": "node build.js",
@@ -53,9 +54,12 @@
 		"src",
 		"dist",
 		"bin",
+		"gallery.css",
 		"README.md"
 	],
-	"sideEffects": false,
+	"sideEffects": [
+		"*.css"
+	],
 	"repository": {
 		"type": "git",
 		"url": "git+https://github.com/pixelersagency/leiho.git",

@@ -153,6 +153,61 @@ class Leiho_Url_Mapper {
 	}
 
 	/**
+	 * Page modèle d'un contenu qui n'est pas encore sur le site (brouillon,
+	 * en attente, programmé) : un contenu publié du même type, le plus
+	 * récent, dans la page duquel l'éditeur montre le brouillon (le bridge
+	 * rattache la page au brouillon et y applique ses valeurs).
+	 *
+	 * Type hiérarchique (pages) : seulement une page de même modèle de page,
+	 * hors modèle par défaut (deux pages n'ont sinon aucune raison de partager
+	 * une mise en page). Aucune page modèle : null, l'éditeur charge
+	 * l'adresse du brouillon.
+	 *
+	 * @param WP_Post $post Post.
+	 * @return WP_Post|null
+	 */
+	public function stand_in( $post ) {
+		$stand_in = null;
+		if ( 'publish' !== $post->post_status ) {
+			$args = array(
+				'post_type'        => $post->post_type,
+				'post_status'      => 'publish',
+				'posts_per_page'   => 1,
+				'orderby'          => 'date',
+				'order'            => 'DESC',
+				'post__not_in'     => array_filter( array( (int) $post->ID, (int) get_option( 'page_on_front' ) ) ),
+				'no_found_rows'    => true,
+				'suppress_filters' => false,
+			);
+			$object = get_post_type_object( $post->post_type );
+			if ( $object && ! empty( $object->hierarchical ) ) {
+				$template = (string) get_post_meta( $post->ID, '_wp_page_template', true );
+				if ( '' === $template || 'default' === $template ) {
+					$args = null;
+				} else {
+					$args['meta_key']   = '_wp_page_template'; // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key
+					$args['meta_value'] = $template; // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_value
+				}
+			}
+			if ( $args ) {
+				$found    = get_posts( $args );
+				$stand_in = $found ? $found[0] : null;
+			}
+		}
+
+		/**
+		 * Page modèle dans laquelle l'éditeur montre un contenu qui n'est pas
+		 * encore sur le site. null : aucune (un front qui sait afficher les
+		 * brouillons à leur propre adresse, par exemple).
+		 *
+		 * @param WP_Post|null $stand_in Contenu publié choisi.
+		 * @param WP_Post      $post     Contenu édité.
+		 */
+		$stand_in = apply_filters( 'leiho_preview_stand_in', $stand_in, $post );
+		return $stand_in instanceof WP_Post && (int) $stand_in->ID !== (int) $post->ID && 'publish' === $stand_in->post_status ? $stand_in : null;
+	}
+
+	/**
 	 * Origin (scheme + host [+ port]) de l'URL chargée dans l'iframe,
 	 * pour la vérification postMessage côté admin.
 	 *

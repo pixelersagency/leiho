@@ -280,11 +280,7 @@ abstract class Leiho_Field_Adapter implements Leiho_Adapter_Interface, Leiho_Con
 						continue;
 					}
 					$ids[]   = $id;
-					$items[] = array(
-						'id'    => $id,
-						'url'   => (string) wp_get_attachment_image_url( $id, 'medium' ),
-						'title' => Leiho_Plugin::title( $id ),
-					);
+					$items[] = self::gallery_item( $id );
 				}
 				return array(
 					'value' => $ids,
@@ -1237,5 +1233,26 @@ abstract class Leiho_Field_Adapter implements Leiho_Adapter_Interface, Leiho_Con
 			return false === strpos( $value, '<' ) ? $value : wp_kses_post( $value );
 		}
 		return is_scalar( $value ) || null === $value ? $value : null;
+	}
+
+	/**
+	 * Image d'une galerie pour l'éditeur : vignette du panneau (url), image
+	 * de l'aperçu en direct (preview, taille large) et ce que le site en
+	 * affiche (alt, dimensions).
+	 *
+	 * @param int $id Pièce jointe.
+	 * @return array
+	 */
+	public static function gallery_item( $id ) {
+		$large = function_exists( 'wp_get_attachment_image_src' ) ? wp_get_attachment_image_src( $id, 'large' ) : false;
+		return array(
+			'id'      => (int) $id,
+			'url'     => (string) wp_get_attachment_image_url( $id, 'medium' ),
+			'title'   => Leiho_Plugin::title( $id ),
+			'alt'     => function_exists( 'get_post_meta' ) ? (string) get_post_meta( $id, '_wp_attachment_image_alt', true ) : '',
+			'preview' => $large ? (string) $large[0] : '',
+			'width'   => $large ? (int) $large[1] : 0,
+			'height'  => $large ? (int) $large[2] : 0,
+		);
 	}
 }

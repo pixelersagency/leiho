@@ -6,7 +6,8 @@ defined( 'ABSPATH' ) || exit;
  * dans WordPress.
  *
  * Leiho édite du HTML (TinyMCE). Le contenu d'un article fait de blocs
- * courants (paragraphes, titres, listes, citations, images, séparateurs)
+ * courants (paragraphes, titres, listes, citations, images, galeries,
+ * séparateurs)
  * passe en HTML sans ses commentaires de blocs ; à l'enregistrement, le
  * HTML redevient des blocs :
  *
@@ -27,10 +28,13 @@ defined( 'ABSPATH' ) || exit;
 class Leiho_Blocks {
 
 	/** Blocs qui se convertissent sans perte, au premier niveau. */
-	const TOP = array( 'core/paragraph', 'core/heading', 'core/list', 'core/quote', 'core/image', 'core/separator' );
+	const TOP = array( 'core/paragraph', 'core/heading', 'core/list', 'core/quote', 'core/image', 'core/gallery', 'core/separator' );
 
 	/** Blocs admis à l'intérieur d'une liste ou d'une citation. */
 	const INNER = array( 'core/list-item', 'core/list', 'core/paragraph', 'core/heading' );
+
+	/** Classes du bloc Galerie écrit par Leiho (celles de l'éditeur de blocs par défaut). */
+	const GALLERY_CLASS = 'wp-block-gallery has-nested-images columns-default is-cropped';
 
 	/**
 	 * Blocs du contenu qu'on ne sait pas convertir (vide : éditable).
@@ -52,17 +56,19 @@ class Leiho_Blocks {
 	 * @param array $out   Noms refusés.
 	 * @return void
 	 */
-	private static function collect( array $block, $top, array &$out ) {
+	private static function collect( array $block, $top, array &$out, $parent = '' ) {
 		$name = $block['blockName'];
 		if ( null === $name ) {
 			return; // HTML libre (bloc Classique) ou espaces : éditable.
 		}
-		if ( ! in_array( $name, $top ? self::TOP : self::INNER, true ) ) {
+		// Une galerie ne contient que des images (sans blocs intérieurs).
+		$allowed = 'core/gallery' === $parent ? array( 'core/image' ) : ( $top ? self::TOP : self::INNER );
+		if ( ! in_array( $name, $allowed, true ) || ( 'core/gallery' === $parent && $block['innerBlocks'] ) ) {
 			$out[] = $name;
 			return;
 		}
 		foreach ( $block['innerBlocks'] as $inner ) {
-			self::collect( $inner, false, $out );
+			self::collect( $inner, false, $out, $name );
 		}
 	}
 
@@ -341,6 +347,10 @@ class Leiho_Blocks {
 			case 'hr':
 				return self::make( 'core/separator', array(), '<hr class="wp-block-separator has-alpha-channel-opacity"/>' );
 			case 'figure':
+				if ( preg_match( '/(^|\s)wp-block-gallery(\s|$)/', (string) $node->getAttribute( 'class' ) ) ) {
+					return self::gallery( $node );
+				}
+				return self::image( $node );
 			case 'img':
 				return self::image( $node );
 			case 'strong':
@@ -561,7 +571,9 @@ class Leiho_Blocks {
 		$id   = (int) $m[1];
 		$src  = (string) $img->getAttribute( 'src' );
 		$alt  = (string) $img->getAttribute( 'alt' );
-		$size = preg_match( '/\bsize-([a-z0-9_-]+)\b/', (string) $img->getAttribute( 'class' ), $s ) ? $s[1] : 'full';
+		// Taille : classe de l'image (éditeur classique) ou de sa figure (éditeur de blocs).
+		$class = (string) $img->getAttribute( 'class' ) . ( $img !== $node ? ' ' . (string) $node->getAttribute( 'class' ) : '' );
+		$size  = preg_match( '/\bsize-([a-z0-9_-]+)\b/', $class, $s ) ? $s[1] : 'full';
 		$html = '<figure class="wp-block-image size-' . esc_attr( $size ) . '"><img src="' . esc_url( $src ) . '" alt="' . esc_attr( $alt ) . '" class="wp-image-' . $id . '"/>'
 			. ( '' !== $caption ? '<figcaption class="wp-element-caption">' . $caption . '</figcaption>' : '' )
 			. '</figure>';
@@ -574,5 +586,82 @@ class Leiho_Blocks {
 			),
 			$html
 		);
+	}
+
+	/**
+	 * Galerie (figure.wp-block-gallery) : une image de la médiathèque par
+	 * figure, légende de la galerie facultative. Réglages de l'éditeur de
+	 * blocs (colonnes, recadrage) non repris : le site décide de la mise en
+	 * page. Une image qui ne vient pas de la médiathèque : HTML libre.
+	 *
+	 * @param DOMElement $node <figure class="wp-block-gallery">.
+	 * @return array|null
+	 */
+	private static function gallery( DOMElement $node ) {
+		$images  = array();
+		$caption = '';
+		foreach ( $node->childNodes as $child ) {
+			if ( XML_TEXT_NODE === $child->nodeType && '' === trim( $child->nodeValue ) ) {
+				continue;
+			}
+			$name = XML_ELEMENT_NODE === $child->nodeType ? strtolower( $child->nodeName ) : '';
+			if ( 'figcaption' === $name ) {
+				$caption = trim( self::inner( $child ) );
+				continue;
+			}
+			// wpautop entoure parfois l'image d'un paragraphe : on le traverse.
+			if ( 'p' === $name ) {
+				$kids = array();
+				foreach ( $child->childNodes as $kid ) {
+					if ( XML_TEXT_NODE !== $kid->nodeType || '' !== trim( $kid->nodeValue ) ) {
+						$kids[] = $kid;
+					}
+				}
+				$child = 1 === count( $kids ) ? $kids[0] : null;
+				$name  = $child && XML_ELEMENT_NODE === $child->nodeType ? strtolower( $child->nodeName ) : '';
+			}
+			if ( 'figure' !== $name && 'img' !== $name ) {
+				return null;
+			}
+			$image = self::image( self::unwrap( $child ) );
+			if ( null === $image ) {
+				return null;
+			}
+			$images[] = $image;
+		}
+		if ( ! $images ) {
+			return null;
+		}
+		$open    = '<figure class="' . self::GALLERY_CLASS . '">';
+		$close   = ( '' !== $caption ? '<figcaption class="blocks-gallery-caption wp-element-caption">' . $caption . '</figcaption>' : '' ) . '</figure>';
+		$content = array_merge( array( $open ), array_fill( 0, count( $images ), null ), array( $close ) );
+		return self::make( 'core/gallery', array( 'linkTo' => 'none' ), $open . $close, $images, $content );
+	}
+
+	/**
+	 * Figure d'image dont wpautop a mis l'image dans un paragraphe : la
+	 * figure, image remontée à sa place.
+	 *
+	 * @param DOMElement $node <figure> ou <img>.
+	 * @return DOMElement
+	 */
+	private static function unwrap( DOMElement $node ) {
+		if ( 'figure' !== strtolower( $node->nodeName ) ) {
+			return $node;
+		}
+		foreach ( iterator_to_array( $node->childNodes ) as $child ) {
+			if ( XML_ELEMENT_NODE === $child->nodeType && 'p' === strtolower( $child->nodeName ) ) {
+				$kids = array();
+				foreach ( iterator_to_array( $child->childNodes ) as $kid ) {
+					if ( XML_TEXT_NODE !== $kid->nodeType || '' !== trim( $kid->nodeValue ) ) {
+						$kids[] = $kid;
+					}
+				}
+				if ( 1 === count( $kids ) && XML_ELEMENT_NODE === $kids[0]->nodeType && 'img' === strtolower( $kids[0]->nodeName ) ) {
+					$node->replaceChild( $kids[0], $child );
+				}
+			}
+		}
+		return $node;
 	}
 }

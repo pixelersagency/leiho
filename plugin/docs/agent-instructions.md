@@ -126,6 +126,7 @@ The attributes the helpers write:
 | `data-wp-post="12"` | Container: ID of the WordPress content that the fields inside it belong to |
 | `data-wp-field="path"` | Element that displays this field |
 | `data-leiho-apply="html"` | The value contains markup (an accent `<span>` in a heading, a WYSIWYG field) |
+| `data-leiho-apply="gallery"` | Gallery field: one child per image (`field(page, 'photos', { gallery: true })`) |
 | `data-leiho-section="Label"` | Name of the section in the editor’s structure tree |
 | `data-leiho-layout="sections.2"` | The section is row 2 of the `sections` flexible content: the client can add, move, duplicate and delete it |
 | `data-leiho-refresh="save"` | No instant preview: the editor reloads the page after saving (complex rendering) |
@@ -138,7 +139,7 @@ The attributes the helpers write:
 - Simple field: `hero_title`
 - Row of a repeater or a flexible content: `cards.0.title`, `sections.2.intro`
 - Sub-field of a group: `contact.phone`
-- Native fields: `_title` (content title), `_thumbnail` (featured image)
+- Native fields: `_title` (content title), `_thumbnail` (featured image), `_content` (post body, rendered HTML: annotate with `{ html: true }`)
 
 The path of a list item uses the **render index**: in a `map`, build it from the loop
 index, not from an identifier.
@@ -170,6 +171,26 @@ the featured image. Every image slot has an **aspect ratio fixed by the layout**
 
 Replacing an image with another of a different aspect ratio must never change the size of
 the component. The editor warns the client when the chosen image will be heavily cropped.
+
+### Galleries
+
+Photos shown together (an event, a workshop) are a gallery, never a fixed number of image
+fields, and the client never sets columns or sizes: the front end lays them out.
+
+- In a template: an ACF **gallery** field. Render one child per image in the annotated
+  container, so the preview can rebuild it live from the first child:
+
+  ```jsx
+  <ul className="leiho-gallery" {...field(page, 'photos', { gallery: true })}>
+    {page.fields.photos.map((photo) => (
+      <li key={photo.id}><img src={photo.sizes.large?.url ?? photo.url} alt={photo.alt} loading="lazy" /></li>
+    ))}
+  </ul>
+  ```
+
+- In a post body: the client adds a Gallery block (from Leiho or the block editor). Style
+  `.wp-block-gallery` in the post body CSS, or the body will show the photos one under another.
+- `leiho/gallery.css` is a ready default for both (automatic grid of squares).
 
 ### Page composition
 

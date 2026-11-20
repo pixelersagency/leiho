@@ -1,0 +1,74 @@
+/*
+ * leiho/gallery.css — rendu par défaut des galeries Leiho, à importer si on
+ * veut (import 'leiho/gallery.css') ou à copier et adapter.
+ *
+ * Une grille automatique de carrés : autant de colonnes que la largeur en
+ * permet (200 px minimum), photos recadrées au centre. Une photo seule garde
+ * son format. Aucun réglage côté éditeur : le site décide.
+ *
+ * Couvre les deux galeries :
+ *   - un champ galerie rendu dans un .leiho-gallery (ul, ol ou div, un
+ *     enfant par image) ;
+ *   - le bloc Galerie du contenu (figure.wp-block-gallery), tel que
+ *     WordPress et Leiho l'écrivent.
+ *
+ * Variables : --leiho-gallery-min (200px), --leiho-gallery-gap (10px),
+ * --leiho-gallery-radius (12px), --leiho-gallery-ratio (1).
+ */
+.leiho-gallery,
+.wp-block-gallery,
+.blocks-gallery-grid {
+	display: grid;
+	grid-template-columns: repeat(auto-fill, minmax(min(var(--leiho-gallery-min, 200px), 100%), 1fr));
+	gap: var(--leiho-gallery-gap, 10px);
+	margin-left: 0;
+	margin-right: 0;
+	padding: 0;
+	list-style: none;
+}
+
+.wp-block-gallery .blocks-gallery-grid {
+	display: contents;
+}
+
+.leiho-gallery > *,
+.wp-block-gallery > figure,
+.blocks-gallery-item {
+	margin: 0;
+	min-width: 0;
+}
+
+.leiho-gallery img,
+.wp-block-gallery img {
+	display: block;
+	width: 100%;
+	height: 100%;
+	aspect-ratio: var(--leiho-gallery-ratio, 1);
+	object-fit: cover;
+	border-radius: var(--leiho-gallery-radius, 12px);
+}
+
+.leiho-gallery figcaption,
+.wp-block-gallery figure figcaption {
+	margin-top: 6px;
+	font-size: 0.875em;
+}
+
+/* Légende de la galerie entière : sur toute la largeur. */
+.wp-block-gallery > figcaption,
+.blocks-gallery-caption {
+	grid-column: 1 / -1;
+}
+
+/* Une seule photo : pleine largeur, à son format. */
+.leiho-gallery:has(> :only-child),
+.wp-block-gallery:has(> figure:only-of-type) {
+	grid-template-columns: minmax(0, 1fr);
+}
+
+.leiho-gallery > :only-child img,
+.wp-block-gallery > figure:only-of-type img {
+	height: auto;
+	aspect-ratio: auto;
+	object-fit: contain;
+}

@@ -2,6 +2,26 @@
 
 All notable changes to Leiho (called Okno until 1.0.0-beta.11) are documented here. The project follows [Semantic Versioning](https://semver.org/). The plugin and the bridge package share one version number.
 
+## [Unreleased]
+
+### Added
+
+- **Photo galleries, without layout settings.** Editors add several photos at once (in any order), drag them to reorder and remove them; the front end decides how the gallery looks.
+  - **In the post body**: a **Photos** button in the content editor creates a gallery where the cursor is, and clicking a gallery opens its photos. Galleries are saved as WordPress's Gallery block (`core/gallery` with one `core/image` per photo), valid in the block editor; Gallery blocks made in the block editor are no longer locked in Leiho. A classic post that receives a gallery is saved as blocks.
+  - **Gallery fields** (ACF / SCF, Leiho Collections): photos can be dragged to reorder, the media library opens with several photos selectable at once, and the preview rebuilds the gallery live (`field( page, 'photos', { gallery: true } )` → `data-leiho-apply="gallery"`: one child per image, cloned from the first). Before, the page was reloaded after saving.
+  - **`leiho/gallery.css`**: an optional default rendering for both, an automatic grid of squares (one photo keeps its own shape), tuned with CSS variables.
+- **Draft preview, even on a static site.** An entry that isn't on the site yet (draft, pending, scheduled, private) used to open on a "page not found": the editor now shows it in the page of the latest published entry of the same type, with the draft's values, and a banner says so. Pages only borrow a page with the same page template. Filter `leiho_preview_stand_in` to choose the page, or `null` to keep loading the draft's own address. Needs bridge 6 (an older bridge shows a notice and never edits the borrowed page).
+- **The post body previews as the site will show it.** While editing `_content`, the preview receives the HTML WordPress will serve (blocks, galleries, shortcodes, embeds) instead of the editor's raw HTML (`POST /leiho/v1/render/{id}`, nothing saved). The body can be annotated on the page (`data-wp-field="_content"`) and is then edited from the visual editor too.
+
+### Fixed
+
+- **Saving the settings kept only public content types.** Internal types shown by the front end only (testimonials, partners: `show_ui` without `public`) were dropped from Leiho's content types each time the settings were saved. They are now offered in the settings, and a type already chosen is never removed silently.
+- **"The site doesn't respond" on the first load of the preview.** The bridge announces itself once when it starts; if that message was missed, the editor waited until its timeout. The editor now asks again (`ping`) once the page has loaded, until the bridge answers.
+
+### Bridge 6
+
+- `ping` (announce again), `adopt` (show a draft in another entry's page) and live galleries. Update `leiho-bridge.js` on sites that copy it by hand.
+
 ## [1.0.0-rc.6] — 2026-11-09
 
 ### Fixed

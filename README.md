@@ -205,14 +205,15 @@ import { field, block } from 'leiho';
 <section {...block(page, 'sections', i, 'Hero')}>…</section>
 ```
 
-`field(page, 'intro', { html: true })` adds `data-leiho-apply="html"`; `{ refresh: true }` adds `data-leiho-refresh="save"`. In plain HTML or server templates, write the attributes below by hand.
+`field(page, 'intro', { html: true })` adds `data-leiho-apply="html"`; `{ gallery: true }` adds `data-leiho-apply="gallery"` (see [Galleries](#galleries)); `{ refresh: true }` adds `data-leiho-refresh="save"`. In plain HTML or server templates, write the attributes below by hand.
 
 | Attribute | Purpose |
 |---|---|
 | `data-wp-post="12"` | Container: the WordPress post ID for the fields inside |
-| `data-wp-field="hero_title"` | Editable element: ACF field name, or `_title` / `_thumbnail` |
+| `data-wp-field="hero_title"` | Editable element: ACF field name, or `_title` / `_thumbnail` / `_content` (the post body, with `data-leiho-apply="html"`) |
 | `data-wp-field="cards.0.title"` | Dotted paths reach into repeaters, flexible content and groups |
 | `data-leiho-apply="html"` | The value contains markup (an accent `<span>` in a heading): inject filtered HTML instead of text |
+| `data-leiho-apply="gallery"` | A gallery field: one child per image, rebuilt live from the first child |
 | `data-leiho-refresh="save"` | No live preview for this field; reload the page after saving (complex WYSIWYG rendering) |
 | `data-leiho-section="Hero"` | Name a section in the Structure tree |
 | `data-leiho-layout="sections.2"` | Bind a section to a flexible content row, so editors can add, move, duplicate and remove it |
@@ -222,6 +223,34 @@ import { field, block } from 'leiho';
 **One rule:** always render an annotated element, even when its value is empty. `{title && <h2 data-wp-field="title">…}` breaks live editing, because an element missing from the page can't be filled in. Leiho flags such fields as "not on this page".
 
 Client-side navigation (React Router, Next.js links, `history.pushState`) and re-renders are handled: the bridge re-scans the page and keeps unsaved edits applied.
+
+### Galleries
+
+Editors add several photos at once (in any order), reorder them by dragging and remove them. There is no layout setting: the front end decides how a gallery looks.
+
+**In the post body** (`_content`), the **Photos** button of the content editor creates a gallery where the cursor is; clicking a gallery changes its photos. It is saved as WordPress's own Gallery block (`core/gallery`, one `core/image` per photo), so the block editor opens it as a regular Gallery block, and galleries made in the block editor can be edited in Leiho. A classic post that receives a gallery is saved as blocks. The content API serves the rendered block:
+
+```html
+<figure class="wp-block-gallery has-nested-images columns-default is-cropped …">
+  <figure class="wp-block-image size-large"><img src="…" alt="…" class="wp-image-12" width="1024" height="768" srcset="…" /></figure>
+  …
+  <figcaption class="blocks-gallery-caption">optional caption</figcaption>
+</figure>
+```
+
+To edit the body in the visual editor, annotate it: `<div {...field(post, '_content', { html: true })} set:html={post.content} />`.
+
+**A gallery field** (ACF / SCF `gallery`, or a Leiho Collections `gallery`) is served as an array of images, in the editor's order, each the same object as an image field: `{ id, url, alt, title, mime, width, height, sizes }`. Render one child per image in an annotated container, and the preview rebuilds it live from the first child:
+
+```astro
+<ul class="leiho-gallery" {...field(page, 'photos', { gallery: true })}>
+  {page.fields.photos.map((photo) => (
+    <li><img src={photo.sizes.large?.url ?? photo.url} alt={photo.alt} width={photo.width} height={photo.height} loading="lazy" /></li>
+  ))}
+</ul>
+```
+
+**Default rendering**: `import 'leiho/gallery.css'` (or copy it) gives both kinds of gallery an automatic grid of squares, as many columns as fit (200 px minimum), and keeps a single photo at its own aspect ratio. Change `--leiho-gallery-min`, `--leiho-gallery-gap`, `--leiho-gallery-radius` or `--leiho-gallery-ratio`, or write your own CSS for `.leiho-gallery` and `.wp-block-gallery`.
 
 ## Supported fields
 
@@ -252,7 +281,8 @@ Content written with the WordPress block editor is never rewritten by Leiho: its
 
 ## What editors get
 
-- Live preview while typing, with character counters where fields have a limit.
+- Live preview while typing, with character counters where fields have a limit. The post body is previewed as WordPress will render it (blocks, galleries, embeds), not as raw editor HTML.
+- **Draft preview, even on a static site.** A draft (or pending, scheduled or private entry) has no page on the site yet: the editor shows it in the page of the most recent published entry of the same type, with the draft's own values, and says so. Elements that don't come from the entry (a date you didn't annotate, a list of recent posts) are those of that page. Pages only borrow a page that uses the same page template. Hook `leiho_preview_stand_in` to choose another page, or return `null` if your front end renders drafts at their own address. Requires bridge 6.
 - Undo / redo (Ctrl+Z, Ctrl+Shift+Z) and Ctrl+S to save.
 - Local drafts: unsaved changes survive a closed tab, and are offered back on return.
 - Page composition: add, reorder, duplicate and remove flexible content blocks.
@@ -518,6 +548,7 @@ Found a vulnerability? See [SECURITY.md](SECURITY.md).
 - **Other field plugins**: implement `Leiho_Adapter_Interface` and register it with the `leiho_adapters` filter (Meta Box, JetEngine, Pods…).
 - **Other deployment targets**: implement `Leiho_Deploy_Driver_Interface` and plug it in with `leiho_deploy_driver`.
 - **WYSIWYG preview**: `leiho_wysiwyg_render` replaces `wpautop()` with your front end's actual rendering.
+- **Draft preview**: `leiho_preview_stand_in` (`$stand_in`, `$post`) picks the published entry whose page shows a draft (`null`: none).
 - **Content API**: `leiho_content_item` adds or removes data on each item (SEO, author…), `leiho_content_post_types` changes the served types, `leiho_content_html` the rendered HTML. `leiho_content_cache` turns the cache on or off, `leiho_content_cache_control` changes the `Cache-Control` header, `leiho_purge_third_party_caches` (false) skips the built-in purges. An adapter implementing `Leiho_Content_Adapter_Interface` feeds the content API and the types.
 - **Automatic publishing**: the `leiho_content_changed` action fires when served content changes.
 

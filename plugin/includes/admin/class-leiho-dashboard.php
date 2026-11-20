@@ -1491,8 +1491,7 @@ CODE;
 
 	private static function render_settings() {
 		$settings     = Leiho_Plugin::settings();
-		$public_types = get_post_types( array( 'public' => true ), 'objects' );
-		unset( $public_types['attachment'] );
+		$public_types = Leiho_Admin::content_post_types();
 		$preflight    = Leiho_Github_Preflight::consume();
 		$drivers      = self::drivers();
 		?>

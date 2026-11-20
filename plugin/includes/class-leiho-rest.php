@@ -162,6 +162,22 @@ class Leiho_Rest {
 
 		register_rest_route(
 			self::NS,
+			'/render/(?P<id>\d+)',
+			array(
+				'methods'             => WP_REST_Server::CREATABLE,
+				'callback'            => array( $this, 'render_content' ),
+				'permission_callback' => array( $this, 'can_edit_post' ),
+				'args'                => array(
+					'html' => array(
+						'type'     => 'string',
+						'required' => true,
+					),
+				),
+			)
+		);
+
+		register_rest_route(
+			self::NS,
 			'/save/(?P<id>\d+)',
 			array(
 				'methods'             => WP_REST_Server::CREATABLE,
@@ -783,6 +799,38 @@ class Leiho_Rest {
 			return $schema;
 		}
 		return rest_ensure_response( $schema );
+	}
+
+	/** Taille maximale du contenu rendu pour l'aperçu (octets). */
+	const RENDER_MAX = 1048576;
+
+	/**
+	 * POST /render/{id} : le contenu principal en cours d'édition, rendu
+	 * comme l'API de contenu le servira une fois enregistré (blocs, galeries,
+	 * shortcodes, embeds). Rien n'est enregistré : l'aperçu de l'éditeur
+	 * montre ainsi au site le HTML qu'il recevra.
+	 */
+	public function render_content( WP_REST_Request $request ) {
+		$post = get_post( (int) $request['id'] );
+		$html = (string) $request->get_param( 'html' );
+		if ( ! $post || ! post_type_supports( $post->post_type, 'editor' ) ) {
+			return new WP_Error( 'leiho_not_found', __( 'Content not found.', 'leiho' ), array( 'status' => 404 ) );
+		}
+		if ( strlen( $html ) > self::RENDER_MAX ) {
+			return new WP_Error( 'leiho_too_large', __( 'This content is too long to preview.', 'leiho' ), array( 'status' => 413 ) );
+		}
+
+		$stored          = Leiho_Native_Fields::content_to_store( $post, $html );
+		$previous        = isset( $GLOBALS['post'] ) ? $GLOBALS['post'] : null;
+		$GLOBALS['post'] = $post; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+		setup_postdata( $post );
+		$rendered = Leiho_Content::html( $stored, null );
+		$GLOBALS['post'] = $previous; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+		if ( $previous instanceof WP_Post ) {
+			setup_postdata( $previous );
+		}
+
+		return rest_ensure_response( array( 'html' => $rendered ) );
 	}
 
 	/**

@@ -15,7 +15,7 @@ const body = src
 	.trimEnd();
 
 const out = `/*!
- * leiho-bridge v5 — standalone (auto-init).
+ * leiho-bridge v6 — standalone (auto-init).
  * Généré par bridge/build.js depuis src/index.js — ne pas éditer à la main.
  *
  * Chargement recommandé (le bridge ne sert qu'à l'éditeur) :
