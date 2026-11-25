@@ -56,6 +56,7 @@ require_once LEIHO_DIR . 'includes/class-leiho-activity.php';
 require_once LEIHO_DIR . 'includes/class-leiho-blocks.php';
 require_once LEIHO_DIR . 'includes/class-leiho-native-fields.php';
 require_once LEIHO_DIR . 'includes/class-leiho-schema.php';
+require_once LEIHO_DIR . 'includes/class-leiho-roles.php';
 require_once LEIHO_DIR . 'includes/class-leiho-rest.php';
 require_once LEIHO_DIR . 'includes/class-leiho-content.php';
 require_once LEIHO_DIR . 'includes/class-leiho-seo.php';
@@ -149,6 +150,7 @@ final class Leiho_Plugin {
 		Leiho_Updater::init();
 		Leiho_AI::init();
 		Leiho_App::init();
+		Leiho_Roles::init();
 		Leiho_Legacy::init();
 
 		if ( is_admin() ) {

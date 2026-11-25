@@ -777,3 +777,66 @@
 		refreshPublishState: refreshPublishState,
 	};
 } )();
+
+/* Écran Rôles : un profil coche les cases ; toucher une case passe en « personnalisé ». */
+( function () {
+	var form = document.querySelector( '[data-leiho-roles]' );
+	if ( ! form ) {
+		return;
+	}
+	var presets = {};
+	try {
+		presets = JSON.parse( form.getAttribute( 'data-presets' ) ) || {};
+	} catch ( e ) {
+		presets = {};
+	}
+	[].forEach.call( form.querySelectorAll( '.leiho-role' ), function ( section ) {
+		var select = section.querySelector( '[data-role-profile]' );
+		var all = section.querySelector( '[data-role-all-types]' );
+		var types = section.querySelectorAll( '[data-role-type]' );
+		var help = section.querySelector( '[data-role-help]' );
+		function syncTypes() {
+			[].forEach.call( types, function ( box ) {
+				box.disabled = all.checked;
+				if ( all.checked ) {
+					box.checked = true;
+				}
+			} );
+		}
+		function setSelect( value ) {
+			select.value = value;
+			// Met à jour la liste stylée (ui.js écoute « change ») ; « custom » n'a pas de préréglage.
+			select.dispatchEvent( new Event( 'change' ) );
+			if ( help ) {
+				help.textContent = form.getAttribute( 'data-custom-help' ) || '';
+			}
+		}
+		select.addEventListener( 'change', function () {
+			var preset = presets[ select.value ];
+			if ( help ) {
+				help.textContent = preset ? preset.help || '' : form.getAttribute( 'data-custom-help' ) || '';
+			}
+			if ( ! preset ) {
+				return;
+			}
+			[].forEach.call( section.querySelectorAll( '[data-role-view]' ), function ( box ) {
+				box.checked = preset.views.indexOf( box.value ) !== -1;
+			} );
+			[].forEach.call( section.querySelectorAll( '[data-role-flag]' ), function ( box ) {
+				box.checked = !! preset[ box.getAttribute( 'data-role-flag' ) ];
+			} );
+			all.checked = '*' === preset.types;
+			[].forEach.call( types, function ( box ) {
+				box.checked = '*' === preset.types || ( Array.isArray( preset.types ) && preset.types.indexOf( box.value ) !== -1 );
+			} );
+			syncTypes();
+		} );
+		all.addEventListener( 'change', syncTypes );
+		section.addEventListener( 'change', function ( event ) {
+			if ( event.target !== select && 'checkbox' === event.target.type && 'custom' !== select.value ) {
+				setSelect( 'custom' );
+			}
+		} );
+	} );
+}() );
+

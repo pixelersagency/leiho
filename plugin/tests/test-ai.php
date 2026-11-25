@@ -202,6 +202,13 @@ class WP_Query {
 function mysql2date( $f, $d, $t = true ) { return '2026-11-04T10:00:00+00:00'; }
 abstract class Leiho_Field_Adapter {}
 
+// Rôles : administrateur (tout permis) ; testés à part dans test-roles.php.
+class Leiho_Roles {
+	public static function can( $p ) { return true; }
+	public static function can_view( $v ) { return true; }
+	public static function can_type( $t ) { return true; }
+	public static function simple() { return false; }
+}
 require __DIR__ . '/../includes/class-leiho-text.php';
 require __DIR__ . '/../includes/class-leiho-activity.php';
 require __DIR__ . '/../includes/ai/class-leiho-ai-prompt.php';

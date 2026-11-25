@@ -240,7 +240,8 @@ class Leiho_AI_Rest {
 		if ( true !== $ok ) {
 			return $ok;
 		}
-		return current_user_can( 'edit_post', (int) $request['post_id'] );
+		$id = (int) $request['post_id'];
+		return current_user_can( 'edit_post', $id ) && Leiho_Roles::can_type( (string) get_post_type( $id ) );
 	}
 
 	/**
@@ -274,7 +275,7 @@ class Leiho_AI_Rest {
 	 */
 	public static function can_translate( $request ) {
 		$id = (int) $request['post_id'];
-		return $id > 0 && Leiho_AI::user_can() && current_user_can( 'edit_post', $id );
+		return $id > 0 && Leiho_AI::user_can() && current_user_can( 'edit_post', $id ) && Leiho_Roles::can_type( (string) get_post_type( $id ) );
 	}
 
 	/**

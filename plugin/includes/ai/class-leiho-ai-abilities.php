@@ -513,7 +513,8 @@ class Leiho_AI_Abilities {
 	 */
 	private static function is_leiho_type( $id ) {
 		$settings = Leiho_Plugin::settings();
-		return in_array( get_post_type( $id ), (array) $settings['post_types'], true );
+		$type     = (string) get_post_type( $id );
+		return in_array( $type, (array) $settings['post_types'], true ) && Leiho_Roles::can_type( $type );
 	}
 
 	/* ---------------------------------------------------------------------
@@ -711,7 +712,7 @@ class Leiho_AI_Abilities {
 		$items  = array();
 		foreach ( $query->posts as $post ) {
 			// Ce que l'utilisateur connecté ne peut pas modifier n'est pas listé.
-			if ( ! current_user_can( 'edit_post', $post->ID ) ) {
+			if ( ! current_user_can( 'edit_post', $post->ID ) || ! Leiho_Roles::can_type( $post->post_type ) ) {
 				continue;
 			}
 			$items[] = array(

@@ -22,6 +22,7 @@ class Leiho_Admin {
 		add_action( 'admin_post_leiho_save_settings', array( $this, 'handle_save_settings' ) );
 		add_action( 'admin_post_leiho_save_security', array( $this, 'handle_save_security' ) );
 		add_action( 'admin_post_leiho_save_ai', array( $this, 'handle_save_ai' ) );
+		add_action( 'admin_post_leiho_save_roles', array( $this, 'handle_save_roles' ) );
 		add_action( 'admin_bar_menu', array( $this, 'admin_bar' ), 80 );
 		add_filter( 'plugin_action_links_' . plugin_basename( LEIHO_FILE ), array( $this, 'action_links' ) );
 	}
@@ -171,7 +172,7 @@ class Leiho_Admin {
 			return;
 		}
 
-		if ( in_array( $view, array( 'home', 'start', 'settings', 'deploys', 'ai', 'security' ), true ) ) {
+		if ( in_array( $view, array( 'home', 'start', 'settings', 'deploys', 'ai', 'roles', 'security' ), true ) ) {
 			$this->enqueue_dashboard();
 			$this->enqueue_shell( $view );
 			if ( 'ai' === $view ) {
@@ -329,6 +330,7 @@ class Leiho_Admin {
 			'activeDeploy'         => $active ? $active['id'] : '',
 			'handshakeTimeout'     => 8000,
 			'canDeploy'            => Leiho_Deploy_Manager::user_can_deploy(),
+			'simple'               => Leiho_Roles::simple(),
 			'autoDeploy'           => Leiho_Deploy_Manager::auto_enabled() ? self::autopublish_config() : null,
 			'formTypes'            => self::form_types(),
 			'i18n'                 => Leiho_I18n::client_config(),
@@ -542,8 +544,9 @@ class Leiho_Admin {
 				</span>
 				<button type="button" id="leiho-theme" class="leiho-icon-btn" title="<?php esc_attr_e( 'Light or dark theme', 'leiho' ); ?>" aria-label="<?php esc_attr_e( 'Switch to dark theme', 'leiho' ); ?>" aria-pressed="false"><?php Leiho_Icons::render( 'moon', 16 ); ?></button>
 				<span id="leiho-deploy-banner" class="leiho-deploy-banner" hidden></span>
-				<button type="button" id="leiho-save" class="leiho-btn leiho-btn--quiet" disabled><?php esc_html_e( 'Save', 'leiho' ); ?></button>
-				<button type="button" id="leiho-publish" class="leiho-btn" disabled><?php esc_html_e( 'Publish', 'leiho' ); ?></button>
+				<?php $can_deploy = Leiho_Deploy_Manager::user_can_deploy(); // Sans mise en ligne (écran Rôles) : Enregistrer devient le bouton principal. ?>
+				<button type="button" id="leiho-save" class="leiho-btn<?php echo $can_deploy ? ' leiho-btn--quiet' : ''; ?>" disabled><?php esc_html_e( 'Save', 'leiho' ); ?></button>
+				<button type="button" id="leiho-publish" class="leiho-btn" disabled<?php echo $can_deploy ? '' : ' hidden'; ?>><?php esc_html_e( 'Publish', 'leiho' ); ?></button>
 			</div>
 		</header>
 		<?php
@@ -636,6 +639,22 @@ class Leiho_Admin {
 		}
 
 		wp_safe_redirect( Leiho_App::url( 'ai', array( 'leiho_saved' => 1 ) ) );
+		exit;
+	}
+
+	/**
+	 * Écran Rôles : ce que chaque rôle voit et fait dans Leiho.
+	 *
+	 * @return void
+	 */
+	public function handle_save_roles() {
+		if ( ! current_user_can( 'manage_options' ) ) {
+			wp_die( esc_html__( 'Access denied.', 'leiho' ) );
+		}
+		check_admin_referer( 'leiho_save_roles' );
+		$input = isset( $_POST['leiho_roles'] ) && is_array( $_POST['leiho_roles'] ) ? wp_unslash( $_POST['leiho_roles'] ) : array(); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Nettoyé par Leiho_Roles::sanitize().
+		update_option( Leiho_Roles::OPTION, Leiho_Roles::sanitize( $input ), false );
+		wp_safe_redirect( Leiho_App::url( 'roles', array( 'leiho_saved' => '1' ) ) );
 		exit;
 	}
 

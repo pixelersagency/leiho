@@ -41,6 +41,18 @@ class Leiho_App {
 	}
 
 	/**
+	 * Vue ouverte à l'utilisateur : sa capability WordPress, puis les
+	 * réglages de son rôle (écran Rôles).
+	 *
+	 * @param string $slug Vue.
+	 * @return bool
+	 */
+	public static function user_can_view( $slug ) {
+		$views = self::views();
+		return isset( $views[ $slug ] ) && current_user_can( $views[ $slug ]['cap'] ) && Leiho_Roles::can_view( $slug );
+	}
+
+	/**
 	 * Vues de l'application : libellé, capability, icône, place dans la
 	 * navigation (false = vue atteinte par un lien seulement).
 	 *
@@ -90,6 +102,13 @@ class Leiho_App {
 				'icon'  => 'sparkle',
 				'nav'   => true,
 			),
+			// Ce que chaque rôle voit et fait dans Leiho (administrateurs).
+			'roles'       => array(
+				'label' => __( 'Roles', 'leiho' ),
+				'cap'   => 'manage_options',
+				'icon'  => 'users',
+				'nav'   => true,
+			),
 			'settings'    => array(
 				'label' => __( 'Settings', 'leiho' ),
 				'cap'   => 'manage_options',
@@ -125,7 +144,7 @@ class Leiho_App {
 			$requested = isset( $_GET['view'] ) ? sanitize_key( wp_unslash( $_GET['view'] ) ) : 'home';
 		}
 		$views = self::views();
-		if ( ! isset( $views[ $requested ] ) || ! current_user_can( $views[ $requested ]['cap'] ) ) {
+		if ( ! isset( $views[ $requested ] ) || ! self::user_can_view( $requested ) ) {
 			return 'home';
 		}
 		return $requested;
@@ -485,7 +504,7 @@ class Leiho_App {
 				<ul class="leiho-nav__list">
 					<?php foreach ( $views as $slug => $item ) : ?>
 						<?php
-						if ( ! $item['nav'] || ! current_user_can( $item['cap'] ) ) {
+						if ( ! $item['nav'] || ! self::user_can_view( $slug ) ) {
 							continue;
 						}
 						$current = $slug === $view || ( 'start' === $view && 'settings' === $slug );
@@ -635,7 +654,7 @@ class Leiho_App {
 		$acf_groups = class_exists( 'Leiho_ACF_Import' ) && Leiho_ACF_Import::acf_available() && Leiho_Collections_Rest::can_manage();
 		foreach ( $settings['post_types'] as $name ) {
 			$object = get_post_type_object( $name );
-			if ( ! $object || ! current_user_can( $object->cap->edit_posts ) ) {
+			if ( ! $object || ! current_user_can( $object->cap->edit_posts ) || ! Leiho_Roles::can_type( $name ) ) {
 				continue;
 			}
 			$collection = class_exists( 'Leiho_Collections' ) ? Leiho_Collections::for_post_type( $name ) : null;
@@ -725,6 +744,8 @@ class Leiho_App {
 			'acfName'        => '' !== Leiho_Plugin::fields_plugin()['name'] ? Leiho_Plugin::fields_plugin()['name'] : 'ACF',
 			'acfUrl'         => function_exists( 'acf_get_field_groups' ) && current_user_can( 'manage_options' ) ? admin_url( 'edit.php?post_type=acf-field-group' ) : '',
 			'canUpload'      => current_user_can( 'upload_files' ),
+			// Mode simplifié (écran Rôles) : rien de technique à l'écran.
+			'simple'         => Leiho_Roles::simple(),
 			'publish'        => array(
 				'available' => (bool) $driver && 'live' !== $settings['deploy_driver'],
 				'auto'      => Leiho_Deploy_Manager::auto_enabled(),

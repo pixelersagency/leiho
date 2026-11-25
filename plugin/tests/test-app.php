@@ -94,6 +94,13 @@ final class Leiho_Url_Mapper {
 function get_posts( $args ) { return ! empty( $GLOBALS['with_path'][ $args['post_type'] ] ) ? array( 1 ) : array(); }
 $GLOBALS['post_types'] = array( 12 => 'temoignage', 30 => 'service', 40 => 'page' );
 
+// Rôles : administrateur (tout permis) ; testés à part dans test-roles.php.
+class Leiho_Roles {
+	public static function can( $p ) { return true; }
+	public static function can_view( $v ) { return true; }
+	public static function can_type( $t ) { return true; }
+	public static function simple() { return false; }
+}
 require LEIHO_DIR . 'includes/admin/class-leiho-icons.php';
 require LEIHO_DIR . 'includes/admin/class-leiho-app.php';
 require LEIHO_DIR . 'includes/admin/class-leiho-admin.php';
@@ -132,7 +139,7 @@ $nav = array_keys(
 		}
 	)
 );
-check( 'navigation : huit vues (IA et Sécurité comprises), plus d\'onglet Contenus', array( 'home', 'editor', 'collections', 'media', 'deploys', 'ai', 'settings', 'security' ) === $nav, $nav );
+check( 'navigation : neuf vues (IA, Rôles et Sécurité comprises), plus d\'onglet Contenus', array( 'home', 'editor', 'collections', 'media', 'deploys', 'ai', 'roles', 'settings', 'security' ) === $nav, $nav );
 
 /* --- Contenus et Formulaire fondus dans Collections --- */
 

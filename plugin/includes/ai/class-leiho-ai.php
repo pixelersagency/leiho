@@ -129,7 +129,7 @@ class Leiho_AI {
 	 * @return bool
 	 */
 	public static function user_can() {
-		return current_user_can( self::capability() );
+		return current_user_can( self::capability() ) && Leiho_Roles::can( 'use_ai' );
 	}
 
 	/**

@@ -32,6 +32,9 @@ class Leiho_Dashboard {
 			case 'security':
 				self::render_security();
 				break;
+			case 'roles':
+				self::render_roles();
+				break;
 			default:
 				self::render_home();
 		}
@@ -76,9 +79,15 @@ class Leiho_Dashboard {
 									<?php Leiho_Icons::render( 'external', 13 ); ?>
 								</a>
 							<?php endif; ?>
-							<a class="leiho-btn" href="<?php echo esc_url( Leiho_App::url( 'editor' ) ); ?>">
-								<?php esc_html_e( 'Open the editor', 'leiho' ); ?>
-							</a>
+							<?php if ( Leiho_Roles::can_view( 'editor' ) ) : ?>
+								<a class="leiho-btn" href="<?php echo esc_url( Leiho_App::url( 'editor' ) ); ?>">
+									<?php esc_html_e( 'Open the editor', 'leiho' ); ?>
+								</a>
+							<?php elseif ( Leiho_Roles::can_view( 'collections' ) ) : ?>
+								<a class="leiho-btn" href="<?php echo esc_url( Leiho_App::url( 'collections' ) ); ?>">
+									<?php esc_html_e( 'Collections', 'leiho' ); ?>
+								</a>
+							<?php endif; ?>
 						</div>
 					</div>
 				<?php endif; ?>
@@ -89,7 +98,7 @@ class Leiho_Dashboard {
 				$preview_url = '' !== $settings['preview_url'] ? $settings['preview_url'] : $settings['front_url'];
 				$front_page  = (int) get_option( 'page_on_front' );
 				?>
-				<?php if ( $configured && $connection && ! empty( $connection['ok'] ) ) : ?>
+				<?php if ( $configured && $connection && ! empty( $connection['ok'] ) && Leiho_Roles::can_view( 'editor' ) ) : ?>
 					<section class="leiho-home__section">
 						<h2 class="leiho-home__label"><?php esc_html_e( 'Your site', 'leiho' ); ?></h2>
 						<a class="leiho-site-preview" href="<?php echo esc_url( Leiho_App::url( 'editor', $front_page ? array( 'post' => $front_page ) : array() ) ); ?>" aria-label="<?php esc_attr_e( 'Edit the home page in the visual editor', 'leiho' ); ?>">
@@ -114,7 +123,7 @@ class Leiho_Dashboard {
 							<ul class="leiho-log">
 								<?php foreach ( $activities as $activity ) : ?>
 									<?php
-									if ( ! current_user_can( 'edit_post', (int) $activity->post_id ) ) {
+									if ( ! current_user_can( 'edit_post', (int) $activity->post_id ) || ! Leiho_Rest::reachable( (int) $activity->post_id ) ) {
 										continue;
 									}
 									self::render_activity( $activity );
@@ -130,6 +139,8 @@ class Leiho_Dashboard {
 				<section class="leiho-home__section">
 					<h2 class="leiho-home__label"><?php esc_html_e( 'Publishing', 'leiho' ); ?></h2>
 					<ul class="leiho-status-list">
+						<?php // Connexion et méthode : détails techniques, montrés à qui voit la Publication. ?>
+						<?php if ( Leiho_Roles::can_view( 'deploys' ) && ! Leiho_Roles::simple() ) : ?>
 						<li>
 							<?php if ( ! $connection ) : ?>
 								<span class="leiho-dot"></span>
@@ -162,6 +173,7 @@ class Leiho_Dashboard {
 								<?php endif; ?>
 							</span>
 						</li>
+						<?php endif; ?>
 						<li>
 							<span class="leiho-dot leiho-dot--accent"></span>
 							<span class="leiho-status-list__text"><strong><?php echo esc_html( number_format_i18n( $week_count ) ); ?></strong><span><?php esc_html_e( 'Changes this week', 'leiho' ); ?></span></span>
@@ -180,7 +192,7 @@ class Leiho_Dashboard {
 							array( 'media', array(), 'image', __( 'Media', 'leiho' ), __( 'Images and files of the site.', 'leiho' ), 'upload_files' ),
 						);
 						foreach ( $links as $link ) :
-							if ( ! current_user_can( $link[5] ) ) {
+							if ( ! current_user_can( $link[5] ) || ! Leiho_Roles::can_view( $link[0] ) ) {
 								continue;
 							}
 							?>
@@ -2147,6 +2159,131 @@ CODE;
 	 * Sécurité
 	 * =================================================================== */
 
+	/* =====================================================================
+	 * Rôles
+	 * =================================================================== */
+
+	/**
+	 * Ce que chaque rôle WordPress voit et fait dans Leiho.
+	 *
+	 * @return void
+	 */
+	private static function render_roles() {
+		$roles    = Leiho_Roles::editable_roles();
+		$config   = Leiho_Roles::config();
+		$profiles = Leiho_Roles::profiles();
+		$counts   = count_users();
+		$counts   = isset( $counts['avail_roles'] ) ? $counts['avail_roles'] : array();
+		$types    = array();
+		foreach ( Leiho_Plugin::settings()['post_types'] as $name ) {
+			$object = get_post_type_object( $name );
+			if ( $object ) {
+				$types[ $name ] = $object->labels->name;
+			}
+		}
+		$views   = array(
+			'editor'      => __( 'Visual editor', 'leiho' ),
+			'collections' => __( 'Collections', 'leiho' ),
+			'media'       => __( 'Media', 'leiho' ),
+			'deploys'     => _x( 'Publishing', 'navigation', 'leiho' ),
+		);
+		$presets = array();
+		foreach ( array_keys( $profiles ) as $profile ) {
+			$presets[ $profile ]         = Leiho_Roles::from_profile( $profile );
+			$presets[ $profile ]['help'] = $profiles[ $profile ]['help'];
+		}
+		?>
+		<div class="leiho-page">
+
+			<?php // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Simple drapeau d'affichage. ?>
+			<?php if ( isset( $_GET['leiho_saved'] ) ) : ?>
+				<div class="leiho-notice leiho-notice--ok" role="status">
+					<span class="leiho-dot leiho-dot--ok"></span>
+					<strong><?php esc_html_e( 'Roles saved.', 'leiho' ); ?></strong>
+				</div>
+			<?php endif; ?>
+
+			<p class="leiho-help"><?php esc_html_e( 'Choose what each WordPress role sees and does in Leiho. WordPress permissions still apply (an author only edits their own content). Administrators always have full access.', 'leiho' ); ?></p>
+
+			<?php if ( ! $roles ) : ?>
+				<p class="leiho-muted"><?php esc_html_e( 'No role edits content apart from administrators.', 'leiho' ); ?></p>
+			<?php else : ?>
+			<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" data-leiho-roles data-presets="<?php echo esc_attr( wp_json_encode( $presets ) ); ?>" data-custom-help="<?php esc_attr_e( 'Settings chosen below.', 'leiho' ); ?>">
+				<input type="hidden" name="action" value="leiho_save_roles">
+				<?php wp_nonce_field( 'leiho_save_roles' ); ?>
+
+				<?php foreach ( $roles as $role => $role_label ) : ?>
+					<?php
+					$current = $config[ $role ];
+					$field   = 'leiho_roles[' . $role . ']';
+					$count   = isset( $counts[ $role ] ) ? (int) $counts[ $role ] : 0;
+					$all     = '*' === $current['types'];
+					?>
+					<section class="leiho-form-section leiho-role" data-role="<?php echo esc_attr( $role ); ?>">
+						<h2><?php echo esc_html( $role_label ); ?> <span class="leiho-muted">· <?php echo esc_html( sprintf( /* translators: %d: number of users. */ _n( '%d user', '%d users', $count, 'leiho' ), $count ) ); ?></span></h2>
+
+						<div class="leiho-row">
+							<label for="<?php echo esc_attr( 'leiho-role-' . $role ); ?>"><?php esc_html_e( 'Profile', 'leiho' ); ?></label>
+							<div>
+								<select id="<?php echo esc_attr( 'leiho-role-' . $role ); ?>" data-role-profile>
+									<?php foreach ( $profiles as $profile => $data ) : ?>
+										<option value="<?php echo esc_attr( $profile ); ?>" <?php selected( $current['profile'], $profile ); ?>><?php echo esc_html( $data['label'] ); ?></option>
+									<?php endforeach; ?>
+									<option value="custom" <?php selected( $current['profile'], 'custom' ); ?>><?php esc_html_e( 'Custom', 'leiho' ); ?></option>
+								</select>
+								<span class="leiho-help" data-role-help><?php echo esc_html( isset( $profiles[ $current['profile'] ] ) ? $profiles[ $current['profile'] ]['help'] : __( 'Settings chosen below.', 'leiho' ) ); ?></span>
+							</div>
+						</div>
+
+						<div class="leiho-row">
+							<span class="leiho-row__label"><?php esc_html_e( 'Screens', 'leiho' ); ?></span>
+							<div class="leiho-checks">
+								<?php foreach ( $views as $view => $view_label ) : ?>
+									<label class="leiho-inline-check"><input type="checkbox" name="<?php echo esc_attr( $field . '[views][]' ); ?>" value="<?php echo esc_attr( $view ); ?>" data-role-view <?php checked( in_array( $view, $current['views'], true ) ); ?>> <?php echo esc_html( $view_label ); ?></label>
+								<?php endforeach; ?>
+							</div>
+						</div>
+
+						<div class="leiho-row">
+							<span class="leiho-row__label"><?php esc_html_e( 'Actions', 'leiho' ); ?></span>
+							<div class="leiho-checks">
+								<label class="leiho-inline-check"><input type="checkbox" name="<?php echo esc_attr( $field . '[publish_site]' ); ?>" value="1" data-role-flag="publish_site" <?php checked( $current['publish_site'] ); ?>> <?php esc_html_e( 'Put the site online (Publish button)', 'leiho' ); ?></label>
+								<label class="leiho-inline-check"><input type="checkbox" name="<?php echo esc_attr( $field . '[use_ai]' ); ?>" value="1" data-role-flag="use_ai" <?php checked( $current['use_ai'] ); ?>> <?php esc_html_e( 'Use the AI tools', 'leiho' ); ?></label>
+							</div>
+						</div>
+
+						<div class="leiho-row">
+							<span class="leiho-row__label"><?php esc_html_e( 'Content', 'leiho' ); ?></span>
+							<div class="leiho-checks">
+								<label class="leiho-inline-check"><input type="checkbox" name="<?php echo esc_attr( $field . '[all_types]' ); ?>" value="1" data-role-all-types <?php checked( $all ); ?>> <?php esc_html_e( 'All content types', 'leiho' ); ?></label>
+								<?php foreach ( $types as $type => $type_label ) : ?>
+									<label class="leiho-inline-check"><input type="checkbox" name="<?php echo esc_attr( $field . '[types][]' ); ?>" value="<?php echo esc_attr( $type ); ?>" data-role-type <?php checked( $all || in_array( $type, (array) $current['types'], true ) ); ?> <?php disabled( $all ); ?>> <?php echo esc_html( $type_label ); ?></label>
+								<?php endforeach; ?>
+							</div>
+						</div>
+
+						<div class="leiho-row">
+							<span class="leiho-row__label"><?php esc_html_e( 'Display', 'leiho' ); ?></span>
+							<div class="leiho-checks">
+								<label class="leiho-inline-check"><input type="checkbox" name="<?php echo esc_attr( $field . '[simple]' ); ?>" value="1" data-role-flag="simple" <?php checked( $current['simple'] ); ?>> <?php esc_html_e( 'Simplified mode', 'leiho' ); ?></label>
+								<span class="leiho-help"><?php esc_html_e( 'Nothing technical on screen: no HTML code tab, no field type names, no build details. The WordPress dashboard opens Leiho instead.', 'leiho' ); ?></span>
+							</div>
+						</div>
+					</section>
+				<?php endforeach; ?>
+
+				<div class="leiho-savebar">
+					<span class="leiho-muted"><?php esc_html_e( 'Changes apply at the next page load of each user.', 'leiho' ); ?></span>
+					<div class="leiho-actions" style="margin:0">
+						<button type="submit" class="leiho-btn"><?php esc_html_e( 'Save', 'leiho' ); ?></button>
+					</div>
+				</div>
+			</form>
+			<?php endif; ?>
+		</div>
+		<?php
+	}
+
 	/**
 	 * Onglet Sécurité : WordPress en back-office, durcissement, Leiho Zero.
 	 *
@@ -2501,7 +2638,8 @@ CODE;
 		$usage   = get_option( Leiho_Plugin::OPTION_USAGE, array() );
 		$usage   = is_array( $usage ) ? $usage : array();
 		krsort( $usage );
-		$usage = array_slice( $usage, 0, 8, true );
+		$usage  = array_slice( $usage, 0, 8, true );
+		$simple = Leiho_Roles::simple();
 		?>
 		<div class="leiho-page">
 			<h2 class="leiho-heading"><?php esc_html_e( 'Deployment history', 'leiho' ); ?></h2>
@@ -2518,7 +2656,9 @@ CODE;
 							<tr>
 								<th scope="col"><?php esc_html_e( 'Date', 'leiho' ); ?></th>
 								<th scope="col"><?php esc_html_e( 'By', 'leiho' ); ?></th>
-								<th scope="col"><?php esc_html_e( 'Method', 'leiho' ); ?></th>
+								<?php if ( ! $simple ) : ?>
+									<th scope="col"><?php esc_html_e( 'Method', 'leiho' ); ?></th>
+								<?php endif; ?>
 								<th scope="col"><?php esc_html_e( 'Result', 'leiho' ); ?></th>
 							</tr>
 						</thead>
@@ -2527,13 +2667,15 @@ CODE;
 								<tr>
 									<td><?php echo esc_html( wp_date( get_option( 'date_format' ) . ' · ' . get_option( 'time_format' ), $record['started'] ) ); ?></td>
 									<td><?php echo esc_html( $record['user_name'] ); ?></td>
-									<td><?php echo esc_html( self::driver_label( $record['driver'] ) ); ?></td>
+									<?php if ( ! $simple ) : ?>
+										<td><?php echo esc_html( self::driver_label( $record['driver'] ) ); ?></td>
+									<?php endif; ?>
 									<td>
 										<span class="leiho-pill leiho-pill--<?php echo esc_attr( self::status_level( $record['status'] ) ); ?>"><?php echo esc_html( self::status_label( $record['status'] ) ); ?></span>
 										<?php if ( $record['message'] ) : ?>
 											<div class="leiho-table__message"><?php echo esc_html( $record['message'] ); ?></div>
 										<?php endif; ?>
-										<?php if ( ! empty( $record['meta']['run_url'] ) ) : ?>
+										<?php if ( ! $simple && ! empty( $record['meta']['run_url'] ) ) : ?>
 											<div class="leiho-table__message"><a href="<?php echo esc_url( $record['meta']['run_url'] ); ?>" target="_blank" rel="noopener"><?php esc_html_e( 'View build', 'leiho' ); ?></a></div>
 										<?php endif; ?>
 									</td>

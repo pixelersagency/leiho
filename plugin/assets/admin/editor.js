@@ -246,7 +246,7 @@
 	function setButtons() {
 		els.save.disabled = ! isDirty() || state.saving;
 		// Site qui lit le contenu en direct : enregistrer = mettre en ligne.
-		els.publish.hidden = !! cfg.liveMode;
+		els.publish.hidden = !! cfg.liveMode || ! cfg.canDeploy;
 		els.publish.disabled = ! state.post || ! cfg.canDeploy || ! cfg.driverConfigured;
 		els.publish.title = ! cfg.driverConfigured
 			? __( 'No publishing method is set up in the settings.', 'leiho' )
@@ -2610,9 +2610,11 @@
 			wrap.classList.add( 'leiho-field-unsupported' );
 			var note = document.createElement( 'p' );
 			note.className = 'leiho-field-note';
-			/* translators: %s: ACF field type (e.g. google_map). */
-			note.textContent = sprintf( __( 'The “%s” field type can’t be edited here.', 'leiho' ), field.type ) + ' ';
-			if ( field.edit_url ) {
+			note.textContent = cfg.simple
+				? __( 'This field can’t be edited here.', 'leiho' )
+				: /* translators: %s: ACF field type (e.g. google_map). */
+				  sprintf( __( 'The “%s” field type can’t be edited here.', 'leiho' ), field.type ) + ' ';
+			if ( field.edit_url && ! cfg.simple ) {
 				var link = document.createElement( 'a' );
 				link.href = field.edit_url;
 				link.textContent = __( 'Edit in WordPress', 'leiho' );
@@ -3432,7 +3434,8 @@
 							} );
 						},
 					},
-					quicktags: { buttons: full ? 'strong,em,link,block,ul,ol,li,code' : 'strong,em,link,ul,ol,li' },
+					// Mode simplifié : pas d'onglet Code (HTML).
+					quicktags: cfg.simple ? false : { buttons: full ? 'strong,em,link,block,ul,ol,li,code' : 'strong,em,link,ul,ol,li' },
 					mediaButtons: !! ( full && ctx.def.media ),
 				} );
 				state.tinymceIds.push( editorId );

@@ -212,11 +212,12 @@ class Leiho_Deploy_Manager {
 	 */
 	public static function user_can_deploy() {
 		/**
-		 * Capability requise pour publier (déclencher un deploy).
+		 * Capability WordPress requise pour publier (déclencher un deploy), en
+		 * plus de la permission « Mettre le site en ligne » de l'écran Rôles.
 		 *
-		 * @param string $capability Défaut : publish_pages (éditeur de site vitrine).
+		 * @param string $capability Défaut : edit_posts.
 		 */
-		return current_user_can( apply_filters( 'leiho_deploy_capability', 'publish_pages' ) );
+		return current_user_can( apply_filters( 'leiho_deploy_capability', 'edit_posts' ) ) && Leiho_Roles::can( 'publish_site' );
 	}
 
 	/**

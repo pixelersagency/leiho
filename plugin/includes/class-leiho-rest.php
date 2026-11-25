@@ -265,11 +265,22 @@ class Leiho_Rest {
 	}
 
 	public function can_edit_post( WP_REST_Request $request ) {
-		return self::managed( (int) $request['id'] ) && current_user_can( 'edit_post', (int) $request['id'] );
+		return self::reachable( (int) $request['id'] ) && current_user_can( 'edit_post', (int) $request['id'] );
 	}
 
 	public function can_delete_post( WP_REST_Request $request ) {
-		return self::managed( (int) $request['id'] ) && current_user_can( 'delete_post', (int) $request['id'] );
+		return self::reachable( (int) $request['id'] ) && current_user_can( 'delete_post', (int) $request['id'] );
+	}
+
+	/**
+	 * Contenu que Leiho édite et dont le type est ouvert au rôle de
+	 * l'utilisateur (écran Rôles).
+	 *
+	 * @param int $post_id Post.
+	 * @return bool
+	 */
+	public static function reachable( $post_id ) {
+		return self::managed( $post_id ) && Leiho_Roles::can_type( (string) get_post_type( $post_id ) );
 	}
 
 	/**
@@ -293,7 +304,7 @@ class Leiho_Rest {
 
 	public function can_duplicate_post( WP_REST_Request $request ) {
 		$post = get_post( (int) $request['id'] );
-		if ( ! $post || ! self::managed( $post->ID ) || ! current_user_can( 'edit_post', $post->ID ) ) {
+		if ( ! $post || ! self::reachable( $post->ID ) || ! current_user_can( 'edit_post', $post->ID ) ) {
 			return false;
 		}
 		return $this->can_create_type( $post->post_type );
@@ -306,7 +317,7 @@ class Leiho_Rest {
 
 	public function can_create_type( $post_type ) {
 		$settings = Leiho_Plugin::settings();
-		if ( ! in_array( $post_type, $settings['post_types'], true ) ) {
+		if ( ! in_array( $post_type, $settings['post_types'], true ) || ! Leiho_Roles::can_type( $post_type ) ) {
 			return false;
 		}
 		$object = get_post_type_object( $post_type );
@@ -336,22 +347,38 @@ class Leiho_Rest {
 			}
 			$types = array( $type );
 		}
+		// Types fermés au rôle de l'utilisateur (écran Rôles) : ni listés ni comptés.
+		$types = array_values( array_filter( $types, array( 'Leiho_Roles', 'can_type' ) ) );
+		if ( ! $types ) {
+			$response = rest_ensure_response( array() );
+			$response->header( 'X-WP-Total', 0 );
+			$response->header( 'X-WP-TotalPages', 0 );
+			return $response;
+		}
 
 		$statuses = self::query_statuses( (string) $request->get_param( 'status' ) );
 		$orderby  = (string) $request->get_param( 'orderby' );
 		$orderby  = in_array( $orderby, array( 'modified', 'date' ), true ) ? $orderby : 'title';
 
-		$query = new WP_Query(
-			array(
-				'post_type'      => $types,
-				'post_status'    => $statuses,
-				'posts_per_page' => $per_page,
-				'paged'          => $page,
-				's'              => $search,
-				'orderby'        => $orderby,
-				'order'          => 'title' === $orderby ? 'ASC' : 'DESC',
-			)
+		$args = array(
+			'post_type'      => $types,
+			'post_status'    => $statuses,
+			'posts_per_page' => $per_page,
+			'paged'          => $page,
+			's'              => $search,
+			'orderby'        => $orderby,
+			'order'          => 'title' === $orderby ? 'ASC' : 'DESC',
 		);
+		// Qui n'édite que ses contenus (auteur, contributeur) : la requête ne
+		// compte que les siens, sinon la liste paraît vide sous un total plein.
+		foreach ( $types as $type_name ) {
+			$object = get_post_type_object( $type_name );
+			if ( $object && ! current_user_can( $object->cap->edit_others_posts ) ) {
+				$args['author'] = get_current_user_id();
+				break;
+			}
+		}
+		$query = new WP_Query( $args );
 
 		$items = array();
 		foreach ( $query->posts as $post ) {
