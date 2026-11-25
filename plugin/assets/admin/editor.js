@@ -191,7 +191,8 @@
 
 	function icon( name, size ) {
 		var svg = document.createElementNS( 'http://www.w3.org/2000/svg', 'svg' );
-		svg.setAttribute( 'class', 'leiho-icon' );
+		// Flèches et chevrons : miroir en droite à gauche (CSS .leiho-icon--dir).
+		svg.setAttribute( 'class', { chevron: 1, back: 1, undo: 1, redo: 1 }[ name ] ? 'leiho-icon leiho-icon--dir' : 'leiho-icon' );
 		svg.setAttribute( 'viewBox', '0 0 24 24' );
 		svg.setAttribute( 'width', size || 15 );
 		svg.setAttribute( 'height', size || 15 );
@@ -1134,7 +1135,7 @@
 			var row = document.createElement( 'button' );
 			row.type = 'button';
 			row.className = 'leiho-tree-folder';
-			row.style.paddingLeft = 8 + depth * 14 + 'px';
+			row.style.paddingInlineStart = 8 + depth * 14 + 'px';
 			row.setAttribute( 'aria-expanded', expandAll ? 'true' : 'false' );
 
 			var chevron = icon( 'chevron', 13 );
@@ -1185,7 +1186,7 @@
 		item.type = 'button';
 		item.className = 'leiho-page-item';
 		item.dataset.id = post.id;
-		item.style.paddingLeft = 8 + depth * 14 + 18 + 'px';
+		item.style.paddingInlineStart = 8 + depth * 14 + 18 + 'px';
 		item.title = postPath( post );
 
 		item.appendChild( icon( 'page', 13 ) );
@@ -3343,7 +3344,9 @@
 			'html,body{background:' + token( '--leiho-surface', '#ffffff' ) + ';color:' + token( '--leiho-ink', '#171717' ) + ';}' +
 			'body{font-family:-apple-system,BlinkMacSystemFont,"Inter","Segoe UI",system-ui,sans-serif;font-size:15px;line-height:1.6;margin:12px 16px;}' +
 			'a{color:' + token( '--leiho-accent-ink', '#3d6b00' ) + ';}' +
-			'blockquote{margin:0 0 1em;padding-left:14px;border-left:3px solid ' + token( '--leiho-line-strong', '#cccccc' ) + ';color:' + token( '--leiho-muted', '#555555' ) + ';}' +
+			// Chaque paragraphe prend le sens de son texte (hébreu à droite, anglais à gauche).
+			'p,h1,h2,h3,h4,h5,h6,li,blockquote,div{unicode-bidi:plaintext;}' +
+			'blockquote{margin:0 0 1em;padding-inline-start:14px;border-inline-start:3px solid ' + token( '--leiho-line-strong', '#cccccc' ) + ';color:' + token( '--leiho-muted', '#555555' ) + ';}' +
 			'::selection{background:' + token( '--leiho-accent-soft', 'rgba(197,255,62,.3)' ) + ';}' +
 			// Galeries : vignettes en grille, un clic ouvre « Modifier les photos ».
 			'figure.wp-block-gallery{display:grid;grid-template-columns:repeat(auto-fill,minmax(84px,1fr));gap:6px;margin:0 0 1em;padding:30px 8px 8px;position:relative;border:1px dashed ' + token( '--leiho-line-strong', '#cccccc' ) + ';border-radius:8px;background:' + token( '--leiho-input', 'rgba(0,0,0,.05)' ) + ';cursor:pointer;}' +

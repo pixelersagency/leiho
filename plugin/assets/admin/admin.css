@@ -30,7 +30,8 @@
 	--leiho-error-soft: #fdecea;
 	--leiho-radius: 10px;
 
-	margin: 0 0 0 -20px;
+	margin-block: 0;
+	margin-inline: -20px 0;
 	color: var(--leiho-body);
 	font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
 	font-size: 14px;
@@ -549,7 +550,8 @@
 
 .leiho-step {
 	position: relative;
-	padding: 24px 32px 24px 80px;
+	padding-block: 24px;
+	padding-inline: 80px 32px;
 	background: var(--leiho-bg);
 	border: 1px solid var(--leiho-line);
 	border-radius: var(--leiho-radius);
@@ -564,7 +566,7 @@
 	content: counter( leiho-step );
 	position: absolute;
 	top: 22px;
-	left: 28px;
+	inset-inline-start: 28px;
 	display: grid;
 	place-items: center;
 	width: 30px;
@@ -645,7 +647,7 @@
 .leiho-code pre {
 	margin: 0;
 	padding: 14px 16px;
-	padding-right: 88px;
+	padding-inline-end: 88px;
 	border-radius: 8px;
 	background: #0a0a0a;
 	color: #ededed;
@@ -661,7 +663,7 @@
 .leiho-code button {
 	position: absolute;
 	top: 8px;
-	right: 8px;
+	inset-inline-end: 8px;
 	min-height: 28px;
 	padding: 0 10px;
 	border: 1px solid rgba( 255, 255, 255, 0.16 );
@@ -909,7 +911,8 @@ form + .leiho-form-section,
 .leiho-choice {
 	position: relative;
 	display: block;
-	padding: 14px 16px 14px 44px;
+	padding-block: 14px;
+	padding-inline: 44px 16px;
 	border: 1px solid var(--leiho-line);
 	border-radius: 10px;
 	background: var(--leiho-bg);
@@ -924,7 +927,7 @@ form + .leiho-form-section,
 .leiho-choice input {
 	position: absolute;
 	top: 16px;
-	left: 16px;
+	inset-inline-start: 16px;
 	margin: 0;
 }
 
@@ -971,7 +974,7 @@ form + .leiho-form-section,
 
 .leiho-secret-state {
 	display: inline-flex;
-	margin-left: 8px;
+	margin-inline-start: 8px;
 	vertical-align: middle;
 }
 
@@ -1063,7 +1066,7 @@ form + .leiho-form-section,
 	font-size: var(--leiho-text-sm, 13px);
 	font-weight: 650;
 	letter-spacing: 0.06em;
-	text-align: left;
+	text-align: start;
 	text-transform: uppercase;
 }
 
@@ -1097,13 +1100,13 @@ form + .leiho-form-section,
 
 @media ( max-width: 782px ) {
 	.leiho-admin {
-		margin-left: -10px;
+		margin-inline-start: -10px;
 	}
 
 	.leiho-bar,
 	.leiho-page {
-		padding-left: 16px;
-		padding-right: 16px;
+		padding-inline-start: 16px;
+		padding-inline-end: 16px;
 	}
 
 	.leiho-card,
@@ -1112,11 +1115,12 @@ form + .leiho-form-section,
 	}
 
 	.leiho-step {
-		padding: 20px 20px 20px 64px;
+		padding-block: 20px;
+		padding-inline: 64px 20px;
 	}
 
 	.leiho-step::before {
-		left: 18px;
+		inset-inline-start: 18px;
 	}
 
 	.leiho-row {
@@ -1134,6 +1138,11 @@ form + .leiho-form-section,
 
 	.leiho-diff__arrow {
 		transform: rotate( 90deg );
+	}
+
+	/* La flèche est déjà en miroir en RTL : la même rotation la ferait monter. */
+	[dir="rtl"] .leiho-diff__arrow {
+		transform: rotate( -90deg );
 	}
 
 	.leiho-split {
@@ -1244,7 +1253,8 @@ form + .leiho-form-section,
 
 .leiho-code__file {
 	display: block;
-	padding: 8px 88px 8px 16px;
+	padding-block: 8px;
+	padding-inline: 16px 88px;
 	background: #0a0a0a;
 	border-bottom: 1px solid rgba( 255, 255, 255, 0.1 );
 	color: #a1a1a1;
@@ -1255,13 +1265,13 @@ form + .leiho-form-section,
 }
 
 .leiho-code--file pre {
-	padding-right: 16px;
+	padding-inline-end: 16px;
 	border-radius: 0;
 }
 
 .leiho-code--file button {
 	top: 3px;
-	right: 6px;
+	inset-inline-end: 6px;
 }
 
 .leiho-onboard__guide {
@@ -1282,7 +1292,7 @@ form + .leiho-form-section,
 }
 
 [data-leiho-after-copy] .leiho-btn {
-	margin-left: 6px;
+	margin-inline-start: 6px;
 	vertical-align: middle;
 }
 
@@ -1311,4 +1321,19 @@ form + .leiho-form-section,
 
 .leiho-codetabs [role="tabpanel"] > .leiho-actions:first-child {
 	margin-top: 12px;
+}
+
+/* ── Droite à gauche (RTL) ─────────────────────────────────────────── */
+
+/* Icônes directionnelles (flèches, chevrons, retour, annuler) : miroir en RTL.
+   La propriété scale se compose avec les rotations des états ouverts. */
+[dir="rtl"] .leiho-icon--dir {
+	scale: -1 1;
+}
+
+/* Code, adresses et commandes restent de gauche à droite. */
+[dir="rtl"] :is(.leiho-app, .leiho-admin) :is(pre, code, kbd, samp) {
+	direction: ltr;
+	unicode-bidi: isolate;
+	text-align: left;
 }

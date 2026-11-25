@@ -37,6 +37,11 @@
 		return 'leiho-ui-' + prefix + '-' + count;
 	}
 
+	/** Vrai quand l'élément s'affiche de droite à gauche (admin en hébreu, arabe…). */
+	function isRtl( el ) {
+		return 'rtl' === window.getComputedStyle( el || document.documentElement ).direction;
+	}
+
 	function svg( paths, className ) {
 		var el = document.createElementNS( SVG_NS, 'svg' );
 		el.setAttribute( 'viewBox', '0 0 24 24' );
@@ -257,7 +262,7 @@
 		el.style.maxHeight = Math.min( 340, room ) + 'px';
 		el.style.top = ( placeBelow ? r.bottom + gap : r.top - gap - height ) + 'px';
 		var width = el.offsetWidth;
-		var left = Math.min( r.left, vw - width - margin );
+		var left = Math.min( isRtl( el ) ? r.right - width : r.left, vw - width - margin );
 		el.style.left = Math.max( margin, left ) + 'px';
 	};
 
@@ -1270,7 +1275,7 @@
 
 		function navButton( dir ) {
 			var b = el( 'button', 'leiho-datepicker__nav', { type: 'button' } );
-			b.appendChild( svg( dir < 0 ? ICONS.left : ICONS.right ) );
+			b.appendChild( svg( dir < 0 ? ICONS.left : ICONS.right, 'leiho-icon--dir' ) );
 			b.addEventListener( 'click', function () {
 				if ( 'months' === state.view ) {
 					state.y += dir;
@@ -1596,12 +1601,13 @@
 		function onGridKey( e ) {
 			var handled = true;
 			var f = state.focus;
+			var forward = isRtl( grid ) ? -1 : 1;
 			switch ( e.key ) {
 				case 'ArrowLeft':
-					shiftFocus( -1 );
+					shiftFocus( -forward );
 					break;
 				case 'ArrowRight':
-					shiftFocus( 1 );
+					shiftFocus( forward );
 					break;
 				case 'ArrowUp':
 					shiftFocus( -7 );
@@ -1667,7 +1673,8 @@
 				if ( i < 0 ) {
 					return;
 				}
-				var to = { ArrowLeft: i - 1, ArrowRight: i + 1, ArrowUp: i - cols, ArrowDown: i + cols, Home: 0, End: buttons.length - 1 }[ e.key ];
+				var forward = isRtl( grid ) ? -1 : 1;
+				var to = { ArrowLeft: i - forward, ArrowRight: i + forward, ArrowUp: i - cols, ArrowDown: i + cols, Home: 0, End: buttons.length - 1 }[ e.key ];
 				if ( undefined === to ) {
 					return;
 				}
@@ -1797,7 +1804,7 @@
 			var above = r.top - gap - margin;
 			var top = below >= h || below >= above ? r.bottom + gap : r.top - gap - h;
 			dialog.style.top = Math.max( margin, Math.min( top, vh - h - margin ) ) + 'px';
-			dialog.style.left = Math.max( margin, Math.min( r.left, vw - w - margin ) ) + 'px';
+			dialog.style.left = Math.max( margin, Math.min( isRtl( dialog ) ? r.right - w : r.left, vw - w - margin ) ) + 'px';
 		}
 
 		function open() {

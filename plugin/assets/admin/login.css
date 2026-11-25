@@ -234,13 +234,13 @@ html body.leiho-login #login .wp-pwd {
 
 html body.leiho-login #login .wp-pwd input[type="password"],
 html body.leiho-login #login .wp-pwd input[type="text"] {
-	padding-right: 48px;
+	padding-inline-end: 48px;
 }
 
 html body.leiho-login #login .button.wp-hide-pw {
 	position: absolute;
 	top: 0;
-	right: 0;
+	inset-inline-end: 0;
 	width: 44px;
 	height: 44px;
 	min-height: 44px;
@@ -518,7 +518,7 @@ html body.leiho-login .leiho-login-badge i {
 }
 
 html body.leiho-login .leiho-login-badge b {
-	margin-left: -3px;
+	margin-inline-start: -3px;
 	color: var(--lh-fg);
 	font-weight: 500;
 }

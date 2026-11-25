@@ -101,6 +101,9 @@
 			// Flèches gauche / droite entre les onglets (motif ARIA tablist).
 			b.addEventListener( 'keydown', function ( event ) {
 				var step = { ArrowRight: 1, ArrowLeft: -1 }[ event.key ];
+				if ( step && 'rtl' === window.getComputedStyle( b ).direction ) {
+					step = -step;
+				}
 				if ( step ) {
 					event.preventDefault();
 					var next = buttons[ ( i + step + buttons.length ) % buttons.length ];

@@ -10,6 +10,12 @@ defined( 'ABSPATH' ) || exit;
  */
 class Leiho_Icons {
 
+	/**
+	 * Icônes qui indiquent un sens (flèches, retour, annuler) : miroir quand
+	 * l'admin s'affiche de droite à gauche (CSS .leiho-icon--dir).
+	 */
+	const DIRECTIONAL = array( 'back', 'arrow', 'undo', 'redo', 'logout', 'panel' );
+
 	const PATHS = array(
 		'back'     => array( 'M15 5l-7 7 7 7' ),
 		'arrow'    => array( 'M5 12h14', 'M13 6l6 6-6 6' ),
@@ -58,9 +64,10 @@ class Leiho_Icons {
 		}
 
 		return sprintf(
-			'<svg class="leiho-icon" viewBox="0 0 24 24" width="%1$d" height="%1$d" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">%2$s</svg>',
+			'<svg class="leiho-icon%3$s" viewBox="0 0 24 24" width="%1$d" height="%1$d" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">%2$s</svg>',
 			(int) $size,
-			$d
+			$d,
+			in_array( $name, self::DIRECTIONAL, true ) ? ' leiho-icon--dir' : ''
 		);
 	}
 

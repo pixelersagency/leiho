@@ -146,7 +146,8 @@
 	function icon( name, size ) {
 		var ns = 'http://www.w3.org/2000/svg';
 		var svg = document.createElementNS( ns, 'svg' );
-		svg.setAttribute( 'class', 'leiho-icon' );
+		// Flèches et chevrons : miroir en droite à gauche (CSS .leiho-icon--dir).
+		svg.setAttribute( 'class', { chevron: 1 }[ name ] ? 'leiho-icon leiho-icon--dir' : 'leiho-icon' );
 		svg.setAttribute( 'viewBox', '0 0 24 24' );
 		svg.setAttribute( 'width', size || 16 );
 		svg.setAttribute( 'height', size || 16 );

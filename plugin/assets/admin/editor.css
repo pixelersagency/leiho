@@ -244,7 +244,7 @@ body > .screen-reader-text[role="status"] {
 	flex: 0 0 auto;
 	width: var(--leiho-control-xs, 28px);
 	height: var(--leiho-control-xs, 28px);
-	margin-right: 5px;
+	margin-inline-end: 5px;
 }
 
 .leiho-doc {
@@ -267,7 +267,8 @@ body > .screen-reader-text[role="status"] {
 	max-width: 150px;
 	height: var(--leiho-control-xs, 28px);
 	min-height: 0;
-	padding: 0 26px 0 10px;
+	padding-block: 0;
+	padding-inline: 10px 26px;
 	border: 1px solid var(--leiho-line);
 	border-radius: 999px;
 	background-color: var(--leiho-surface);
@@ -328,7 +329,8 @@ body > .screen-reader-text[role="status"] {
 	display: inline-block;
 	width: 6px;
 	height: 6px;
-	margin: 0 7px 1px 0;
+	margin-block: 0 1px;
+	margin-inline: 0 7px;
 	border-radius: 50%;
 	background: currentColor;
 	vertical-align: middle;
@@ -427,7 +429,7 @@ body > .screen-reader-text[role="status"] {
 	width: 272px;
 	min-height: 0;
 	background: var(--leiho-bg);
-	border-right: 1px solid var(--leiho-line);
+	border-inline-end: 1px solid var(--leiho-line);
 }
 
 .leiho-stage {
@@ -443,7 +445,7 @@ body > .screen-reader-text[role="status"] {
 	min-height: 0;
 	overflow-y: auto;
 	background: var(--leiho-bg);
-	border-left: 1px solid var(--leiho-line);
+	border-inline-start: 1px solid var(--leiho-line);
 }
 
 /* ── Barre latérale ────────────────────────────────────────────────── */
@@ -541,7 +543,7 @@ body > .screen-reader-text[role="status"] {
 	background: transparent;
 	color: var(--leiho-body);
 	font-size: var(--leiho-text-md, 15px);
-	text-align: left;
+	text-align: start;
 	cursor: pointer;
 }
 
@@ -636,7 +638,7 @@ body > .screen-reader-text[role="status"] {
 .leiho-tree-actions {
 	position: absolute;
 	top: 50%;
-	right: 4px;
+	inset-inline-end: 4px;
 	display: inline-flex;
 	gap: 2px;
 	opacity: 0;
@@ -655,12 +657,12 @@ body > .screen-reader-text[role="status"] {
 
 .leiho-page-row:hover .leiho-page-item,
 .leiho-page-row:focus-within .leiho-page-item {
-	padding-right: 67px;
+	padding-inline-end: 67px;
 }
 
 .leiho-tree-row:hover .leiho-tree-node,
 .leiho-tree-row:focus-within .leiho-tree-node {
-	padding-right: 120px;
+	padding-inline-end: 120px;
 }
 
 /* Au survol, les actions prennent la place du compteur : il disparaît au
@@ -789,7 +791,7 @@ body > .screen-reader-text[role="status"] {
 	color: var(--leiho-ink);
 	font-size: var(--leiho-text-base, 14px);
 	font-weight: 650;
-	text-align: left;
+	text-align: start;
 	cursor: pointer;
 }
 
@@ -897,7 +899,7 @@ body > .screen-reader-text[role="status"] {
 
 .leiho-frame-help ol {
 	margin: 19px 0 29px;
-	padding-left: 24px;
+	padding-inline-start: 24px;
 }
 
 .leiho-frame-help li {
@@ -1001,8 +1003,8 @@ body > .screen-reader-text[role="status"] {
 
 .leiho-field--error {
 	padding: 12px 14px;
-	margin-left: -14px;
-	margin-right: -14px;
+	margin-inline-start: -14px;
+	margin-inline-end: -14px;
 	border-radius: 8px;
 	background: var(--leiho-error-soft, #fdecea);
 }
@@ -1047,7 +1049,7 @@ body > .screen-reader-text[role="status"] {
 
 .leiho-panel select:not([multiple]),
 .leiho-sidebar select {
-	padding-right: 38px;
+	padding-inline-end: 38px;
 	background: var(--leiho-bg) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%236c6f7b' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E") no-repeat right 10px center / 14px;
 	-webkit-appearance: none;
 	appearance: none;
@@ -1081,13 +1083,13 @@ body > .screen-reader-text[role="status"] {
 
 .leiho-counted input,
 .leiho-counted textarea {
-	padding-right: 77px;
+	padding-inline-end: 77px;
 }
 
 .leiho-counter {
 	position: absolute;
 	top: 9px;
-	right: 10px;
+	inset-inline-end: 10px;
 	color: var(--leiho-faint);
 	font-size: var(--leiho-text-sm, 13px);
 	font-variant-numeric: tabular-nums;
@@ -1564,7 +1566,7 @@ html.leiho-fullscreen .mce-floatpanel {
 }
 
 .leiho-app .leiho-toolbar-end .leiho-btn {
-	margin-left: 2px;
+	margin-inline-start: 2px;
 }
 
 .leiho-app .leiho-exit {
@@ -1600,7 +1602,8 @@ html.leiho-fullscreen .mce-floatpanel {
 
 .leiho-app .leiho-editor .leiho-status-select {
 	height: var(--leiho-control-sm, 30px);
-	padding: 0 24px 0 10px;
+	padding-block: 0;
+	padding-inline: 10px 24px;
 	border: 0;
 	border-radius: 99px;
 	background-color: var(--leiho-input);
@@ -1612,7 +1615,8 @@ html.leiho-fullscreen .mce-floatpanel {
 	gap: 7px;
 	width: auto;
 	max-width: 240px;
-	padding: 0 8px 0 11px;
+	padding-block: 0;
+	padding-inline: 11px 8px;
 }
 
 .leiho-app .leiho-editor .leiho-select.leiho-status-select .leiho-select__chevron {
@@ -1806,8 +1810,8 @@ html.leiho-fullscreen .mce-floatpanel {
 
 .leiho-app .leiho-field--error {
 	padding: 10px 12px;
-	margin-left: -12px;
-	margin-right: -12px;
+	margin-inline-start: -12px;
+	margin-inline-end: -12px;
 }
 
 .leiho-app .leiho-field-error {
@@ -1833,7 +1837,7 @@ html.leiho-fullscreen .mce-floatpanel {
 }
 
 .leiho-app .leiho-panel select:not([multiple]) {
-	padding-right: 34px;
+	padding-inline-end: 34px;
 	background-size: 12px;
 	background-position: right 9px center;
 }
@@ -2049,14 +2053,15 @@ html.leiho-fullscreen .mce-floatpanel {
 }
 
 .leiho-app .leiho-repeater-row .leiho-repeater-row {
-	padding: 8px 0 4px 12px;
+	padding-block: 8px 4px;
+	padding-inline: 12px 0;
 	border: 0;
-	border-left: 2px solid var(--leiho-line-strong);
+	border-inline-start: 2px solid var(--leiho-line-strong);
 	border-radius: 0;
 }
 
 .leiho-app .leiho-repeater-row .leiho-repeater-row:focus-within {
-	border-left-color: var(--leiho-accent-ink);
+	border-inline-start-color: var(--leiho-accent-ink);
 }
 
 .leiho-app .leiho-repeater-row .leiho-repeater-title {
@@ -2064,7 +2069,30 @@ html.leiho-fullscreen .mce-floatpanel {
 	font-size: var(--leiho-text-sm, 13px);
 }
 
-/* Galerie de photos : « Supprimer la galerie » à gauche, loin de « OK ». */
+/* Galerie de photos : « Supprimer la galerie » au début de la ligne, loin de « OK ». */
 .leiho-dialog__actions > .leiho-btn--danger:first-child {
-	margin-right: auto;
+	margin-inline-end: auto;
+}
+
+/* ── Droite à gauche (RTL) ─────────────────────────────────────────── */
+
+/* Icônes directionnelles (flèches, chevrons, retour, annuler) : miroir en RTL.
+   La propriété scale se compose avec les rotations des états ouverts. */
+[dir="rtl"] .leiho-icon--dir {
+	scale: -1 1;
+}
+
+[dir="rtl"] .leiho-editor .leiho-status-select {
+	background-position: left 4px top 50%;
+}
+
+[dir="rtl"] .leiho-app .leiho-panel select:not([multiple]) {
+	background-position: left 9px center;
+}
+
+/* Place du compteur de caractères : les règles des champs du panneau
+   (padding: 7px 11px) l'écrasaient, le texte passait sous le compteur. */
+.leiho-app .leiho-panel .leiho-counted input,
+.leiho-app .leiho-panel .leiho-counted textarea {
+	padding-inline-end: 77px;
 }

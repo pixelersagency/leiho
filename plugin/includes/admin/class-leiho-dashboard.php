@@ -1543,13 +1543,13 @@ CODE;
 					<div class="leiho-row">
 						<label for="leiho_front_url"><?php esc_html_e( 'Site URL', 'leiho' ); ?></label>
 						<div>
-							<input type="url" id="leiho_front_url" name="leiho_settings[front_url]" value="<?php echo esc_attr( $settings['front_url'] ); ?>" placeholder="https://www.example.com">
+							<input dir="ltr" type="url" id="leiho_front_url" name="leiho_settings[front_url]" value="<?php echo esc_attr( $settings['front_url'] ); ?>" placeholder="https://www.example.com">
 						</div>
 					</div>
 					<div class="leiho-row">
 						<label for="leiho_preview_url"><?php esc_html_e( 'Preview URL', 'leiho' ); ?></label>
 						<div>
-							<input type="url" id="leiho_preview_url" name="leiho_settings[preview_url]" value="<?php echo esc_attr( $settings['preview_url'] ); ?>" placeholder="https://preview.example.com">
+							<input dir="ltr" type="url" id="leiho_preview_url" name="leiho_settings[preview_url]" value="<?php echo esc_attr( $settings['preview_url'] ); ?>" placeholder="https://preview.example.com">
 							<span class="leiho-help"><?php esc_html_e( 'Optional. Shown in the editor instead of the public site: useful when the public site is generated at build time and an up-to-date version is served elsewhere.', 'leiho' ); ?></span>
 						</div>
 					</div>
@@ -1578,7 +1578,7 @@ CODE;
 								<?php foreach ( $public_types as $type ) : ?>
 									<div>
 										<code><?php echo esc_html( $type->name ); ?></code>
-										<input type="text" name="leiho_settings[url_patterns][<?php echo esc_attr( $type->name ); ?>]" value="<?php echo esc_attr( isset( $settings['url_patterns'][ $type->name ] ) ? $settings['url_patterns'][ $type->name ] : '' ); ?>" placeholder="/{slug}" aria-label="<?php echo esc_attr( sprintf( /* translators: %s: post type name. */ __( 'URL pattern for %s', 'leiho' ), $type->labels->name ) ); ?>">
+										<input dir="ltr" type="text" name="leiho_settings[url_patterns][<?php echo esc_attr( $type->name ); ?>]" value="<?php echo esc_attr( isset( $settings['url_patterns'][ $type->name ] ) ? $settings['url_patterns'][ $type->name ] : '' ); ?>" placeholder="/{slug}" aria-label="<?php echo esc_attr( sprintf( /* translators: %s: post type name. */ __( 'URL pattern for %s', 'leiho' ), $type->labels->name ) ); ?>">
 									</div>
 								<?php endforeach; ?>
 							</div>
@@ -1589,7 +1589,7 @@ CODE;
 					<div class="leiho-row">
 						<label for="leiho_path_meta_key"><?php esc_html_e( 'Field holding the URL', 'leiho' ); ?></label>
 						<div>
-							<input type="text" id="leiho_path_meta_key" name="leiho_settings[path_meta_key]" value="<?php echo esc_attr( $settings['path_meta_key'] ); ?>" placeholder="page_path">
+							<input dir="ltr" type="text" id="leiho_path_meta_key" name="leiho_settings[path_meta_key]" value="<?php echo esc_attr( $settings['path_meta_key'] ); ?>" placeholder="page_path">
 							<span class="leiho-help"><?php esc_html_e( 'Optional. Name of a field (Leiho collection, ACF) or meta key that holds each item’s actual URL (for example /services/audit). Takes priority over the patterns above.', 'leiho' ); ?></span>
 						</div>
 					</div>
@@ -1613,7 +1613,7 @@ CODE;
 						<div class="leiho-row">
 							<label for="leiho_build_hook_url"><?php esc_html_e( 'Build hook URL', 'leiho' ); ?></label>
 							<div>
-								<input type="url" id="leiho_build_hook_url" name="leiho_settings[build_hook_url]" value="<?php echo esc_attr( $settings['build_hook_url'] ); ?>" placeholder="https://api.netlify.com/build_hooks/…">
+								<input dir="ltr" type="url" id="leiho_build_hook_url" name="leiho_settings[build_hook_url]" value="<?php echo esc_attr( $settings['build_hook_url'] ); ?>" placeholder="https://api.netlify.com/build_hooks/…">
 							</div>
 						</div>
 					</div>
@@ -1621,7 +1621,7 @@ CODE;
 					<div class="leiho-driver-fields" data-leiho-driver-fields="coolify">
 						<div class="leiho-row">
 							<label for="leiho_coolify_url"><?php esc_html_e( 'Coolify webhook URL', 'leiho' ); ?></label>
-							<div><input type="url" id="leiho_coolify_url" name="leiho_settings[coolify_url]" value="<?php echo esc_attr( $settings['coolify_url'] ); ?>"></div>
+							<div><input dir="ltr" type="url" id="leiho_coolify_url" name="leiho_settings[coolify_url]" value="<?php echo esc_attr( $settings['coolify_url'] ); ?>"></div>
 						</div>
 						<?php self::secret_row( 'coolify_token', __( 'Coolify token', 'leiho' ) ); ?>
 					</div>
@@ -1639,17 +1639,17 @@ CODE;
 					<div class="leiho-driver-fields" data-leiho-driver-fields="github github_commit">
 						<div class="leiho-row">
 							<label for="leiho_gh_repo"><?php esc_html_e( 'GitHub repository', 'leiho' ); ?></label>
-							<div><input type="text" id="leiho_gh_repo" name="leiho_settings[gh_repo]" value="<?php echo esc_attr( $settings['gh_repo'] ); ?>" placeholder="organization/site"></div>
+							<div><input dir="ltr" type="text" id="leiho_gh_repo" name="leiho_settings[gh_repo]" value="<?php echo esc_attr( $settings['gh_repo'] ); ?>" placeholder="organization/site"></div>
 						</div>
 						<div class="leiho-driver-fields" data-leiho-driver-fields="github">
 							<div class="leiho-row">
 								<label for="leiho_gh_workflow"><?php esc_html_e( 'Workflow file', 'leiho' ); ?></label>
-								<div><input type="text" id="leiho_gh_workflow" name="leiho_settings[gh_workflow]" value="<?php echo esc_attr( $settings['gh_workflow'] ); ?>" placeholder="deploy.yml"></div>
+								<div><input dir="ltr" type="text" id="leiho_gh_workflow" name="leiho_settings[gh_workflow]" value="<?php echo esc_attr( $settings['gh_workflow'] ); ?>" placeholder="deploy.yml"></div>
 							</div>
 						</div>
 						<div class="leiho-row">
 							<label for="leiho_gh_branch"><?php esc_html_e( 'Branch', 'leiho' ); ?></label>
-							<div><input type="text" id="leiho_gh_branch" name="leiho_settings[gh_branch]" value="<?php echo esc_attr( $settings['gh_branch'] ); ?>" placeholder="main"></div>
+							<div><input dir="ltr" type="text" id="leiho_gh_branch" name="leiho_settings[gh_branch]" value="<?php echo esc_attr( $settings['gh_branch'] ); ?>" placeholder="main"></div>
 						</div>
 						<?php self::secret_row( 'gh_pat', __( 'GitHub token', 'leiho' ), __( 'Fine-grained token limited to this repository only: “Actions: Read and write” for GitHub Actions, “Contents: Read and write” for the deployment commit. Don’t use a classic token: it grants access to all your repositories.', 'leiho' ) ); ?>
 					</div>
@@ -2259,7 +2259,7 @@ CODE;
 						<div>
 							<div class="leiho-inline-field">
 								<span class="leiho-muted"><?php echo esc_html( untrailingslashit( home_url() ) . '/' ); ?></span>
-								<input type="text" id="leiho_login_slug" name="leiho_settings[login_slug]" value="<?php echo esc_attr( $settings['login_slug'] ); ?>" placeholder="<?php esc_attr_e( 'e.g. my-office', 'leiho' ); ?>" pattern="[A-Za-z0-9-]{4,50}" autocomplete="off" spellcheck="false">
+								<input dir="ltr" type="text" id="leiho_login_slug" name="leiho_settings[login_slug]" value="<?php echo esc_attr( $settings['login_slug'] ); ?>" placeholder="<?php esc_attr_e( 'e.g. my-office', 'leiho' ); ?>" pattern="[A-Za-z0-9-]{4,50}" autocomplete="off" spellcheck="false">
 							</div>
 							<?php if ( '' !== $settings['login_slug'] && ! Leiho_Login::rescue() ) : ?>
 								<?php /* translators: %s: login URL. */ ?>
@@ -2458,7 +2458,7 @@ CODE;
 				<div class="leiho-row">
 					<label for="leiho_content_token"><?php esc_html_e( 'Content token', 'leiho' ); ?></label>
 					<div>
-						<input type="text" id="leiho_content_token" value="<?php echo esc_attr( $token ); ?>" readonly onfocus="this.select()">
+						<input dir="ltr" type="text" id="leiho_content_token" value="<?php echo esc_attr( $token ); ?>" readonly onfocus="this.select()">
 						<label class="leiho-inline-check"><input type="checkbox" name="leiho_regen_content_token" value="1"> <?php esc_html_e( 'Generate a new token (the current one stops working)', 'leiho' ); ?></label>
 						<span class="leiho-help"><?php esc_html_e( 'Set it as LEIHO_TOKEN in the front end’s build environment. Sent in the X-Leiho-Token header.', 'leiho' ); ?></span>
 					</div>
@@ -2477,7 +2477,7 @@ CODE;
 				<?php echo esc_html( $label ); ?>
 			</label>
 			<div>
-				<input type="password" id="leiho_secret_<?php echo esc_attr( $name ); ?>" name="leiho_secret[<?php echo esc_attr( $name ); ?>]" value="" autocomplete="new-password"
+				<input dir="ltr" type="password" id="leiho_secret_<?php echo esc_attr( $name ); ?>" name="leiho_secret[<?php echo esc_attr( $name ); ?>]" value="" autocomplete="new-password"
 					placeholder="<?php echo 'ok' === $status ? esc_attr__( 'Saved — leave empty to keep it', 'leiho' ) : esc_attr__( 'Not set', 'leiho' ); ?>">
 				<?php if ( 'unreadable' === $status ) : ?>
 					<span class="leiho-help" style="color:var(--leiho-error)"><?php esc_html_e( 'This secret can’t be read anymore: the WordPress salts have changed (host or security plugin). Enter it again.', 'leiho' ); ?></span>

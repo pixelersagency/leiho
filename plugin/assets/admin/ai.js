@@ -52,7 +52,8 @@
 	function icon( name, size ) {
 		var ns = 'http://www.w3.org/2000/svg';
 		var svg = document.createElementNS( ns, 'svg' );
-		svg.setAttribute( 'class', 'leiho-icon' );
+		// Flèches et chevrons : miroir en droite à gauche (CSS .leiho-icon--dir).
+		svg.setAttribute( 'class', { chevron: 1 }[ name ] ? 'leiho-icon leiho-icon--dir' : 'leiho-icon' );
 		svg.setAttribute( 'viewBox', '0 0 24 24' );
 		svg.setAttribute( 'width', size || 16 );
 		svg.setAttribute( 'height', size || 16 );
@@ -363,7 +364,8 @@
 			}
 			var below = vh - r.bottom > menu.offsetHeight + 12 || vh - r.bottom > r.top;
 			menu.style.top = ( below ? r.bottom + 4 : Math.max( 8, r.top - 4 - menu.offsetHeight ) ) + 'px';
-			menu.style.left = Math.max( 8, Math.min( r.right - menu.offsetWidth, vw - menu.offsetWidth - 8 ) ) + 'px';
+			var rtl = 'rtl' === window.getComputedStyle( anchor ).direction;
+			menu.style.left = Math.max( 8, Math.min( rtl ? r.left : r.right - menu.offsetWidth, vw - menu.offsetWidth - 8 ) ) + 'px';
 		}
 		place();
 
