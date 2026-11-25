@@ -1,69 +1,242 @@
 <p align="center">
+  <a href="https://leiho.dev">
+    <picture>
+      <source media="(prefers-color-scheme: dark)" srcset=".github/assets/readme/hero-dark.webp">
+      <img src=".github/assets/readme/hero.webp" width="100%" alt="Leiho: edit the real site. Your front end, inside wp-admin. Click, type, publish.">
+    </picture>
+  </a>
+</p>
+
+<p align="center">
+  <strong>Edit the real site.</strong><br />
+  Visual editing for headless WordPress: your editors click the real front end inside wp-admin, type, and publish.
+</p>
+
+<p align="center">
+  <a href="https://leiho.dev/get/leiho.zip"><img src=".github/assets/readme/button-download.webp" height="46" alt="Download leiho.zip"></a>
+  <a href="https://leiho.dev/gh"><img src=".github/assets/readme/button-try.webp" height="46" alt="Try in your browser"></a>
+  <a href="https://leiho.dev">
+    <picture>
+      <source media="(prefers-color-scheme: dark)" srcset=".github/assets/readme/button-site-dark.webp">
+      <img src=".github/assets/readme/button-site.webp" height="46" alt="leiho.dev">
+    </picture>
+  </a>
+</p>
+
+<p align="center">
+  <sub>WordPress 6.0+ and PHP 7.4+. Works with Next.js, Astro, Nuxt, SvelteKit, Remix, Vite or plain HTML. Free and open source, GPL-2.0-or-later. The demo runs in your browser: no install, no sign-up.</sub>
+</p>
+
+<p align="center">
+  <a href="https://github.com/pixelersagency/leiho/releases"><img alt="Latest release" src="https://img.shields.io/github/v/release/pixelersagency/leiho?include_prereleases&style=flat-square&labelColor=0A0A0A&color=C5FF3E&label=release"></a>
+  <a href="https://github.com/pixelersagency/leiho/stargazers"><img alt="GitHub stars" src="https://img.shields.io/github/stars/pixelersagency/leiho?style=flat-square&labelColor=0A0A0A&color=C5FF3E&logo=github"></a>
+  <a href="LICENSE"><img alt="License: GPL-2.0-or-later" src="https://img.shields.io/badge/license-GPL--2.0--or--later-C5FF3E?style=flat-square&labelColor=0A0A0A"></a>
+  <a href="https://www.npmjs.com/package/leiho"><img alt="npm: leiho" src="https://img.shields.io/npm/v/leiho?style=flat-square&labelColor=0A0A0A&color=C5FF3E&label=npm&logo=npm"></a>
+  <img alt="Status: stable" src="https://img.shields.io/badge/status-stable-C5FF3E?style=flat-square&labelColor=0A0A0A">
+</p>
+
+<p align="center"><a href="https://leiho.dev/gh"><img src=".github/assets/leiho-demo.gif" width="480" alt="The Leiho editor in wp-admin: click a heading on the real site, type, and the page changes live; then publish"></a></p>
+
+<p align="center">
+  <sub><a href="README.fr.md">Français</a> · <a href="https://leiho.dev/docs">Docs</a> · <a href="CHANGELOG.md">Changelog</a> · <a href="bridge/">Bridge package</a> · <a href="examples/">Framework examples</a><br />
+  <em>Leiho</em> means <em>window</em> in Basque. It was called Okno until 1.0.0-beta.11: see <a href="#coming-from-okno">Coming from Okno</a>.</sub>
+</p>
+
+<br />
+
+<p align="center">
   <picture>
-    <source media="(prefers-color-scheme: dark)" srcset=".github/assets/leiho-logo-dark.svg">
-    <img src=".github/assets/leiho-logo.svg" alt="Leiho" width="260">
+    <source media="(prefers-color-scheme: dark)" srcset=".github/assets/readme/heading-live-dark.webp">
+    <img src=".github/assets/readme/heading-live.webp" width="465" alt="Click the page. Type. It's live.">
   </picture>
 </p>
 
-<h1 align="center">Edit the real site.</h1>
+<p align="center">Leiho loads your real front end inside wp-admin. Editors click a heading, an image or a list,<br />change the field behind it, and the page updates as they type.</p>
+
+<table>
+  <tr>
+    <td width="50%"><strong>Live preview, in the browser.</strong><br />Typing updates the page right away; nothing reaches WordPress until <b>Save</b>. Fields with a limit show a character counter.</td>
+    <td width="50%"><strong>Undo, drafts, history.</strong><br />Ctrl+Z, Ctrl+Shift+Z and Ctrl+S. Unsaved changes survive a closed tab, and every saved change is logged with its before and after values and its author.</td>
+  </tr>
+  <tr>
+    <td><strong>Compose pages.</strong><br />Add, move, duplicate and remove sections where you bound them to flexible content or a Leiho blocks field, only with the layouts you defined.</td>
+    <td><strong>No silent overwrites.</strong><br />If someone else changed the page meanwhile, Leiho refuses to save over it and offers to reload.</td>
+  </tr>
+</table>
+
+<br />
 
 <p align="center">
-  <a href="https://leiho.dev/try"><b>▶ Try it in your browser</b></a> · no install, no sign-up<br>
-  <a href="https://leiho.dev">leiho.dev</a> · <a href="https://leiho.dev/get/leiho.zip">Download leiho.zip</a> · <a href="https://leiho.dev/docs">Docs</a>
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset=".github/assets/readme/heading-frontend-dark.webp">
+    <img src=".github/assets/readme/heading-frontend.webp" width="426" alt="Your front end stays yours">
+  </picture>
+</p>
+
+<p align="center">Keep your framework, your components and your host. Add a small bridge script, then mark<br />what editors may change with <code>data-wp-field</code>. No page builder, no free HTML.</p>
+
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset=".github/assets/readme/frameworks-dark.webp">
+    <img src=".github/assets/readme/frameworks.webp" width="564" alt="Next.js, Astro, Nuxt, SvelteKit, Remix, Vite and plain HTML">
+  </picture>
 </p>
 
 <p align="center">
-  <a href="https://leiho.dev/try"><img src=".github/assets/leiho-demo.gif" alt="Leiho editor: click a heading on the real site in wp-admin, type, and publish" width="560"></a>
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset=".github/assets/readme/scene-dark.webp">
+    <img src=".github/assets/readme/scene.webp" width="100%" alt="The page in the Leiho editor with its heading selected, the template where the heading carries data-wp-field="hero_title", and the field panel where the title is being typed">
+  </picture>
 </p>
 
+<p align="center">React apps add one component, <code>&lt;LeihoBridge /&gt;</code>. Other sites load <code>leiho-bridge.js</code> only inside the editor,<br />so visitors download a few lines of script. Step-by-step setups are in <a href="examples/"><code>examples/</code></a>.</p>
 
-**Visual editing for headless WordPress.** Your editors see the real front end — Next.js, Astro, Remix, Vite, Nuxt, SvelteKit or plain HTML — inside wp-admin. They click a heading, change it, watch it update live, save, and publish. Define your content types in Leiho, or keep your existing ACF fields: either way WordPress stays the single source of truth, with no page builder and no lock-in.
+<br />
 
-> *Leiho* means *window* in Basque — a window onto the real site. Leiho was called **Okno** until 1.0.0-beta.11: see [Coming from Okno](#coming-from-okno).
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset=".github/assets/readme/heading-editors-dark.webp">
+    <img src=".github/assets/readme/heading-editors.webp" width="498" alt="Your editors stay in WordPress">
+  </picture>
+</p>
 
-[Français](README.fr.md) · [Changelog](CHANGELOG.md) · [Bridge package](bridge/) · [Framework examples](examples/)
+<p align="center">WordPress stays the single source of truth, with its roles, drafts, media library and revisions.<br />Leiho opens full screen as the back office, so editors never need the rest of wp-admin.</p>
 
-> **Status: 1.0.0-rc.10 (release candidate).** The interface is in English and French (it follows the WordPress site language).
+<table>
+  <tr>
+    <td width="50%"><strong>ACF, JetEngine or Leiho Collections.</strong><br />Keep your ACF fields (free or Pro) or your JetEngine meta boxes as they are, or define content types in Leiho, stored in typed tables. An ACF type can <a href="#import-from-acf">move over</a> one at a time.</td>
+    <td width="50%"><strong>Publishing that fits your host.</strong><br />Live content, a build hook (Vercel, Netlify, Cloudflare Pages), GitHub Actions with live build status, a publish commit, or Coolify.</td>
+  </tr>
+  <tr>
+    <td><strong>A Security tab.</strong><br />File editor off, login errors that don't reveal usernames, failed attempts limited, a login address of your choice, comments off when the site doesn't use them.</td>
+    <td><strong>Leiho Zero.</strong><br />An empty theme shipped with Leiho, for a WordPress that only serves as a back office. One button installs it; another brings your previous theme back.</td>
+  </tr>
+</table>
 
----
+<br />
 
-## Why
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset=".github/assets/readme/heading-hood-dark.webp">
+    <img src=".github/assets/readme/heading-hood.webp" width="255" alt="Under the hood">
+  </picture>
+</p>
 
-Headless WordPress gives developers a modern front end, but it takes the "what you see" away from editors. They fill in forms blind, wait for a build, and discover the result on the live site. Leiho puts the site back in front of them, without asking developers to give up their stack.
+<p align="center">One WordPress plugin, and one small script in your front end<br />that talks to wp-admin and to nothing else.</p>
 
-- **Works with any front end.** A ~10 KB, dependency-free bridge talks to wp-admin through `postMessage`. React apps get a one-line component.
-- **Your data model, untouched.** Leiho reads and writes the ACF fields you already have — repeaters, groups, flexible content, relationships, images.
-- **Or no field plugin at all.** Leiho Collections defines content types and fields in Leiho itself, stored in typed tables. WordPress + Leiho is enough.
-- **Nothing public.** The bridge never calls the WordPress API and holds no secrets. Every message is origin-checked on both sides.
-- **Publishing that fits your hosting.** Live content, a build hook (Vercel, Netlify, Cloudflare Pages), GitHub Actions with live build status, a publish commit, or Coolify.
+- **A small bridge.** `leiho-bridge.js` is plain JavaScript with no dependencies, about 8 KB gzipped. It finds the elements you annotated and reports them to the editor.
+- **`postMessage`, checked by origin.** Every message is checked in both directions. Outside the editor iframe the bridge does nothing, and it never makes a network request.
+- **No secrets in the front end.** The bridge never calls the WordPress API. Editing goes through the REST namespace `leiho/v1`, with a nonce and WordPress capabilities.
+- **A content API as well.** `/wp-json/leiho/v1/export` serves all published content in one cached request, with TypeScript types from `npx leiho types`.
 
-## How it works
+| Part           | Tech                                                                                   |
+| -------------- | -------------------------------------------------------------------------------------- |
+| Plugin         | PHP 7.4+, WordPress 6.0+ (AI tools need 7.0+), REST namespace `leiho/v1`               |
+| Bridge         | Vanilla JavaScript, no dependencies, npm package [`leiho`](bridge/) (React component in `leiho/react`) |
+| Content client | `leiho/content`, `leiho/seo`, `leiho/ai-ready` and the `npx leiho` CLI, Node 18+       |
+| Storage        | Your ACF fields, or Leiho Collections tables (MySQL 5.7+, MariaDB, SQLite drop-in)      |
+| Publishing     | Build hooks, GitHub Actions, GitHub commit, Coolify                                    |
+| Updates        | GitHub releases, signed with Ed25519 and checked by the plugin before installing       |
 
 ```
-┌──────────────────────── wp-admin ────────────────────────┐
-│  Leiho editor                                             │
-│  ┌──────────────┐  ┌───────────────────────────┐  ┌─────┐│
-│  │ Pages        │  │  <iframe> your real site  │  │Field││
-│  │ Structure    │  │  ┌─────────────────────┐  │  │panel││
-│  │ History      │  │  │ leiho-bridge.js      │◄─┼──┤     ││
-│  └──────────────┘  │  └─────────────────────┘  │  └─────┘│
-│                    └───────────────────────────┘         │
-│             REST (leiho/v1, nonce + capabilities)         │
-└───────────────────────────┬──────────────────────────────┘
-                            ▼
-                     WordPress + ACF
+plugin/     WordPress plugin (PHP, GPL-2.0-or-later)
+bridge/     leiho — the front-end bridge (vanilla JS, zero dependencies)
+examples/   Minimal integrations: Next.js, Astro, React + Vite, plain HTML
+scripts/    Release packaging
 ```
 
-1. The editor loads your front end in an iframe.
-2. The bridge finds the elements you annotated with `data-wp-field` and reports them.
-3. Clicking an element opens its field. Typing updates the page instantly, in the browser only.
-4. **Save** writes to WordPress. **Publish** triggers your deployment (or nothing at all in live mode).
+```bash
+# Plugin tests (no WordPress needed)
+for f in plugin/tests/test-*.php plugin/tests/smoke-load.php; do php "$f" || exit 1; done
+
+# Content client tests
+cd bridge && npm test
+
+# Rebuild the bridge (also copies it into the plugin)
+cd bridge && npm run build
+
+# Build the installable zip into dist/
+./scripts/build-zip.sh
+```
+
+[CONTRIBUTING.md](CONTRIBUTING.md) covers setup and pull requests. Found a vulnerability? See [SECURITY.md](SECURITY.md).
+
+<br />
+
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset=".github/assets/readme/heading-answers-dark.webp">
+    <img src=".github/assets/readme/heading-answers.webp" width="283" alt="Straight answers">
+  </picture>
+</p>
+
+<details>
+<summary><strong>Is it free?</strong></summary>
+<br />
+Yes. The plugin and the <code>leiho</code> package are free and open source, under GPL-2.0-or-later.
+</details>
+
+<details>
+<summary><strong>Do I need ACF?</strong></summary>
+<br />
+No. ACF (free or Pro) is optional. Keep the ACF or JetEngine fields you already have, or define your content types in <a href="#collections">Leiho Collections</a>, which stores them in typed tables. WordPress and Leiho are enough.
+</details>
+
+<details>
+<summary><strong>Is my data locked in?</strong></summary>
+<br />
+No. Content stays in WordPress. ACF fields stay ACF fields, and Leiho never touches them if you remove it. Leiho Collections are regular posts plus one table per collection, exported as JSON by the content API, and an imported ACF type can go back to ACF. Deleting the plugin drops the Collections tables unless <code>define( 'LEIHO_KEEP_DATA', true );</code> is set in <code>wp-config.php</code>; deactivating keeps everything.
+</details>
+
+<details>
+<summary><strong>Can editors break the layout or the build?</strong></summary>
+<br />
+No. Editors only change the fields you annotated, and every value is checked against its field type on save. The structure stays in your code: which fields exist, and which section types a page may use. A section type exists only once you add it to the field group (or the Leiho schema) and render it in your front end.
+</details>
+
+<details>
+<summary><strong>Static site or server-rendered?</strong></summary>
+<br />
+Both. Server-rendered sites show changes on save; static sites rebuild when an editor clicks <b>Publish</b> (build hook, GitHub Actions, a commit, or Coolify), or on their own after each change if you turn that on.
+</details>
+
+<details>
+<summary><strong>Do I need WPGraphQL?</strong></summary>
+<br />
+No. Keep it if you use it: Leiho reads and writes the same ACF fields. Or use Leiho's content API (<code>/leiho/v1/export</code>, one request per build, with TypeScript types).
+</details>
+
+<details>
+<summary><strong>Why not Markdown files in Git?</strong></summary>
+<br />
+If your editors are happy committing Markdown, keep that. Leiho is for people who already know WordPress, or would rather click on the page than learn Git: they see the real site while they type, and nobody has to review a pull request to fix a typo.
+</details>
+
+<details>
+<summary><strong>What does it take to maintain?</strong></summary>
+<br />
+One WordPress plugin, updated from the Plugins screen like any other (updates are signed), and a small bridge with no dependencies in your front end.
+</details>
+
+<details>
+<summary><strong>Why isn't it on WordPress.org?</strong></summary>
+<br />
+Leiho updates itself from its GitHub releases, which are signed and checked before installing, and it ships the Leiho Zero theme inside the plugin. Neither fits the WordPress.org directory rules, so Leiho is distributed here. Updates still show up in <b>Plugins</b> like any other.
+</details>
+
+<details>
+<summary><strong>What isn't there yet?</strong></summary>
+<br />
+The interface is in English and French only. Field types not listed under <a href="#supported-fields">Supported fields</a> show read-only. In block-editor content, only common blocks (paragraphs, headings, lists, quotes, images, separators) are editable; other blocks stay locked and come back untouched. Pages and posts can't become Leiho collections, the custom login address doesn't work on multisite, and the AI tools need WordPress 7.0. <a href="https://github.com/pixelersagency/leiho/issues">Tell us what breaks.</a>
+</details>
+
+<br />
 
 ## Quick start
 
 ### 1. Install the plugin
 
-[Download `leiho.zip`](https://github.com/pixelersagency/leiho/releases/latest/download/leiho.zip) (latest version, also listed on the [releases page](https://github.com/pixelersagency/leiho/releases)) and upload it in **Plugins → Add New → Upload Plugin**. Later versions show up in **Plugins** like any other update. Requires WordPress 6.0+ and PHP 7.4+. [ACF](https://www.advancedcustomfields.com/) (free or Pro) is optional: use your existing ACF fields, or define your content in [Leiho Collections](#collections) instead.
+[Download `leiho.zip`](https://leiho.dev/get/leiho.zip) (latest version, also listed on the [releases page](https://github.com/pixelersagency/leiho/releases)) and upload it in **Plugins → Add New → Upload Plugin**. Later versions show up in **Plugins** like any other update. Requires WordPress 6.0+ and PHP 7.4+. [ACF](https://www.advancedcustomfields.com/) (free or Pro) is optional: use your existing ACF fields, or define your content in [Leiho Collections](#collections) instead.
 
 ### 2. Point it at your site
 
@@ -194,6 +367,38 @@ Back in wp-admin, **Leiho → Get started → Test the connection** confirms tha
 
 > **Using a coding agent?** **Leiho → Get started** gives you ready-to-paste prompts and the full integration contract ([`plugin/docs/agent-instructions.md`](plugin/docs/agent-instructions.md)) for Claude Code, Cursor, Codex and the like.
 
+## Why
+
+Headless WordPress gives developers a modern front end, but it takes the "what you see" away from editors. They fill in forms blind, wait for a build, and discover the result on the live site. Leiho puts the site back in front of them, without asking developers to give up their stack.
+
+- **Works with any front end.** A ~10 KB, dependency-free bridge talks to wp-admin through `postMessage`. React apps get a one-line component.
+- **Your data model, untouched.** Leiho reads and writes the ACF fields you already have — repeaters, groups, flexible content, relationships, images.
+- **Or no field plugin at all.** Leiho Collections defines content types and fields in Leiho itself, stored in typed tables. WordPress + Leiho is enough.
+- **Nothing public.** The bridge never calls the WordPress API and holds no secrets. Every message is origin-checked on both sides.
+- **Publishing that fits your hosting.** Live content, a build hook (Vercel, Netlify, Cloudflare Pages), GitHub Actions with live build status, a publish commit, or Coolify.
+
+## How it works
+
+```
+┌──────────────────────── wp-admin ────────────────────────┐
+│  Leiho editor                                             │
+│  ┌──────────────┐  ┌───────────────────────────┐  ┌─────┐│
+│  │ Pages        │  │  <iframe> your real site  │  │Field││
+│  │ Structure    │  │  ┌─────────────────────┐  │  │panel││
+│  │ History      │  │  │ leiho-bridge.js      │◄─┼──┤     ││
+│  └──────────────┘  │  └─────────────────────┘  │  └─────┘│
+│                    └───────────────────────────┘         │
+│             REST (leiho/v1, nonce + capabilities)         │
+└───────────────────────────┬──────────────────────────────┘
+                            ▼
+                     WordPress + ACF
+```
+
+1. The editor loads your front end in an iframe.
+2. The bridge finds the elements you annotated with `data-wp-field` and reports them.
+3. Clicking an element opens its field. Typing updates the page instantly, in the browser only.
+4. **Save** writes to WordPress. **Publish** triggers your deployment (or nothing at all in live mode).
+
 ## Annotations
 
 In a JavaScript framework, let the `leiho` package write the attributes: `field()`, `block()` and `entry()` return an object to spread on the element (JSX, Astro, Svelte; `v-bind` in Vue).
@@ -263,23 +468,6 @@ To edit the body in the visual editor, annotate it: `<div {...field(post, '_cont
 
 Other field types show up read-only, with a link to the classic WordPress editor.
 
-## Leiho is the back office
-
-Click **Leiho** in wp-admin and it opens full screen: the WordPress menu, admin bar, footer and other plugins' notices are gone (on this page only), replaced by Leiho's own navigation. Install WordPress and Leiho, and editors never need to leave it.
-
-| | |
-|---|---|
-| **Home** | Recent changes with before / after values, connection and publishing status, quick links. |
-| **Visual editor** | The site as visitors see it, editable in place. |
-| **Collections** | All your content in three panes, whatever its engine: content types on the left (WordPress pages and posts, ACF or theme post types, Leiho collections and single pages, with their entry counts), the entries of the selected type in the middle (search, status filter, sort, create, duplicate, publish or unpublish, trash and restore), and the selected entry edited in place on the right with every field — including WordPress's own: content (rich text editor with headings, lists, links, quotes and images from the media library), excerpt, URL slug, categories, tags and other public taxonomies (chips with search; new tags are created on save), author, publish date, parent and order, depending on what the type supports — (undo / redo, local drafts, conflict protection, history), its status, **Save**, and a link to the visual editor or the live page when it has one. The **Fields** tab of a Leiho collection opens the schema builder (administrators, see below); ACF types point to ACF and offer **Import into Leiho** (see [Import from ACF](#import-from-acf)). |
-| **Media** | The media library: grid, search, upload (button or drag and drop), alternative text. |
-| **Publishing** | Deployment history. The **Publish** button in the top bar shows when changes aren't published yet. |
-| **Settings** | Everything Leiho needs (administrators). |
-
-Editors and authors land in Leiho right after logging in (a setting, on by default); administrators keep the WordPress dashboard and get a **Back to WordPress** link. The navigation collapses, works with the keyboard, and becomes a drawer on small screens; the light or dark theme is shared with the editor and remembered per user on the server, so every page opens directly in it (dark by default). Old addresses (`admin.php?page=leiho-settings`, `leiho-editor`, …) redirect to their view.
-
-Content written with the WordPress block editor is never rewritten by Leiho: its **Content** field shows a read-only preview and an **Open in the WordPress editor** link (the server refuses to overwrite it), while every other field of the entry stays editable. Classic content is saved in the classic editor's format.
-
 ## What editors get
 
 - Live preview while typing, with character counters where fields have a limit. The post body is previewed as WordPress will render it (blocks, galleries, embeds), not as raw editor HTML.
@@ -291,6 +479,38 @@ Content written with the WordPress block editor is never rewritten by Leiho: its
 - Conflict protection: if someone else changed the page meanwhile, Leiho refuses to overwrite it and offers to reload.
 - Change history: every saved change, with its before and after values and its author.
 - Deep links: "Edit with Leiho" in the admin bar opens the current page.
+
+## Leiho is the back office
+
+Click **Leiho** in wp-admin and it opens full screen: the WordPress menu, admin bar, footer and other plugins' notices are gone (on this page only), replaced by Leiho's own navigation. Install WordPress and Leiho, and editors never need to leave it.
+
+| | |
+|---|---|
+| **Home** | Recent changes with before / after values, connection and publishing status, quick links. |
+| **Visual editor** | The site as visitors see it, editable in place. |
+| **Collections** | All your content in three panes, whatever its engine: content types on the left (WordPress pages and posts, ACF or theme post types, Leiho collections and single pages, with their entry counts), the entries of the selected type in the middle (search, status filter, sort, create, duplicate, publish or unpublish, trash and restore), and the selected entry edited in place on the right with every field — including WordPress's own: content (rich text editor with headings, lists, links, quotes and images from the media library), excerpt, URL slug, categories, tags and other public taxonomies (chips with search; new tags are created on save), author, publish date, parent and order, depending on what the type supports — (undo / redo, local drafts, conflict protection, history), its status, **Save**, and a link to the visual editor or the live page when it has one. The **Fields** tab of a Leiho collection opens the schema builder (administrators, see below); ACF types point to ACF and offer **Import into Leiho** (see [Import from ACF](#import-from-acf)). |
+| **Media** | The media library: grid, search, upload (button or drag and drop), alternative text. |
+| **Publishing** | Deployment history. The **Publish** button in the top bar shows when changes aren't published yet. |
+| **Roles** | What each WordPress role sees and does in Leiho (administrators, see [Roles](#roles)). |
+| **Settings** | Everything Leiho needs (administrators). |
+
+Editors and authors land in Leiho right after logging in (a setting, on by default); administrators keep the WordPress dashboard and get a **Back to WordPress** link. The navigation collapses, works with the keyboard, and becomes a drawer on small screens; the light or dark theme is shared with the editor and remembered per user on the server, so every page opens directly in it (dark by default). Old addresses (`admin.php?page=leiho-settings`, `leiho-editor`, …) redirect to their view.
+
+Content written with the WordPress block editor is never rewritten by Leiho: its **Content** field shows a read-only preview and an **Open in the WordPress editor** link (the server refuses to overwrite it), while every other field of the entry stays editable. Classic content is saved in the classic editor's format.
+
+## Roles
+
+Leiho doesn't add roles or users: the **Roles** screen sets, for each WordPress role that edits content (Editor, Author, Contributor, or a role from another plugin), what that role gets in Leiho. Start from a profile, then adjust:
+
+| Profile | Screens | Puts the site online | Default for |
+|---|---|---|---|
+| **Content manager** | Visual editor, Collections, Media, Publishing | Yes | Editor |
+| **Writer** | Visual editor, Collections, Media | No | Author, Contributor and other roles |
+| **No access** | Home only | No | |
+
+Each role can also be limited to some content types (an author who only writes the blog), lose the AI tools, and use the **simplified mode**: nothing technical on screen (no HTML code tab, no field type names, no build details), and the WordPress dashboard opens Leiho instead. Simplified mode is on for every profile.
+
+WordPress permissions still apply on top: an author only edits their own entries, a contributor can't publish. Administrators always have full access, so no setting can lock out the person who changes them. The rules are enforced by the server (REST routes, AI tools, publishing), not only hidden in the interface. A role plugin (Members, User Role Editor) can grant a permission to one user or role with the capability `leiho_<permission>` (`leiho_publish_site`, `leiho_use_ai`, `leiho_view_deploys`…).
 
 ## Publishing modes
 
@@ -492,6 +712,26 @@ Leiho writes with the AI provider the site configured in **Settings → Connecto
 - **Translation**: *Translate with AI* in the editor (missing texts, as edits to review), and for agents `leiho/list-translations`, `leiho/get-translation`, `leiho/update-translation` (on published entries, fills empty translations as suggestions an editor reviews and saves in the editor, never replaces existing ones; anything on drafts) and `leiho/translate-entry` (the site's AI, `save` optional). REST: `POST leiho/v1/ai/translate` (`post_id`, `locale`, `mode`: `missing` or `all`).
 - REST: `leiho/v1/ai/status`, `ai/field`, `ai/alt`, `ai/entry`, `ai/entry/create`, `ai/brand`, `ai/collections/{type}` (nonce, capability, size limits, per-user rate limit). Filters: `leiho_ai_capability` (default `edit_posts`), `leiho_ai_rate_limit` (20 requests a minute), `leiho_ai_timeout` (60 s), `leiho_ai_status`, `leiho_ai_ability_statuses`. Each AI action is logged in the change log (who, field, action), never the prompt.
 
+## Security
+
+- Editing routes check a nonce and `edit_post` on the content. The content API only serves published items of the Leiho content types; it can require a token (compared in constant time, sent in `X-Leiho-Token`). Putting the site online requires `edit_posts` (filter `leiho_deploy_capability`) and the role's **Put the site online** permission (see [Roles](#roles)); content types, screens and AI tools closed to a role are refused by the server too. Settings and roles require `manage_options`.
+- The bridge is inert outside the editor iframe and checks the origin of every message, in both directions. It makes no network request.
+- Values are sanitized per field type on write. `required` and `maxlength` are enforced server side. Attachments and related posts are checked for read access.
+- Use a fine-grained GitHub token limited to the deployment repository (`Actions: write`, or `Contents: write` for the commit mode).
+
+Found a vulnerability? See [SECURITY.md](SECURITY.md).
+
+## Extending
+
+- **JetEngine**: the fields of JetEngine meta boxes and post types, every type included (maps, color and icon pickers, repeaters saved as separate fields), are edited like ACF fields and saved in JetEngine's own formats.
+- **Other field plugins**: implement `Leiho_Adapter_Interface` and register it with the `leiho_adapters` filter (Meta Box, Pods…).
+- **Other deployment targets**: implement `Leiho_Deploy_Driver_Interface` and plug it in with `leiho_deploy_driver`.
+- **WYSIWYG preview**: `leiho_wysiwyg_render` replaces `wpautop()` with your front end's actual rendering.
+- **Draft preview**: `leiho_preview_stand_in` (`$stand_in`, `$post`) picks the published entry whose page shows a draft (`null`: none).
+- **Content API**: `leiho_content_item` adds or removes data on each item (SEO, author…), `leiho_content_post_types` changes the served types, `leiho_content_html` the rendered HTML. `leiho_content_cache` turns the cache on or off, `leiho_content_cache_control` changes the `Cache-Control` header, `leiho_purge_third_party_caches` (false) skips the built-in purges. An adapter implementing `Leiho_Content_Adapter_Interface` feeds the content API and the types.
+- **Automatic publishing**: the `leiho_content_changed` action fires when served content changes.
+- **Roles**: `leiho_user_can` (`$granted`, `$permission`, `$user`) and `leiho_user_can_type` (`$granted`, `$post_type`, `$user`) change what a user may see and do in Leiho.
+
 ## Coming from Okno
 
 Okno was renamed **Leiho** in 1.0.0-beta.12, because another project already used the name. Your content, settings and front end are carried over.
@@ -512,89 +752,12 @@ Update the CMS first. Your front end keeps working unchanged until Leiho 2.0: th
 | `npx okno pull`, `OKNO_URL`, `OKNO_TOKEN`, `.okno/` | `npx leiho pull`, `LEIHO_URL`, `LEIHO_TOKEN`, `.leiho/` |
 | `okno.schema.json`, `okno_*` hooks, `OKNO_KEEP_DATA` | `leiho.schema.json`, `leiho_*` hooks, `LEIHO_KEEP_DATA` |
 
-## FAQ
+## Credits / third-party
 
-**Can editors break the layout or the build?**
-No. Editors only change the fields you annotated, and every value is checked against its field type on save. The structure stays in your code: which fields exist, and which section types a page may use. Editors can add, move, duplicate and remove sections only where you bound them to flexible content (or a Leiho blocks field), and only with the layouts you defined. There is no free HTML and no page builder, so content can't produce markup your components don't expect.
+The layout and styles of the Leiho app (three-pane Collections view, list rows, field settings, dialogs) are partly derived from [Stacki](https://github.com/flowtricks/stacki), Copyright (c) 2026 Timothy Ricks, under the MIT License: see [plugin/licenses/stacki-MIT.txt](plugin/licenses/stacki-MIT.txt). Files with derived portions say so in their header.
 
-**What about sections my components don't handle yet?**
-A section type exists only once you add it to the field group (or the Leiho schema) and render it in your front end. Until then editors can't pick it.
-
-**Why not Markdown files in Git?**
-If your editors are happy committing Markdown, keep that. Leiho is for people who already know WordPress, or would rather click on the page than learn Git: they see the real site while they type, and nobody has to review a pull request to fix a typo.
-
-**What does it take to maintain?**
-One WordPress plugin, updated from the Plugins screen like any other (updates are signed), and a ~10 KB bridge in your front end with no dependencies. Content stays in WordPress: ACF fields stay ACF fields and are never touched if you remove Leiho. Leiho Collections are regular posts plus one table per collection, exported as JSON by the content API; deleting the plugin drops those tables unless `define( 'LEIHO_KEEP_DATA', true );` is set in `wp-config.php` (deactivating keeps everything).
-
-**Do I need WPGraphQL?**
-No. Keep it if you use it: Leiho reads and writes the same ACF fields. Or use Leiho's content API (`/leiho/v1/export`, one request per build, with TypeScript types).
-
-**Static site or server-rendered?**
-Both. Server-rendered sites show changes on save; static sites rebuild when an editor clicks **Publish** (build hook, GitHub Actions, a commit, or Coolify).
-
-**Is it free?**
-Yes, GPL-2.0.
-
-## Security
-
-- Editing routes check a nonce and `edit_post` on the content. The content API only serves published items of the Leiho content types; it can require a token (compared in constant time, sent in `X-Leiho-Token`). Publishing requires `publish_pages` (filter `leiho_deploy_capability`), settings require `manage_options`.
-- The bridge is inert outside the editor iframe and checks the origin of every message, in both directions. It makes no network request.
-- Values are sanitized per field type on write. `required` and `maxlength` are enforced server side. Attachments and related posts are checked for read access.
-- Use a fine-grained GitHub token limited to the deployment repository (`Actions: write`, or `Contents: write` for the commit mode).
-
-Found a vulnerability? See [SECURITY.md](SECURITY.md).
-
-## Extending
-
-- **JetEngine**: the fields of JetEngine meta boxes and post types, every type included (maps, color and icon pickers, repeaters saved as separate fields), are edited like ACF fields and saved in JetEngine's own formats.
-- **Other field plugins**: implement `Leiho_Adapter_Interface` and register it with the `leiho_adapters` filter (Meta Box, Pods…).
-- **Other deployment targets**: implement `Leiho_Deploy_Driver_Interface` and plug it in with `leiho_deploy_driver`.
-- **WYSIWYG preview**: `leiho_wysiwyg_render` replaces `wpautop()` with your front end's actual rendering.
-- **Draft preview**: `leiho_preview_stand_in` (`$stand_in`, `$post`) picks the published entry whose page shows a draft (`null`: none).
-- **Content API**: `leiho_content_item` adds or removes data on each item (SEO, author…), `leiho_content_post_types` changes the served types, `leiho_content_html` the rendered HTML. `leiho_content_cache` turns the cache on or off, `leiho_content_cache_control` changes the `Cache-Control` header, `leiho_purge_third_party_caches` (false) skips the built-in purges. An adapter implementing `Leiho_Content_Adapter_Interface` feeds the content API and the types.
-- **Automatic publishing**: the `leiho_content_changed` action fires when served content changes.
-
-## Repository layout
-
-```
-plugin/     WordPress plugin (PHP, GPL-2.0-or-later)
-bridge/     leiho — the front-end bridge (vanilla JS, zero dependencies)
-examples/   Minimal integrations: Next.js, Astro, React + Vite, plain HTML
-scripts/    Release packaging
-```
-
-## Development
-
-```bash
-# Plugin tests (no WordPress needed)
-php plugin/tests/test-acf-adapter.php
-php plugin/tests/test-content.php
-php plugin/tests/test-cache.php
-php plugin/tests/test-collections.php
-php plugin/tests/test-acf-import.php
-php plugin/tests/test-activity.php
-php plugin/tests/test-frame-verdict.php
-php plugin/tests/test-updater.php
-php plugin/tests/test-autopublish.php
-php plugin/tests/test-app.php
-php plugin/tests/smoke-load.php
-
-# Content client tests
-cd bridge && npm test
-
-# Rebuild the bridge (also copies it into the plugin)
-cd bridge && npm run build
-
-# Build the installable zip into dist/
-./scripts/build-zip.sh
-```
-
-See [CONTRIBUTING.md](CONTRIBUTING.md).
+The Geist font used in the login page and in the images of this README is Copyright 2024 The Geist Project Authors, under the SIL Open Font License 1.1: see [plugin/licenses/geist-OFL.txt](plugin/licenses/geist-OFL.txt). Framework logos come from [Simple Icons](https://simpleicons.org) (CC0).
 
 ## License
 
 [GPL-2.0-or-later](LICENSE). Made by [Pixelers](https://pixelers.fr).
-
-## Credits / third-party
-
-The layout and styles of the Leiho app (three-pane Collections view, list rows, field settings, dialogs) are partly derived from [Stacki](https://github.com/flowtricks/stacki), Copyright (c) 2026 Timothy Ricks, under the MIT License: see [plugin/licenses/stacki-MIT.txt](plugin/licenses/stacki-MIT.txt). Files with derived portions say so in their header.

@@ -2,15 +2,23 @@
 
 All notable changes to Leiho (called Okno until 1.0.0-beta.11) are documented here. The project follows [Semantic Versioning](https://semver.org/). The plugin and the bridge package share one version number.
 
-## [Unreleased]
+## [1.0.0] — 2026-11-25
+
+First stable release.
 
 ### Added
 
 - **JetEngine fields.** The fields of JetEngine meta boxes and post types show up in the visual editor and in Collections, next to ACF fields, and every JetEngine field type is editable: text, textarea, WYSIWYG, number, media, gallery, switcher, date, time, date and time, select (single or multiple), radio, checkboxes, posts, color, icon (its class, as text), map (latitude and longitude, or an address) and repeaters, including repeaters saved as separate fields. Leiho saves them in JetEngine's own formats (repeater rows `item-0`, `item-1`…, media as an ID, a URL or both, dates as timestamps when the field asks for it, checkboxes as `value => true/false`) and rewrites the extra values JetEngine's form writes along (a map's hash and coordinates, the separate copies of a repeater), so listings, map listings, GraphQL and the REST API read them as before.
+- **Roles.** A new **Roles** screen (administrators) sets what each WordPress role that edits content sees and does in Leiho: screens (visual editor, Collections, Media, Publishing), content types, putting the site online, AI tools, and a **simplified mode** with nothing technical on screen (no HTML code tab, no field type names, no build details; the WordPress dashboard opens Leiho). Three profiles to start from: **Content manager** (default for Editors), **Writer** (default for Authors, Contributors and other roles) and **No access**. The server enforces the rules (REST routes, AI tools, publishing), WordPress permissions still apply, and administrators always keep full access. A role plugin can grant a permission with the capability `leiho_<permission>`; filters `leiho_user_can` and `leiho_user_can_type`.
 - **ACF checkboxes, radio buttons and button groups**, and multiple selects, are editable. They were shown read-only.
+
+### Changed
+
+- **Who puts the site online.** The **Publish** button now follows the role's permission on the Roles screen (on for Editors, off for Authors by default) instead of the `publish_pages` capability; the `leiho_deploy_capability` filter now defaults to `edit_posts`. Users who can't put the site online no longer see the button: **Save** becomes the main action.
 
 ### Fixed
 
+- **Authors in Collections** see their own entries, with the right count. The list asked for every entry, then hid the ones they can't edit, so it could look empty under a full total.
 - In Collections, the status and language menus of the top bar no longer run over the save state when the bar is narrow: the entry title (already at the top of the panel) leaves the bar, and the save state is shortened, with the full text on hover.
 
 ## [1.0.0-rc.10] — 2026-11-25
@@ -385,6 +393,7 @@ First public release.
 - Managed regions (`data-okno-managed`) explain where to edit content Okno doesn't own.
 - Explicit sections (`data-okno-section`, `data-okno-layout`) take precedence over auto-detected ones.
 
+[1.0.0]: https://github.com/pixelersagency/leiho/releases/tag/v1.0.0
 [1.0.0-rc.10]: https://github.com/pixelersagency/leiho/releases/tag/v1.0.0-rc.10
 [1.0.0-rc.9]: https://github.com/pixelersagency/leiho/releases/tag/v1.0.0-rc.9
 [1.0.0-rc.8]: https://github.com/pixelersagency/leiho/releases/tag/v1.0.0-rc.8

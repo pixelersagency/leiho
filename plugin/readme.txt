@@ -1,10 +1,10 @@
 === Leiho ===
 Contributors: pixelersagency
-Tags: headless, acf, visual editor, nextjs, astro
+Tags: headless, acf, jetengine, visual editor, nextjs
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.0.0-rc.10
+Stable tag: 1.0.0
 License: GPL-2.0-or-later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -12,12 +12,14 @@ Visual editing and content API for headless WordPress. Editors see the real fron
 
 == Description ==
 
-Leiho loads your headless front end (Next.js, Astro, Remix, Vite, Nuxt, SvelteKit or plain HTML) inside wp-admin. Editors click an element, edit the field behind it (ACF or Leiho Collections), watch the page update as they type, then save and publish.
+Leiho loads your headless front end (Next.js, Astro, Remix, Vite, Nuxt, SvelteKit or plain HTML) inside wp-admin. Editors click an element, edit the field behind it (ACF, JetEngine or Leiho Collections), watch the page update as they type, then save and publish.
 
 * Works with any front end through a small, dependency-free bridge script. React apps get a one-line component.
-* Uses the ACF fields you already have: text, WYSIWYG, images, galleries, links, relationships, repeaters, groups and flexible content.
+* Uses the ACF fields you already have: text, WYSIWYG, images, galleries, links, choices, relationships, repeaters, groups and flexible content.
+* Edits JetEngine meta boxes too, every field type included (maps, colors, icons, repeaters), saved in JetEngine's own formats.
 * Page composition: add, reorder, duplicate and remove flexible content blocks.
 * Undo and redo, local drafts, conflict protection and a full change history.
+* Roles: choose what editors, authors and other roles see and do, with a simplified mode that hides everything technical.
 * Publishing modes: live content, build hook (Vercel, Netlify, Cloudflare Pages), GitHub Actions with live status, publish commit, Coolify.
 * No public endpoint and no secret on the front end.
 
@@ -50,6 +52,15 @@ Parts of the Leiho app's layout and styles (three-pane Collections view, list ro
 The login page uses the Geist font (https://github.com/vercel/geist-font), Copyright 2024 The Geist Project Authors, SIL Open Font License 1.1. The license ships in licenses/geist-OFL.txt.
 
 == Changelog ==
+
+= 1.0.0 =
+* First stable release.
+* JetEngine fields: every field type of JetEngine meta boxes is editable in the visual editor and in Collections, saved in JetEngine's own formats.
+* Roles: choose what each WordPress role sees and does in Leiho (screens, content types, putting the site online, AI tools), with a simplified mode that hides everything technical.
+* ACF checkboxes, radio buttons, button groups and multiple selects are editable.
+* The Publish button follows the role's permission (filter leiho_deploy_capability now defaults to edit_posts).
+* Authors see their own entries in Collections, with the right count.
+* Collections: the status and language menus no longer run over the save state in a narrow top bar.
 
 = 1.0.0-rc.10 =
 * Right-to-left languages: the interface is mirrored, and text fields follow the direction of their content.
