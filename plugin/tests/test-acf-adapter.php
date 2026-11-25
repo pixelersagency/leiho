@@ -22,8 +22,12 @@ $GLOBALS['group_fields'] = array(
 		field( 'reglages', 'group', array( 'sub_fields' => array(
 			field( 'adresse', 'text' ),
 			field( 'lien', 'link' ),
-			field( 'mode', 'radio' ),
+			field( 'mode', 'google_map' ),
 		) ) ),
+		field( 'jours', 'checkbox', array( 'choices' => array( 'lun' => 'Lundi', 'mar' => 'Mardi', 'mer' => 'Mercredi' ) ) ),
+		field( 'formule', 'radio', array( 'choices' => array( 'a' => 'A', 'b' => 'B' ) ) ),
+		field( 'tags', 'select', array( 'multiple' => 1, 'choices' => array( 'x' => 'X', 'y' => 'Y' ) ) ),
+		field( 'libre', 'checkbox', array( 'allow_custom' => 1, 'choices' => array( 'p' => 'P' ) ) ),
 	),
 );
 
@@ -36,6 +40,8 @@ $GLOBALS['store'] = array(
 		) ),
 	),
 	'field_reglages' => array( 'field_adresse' => 'Paris', 'field_lien' => array( 'url' => 'https://a.fr', 'title' => 'A', 'target' => '' ) ),
+	'field_jours'    => array( 'lun' ),
+	'field_formule'  => 'a',
 );
 
 $adapter = new Leiho_ACF_Adapter();
@@ -54,6 +60,23 @@ assert_true( 'wysiwyg rendu', '<p>Sur devis</p>' === $flex['meta'][1]['questions
 $group = $fields[2];
 assert_true( 'group lu', 'Paris' === $group['value']['adresse'] );
 assert_true( 'link lu', 'https://a.fr' === $group['value']['lien']['url'] );
+
+/* --- Choix : cases à cocher, radio, select multiple --- */
+$by = array();
+foreach ( $fields as $f ) {
+	$by[ $f['path'] ] = $f;
+}
+assert_true( 'cases à cocher → select multiple', 'select' === $by['jours']['type'] && ! empty( $by['jours']['multiple'] ) && $by['jours']['supported'] && array( 'lun' ) === $by['jours']['value'], $by['jours'] );
+assert_true( 'radio → select', 'select' === $by['formule']['type'] && empty( $by['formule']['multiple'] ) && 'a' === $by['formule']['value'], $by['formule'] );
+$r = $adapter->save_values( 1, array( 'jours' => array( 'mar', 'mer' ), 'formule' => 'b', 'tags' => array( 'y' ) ) );
+assert_true( 'choix enregistrés', 3 === count( $r['saved'] ) && empty( $r['errors'] ), $r );
+assert_true( 'cases à cocher écrites en liste', array( 'mar', 'mer' ) === $GLOBALS['store']['field_jours'], $GLOBALS['store']['field_jours'] );
+assert_true( 'radio écrit', 'b' === $GLOBALS['store']['field_formule'] );
+assert_true( 'select multiple écrit', array( 'y' ) === $GLOBALS['store']['field_tags'] );
+$r = $adapter->save_values( 1, array( 'jours' => array( 'dim' ) ) );
+assert_true( 'choix inconnu refusé', 'invalid_choice' === $r['errors']['jours'] && array( 'mar', 'mer' ) === $GLOBALS['store']['field_jours'], $r );
+$r = $adapter->save_values( 1, array( 'libre' => array( 'p', 'Sur mesure <b>' ) ) );
+assert_true( 'choix libre permis par le champ', empty( $r['errors'] ) && array( 'p', 'Sur mesure' ) === $GLOBALS['store']['field_libre'], array( $r, $GLOBALS['store']['field_libre'] ?? null ) );
 
 /* --- Écriture par chemin pointé --- */
 $result = $adapter->save_values( 1, array( 'sections.0.h1' => 'Bonsoir' ) );

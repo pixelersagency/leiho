@@ -3099,8 +3099,18 @@ body.leiho-app-body #wpbody-content {
 	display: none;
 }
 
-.leiho-editor--collections .leiho-current-title:empty {
+/* Le titre de l'entrée est déjà en tête du panneau : la barre garde les
+   pastilles (statut, langue) entières, l'état d'enregistrement s'abrège. */
+.leiho-editor--collections .leiho-doc-row .leiho-current-title {
 	display: none;
+}
+
+.leiho-editor--collections .leiho-doc-row {
+	flex-shrink: 0;
+}
+
+.leiho-app .leiho-doc .leiho-save-state {
+	min-width: 0;
 }
 
 .leiho-editor--collections #leiho-open-visual .leiho-icon {

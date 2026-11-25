@@ -264,6 +264,8 @@
 				: cfg.liveMode
 				? __( 'Everything is live', 'leiho' )
 				: __( 'Everything is saved', 'leiho' );
+			// Abrégé quand la barre manque de place : le texte entier au survol.
+			els.saveState.title = els.saveState.textContent;
 		}
 		if ( els.undo ) {
 			els.undo.disabled = state.history.index <= 0;

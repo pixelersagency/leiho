@@ -254,11 +254,12 @@ To edit the body in the visual editor, annotate it: `<div {...field(post, '_cont
 
 ## Supported fields
 
-- **Content**: text, textarea, WYSIWYG, number, range, URL, email, oEmbed, page link, link, select, true/false, date, date-time, time.
+- **Content**: text, textarea, WYSIWYG, number, range, URL, email, oEmbed, page link, link, select (single or multiple), checkbox, radio button, button group, true/false, date, date-time, time.
 - **Media**: image (with crop-ratio warnings), file, gallery.
 - **Relations**: post object, relationship, taxonomy.
 - **Containers**: repeater, group, clone, flexible content, nested freely.
 - **Native**: title and featured image.
+- **JetEngine**: every field type of its meta boxes, see [Extending](#extending).
 
 Other field types show up read-only, with a link to the classic WordPress editor.
 
@@ -545,7 +546,7 @@ Found a vulnerability? See [SECURITY.md](SECURITY.md).
 
 ## Extending
 
-- **JetEngine**: the fields of JetEngine meta boxes and post types are edited like ACF fields and saved in JetEngine's own formats. Not edited yet: repeaters saved as separate fields, color and icon pickers, maps.
+- **JetEngine**: the fields of JetEngine meta boxes and post types, every type included (maps, color and icon pickers, repeaters saved as separate fields), are edited like ACF fields and saved in JetEngine's own formats.
 - **Other field plugins**: implement `Leiho_Adapter_Interface` and register it with the `leiho_adapters` filter (Meta Box, Pods…).
 - **Other deployment targets**: implement `Leiho_Deploy_Driver_Interface` and plug it in with `leiho_deploy_driver`.
 - **WYSIWYG preview**: `leiho_wysiwyg_render` replaces `wpautop()` with your front end's actual rendering.

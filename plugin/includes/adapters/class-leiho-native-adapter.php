@@ -537,10 +537,6 @@ class Leiho_Native_Adapter extends Leiho_Field_Adapter {
 			return $this->within_length( $field, wp_check_invalid_utf8( $code ), $error );
 		}
 
-		if ( 'select' === $type && ! empty( $field['multiple'] ) ) {
-			return $this->sanitize_choices( $field, $value, $error );
-		}
-
 		$clean = parent::sanitize( $field, $value, $error, $post_id );
 		if ( null !== $error ) {
 			return $clean;

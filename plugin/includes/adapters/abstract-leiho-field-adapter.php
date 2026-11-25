@@ -77,7 +77,7 @@ abstract class Leiho_Field_Adapter implements Leiho_Adapter_Interface, Leiho_Con
 			'supported' => in_array( $type, static::SUPPORTED_TYPES, true ),
 		);
 
-		// Un select/post_object/taxonomy multiple reste lisible mais pas éditable en v1.
+		// Select multiple (cases à cocher comprises) et post_object multiple.
 		if ( ! empty( $field['multiple'] ) && in_array( $type, array( 'select', 'post_object' ), true ) ) {
 			$entry['multiple'] = true;
 		}
@@ -682,6 +682,11 @@ abstract class Leiho_Field_Adapter implements Leiho_Adapter_Interface, Leiho_Con
 		$out = array();
 		foreach ( $items as $item ) {
 			$item = is_scalar( $item ) ? (string) $item : '';
+			// Choix libre permis par le champ (ACF « allow_custom ») : un texte simple.
+			if ( ! empty( $field['allow_custom'] ) && '' !== trim( $item ) && ! array_key_exists( $item, $choices ) ) {
+				$out[] = sanitize_text_field( $item );
+				continue;
+			}
 			if ( ! array_key_exists( $item, $choices ) ) {
 				$error = 'invalid_choice';
 				return null;
@@ -890,8 +895,11 @@ abstract class Leiho_Field_Adapter implements Leiho_Adapter_Interface, Leiho_Con
 				return (float) $value;
 
 			case 'select':
+				if ( ! empty( $field['multiple'] ) ) {
+					return $this->sanitize_choices( $field, $value, $error );
+				}
 				$choices = isset( $field['choices'] ) && is_array( $field['choices'] ) ? $field['choices'] : array();
-				$value   = (string) $value;
+				$value   = is_scalar( $value ) ? (string) $value : '';
 				if ( '' === $value ) {
 					return '';
 				}

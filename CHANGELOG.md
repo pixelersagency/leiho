@@ -6,7 +6,12 @@ All notable changes to Leiho (called Okno until 1.0.0-beta.11) are documented he
 
 ### Added
 
-- **JetEngine fields.** The fields of JetEngine meta boxes and post types show up in the visual editor and in Collections, next to ACF fields: text, textarea, WYSIWYG, number, media, gallery, switcher, date, time, select (single or multiple), radio, checkboxes, posts and repeaters. Leiho saves them in JetEngine's own formats (repeater rows `item-0`, `item-1`…, media as an ID, a URL or both, dates as timestamps when the field asks for it, checkboxes as `value => true/false`), so listings, GraphQL and the REST API read them as before. Repeaters saved as separate fields, color and icon pickers and maps are shown but not edited yet.
+- **JetEngine fields.** The fields of JetEngine meta boxes and post types show up in the visual editor and in Collections, next to ACF fields, and every JetEngine field type is editable: text, textarea, WYSIWYG, number, media, gallery, switcher, date, time, date and time, select (single or multiple), radio, checkboxes, posts, color, icon (its class, as text), map (latitude and longitude, or an address) and repeaters, including repeaters saved as separate fields. Leiho saves them in JetEngine's own formats (repeater rows `item-0`, `item-1`…, media as an ID, a URL or both, dates as timestamps when the field asks for it, checkboxes as `value => true/false`) and rewrites the extra values JetEngine's form writes along (a map's hash and coordinates, the separate copies of a repeater), so listings, map listings, GraphQL and the REST API read them as before.
+- **ACF checkboxes, radio buttons and button groups**, and multiple selects, are editable. They were shown read-only.
+
+### Fixed
+
+- In Collections, the status and language menus of the top bar no longer run over the save state when the bar is narrow: the entry title (already at the top of the panel) leaves the bar, and the save state is shortened, with the full text on hover.
 
 ## [1.0.0-rc.10] — 2026-11-25
 

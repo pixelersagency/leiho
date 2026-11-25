@@ -81,7 +81,7 @@ class Leiho_ACF_Adapter extends Leiho_Field_Adapter {
 			$out[] = array(
 				'key'    => $group['key'],
 				'title'  => $group['title'],
-				'fields' => $fields,
+				'fields' => self::normalize_fields( $fields ),
 			);
 		}
 
@@ -169,10 +169,45 @@ class Leiho_ACF_Adapter extends Leiho_Field_Adapter {
 			}
 			$out[] = array(
 				'conditional' => $target,
-				'fields'      => $fields,
+				'fields'      => self::normalize_fields( $fields ),
 			);
 		}
 		return $out;
+	}
+
+	/**
+	 * Champs à choix d'ACF vus comme le select de Leiho : cases à cocher →
+	 * select multiple, boutons radio et groupe de boutons → select. ACF les
+	 * stocke de la même façon (une liste, ou une valeur), update_field()
+	 * reçoit donc la bonne valeur ; seul l'affichage dans Leiho change.
+	 *
+	 * @param array $fields Champs ACF (sous-champs et mises en page compris).
+	 * @return array
+	 */
+	private static function normalize_fields( $fields ) {
+		foreach ( $fields as $i => $field ) {
+			if ( ! is_array( $field ) || ! isset( $field['type'] ) ) {
+				continue;
+			}
+			if ( 'checkbox' === $field['type'] ) {
+				$fields[ $i ]['type']     = 'select';
+				$fields[ $i ]['multiple'] = 1;
+			} elseif ( in_array( $field['type'], array( 'radio', 'button_group' ), true ) ) {
+				$fields[ $i ]['type']     = 'select';
+				$fields[ $i ]['multiple'] = 0;
+			}
+			if ( ! empty( $field['sub_fields'] ) && is_array( $field['sub_fields'] ) ) {
+				$fields[ $i ]['sub_fields'] = self::normalize_fields( $field['sub_fields'] );
+			}
+			if ( ! empty( $field['layouts'] ) && is_array( $field['layouts'] ) ) {
+				foreach ( $field['layouts'] as $l => $layout ) {
+					if ( ! empty( $layout['sub_fields'] ) && is_array( $layout['sub_fields'] ) ) {
+						$fields[ $i ]['layouts'][ $l ]['sub_fields'] = self::normalize_fields( $layout['sub_fields'] );
+					}
+				}
+			}
+		}
+		return $fields;
 	}
 
 	/**
