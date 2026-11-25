@@ -36,6 +36,9 @@ class Leiho_ACF_Adapter extends Leiho_Field_Adapter {
 		foreach ( $this->field_groups( $post_id ) as $group ) {
 			$mapped = array();
 			foreach ( $group['fields'] as $field ) {
+				if ( self::is_layout( $field ) ) {
+					continue;
+				}
 				$mapped[] = $this->map_field( $field, $post_id );
 			}
 			if ( empty( $mapped ) ) {

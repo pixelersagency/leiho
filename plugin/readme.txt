@@ -60,6 +60,7 @@ The login page uses the Geist font (https://github.com/vercel/geist-font), Copyr
 * ACF checkboxes, radio buttons, button groups and multiple selects are editable.
 * The Publish button follows the role's permission (filter leiho_deploy_capability now defaults to edit_posts).
 * Authors see their own entries in Collections, with the right count.
+* ACF / SCF tabs, messages and accordions no longer show as fields that can't be edited.
 * Collections: the status and language menus no longer run over the save state in a narrow top bar.
 
 = 1.0.0-rc.10 =

@@ -28,6 +28,8 @@ $GLOBALS['group_fields'] = array(
 		field( 'formule', 'radio', array( 'choices' => array( 'a' => 'A', 'b' => 'B' ) ) ),
 		field( 'tags', 'select', array( 'multiple' => 1, 'choices' => array( 'x' => 'X', 'y' => 'Y' ) ) ),
 		field( 'libre', 'checkbox', array( 'allow_custom' => 1, 'choices' => array( 'p' => 'P' ) ) ),
+		field( 'onglet', 'tab' ),
+		field( 'note', 'message' ),
 	),
 );
 
@@ -49,6 +51,8 @@ $adapter = new Leiho_ACF_Adapter();
 /* --- Lecture --- */
 $schema = $adapter->get_schema( 1 );
 $fields = $schema[0]['fields'];
+$names  = array_column( $fields, 'name' );
+assert_true( 'onglets et messages absents du panneau', ! in_array( 'onglet', $names, true ) && ! in_array( 'note', $names, true ), $names );
 $flex = $fields[1];
 assert_true( 'flexible_content supporté', true === $flex['supported'] );
 assert_true( 'layouts décrits', 2 === count( $flex['layouts'] ) );

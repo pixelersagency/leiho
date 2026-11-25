@@ -18,6 +18,7 @@ First stable release.
 
 ### Fixed
 
+- **ACF / SCF tabs, messages and accordions** no longer show in the editor panel as fields that "can't be edited here". They only lay out WordPress's own edit screen, so Leiho leaves them out, as the content API already did.
 - **Authors in Collections** see their own entries, with the right count. The list asked for every entry, then hid the ones they can't edit, so it could look empty under a full total.
 - In Collections, the status and language menus of the top bar no longer run over the save state when the bar is narrow: the entry title (already at the top of the panel) leaves the bar, and the save state is shortened, with the full text on hover.
 

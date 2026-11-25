@@ -178,6 +178,9 @@ abstract class Leiho_Field_Adapter implements Leiho_Adapter_Interface, Leiho_Con
 		$out = array();
 		foreach ( $this->get_definitions( $post_type ) as $group ) {
 			foreach ( isset( $group['fields'] ) ? (array) $group['fields'] : array() as $field ) {
+				if ( self::is_layout( $field ) ) {
+					continue;
+				}
 				$entry = $this->describe( $field );
 				if ( ! empty( $group['conditional'] ) ) {
 					$entry['conditional'] = true;
@@ -191,6 +194,9 @@ abstract class Leiho_Field_Adapter implements Leiho_Adapter_Interface, Leiho_Con
 	protected function describe_all( $fields ) {
 		$out = array();
 		foreach ( (array) $fields as $sub ) {
+			if ( self::is_layout( $sub ) ) {
+				continue;
+			}
 			$out[] = $this->describe( $sub );
 		}
 		return $out;
@@ -485,6 +491,17 @@ abstract class Leiho_Field_Adapter implements Leiho_Adapter_Interface, Leiho_Con
 
 	/** Types sans valeur (mise en forme de l'écran d'édition ACF). */
 	const LAYOUT_TYPES = array( 'tab', 'message', 'accordion' );
+
+	/**
+	 * Onglet, message ou accordéon : mise en forme de l'écran d'édition de
+	 * WordPress, sans valeur. Ni éditable ni « non pris en charge » : absent.
+	 *
+	 * @param mixed $field Champ brut.
+	 * @return bool
+	 */
+	protected static function is_layout( $field ) {
+		return is_array( $field ) && isset( $field['type'] ) && in_array( $field['type'], self::LAYOUT_TYPES, true );
+	}
 
 	/**
 	 * Valeur d'un champ telle que le front la consomme.
