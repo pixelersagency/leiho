@@ -2,6 +2,12 @@
 
 All notable changes to Leiho (called Okno until 1.0.0-beta.11) are documented here. The project follows [Semantic Versioning](https://semver.org/). The plugin and the bridge package share one version number.
 
+## [Unreleased]
+
+### Added
+
+- **JetEngine fields.** The fields of JetEngine meta boxes and post types show up in the visual editor and in Collections, next to ACF fields: text, textarea, WYSIWYG, number, media, gallery, switcher, date, time, select (single or multiple), radio, checkboxes, posts and repeaters. Leiho saves them in JetEngine's own formats (repeater rows `item-0`, `item-1`…, media as an ID, a URL or both, dates as timestamps when the field asks for it, checkboxes as `value => true/false`), so listings, GraphQL and the REST API read them as before. Repeaters saved as separate fields, color and icon pickers and maps are shown but not edited yet.
+
 ## [1.0.0-rc.10] — 2026-11-25
 
 ### Added

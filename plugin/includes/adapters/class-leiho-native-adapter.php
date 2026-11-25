@@ -538,21 +538,7 @@ class Leiho_Native_Adapter extends Leiho_Field_Adapter {
 		}
 
 		if ( 'select' === $type && ! empty( $field['multiple'] ) ) {
-			$items = is_array( $value ) ? $value : ( '' === $value || null === $value ? array() : array( $value ) );
-			if ( ! empty( $field['required'] ) && ! $items ) {
-				$error = 'required';
-				return null;
-			}
-			$out = array();
-			foreach ( $items as $item ) {
-				$item = is_scalar( $item ) ? (string) $item : '';
-				if ( ! array_key_exists( $item, $field['choices'] ) ) {
-					$error = 'invalid_choice';
-					return null;
-				}
-				$out[] = $item;
-			}
-			return array_values( array_unique( $out ) );
+			return $this->sanitize_choices( $field, $value, $error );
 		}
 
 		$clean = parent::sanitize( $field, $value, $error, $post_id );

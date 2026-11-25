@@ -663,6 +663,35 @@ abstract class Leiho_Field_Adapter implements Leiho_Adapter_Interface, Leiho_Con
 	}
 
 	/**
+	 * Liste de choix (select multiple, cases à cocher) : chaque valeur doit
+	 * être un des choix du champ.
+	 *
+	 * @param array  $field Champ (choices, required).
+	 * @param mixed  $value Valeur reçue : une liste ou un seul choix.
+	 * @param string $error Code d'erreur (sortie).
+	 * @return array|null
+	 */
+	protected function sanitize_choices( $field, $value, &$error ) {
+		$error   = null;
+		$choices = isset( $field['choices'] ) && is_array( $field['choices'] ) ? $field['choices'] : array();
+		$items   = is_array( $value ) ? $value : ( '' === $value || null === $value ? array() : array( $value ) );
+		if ( ! empty( $field['required'] ) && ! $items ) {
+			$error = 'required';
+			return null;
+		}
+		$out = array();
+		foreach ( $items as $item ) {
+			$item = is_scalar( $item ) ? (string) $item : '';
+			if ( ! array_key_exists( $item, $choices ) ) {
+				$error = 'invalid_choice';
+				return null;
+			}
+			$out[] = $item;
+		}
+		return array_values( array_unique( $out ) );
+	}
+
+	/**
 	 * Un champ taxonomie renvoie-t-il plusieurs termes ?
 	 *
 	 * @param array $field Champ ACF brut.

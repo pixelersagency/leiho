@@ -545,7 +545,8 @@ Found a vulnerability? See [SECURITY.md](SECURITY.md).
 
 ## Extending
 
-- **Other field plugins**: implement `Leiho_Adapter_Interface` and register it with the `leiho_adapters` filter (Meta Box, JetEngine, Pods…).
+- **JetEngine**: the fields of JetEngine meta boxes and post types are edited like ACF fields and saved in JetEngine's own formats. Not edited yet: repeaters saved as separate fields, color and icon pickers, maps.
+- **Other field plugins**: implement `Leiho_Adapter_Interface` and register it with the `leiho_adapters` filter (Meta Box, Pods…).
 - **Other deployment targets**: implement `Leiho_Deploy_Driver_Interface` and plug it in with `leiho_deploy_driver`.
 - **WYSIWYG preview**: `leiho_wysiwyg_render` replaces `wpautop()` with your front end's actual rendering.
 - **Draft preview**: `leiho_preview_stand_in` (`$stand_in`, `$post`) picks the published entry whose page shows a draft (`null`: none).

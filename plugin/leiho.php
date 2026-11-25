@@ -35,6 +35,7 @@ require_once LEIHO_DIR . 'includes/adapters/interface-leiho-adapter.php';
 require_once LEIHO_DIR . 'includes/adapters/abstract-leiho-field-adapter.php';
 require_once LEIHO_DIR . 'includes/adapters/class-leiho-acf-adapter.php';
 require_once LEIHO_DIR . 'includes/adapters/class-leiho-native-adapter.php';
+require_once LEIHO_DIR . 'includes/adapters/class-leiho-jetengine-adapter.php';
 require_once LEIHO_DIR . 'includes/collections/class-leiho-collections-schema.php';
 require_once LEIHO_DIR . 'includes/collections/class-leiho-collections-values.php';
 require_once LEIHO_DIR . 'includes/collections/class-leiho-collections-store.php';
@@ -113,6 +114,7 @@ final class Leiho_Plugin {
 		// Leiho Collections d'abord : les champs natifs priment sur un homonyme ACF.
 		$this->adapters['collections'] = new Leiho_Native_Adapter();
 		$this->adapters['acf']         = new Leiho_ACF_Adapter();
+		$this->adapters['jetengine']   = new Leiho_JetEngine_Adapter();
 
 		/**
 		 * Permet d'enregistrer des adapters supplémentaires (JetEngine, Metabox, …).
