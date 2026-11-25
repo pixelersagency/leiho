@@ -24,6 +24,16 @@ function wp_slash( $v ) { return is_array( $v ) ? array_map( 'wp_slash', $v ) : 
 function wp_unslash( $v ) { return is_array( $v ) ? array_map( 'wp_unslash', $v ) : ( is_string( $v ) ? stripslashes( $v ) : $v ); }
 function attachment_url_to_postid( $url ) { return preg_match( '#/(\d+)\.jpg$#', $url, $m ) ? (int) $m[1] : 0; }
 function do_action( $tag, ...$args ) { $GLOBALS['actions'][] = $tag; }
+function delete_post_meta( $id, $key ) { unset( $GLOBALS['meta'][ $id ][ $key ] ); return true; }
+if ( ! function_exists( 'wp_json_encode' ) ) {
+	function wp_json_encode( $v ) { return json_encode( $v ); }
+}
+// Méthode du formulaire de JetEngine qui réécrit les copies d'un repeater « en champs séparés ».
+class Cherry_X_Post_Meta {
+	public static function _save_repeater_separate_fields( $post_id, $key, $value, $field ) {
+		$GLOBALS['separate'][] = array( $key, $value );
+	}
+}
 
 class Jet_Engine_CPT_Meta {
 	public function filter_options_list( $list, $field ) {
@@ -83,6 +93,15 @@ jet_engine()->meta_boxes->fields['page'] = array(
 	) ),
 	array( 'title' => 'Aide', 'name' => 'help', 'object_type' => 'field', 'type' => 'html', 'html' => '<p>Texte</p>' ),
 	array( 'title' => 'Couleur', 'name' => 'color', 'object_type' => 'field', 'type' => 'colorpicker' ),
+	array( 'title' => 'Icône', 'name' => 'icon_class', 'object_type' => 'field', 'type' => 'iconpicker' ),
+	array( 'title' => 'Lieu', 'name' => 'place', 'object_type' => 'field', 'type' => 'map' ),
+	array( 'title' => 'Lieu JSON', 'name' => 'place_json', 'object_type' => 'field', 'type' => 'map', 'map_value_format' => 'location_array' ),
+	array( 'title' => 'Adresse', 'name' => 'place_addr', 'object_type' => 'field', 'type' => 'map', 'map_value_format' => 'location_address' ),
+	array( 'title' => 'Lieu Hash', 'name' => md5( 'place' ) . '_hash', 'object_type' => 'field', 'type' => 'hidden' ),
+	array( 'title' => 'Agences', 'name' => 'offices', 'object_type' => 'field', 'type' => 'repeater', 'repeater-fields' => array(
+		array( 'title' => 'Ville', 'name' => 'city', 'type' => 'text' ),
+		array( 'title' => 'Position', 'name' => 'pos', 'type' => 'map' ),
+	) ),
 );
 
 $GLOBALS['meta'][1] = array(
@@ -101,6 +120,12 @@ $GLOBALS['meta'][1] = array(
 	'plan'              => 'pro',
 	'opts'              => array( 'a' => 'true', 'b' => 'false' ),
 	'faq'               => array( 'item-0' => array( 'q' => 'Prix ?' ) ),
+	'color'             => '#ff0000',
+	'icon_class'        => 'fas fa-star',
+	'place'             => '48.8566,2.3522',
+	'place_json'        => '{"lat":43.2965,"lng":5.3698}',
+	'place_addr'        => '1 rue de Rivoli, Paris',
+	'offices'           => array( 'item-0' => array( 'city' => 'Lyon', 'pos' => '45.764,4.8357', 'pos_hash' => 'x' ) ),
 );
 
 $adapter = new Leiho_JetEngine_Adapter();
@@ -128,8 +153,14 @@ assert_true( 'galerie « 7,8 »', array( 7, 8 ) === $by['photos']['value'], $by[
 assert_true( 'interrupteur « false »', false === $by['hide']['value'] );
 assert_true( 'select et ses choix', 'pro' === $by['plan']['value'] && array( 'basic' => 'Basic', 'pro' => 'Pro' ) === $by['plan']['options'], $by['plan'] );
 assert_true( 'cases à cocher : liste multiple', ! empty( $by['opts']['multiple'] ) );
-assert_true( 'repeater en champs séparés : lecture seule', false === $by['faq']['supported'] );
-assert_true( 'couleur : non éditée', false === $by['color']['supported'] );
+assert_true( 'repeater en champs séparés : éditable', true === $by['faq']['supported'] );
+assert_true( 'couleur', 'color_picker' === $by['color']['type'] && $by['color']['supported'] && '#ff0000' === $by['color']['value'], $by['color'] );
+assert_true( 'icône : sa classe en texte', 'text' === $by['icon_class']['type'] && 'fas fa-star' === $by['icon_class']['value'], $by['icon_class'] );
+assert_true( 'carte « lat,lng » → groupe', 'group' === $by['place']['type'] && $by['place']['supported'] && array( 'lat' => 48.8566, 'lng' => 2.3522 ) == $by['place']['value'], $by['place'] );
+assert_true( 'carte JSON → groupe', array( 'lat' => 43.2965, 'lng' => 5.3698 ) == $by['place_json']['value'], $by['place_json'] );
+assert_true( 'carte adresse → groupe', array( 'address' => '1 rue de Rivoli, Paris' ) == $by['place_addr']['value'], $by['place_addr'] );
+assert_true( 'champ caché de la carte ignoré', ! isset( $by[ md5( 'place' ) . '_hash' ] ) );
+assert_true( 'carte dans un repeater', array( 'lat' => 45.764, 'lng' => 4.8357 ) == $by['offices']['value'][0]['pos'], $by['offices'] );
 
 /* --- Écriture : chaque format revient tel que JetEngine l'écrit --- */
 $r = $adapter->save_values( 1, array( 'short_description' => 'Gouvernante', 'skills.1.skill' => 'linge \\ maison', 'hide' => true ) );
@@ -154,8 +185,33 @@ $r = $adapter->save_values( 1, array( 'short_description' => '' ) );
 assert_true( 'obligatoire vide refusé', isset( $r['errors']['short_description'] ) && 'Gouvernante' === $GLOBALS['meta'][1]['short_description'], $r );
 $r = $adapter->save_values( 1, array( 'plan' => 'gold' ) );
 assert_true( 'choix inconnu refusé', 'invalid_choice' === $r['errors']['plan'], $r );
+$r = $adapter->save_values( 1, array( 'color' => 'rouge' ) );
+assert_true( 'couleur invalide refusée', 'invalid_color' === $r['errors']['color'] && '#ff0000' === $GLOBALS['meta'][1]['color'], $r );
+
+/* --- Types propres à JetEngine --- */
+$GLOBALS['separate'] = array();
 $r = $adapter->save_values( 1, array( 'faq.0.q' => 'Délai ?' ) );
-assert_true( 'repeater séparé non écrit', 'unsupported_type' === $r['errors']['faq.0.q'] && 'Prix ?' === $GLOBALS['meta'][1]['faq']['item-0']['q'], $r );
+assert_true( 'repeater séparé écrit', empty( $r['errors'] ) && 'Délai ?' === $GLOBALS['meta'][1]['faq']['item-0']['q'], $r );
+assert_true( 'copies séparées réécrites par JetEngine', array( array( 'faq', array( 'item-0' => array( 'q' => 'Délai ?' ) ) ) ) === $GLOBALS['separate'], $GLOBALS['separate'] );
+
+$r = $adapter->save_values( 1, array( 'color' => '#00ff00', 'icon_class' => 'fas fa-heart', 'place.lat' => 45.5, 'place_json' => array( 'lat' => 1.5, 'lng' => -2.25 ), 'place_addr.address' => '2 place Bellecour, Lyon' ) );
+assert_true( 'couleur, icône, cartes enregistrées', empty( $r['errors'] ), $r );
+$m = $GLOBALS['meta'][1];
+assert_true( 'couleur écrite', '#00ff00' === $m['color'] );
+assert_true( 'icône écrite', 'fas fa-heart' === $m['icon_class'] );
+assert_true( 'carte « lat,lng » écrite', '45.5,2.3522' === $m['place'], $m['place'] );
+$p = md5( 'place' );
+assert_true( 'empreinte et coordonnées de la carte', md5( '45.5,2.3522' ) === $m[ $p . '_hash' ] && '45.5' === $m[ $p . '_lat' ] && '2.3522' === $m[ $p . '_lng' ], array( $m[ $p . '_hash' ] ?? null, $m[ $p . '_lat' ] ?? null ) );
+assert_true( 'carte JSON écrite', '{"lat":1.5,"lng":-2.25}' === $m['place_json'], $m['place_json'] );
+$a = md5( 'place_addr' );
+assert_true( 'carte adresse écrite, sans coordonnées', '2 place Bellecour, Lyon' === $m['place_addr'] && md5( '2 place Bellecour, Lyon' ) === $m[ $a . '_hash' ] && ! isset( $m[ $a . '_lat' ] ), $m['place_addr'] );
+
+$r = $adapter->save_values( 1, array( 'offices.0.pos.lng' => 4.9 ) );
+$row = $GLOBALS['meta'][1]['offices']['item-0'];
+assert_true( 'carte du repeater : valeur et champs cachés dans la ligne', empty( $r['errors'] ) && '45.764,4.9' === $row['pos'] && md5( '45.764,4.9' ) === $row['pos_hash'] && '4.9' === $row['pos_lng'], array( $r, $row ) );
+
+$r = $adapter->save_values( 1, array( 'place' => array( 'lat' => '', 'lng' => '' ) ) );
+assert_true( 'carte vidée : champs cachés effacés', empty( $r['errors'] ) && '' === $GLOBALS['meta'][1]['place'] && ! isset( $GLOBALS['meta'][1][ $p . '_hash' ] ), array( $r, $GLOBALS['meta'][1]['place'] ) );
 $r = $adapter->save_values( 1, array( 'opts' => array( 'b', 'zzz' ) ) );
 assert_true( 'case inconnue refusée', isset( $r['errors']['opts'] ) && array( 'a' => 'true', 'b' => 'false' ) === $GLOBALS['meta'][1]['opts'], $r );
 

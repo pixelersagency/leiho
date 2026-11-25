@@ -14,10 +14,43 @@ defined( 'ABSPATH' ) || exit;
  * le front (listings JetEngine, GraphQL, API REST) relise exactement ce que
  * JetEngine aurait écrit.
  *
- * Non édités en v1 (lus, montrés comme non modifiables) : repeaters enregistrés
- * aussi en champs séparés, cases à cocher, couleurs, icônes, cartes.
+ * Équivalents Leiho des champs propres à JetEngine : couleur → couleur,
+ * icône → texte (sa classe, « fas fa-star »), carte → groupe latitude /
+ * longitude (ou adresse). Les métas annexes de JetEngine (empreinte et
+ * coordonnées d'une carte, copies d'un repeater « en champs séparés ») sont
+ * réécrites comme le ferait son formulaire.
  */
 class Leiho_JetEngine_Adapter extends Leiho_Field_Adapter {
+
+	/** Types éditables : ceux du moteur commun + la couleur. */
+	const SUPPORTED_TYPES = array(
+		'text',
+		'textarea',
+		'wysiwyg',
+		'image',
+		'file',
+		'gallery',
+		'url',
+		'link',
+		'page_link',
+		'oembed',
+		'email',
+		'select',
+		'true_false',
+		'number',
+		'range',
+		'date_picker',
+		'date_time_picker',
+		'time_picker',
+		'color_picker',
+		'post_object',
+		'relationship',
+		'taxonomy',
+		'repeater',
+		'group',
+		'clone',
+		'flexible_content',
+	);
 
 	/** Cache par requête : post_type => champs au format ACF. */
 	private $fields_cache = array();
@@ -77,8 +110,9 @@ class Leiho_JetEngine_Adapter extends Leiho_Field_Adapter {
 		}
 
 		$type = isset( $jet['type'] ) ? (string) $jet['type'] : 'text';
-		// Bloc « HTML » : du texte affiché dans la meta box, sans valeur.
-		if ( 'html' === $type ) {
+		// Bloc « HTML » (texte affiché, sans valeur) et champs cachés (les
+		// métas annexes d'une carte) : rien à éditer.
+		if ( 'html' === $type || 'hidden' === $type ) {
 			return null;
 		}
 		$field = array(
@@ -97,6 +131,14 @@ class Leiho_JetEngine_Adapter extends Leiho_Field_Adapter {
 			case 'wysiwyg':
 			case 'number':
 				$field['type'] = $type;
+				if ( 'number' === $type ) {
+					$field['step'] = isset( $jet['step_value'] ) && is_numeric( $jet['step_value'] ) && $jet['step_value'] > 0 ? $jet['step_value'] : 'any';
+					foreach ( array( 'min_value' => 'min', 'max_value' => 'max' ) as $from => $to ) {
+						if ( isset( $jet[ $from ] ) && is_numeric( $jet[ $from ] ) ) {
+							$field[ $to ] = 0 + $jet[ $from ];
+						}
+					}
+				}
 				foreach ( array( 'max_length', 'maxlength' ) as $limit ) {
 					if ( ! empty( $jet[ $limit ] ) ) {
 						$field['maxlength'] = (int) $jet[ $limit ];
@@ -158,8 +200,53 @@ class Leiho_JetEngine_Adapter extends Leiho_Field_Adapter {
 				}
 				break;
 
+			case 'colorpicker':
+				$field['type'] = 'color_picker';
+				break;
+
+			case 'iconpicker':
+				// La classe de l'icône (« fas fa-star ») : un texte.
+				$field['type'] = 'text';
+				break;
+
+			case 'map':
+				$field['type']       = 'group';
+				$field['sub_fields'] = 'location_address' === self::map_format( $jet )
+					? array(
+						array(
+							'key'   => 'address',
+							'name'  => 'address',
+							'label' => __( 'Address', 'leiho' ),
+							'type'  => 'text',
+							'jet'   => array( 'type' => 'text' ),
+						),
+					)
+					: array(
+						array(
+							'key'   => 'lat',
+							'name'  => 'lat',
+							'label' => __( 'Latitude', 'leiho' ),
+							'type'  => 'number',
+							'min'   => -90,
+							'max'   => 90,
+							'step'  => 'any',
+							'jet'   => array( 'type' => 'number' ),
+						),
+						array(
+							'key'   => 'lng',
+							'name'  => 'lng',
+							'label' => __( 'Longitude', 'leiho' ),
+							'type'  => 'number',
+							'min'   => -180,
+							'max'   => 180,
+							'step'  => 'any',
+							'jet'   => array( 'type' => 'number' ),
+						),
+					);
+				break;
+
 			default:
-				// Couleur, icône, carte, HTML, champ caché… : lus tels quels, non édités.
+				// Type inconnu (ajouté par une extension) : lu tel quel, non édité.
 				$field['type'] = 'jetengine_' . $type;
 		}
 
@@ -214,22 +301,6 @@ class Leiho_JetEngine_Adapter extends Leiho_Field_Adapter {
 	}
 
 	/**
-	 * Select multiple et cases à cocher : une liste de choix connus.
-	 *
-	 * @param array  $field   Champ.
-	 * @param mixed  $value   Valeur reçue.
-	 * @param string $error   Code d'erreur (sortie).
-	 * @param int    $post_id Contenu.
-	 * @return mixed
-	 */
-	protected function sanitize( $field, $value, &$error, $post_id = 0 ) {
-		if ( 'select' === $field['type'] && ! empty( $field['multiple'] ) ) {
-			return $this->sanitize_choices( $field, $value, $error );
-		}
-		return parent::sanitize( $field, $value, $error, $post_id );
-	}
-
-	/**
 	 * Description : un repeater que JetEngine enregistre aussi en champs
 	 * séparés reste en lecture seule (ces méta annexes ne seraient pas
 	 * tenues à jour).
@@ -237,8 +308,17 @@ class Leiho_JetEngine_Adapter extends Leiho_Field_Adapter {
 	protected function describe( $field ) {
 		$entry = parent::describe( $field );
 		$jet   = isset( $field['jet'] ) ? $field['jet'] : array();
-		if ( 'repeater' === $field['type'] && ! empty( $jet['repeater_save_separate'] ) && filter_var( $jet['repeater_save_separate'], FILTER_VALIDATE_BOOLEAN ) ) {
+		// Repeater « en champs séparés » : éditable si JetEngine fournit de
+		// quoi réécrire ses copies (méthode de son propre formulaire).
+		if ( self::saves_separate( $field ) && ! is_callable( array( 'Cherry_X_Post_Meta', '_save_repeater_separate_fields' ) ) ) {
 			$entry['supported'] = false;
+		}
+		if ( 'number' === $field['type'] && $entry['supported'] ) {
+			foreach ( array( 'min', 'max', 'step' ) as $prop ) {
+				if ( isset( $field[ $prop ] ) ) {
+					$entry[ $prop ] = $field[ $prop ];
+				}
+			}
 		}
 		return $entry;
 	}
@@ -365,6 +445,8 @@ class Leiho_JetEngine_Adapter extends Leiho_Field_Adapter {
 			 * @param string $name    Nom du champ.
 			 * @param array  $jet     Définition JetEngine.
 			 */
+			$this->save_companions( $post_id, $field, $stored, $next );
+
 			do_action( 'leiho_jetengine_field_saved', $post_id, $stored, $field['name'], $field['jet'] );
 
 			$saved = array_merge( $saved, $touched );
@@ -423,6 +505,9 @@ class Leiho_JetEngine_Adapter extends Leiho_Field_Adapter {
 
 			case 'true_false':
 				return true === $raw || 'true' === $raw || '1' === (string) $raw ? 1 : 0;
+
+			case 'group':
+				return self::is_map( $jet ) ? self::map_to_acf( $jet, $raw ) : ( is_array( $raw ) ? $raw : array() );
 
 			case 'date_picker':
 				$time = self::to_time( $raw, $jet );
@@ -488,6 +573,12 @@ class Leiho_JetEngine_Adapter extends Leiho_Field_Adapter {
 					foreach ( $field['sub_fields'] as $sub ) {
 						$cell                = array_key_exists( $sub['key'], $row ) ? $row[ $sub['key'] ] : ( isset( $row[ $sub['name'] ] ) ? $row[ $sub['name'] ] : null );
 						$out[ $sub['name'] ] = $this->from_acf( $sub, $cell );
+						// Carte dans un repeater : ses champs cachés vont dans la ligne.
+						if ( isset( $sub['jet'] ) && self::is_map( $sub['jet'] ) ) {
+							foreach ( self::map_companions( $sub['jet'], $out[ $sub['name'] ], $cell ) as $suffix => $companion ) {
+								$out[ $sub['name'] . $suffix ] = $companion;
+							}
+						}
 					}
 					$rows[ 'item-' . $index ] = $out;
 					++$index;
@@ -511,6 +602,9 @@ class Leiho_JetEngine_Adapter extends Leiho_Field_Adapter {
 
 			case 'true_false':
 				return $value ? 'true' : 'false';
+
+			case 'group':
+				return self::is_map( $jet ) ? self::map_from_acf( $jet, $value ) : $value;
 
 			case 'date_picker':
 			case 'date_time_picker':
@@ -559,6 +653,131 @@ class Leiho_JetEngine_Adapter extends Leiho_Field_Adapter {
 			default:
 				return $value;
 		}
+	}
+
+	/**
+	 * Métas annexes que le formulaire de JetEngine écrit avec certains
+	 * champs : empreinte et coordonnées d'une carte, copies d'un repeater
+	 * « en champs séparés ».
+	 *
+	 * @param int   $post_id Contenu.
+	 * @param array $field   Champ (format ACF, avec 'jet').
+	 * @param mixed $stored  Valeur enregistrée, au format JetEngine.
+	 * @param mixed $value   Même valeur, au format ACF.
+	 * @return void
+	 */
+	private function save_companions( $post_id, $field, $stored, $value ) {
+		$jet = $field['jet'];
+
+		if ( self::is_map( $jet ) ) {
+			$prefix = apply_filters( 'jet-engine/maps-listings/map-field-prefix', md5( $field['name'] ), $field['name'] ); // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound -- Filtre de JetEngine.
+			foreach ( self::map_companions( $jet, $stored, $value ) as $suffix => $companion ) {
+				if ( '' === $companion ) {
+					delete_post_meta( $post_id, $prefix . $suffix );
+				} else {
+					update_post_meta( $post_id, $prefix . $suffix, $companion );
+				}
+			}
+		}
+
+		if ( self::saves_separate( $field ) && is_callable( array( 'Cherry_X_Post_Meta', '_save_repeater_separate_fields' ) ) ) {
+			Cherry_X_Post_Meta::_save_repeater_separate_fields( $post_id, $field['name'], $stored, $jet );
+		}
+	}
+
+	/**
+	 * Repeater enregistré aussi en champs séparés ?
+	 */
+	private static function saves_separate( $field ) {
+		return 'repeater' === $field['type']
+			&& ! empty( $field['jet']['repeater_save_separate'] )
+			&& filter_var( $field['jet']['repeater_save_separate'], FILTER_VALIDATE_BOOLEAN );
+	}
+
+	/**
+	 * Champ carte (module Maps de JetEngine) ?
+	 */
+	private static function is_map( $jet ) {
+		return isset( $jet['type'] ) && 'map' === $jet['type'];
+	}
+
+	/**
+	 * Format d'une carte : « lat,lng », JSON { lat, lng } ou adresse.
+	 */
+	private static function map_format( $jet ) {
+		$format = isset( $jet['map_value_format'] ) ? (string) $jet['map_value_format'] : '';
+		return in_array( $format, array( 'location_array', 'location_address' ), true ) ? $format : 'location_string';
+	}
+
+	/**
+	 * Valeur d'une carte → groupe { lat, lng } ou { address }.
+	 */
+	private static function map_to_acf( $jet, $raw ) {
+		if ( 'location_address' === self::map_format( $jet ) ) {
+			return array( 'address' => is_scalar( $raw ) ? (string) $raw : '' );
+		}
+		$point = is_array( $raw ) ? $raw : null;
+		if ( null === $point && is_string( $raw ) && '' !== trim( $raw ) ) {
+			$decoded = json_decode( wp_unslash( $raw ), true );
+			if ( is_array( $decoded ) ) {
+				$point = $decoded;
+			} elseif ( preg_match( '/^\s*(-?[\d.]+)\s*,\s*(-?[\d.]+)\s*$/', $raw, $m ) ) {
+				$point = array( 'lat' => $m[1], 'lng' => $m[2] );
+			}
+		}
+		$lat = isset( $point['lat'] ) && is_numeric( $point['lat'] ) ? (float) $point['lat'] : null;
+		$lng = isset( $point['lng'] ) && is_numeric( $point['lng'] ) ? (float) $point['lng'] : null;
+		return array(
+			'lat' => $lat,
+			'lng' => $lng,
+		);
+	}
+
+	/**
+	 * Groupe { lat, lng } ou { address } → valeur de la carte, comme l'écrit
+	 * son champ dans l'administration ('' sans position complète).
+	 */
+	private static function map_from_acf( $jet, $value ) {
+		$value  = is_array( $value ) ? $value : array();
+		$format = self::map_format( $jet );
+		if ( 'location_address' === $format ) {
+			return isset( $value['address'] ) && is_scalar( $value['address'] ) ? trim( (string) $value['address'] ) : '';
+		}
+		$lat = isset( $value['lat'] ) && is_numeric( $value['lat'] ) ? 0 + $value['lat'] : null;
+		$lng = isset( $value['lng'] ) && is_numeric( $value['lng'] ) ? 0 + $value['lng'] : null;
+		if ( null === $lat || null === $lng ) {
+			return '';
+		}
+		if ( 'location_array' === $format ) {
+			return wp_json_encode(
+				array(
+					'lat' => $lat,
+					'lng' => $lng,
+				)
+			);
+		}
+		return $lat . ',' . $lng;
+	}
+
+	/**
+	 * Champs cachés d'une carte : empreinte de la valeur (md5, comme la
+	 * route « get-map-location-hash » de JetEngine) et coordonnées. Une
+	 * adresse n'a pas de coordonnées connues : JetEngine la géocode à
+	 * l'affichage, l'empreinte ayant changé.
+	 *
+	 * @param array  $jet      Définition de la carte.
+	 * @param string $location Valeur enregistrée.
+	 * @param mixed  $value    Groupe au format ACF.
+	 * @return array suffixe => valeur ('' : à effacer).
+	 */
+	private static function map_companions( $jet, $location, $value ) {
+		$location = is_scalar( $location ) ? (string) $location : '';
+		$coords   = 'location_address' !== self::map_format( $jet ) && '' !== $location && is_array( $value );
+		return array(
+			'_hash' => '' === $location ? '' : md5( $location ),
+			'_lat'  => $coords ? (string) ( 0 + $value['lat'] ) : '',
+			'_lng'  => $coords ? (string) ( 0 + $value['lng'] ) : '',
+		);
 	}
 
 	/**
