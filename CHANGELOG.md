@@ -2,6 +2,17 @@
 
 All notable changes to Leiho (called Okno until 1.0.0-beta.11) are documented here. The project follows [Semantic Versioning](https://semver.org/). The plugin and the bridge package share one version number.
 
+## [1.0.0-rc.10] — 2026-11-25
+
+### Added
+
+- **Right-to-left languages.** When WordPress shows the admin in Hebrew, Arabic, Persian or another right-to-left language, Leiho's interface (app, visual editor, setup screens, login page) is mirrored: navigation on the right, panels, menus and switches reversed, and arrows, chevrons, back, undo and redo pointing the right way. The arrow keys follow the reading direction in tabs, the date picker and grids.
+- **Text fields follow their content.** In any admin language, each paragraph of a text field, text area or rich text field takes the direction of its own text: Hebrew or Arabic content aligns right, English aligns left. URLs, paths, keys, branch names and code stay left to right.
+
+### Fixed
+
+- **Character counter.** In the editor's side panel, the text of a field with a character limit ran under the counter.
+
 ## [1.0.0-rc.9] — 2026-11-20
 
 ### Changed
@@ -363,6 +374,7 @@ First public release.
 - Managed regions (`data-okno-managed`) explain where to edit content Okno doesn't own.
 - Explicit sections (`data-okno-section`, `data-okno-layout`) take precedence over auto-detected ones.
 
+[1.0.0-rc.10]: https://github.com/pixelersagency/leiho/releases/tag/v1.0.0-rc.10
 [1.0.0-rc.9]: https://github.com/pixelersagency/leiho/releases/tag/v1.0.0-rc.9
 [1.0.0-rc.8]: https://github.com/pixelersagency/leiho/releases/tag/v1.0.0-rc.8
 [1.0.0-rc.7]: https://github.com/pixelersagency/leiho/releases/tag/v1.0.0-rc.7
