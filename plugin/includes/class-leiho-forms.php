@@ -499,7 +499,7 @@ class Leiho_Forms {
 			return false;
 		}
 		$res = wp_remote_post(
-			'https://challenges.cloudflare.com/turnstile/v0/siteverify',
+			'https://challenges.cloudflare.com/turnstile/v0/siteverify', // phpcs:ignore PluginCheck.CodeAnalysis.Offloading.OffloadedContent -- Appel serveur à l'API de vérification Turnstile, aucun fichier chargé.
 			array(
 				'timeout' => 8,
 				'body'    => array(
