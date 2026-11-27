@@ -930,6 +930,10 @@ class Leiho_Content {
 		if ( ! $post || wp_is_post_revision( $post ) || wp_is_post_autosave( $post ) ) {
 			return;
 		}
+		// Message de formulaire reçu : rien de ce que sert l'API ne change.
+		if ( 'leiho_entry' === $post->post_type ) { // Leiho_Forms::POST_TYPE.
+			return;
+		}
 		self::invalidate();
 
 		// Un média seul (téléversé, recadré) ne change rien tant qu'aucun

@@ -35,6 +35,9 @@ class Leiho_Dashboard {
 			case 'roles':
 				self::render_roles();
 				break;
+			case 'forms':
+				self::render_forms();
+				break;
 			default:
 				self::render_home();
 		}
@@ -2186,6 +2189,7 @@ CODE;
 			'collections' => __( 'Collections', 'leiho' ),
 			'media'       => __( 'Media', 'leiho' ),
 			'deploys'     => _x( 'Publishing', 'navigation', 'leiho' ),
+			'forms'       => __( 'Form messages', 'leiho' ),
 		);
 		$presets = array();
 		foreach ( array_keys( $profiles ) as $profile ) {
@@ -2253,6 +2257,16 @@ CODE;
 						</div>
 
 						<div class="leiho-row">
+							<span class="leiho-row__label"><?php esc_html_e( 'Forms', 'leiho' ); ?></span>
+							<div class="leiho-checks">
+								<label class="leiho-inline-check"><input type="checkbox" name="<?php echo esc_attr( $field . '[delete_messages]' ); ?>" value="1" data-role-flag="delete_messages" <?php checked( $current['delete_messages'] ); ?>> <?php esc_html_e( 'Delete received messages', 'leiho' ); ?></label>
+								<label class="leiho-inline-check"><input type="checkbox" name="<?php echo esc_attr( $field . '[manage_forms]' ); ?>" value="1" data-role-flag="manage_forms" <?php checked( $current['manage_forms'] ); ?>> <?php esc_html_e( 'Set up forms and their e-mails (recipients, texts)', 'leiho' ); ?></label>
+								<label class="leiho-inline-check"><input type="checkbox" name="<?php echo esc_attr( $field . '[view_mail_log]' ); ?>" value="1" data-role-flag="view_mail_log" <?php checked( $current['view_mail_log'] ); ?>> <?php esc_html_e( 'See the e-mail log', 'leiho' ); ?></label>
+								<span class="leiho-help"><?php esc_html_e( 'Reading messages needs the Form messages screen. The SMTP server, failure alerts and spam protection stay with administrators.', 'leiho' ); ?></span>
+							</div>
+						</div>
+
+						<div class="leiho-row">
 							<span class="leiho-row__label"><?php esc_html_e( 'Content', 'leiho' ); ?></span>
 							<div class="leiho-checks">
 								<label class="leiho-inline-check"><input type="checkbox" name="<?php echo esc_attr( $field . '[all_types]' ); ?>" value="1" data-role-all-types <?php checked( $all ); ?>> <?php esc_html_e( 'All content types', 'leiho' ); ?></label>
@@ -2280,6 +2294,804 @@ CODE;
 				</div>
 			</form>
 			<?php endif; ?>
+		</div>
+		<?php
+	}
+
+	/* =====================================================================
+	 * Formulaires
+	 * =================================================================== */
+
+	/**
+	 * Onglets de l'écran Formulaires ouverts à l'utilisateur (écran Rôles).
+	 *
+	 * @return array<string,string> Onglet => libellé.
+	 */
+	public static function forms_tabs() {
+		$tabs = array();
+		if ( Leiho_Roles::can_view( 'forms' ) ) {
+			$tabs['entries'] = __( 'Messages received', 'leiho' );
+		}
+		if ( Leiho_Roles::can( 'manage_forms' ) ) {
+			$tabs['setup'] = __( 'Forms', 'leiho' );
+		}
+		if ( Leiho_Roles::can( 'view_mail_log' ) ) {
+			$tabs['mail'] = __( 'E-mail sending', 'leiho' );
+		}
+		return $tabs;
+	}
+
+	/**
+	 * Écran Formulaires, en trois onglets : messages reçus, réglages de
+	 * chaque formulaire, envoi des e-mails. Chaque onglet suit sa
+	 * permission de l'écran Rôles.
+	 *
+	 * @return void
+	 */
+	private static function render_forms() {
+		$tabs = self::forms_tabs();
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Onglet affiché.
+		$tab = isset( $_GET['tab'] ) ? sanitize_key( wp_unslash( $_GET['tab'] ) ) : 'entries';
+		if ( ! isset( $tabs[ $tab ] ) ) {
+			$tab = (string) key( $tabs );
+		}
+		$count = (int) wp_count_posts( Leiho_Forms::POST_TYPE )->private;
+		?>
+		<div class="leiho-page leiho-forms">
+			<div class="leiho-forms__nav">
+				<nav class="leiho-segmented leiho-segmented--links" aria-label="<?php esc_attr_e( 'Forms', 'leiho' ); ?>">
+					<?php foreach ( $tabs as $tab_id => $tab_label ) : ?>
+						<a href="<?php echo esc_url( Leiho_App::url( 'forms', 'entries' === $tab_id ? array() : array( 'tab' => $tab_id ) ) ); ?>" <?php echo $tab_id === $tab ? 'aria-current="page" aria-selected="true"' : 'aria-selected="false"'; ?>>
+							<?php echo esc_html( $tab_label ); ?>
+							<?php if ( 'entries' === $tab_id && $count ) : ?>
+								<span class="leiho-forms__count"><?php echo esc_html( number_format_i18n( $count ) ); ?></span>
+							<?php endif; ?>
+						</a>
+					<?php endforeach; ?>
+				</nav>
+				<?php if ( isset( $tabs['mail'] ) && current_user_can( 'manage_options' ) ) : ?>
+					<a class="leiho-icon-btn leiho-forms__gear" href="<?php echo esc_url( Leiho_App::url( 'forms', array( 'tab' => 'mail' ) ) . '#leiho-mail-settings' ); ?>" title="<?php esc_attr_e( 'E-mail sending settings', 'leiho' ); ?>" aria-label="<?php esc_attr_e( 'E-mail sending settings', 'leiho' ); ?>"><?php Leiho_Icons::render( 'settings', 16 ); ?></a>
+				<?php endif; ?>
+			</div>
+
+			<?php // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Simple drapeau d'affichage. ?>
+			<?php if ( isset( $_GET['leiho_saved'] ) || isset( $_GET['leiho_deleted'] ) ) : ?>
+				<div class="leiho-notice leiho-notice--ok" role="status">
+					<span class="leiho-dot leiho-dot--ok"></span>
+					<?php // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Simple drapeau d'affichage. ?>
+					<strong><?php echo esc_html( isset( $_GET['leiho_deleted'] ) ? __( 'Message deleted.', 'leiho' ) : __( 'Settings saved.', 'leiho' ) ); ?></strong>
+				</div>
+			<?php endif; ?>
+
+			<?php
+			if ( 'setup' === $tab ) {
+				self::render_forms_setup();
+			} elseif ( 'mail' === $tab ) {
+				self::render_mail_tab();
+			} else {
+				self::render_forms_entries();
+			}
+			?>
+		</div>
+		<?php
+	}
+
+	/**
+	 * Onglet Messages reçus.
+	 *
+	 * @return void
+	 */
+	private static function render_forms_entries() {
+		$config  = Leiho_Forms::config();
+		$entries = Leiho_Forms::entries( 100 );
+		$labels  = wp_list_pluck( $config['forms'], 'label', 'id' );
+		$delete  = Leiho_Roles::can( 'delete_messages' );
+		?>
+		<div class="leiho-card leiho-card--flush" id="leiho-entries">
+			<?php if ( ! $entries ) : ?>
+				<div class="leiho-empty">
+					<?php Leiho_Icons::render( 'mail', 32 ); ?>
+					<h3><?php esc_html_e( 'No messages yet', 'leiho' ); ?></h3>
+					<p><?php esc_html_e( 'Messages sent with your site’s forms show up here, even when an e-mail gets lost.', 'leiho' ); ?></p>
+				</div>
+			<?php else : ?>
+				<ul class="leiho-inbox">
+					<?php foreach ( $entries as $entry ) : ?>
+						<?php
+						$form_row = isset( $config['forms'][ $entry['form'] ] ) ? $config['forms'][ $entry['form'] ] : Leiho_Forms::defaults( $entry['form'] );
+						$name     = '' !== $form_row['name_field'] && isset( $entry['fields'][ $form_row['name_field'] ] ) ? $entry['fields'][ $form_row['name_field'] ] : '';
+						$email    = '' !== $form_row['email_field'] && isset( $entry['fields'][ $form_row['email_field'] ] ) ? $entry['fields'][ $form_row['email_field'] ] : '';
+						$preview  = '';
+						foreach ( $entry['fields'] as $field => $value ) {
+							if ( $field !== $form_row['name_field'] && $field !== $form_row['email_field'] && '' !== $value ) {
+								$preview = $value;
+								break;
+							}
+						}
+						$preview = wp_html_excerpt( preg_replace( '/\s+/', ' ', $preview ), 110, '…' );
+						?>
+						<li>
+							<details class="leiho-inbox__item">
+								<summary>
+									<span class="leiho-inbox__from">
+										<strong><?php echo esc_html( '' !== $name ? $name : ( '' !== $email ? $email : __( 'Anonymous', 'leiho' ) ) ); ?></strong>
+										<?php if ( '' !== $entry['spam'] ) : ?>
+											<span class="leiho-pill leiho-pill--warn"><?php esc_html_e( 'Probable spam', 'leiho' ); ?></span>
+										<?php elseif ( 'failed' === $entry['mail'] ) : ?>
+											<span class="leiho-pill leiho-pill--error"><?php esc_html_e( 'Notification not sent', 'leiho' ); ?></span>
+										<?php endif; ?>
+									</span>
+									<span class="leiho-inbox__preview"><?php echo esc_html( $preview ); ?></span>
+									<span class="leiho-inbox__meta">
+										<?php echo esc_html( isset( $labels[ $entry['form'] ] ) ? $labels[ $entry['form'] ] : $entry['form'] ); ?>
+										<time datetime="<?php echo esc_attr( mysql2date( 'c', $entry['date'] ) ); ?>"><?php echo esc_html( mysql2date( get_option( 'date_format' ) . ' ' . get_option( 'time_format' ), $entry['date'] ) ); ?></time>
+									</span>
+								</summary>
+								<div class="leiho-inbox__body">
+									<dl>
+										<?php foreach ( $entry['fields'] as $field => $value ) : ?>
+											<?php if ( '' !== $value ) : ?>
+												<dt><?php echo esc_html( Leiho_Forms::label( $field ) ); ?></dt>
+												<dd><?php echo nl2br( esc_html( $value ) ); ?></dd>
+											<?php endif; ?>
+										<?php endforeach; ?>
+									</dl>
+									<div class="leiho-inbox__actions">
+										<span class="leiho-muted">
+											<?php
+											if ( '' !== $entry['spam'] ) {
+												echo esc_html( 'links' === $entry['spam'] ? __( 'Kept as probable spam (too many links). No e-mail was sent.', 'leiho' ) : __( 'Kept as probable spam. No e-mail was sent.', 'leiho' ) );
+											} elseif ( 'failed' === $entry['mail'] ) {
+												esc_html_e( 'The notification e-mail could not be sent.', 'leiho' );
+											} elseif ( 'sent' === $entry['mail'] ) {
+												esc_html_e( 'Notification sent to your team.', 'leiho' );
+											} else {
+												esc_html_e( 'No notification for this form.', 'leiho' );
+											}
+											?>
+										</span>
+										<span class="leiho-inbox__buttons">
+											<?php if ( '' !== $email && is_email( $email ) ) : ?>
+												<a class="leiho-btn leiho-btn--quiet leiho-btn--small" href="<?php echo esc_url( 'mailto:' . $email ); ?>"><?php esc_html_e( 'Reply', 'leiho' ); ?></a>
+											<?php endif; ?>
+											<?php if ( $delete ) : ?>
+												<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" onsubmit="return confirm(<?php echo esc_attr( wp_json_encode( __( 'Delete this message for good?', 'leiho' ) ) ); ?>);">
+													<input type="hidden" name="action" value="leiho_delete_entry">
+													<input type="hidden" name="entry" value="<?php echo esc_attr( (string) $entry['id'] ); ?>">
+													<?php wp_nonce_field( 'leiho_delete_entry_' . $entry['id'] ); ?>
+													<button type="submit" class="leiho-btn leiho-btn--quiet leiho-btn--small"><?php esc_html_e( 'Delete', 'leiho' ); ?></button>
+												</form>
+											<?php endif; ?>
+										</span>
+									</div>
+								</div>
+							</details>
+						</li>
+					<?php endforeach; ?>
+				</ul>
+			<?php endif; ?>
+		</div>
+		<?php
+	}
+
+	/**
+	 * Onglet Formulaires : un accordéon par formulaire, un pour en ajouter
+	 * un, et la protection anti-spam (administrateurs).
+	 *
+	 * @return void
+	 */
+	private static function render_forms_setup() {
+		$config = Leiho_Forms::config();
+		$forms  = array_values( $config['forms'] );
+		$admin  = current_user_can( 'manage_options' );
+		// Aucun formulaire encore : « contact » est proposé, ouvert, prêt à enregistrer.
+		$rows   = $forms ? $forms : array( Leiho_Forms::defaults( 'contact' ) );
+		$rows[] = array_merge( Leiho_Forms::defaults( '' ), array( 'label' => '' ) );
+		$single = 2 === count( $rows );
+		?>
+		<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" class="leiho-forms__setup">
+			<input type="hidden" name="action" value="leiho_save_forms">
+			<?php wp_nonce_field( 'leiho_save_forms' ); ?>
+
+			<?php foreach ( $rows as $i => $form ) : ?>
+				<?php self::render_form_accordion( $i, $form, $single && 0 === $i ); ?>
+			<?php endforeach; ?>
+
+			<?php if ( $admin ) : ?>
+				<details class="leiho-acc">
+					<summary>
+						<span class="leiho-acc__title">
+							<?php Leiho_Icons::render( 'shield', 16 ); ?>
+							<strong><?php esc_html_e( 'Spam protection', 'leiho' ); ?></strong>
+						</span>
+						<span class="leiho-acc__meta">
+							<?php
+							$chips = array( $config['protection']['require_origin'] ? __( 'Browsers only', 'leiho' ) : __( 'Server sending allowed', 'leiho' ) );
+							if ( Leiho_Forms::turnstile_on() ) {
+								$chips[] = 'Turnstile';
+							}
+							foreach ( $chips as $chip ) {
+								echo '<span class="leiho-acc__chip">' . esc_html( $chip ) . '</span>';
+							}
+							?>
+						</span>
+					</summary>
+					<div class="leiho-acc__body">
+						<p class="leiho-help"><?php esc_html_e( 'Always on: hidden trap field, minimum time to fill in the form, 5 messages per 10 minutes per visitor and 30 per hour per form, size limits, e-mails sent as plain text. Messages that look like spam are kept apart, without an e-mail.', 'leiho' ); ?></p>
+						<div class="leiho-row">
+							<span class="leiho-row__label"><?php esc_html_e( 'Browsers only', 'leiho' ); ?></span>
+							<div class="leiho-checks">
+								<label class="leiho-inline-check"><input type="checkbox" name="leiho_forms[protection][require_origin]" value="1" <?php checked( $config['protection']['require_origin'] ); ?>> <?php esc_html_e( 'Refuse messages that do not come from a browser on an allowed site', 'leiho' ); ?></label>
+								<span class="leiho-help"><?php esc_html_e( 'Recommended. Uncheck only if your front end sends forms from its server (Next.js server action, Astro endpoint…).', 'leiho' ); ?></span>
+							</div>
+						</div>
+						<div class="leiho-row">
+							<label for="leiho_forms_origins"><?php esc_html_e( 'Other sites', 'leiho' ); ?></label>
+							<div>
+								<textarea dir="ltr" id="leiho_forms_origins" name="leiho_forms[origins]" rows="2" placeholder="https://www.example.com" spellcheck="false"><?php echo esc_textarea( implode( "\n", $config['origins'] ) ); ?></textarea>
+								<span class="leiho-help"><?php esc_html_e( 'Your site and its preview (Settings) are always allowed. Add other addresses here, one per line.', 'leiho' ); ?></span>
+							</div>
+						</div>
+						<div class="leiho-row">
+							<label for="leiho_forms_max_links"><?php esc_html_e( 'Links', 'leiho' ); ?></label>
+							<div>
+								<input type="number" id="leiho_forms_max_links" name="leiho_forms[protection][max_links]" value="<?php echo esc_attr( (string) $config['protection']['max_links'] ); ?>" min="0" max="100" class="leiho-input--narrow">
+								<span class="leiho-help"><?php esc_html_e( 'More links than this in a message: probable spam (0 = no limit). Words from Settings → Discussion → Disallowed Comment Keys also count as spam.', 'leiho' ); ?></span>
+							</div>
+						</div>
+						<div class="leiho-row">
+							<label for="leiho_forms_turnstile_site"><?php esc_html_e( 'Turnstile site key', 'leiho' ); ?></label>
+							<div>
+								<input dir="ltr" type="text" id="leiho_forms_turnstile_site" name="leiho_forms[protection][turnstile_site]" value="<?php echo esc_attr( $config['protection']['turnstile_site'] ); ?>" placeholder="0x4AAAAAAA…" spellcheck="false" autocomplete="off">
+								<span class="leiho-help"><?php esc_html_e( 'Optional, strongest protection: Cloudflare Turnstile, free and without image puzzles. Create a widget for your site’s domain in the Cloudflare dashboard, paste both keys here, and add the widget to your form. Once both keys are saved, every message needs a valid check.', 'leiho' ); ?></span>
+							</div>
+						</div>
+						<?php self::secret_row( Leiho_Forms::SECRET_TURNSTILE, __( 'Turnstile secret key', 'leiho' ) ); ?>
+					</div>
+				</details>
+			<?php endif; ?>
+
+			<div class="leiho-savebar">
+				<span></span>
+				<div class="leiho-actions" style="margin:0">
+					<button type="submit" class="leiho-btn"><?php esc_html_e( 'Save', 'leiho' ); ?></button>
+				</div>
+			</div>
+		</form>
+		<?php
+	}
+
+	/**
+	 * Accordéon d'un formulaire (ou d'un nouveau formulaire, id vide).
+	 *
+	 * @param int   $i    Rang.
+	 * @param array $form Formulaire.
+	 * @param bool  $open Ouvert d'emblée.
+	 * @return void
+	 */
+	private static function render_form_accordion( $i, array $form, $open ) {
+		$is_new = '' === $form['id'];
+		$key    = 'leiho_forms[forms][' . $i . ']';
+		$uid    = 'leiho_form_' . $i;
+		$route  = rest_url( Leiho_Rest::NS . '/forms/' . ( $is_new ? '{id}' : $form['id'] ) );
+		$admin  = (string) get_option( 'admin_email' );
+		?>
+		<details class="leiho-acc<?php echo $is_new ? ' leiho-acc--new' : ''; ?>" <?php echo $open ? 'open' : ''; ?>>
+			<summary>
+				<span class="leiho-acc__title">
+					<?php if ( $is_new ) : ?>
+						<?php Leiho_Icons::render( 'plus', 16 ); ?>
+						<strong><?php esc_html_e( 'Add a form', 'leiho' ); ?></strong>
+					<?php else : ?>
+						<?php Leiho_Icons::render( 'mail', 16 ); ?>
+						<strong><?php echo esc_html( $form['label'] ); ?></strong>
+						<code><?php echo esc_html( $form['id'] ); ?></code>
+					<?php endif; ?>
+				</span>
+				<?php if ( ! $is_new ) : ?>
+					<span class="leiho-acc__meta">
+						<span class="leiho-acc__chip<?php echo $form['notify']['on'] ? ' is-on' : ''; ?>"><?php echo esc_html( $form['notify']['on'] ? __( 'Team notified', 'leiho' ) : __( 'No team e-mail', 'leiho' ) ); ?></span>
+						<span class="leiho-acc__chip<?php echo $form['confirm']['on'] ? ' is-on' : ''; ?>"><?php echo esc_html( $form['confirm']['on'] ? __( 'Visitor confirmation', 'leiho' ) : __( 'No confirmation', 'leiho' ) ); ?></span>
+					</span>
+				<?php endif; ?>
+			</summary>
+			<div class="leiho-acc__body">
+				<?php if ( $is_new ) : ?>
+					<p class="leiho-help"><?php esc_html_e( 'Fill in an identifier and save to create another form (quote, newsletter, booking…).', 'leiho' ); ?></p>
+				<?php else : ?>
+					<div class="leiho-acc__route">
+						<span class="leiho-muted"><?php esc_html_e( 'Your site sends the form here (POST):', 'leiho' ); ?></span>
+						<div class="leiho-code">
+							<pre><?php echo esc_html( $route ); ?></pre>
+							<button type="button" data-leiho-copy="<?php echo esc_attr( $route ); ?>"><?php esc_html_e( 'Copy', 'leiho' ); ?></button>
+						</div>
+					</div>
+				<?php endif; ?>
+
+				<h3 class="leiho-subheading"><?php esc_html_e( 'The form', 'leiho' ); ?></h3>
+				<div class="leiho-row">
+					<label for="<?php echo esc_attr( $uid ); ?>_label"><?php esc_html_e( 'Name', 'leiho' ); ?></label>
+					<div><input type="text" id="<?php echo esc_attr( $uid ); ?>_label" name="<?php echo esc_attr( $key ); ?>[label]" value="<?php echo esc_attr( $form['label'] ); ?>" placeholder="<?php esc_attr_e( 'e.g. Quote request', 'leiho' ); ?>"></div>
+				</div>
+				<div class="leiho-row">
+					<label for="<?php echo esc_attr( $uid ); ?>_id"><?php esc_html_e( 'Identifier', 'leiho' ); ?></label>
+					<div>
+						<input dir="ltr" type="text" id="<?php echo esc_attr( $uid ); ?>_id" name="<?php echo esc_attr( $key ); ?>[id]" value="<?php echo esc_attr( $form['id'] ); ?>" pattern="[a-z0-9][a-z0-9_\-]{0,39}" placeholder="<?php esc_attr_e( 'e.g. quote', 'leiho' ); ?>" autocomplete="off" spellcheck="false">
+						<span class="leiho-help"><?php esc_html_e( 'Lowercase letters, digits, - and _. It ends the address of the form.', 'leiho' ); ?></span>
+					</div>
+				</div>
+				<div class="leiho-row">
+					<label for="<?php echo esc_attr( $uid ); ?>_required"><?php esc_html_e( 'Required fields', 'leiho' ); ?></label>
+					<div>
+						<input dir="ltr" type="text" id="<?php echo esc_attr( $uid ); ?>_required" name="<?php echo esc_attr( $key ); ?>[required]" value="<?php echo esc_attr( implode( ', ', $form['required'] ) ); ?>" placeholder="name, email, message" spellcheck="false">
+						<span class="leiho-help"><?php esc_html_e( 'Field names, separated by commas. A message without them is refused.', 'leiho' ); ?></span>
+					</div>
+				</div>
+				<div class="leiho-row">
+					<span class="leiho-row__label"><?php esc_html_e( 'Storage', 'leiho' ); ?></span>
+					<div class="leiho-checks">
+						<label class="leiho-inline-check"><input type="checkbox" name="<?php echo esc_attr( $key ); ?>[store]" value="1" <?php checked( $form['store'] ); ?>> <?php esc_html_e( 'Keep each message in WordPress (Messages received tab)', 'leiho' ); ?></label>
+						<span class="leiho-help"><?php esc_html_e( 'Recommended: nothing is lost if an e-mail ends up in spam or is never sent.', 'leiho' ); ?></span>
+					</div>
+				</div>
+				<details class="leiho-acc__more">
+					<summary><?php esc_html_e( 'Visitor fields', 'leiho' ); ?></summary>
+					<div class="leiho-row">
+						<label for="<?php echo esc_attr( $uid ); ?>_email_field"><?php esc_html_e( 'E-mail field', 'leiho' ); ?></label>
+						<div><input dir="ltr" type="text" id="<?php echo esc_attr( $uid ); ?>_email_field" name="<?php echo esc_attr( $key ); ?>[email_field]" value="<?php echo esc_attr( $form['email_field'] ); ?>" placeholder="email" spellcheck="false" class="leiho-input--medium"></div>
+					</div>
+					<div class="leiho-row">
+						<label for="<?php echo esc_attr( $uid ); ?>_name_field"><?php esc_html_e( 'Name field', 'leiho' ); ?></label>
+						<div>
+							<input dir="ltr" type="text" id="<?php echo esc_attr( $uid ); ?>_name_field" name="<?php echo esc_attr( $key ); ?>[name_field]" value="<?php echo esc_attr( $form['name_field'] ); ?>" placeholder="name" spellcheck="false" class="leiho-input--medium">
+							<span class="leiho-help"><?php esc_html_e( 'The fields holding the visitor’s e-mail address and name: replies go to that address, and the confirmation is sent there.', 'leiho' ); ?></span>
+						</div>
+					</div>
+				</details>
+
+				<h3 class="leiho-subheading"><?php esc_html_e( 'E-mail to your team', 'leiho' ); ?></h3>
+				<div class="leiho-row">
+					<span class="leiho-row__label"><?php esc_html_e( 'Notification', 'leiho' ); ?></span>
+					<div class="leiho-checks">
+						<label class="leiho-inline-check"><input type="checkbox" name="<?php echo esc_attr( $key ); ?>[notify][on]" value="1" <?php checked( $form['notify']['on'] ); ?>> <?php esc_html_e( 'Send an e-mail for each new message', 'leiho' ); ?></label>
+					</div>
+				</div>
+				<div class="leiho-row">
+					<label for="<?php echo esc_attr( $uid ); ?>_to"><?php esc_html_e( 'Recipients', 'leiho' ); ?></label>
+					<div>
+						<input dir="ltr" type="text" id="<?php echo esc_attr( $uid ); ?>_to" name="<?php echo esc_attr( $key ); ?>[notify][to]" value="<?php echo esc_attr( $form['notify']['to'] ); ?>" placeholder="<?php echo esc_attr( $admin ); ?>" spellcheck="false">
+						<span class="leiho-help"><?php esc_html_e( 'One or more addresses, separated by commas. Empty = the site administrator’s address.', 'leiho' ); ?></span>
+					</div>
+				</div>
+				<div class="leiho-row leiho-row--stack">
+					<label for="<?php echo esc_attr( $uid ); ?>_nsubject"><?php esc_html_e( 'Subject', 'leiho' ); ?></label>
+					<input type="text" id="<?php echo esc_attr( $uid ); ?>_nsubject" name="<?php echo esc_attr( $key ); ?>[notify][subject]" value="<?php echo esc_attr( $form['notify']['subject'] ); ?>">
+				</div>
+				<div class="leiho-row leiho-row--stack">
+					<label for="<?php echo esc_attr( $uid ); ?>_nbody"><?php esc_html_e( 'Message', 'leiho' ); ?></label>
+					<textarea id="<?php echo esc_attr( $uid ); ?>_nbody" name="<?php echo esc_attr( $key ); ?>[notify][body]" rows="7" class="leiho-textarea--mail"><?php echo esc_textarea( $form['notify']['body'] ); ?></textarea>
+					<span class="leiho-help"><?php esc_html_e( '{fields} = every field filled in. {name}, {email}… = one field. Also {form}, {site} and {date}.', 'leiho' ); ?></span>
+				</div>
+
+				<h3 class="leiho-subheading"><?php esc_html_e( 'E-mail to the visitor', 'leiho' ); ?></h3>
+				<div class="leiho-row">
+					<span class="leiho-row__label"><?php esc_html_e( 'Confirmation', 'leiho' ); ?></span>
+					<div class="leiho-checks">
+						<label class="leiho-inline-check"><input type="checkbox" name="<?php echo esc_attr( $key ); ?>[confirm][on]" value="1" <?php checked( $form['confirm']['on'] ); ?>> <?php esc_html_e( 'Confirm receipt to the visitor', 'leiho' ); ?></label>
+						<span class="leiho-help"><?php esc_html_e( 'At most once an hour per address. Copied fields are cut short, so nobody can use your site to send text to a stranger.', 'leiho' ); ?></span>
+					</div>
+				</div>
+				<div class="leiho-row leiho-row--stack">
+					<label for="<?php echo esc_attr( $uid ); ?>_csubject"><?php esc_html_e( 'Subject', 'leiho' ); ?></label>
+					<input type="text" id="<?php echo esc_attr( $uid ); ?>_csubject" name="<?php echo esc_attr( $key ); ?>[confirm][subject]" value="<?php echo esc_attr( $form['confirm']['subject'] ); ?>">
+				</div>
+				<div class="leiho-row leiho-row--stack">
+					<label for="<?php echo esc_attr( $uid ); ?>_cbody"><?php esc_html_e( 'Message', 'leiho' ); ?></label>
+					<textarea id="<?php echo esc_attr( $uid ); ?>_cbody" name="<?php echo esc_attr( $key ); ?>[confirm][body]" rows="7" class="leiho-textarea--mail"><?php echo esc_textarea( $form['confirm']['body'] ); ?></textarea>
+				</div>
+
+				<?php if ( ! $is_new ) : ?>
+					<div class="leiho-acc__danger">
+						<label class="leiho-inline-check"><input type="checkbox" name="<?php echo esc_attr( $key ); ?>[delete]" value="1"> <?php esc_html_e( 'Delete this form (messages already received are kept)', 'leiho' ); ?></label>
+					</div>
+				<?php endif; ?>
+			</div>
+		</details>
+		<?php
+	}
+
+	/**
+	 * Onglet Envoi des e-mails : état, journal, puis (administrateurs)
+	 * serveur SMTP, expéditeur, journal, alertes et tests.
+	 *
+	 * @return void
+	 */
+	private static function render_mail_tab() {
+		$s        = Leiho_Mail::settings();
+		$stats    = Leiho_Mail::stats();
+		$failures = Leiho_Mail::failures();
+		$admin    = current_user_can( 'manage_options' );
+		$others   = $admin ? Leiho_Mail::other_plugins() : array();
+		$override = $admin ? Leiho_Mail::wp_mail_override() : '';
+		// phpcs:disable WordPress.Security.NonceVerification.Recommended -- Filtres et drapeaux d'affichage.
+		$filter = isset( $_GET['status'] ) && in_array( $_GET['status'], array( 'sent', 'failed' ), true ) ? sanitize_key( $_GET['status'] ) : '';
+		$paged  = max( 1, isset( $_GET['paged'] ) ? absint( $_GET['paged'] ) : 1 );
+		$test   = isset( $_GET['leiho_test'] ) ? sanitize_key( $_GET['leiho_test'] ) : '';
+		$per    = Leiho_Mail::per_page( isset( $_GET['per'] ) ? absint( $_GET['per'] ) : 0 );
+		// phpcs:enable WordPress.Security.NonceVerification.Recommended
+		$log    = Leiho_Mail::entries( $filter, $per + 1, ( $paged - 1 ) * $per );
+		$more   = count( $log ) > $per;
+		$log    = array_slice( $log, 0, $per );
+		$result = in_array( $test, array( 'mail', 'alert' ), true ) ? get_transient( 'leiho_' . $test . '_test_' . get_current_user_id() ) : false;
+		if ( $result ) {
+			delete_transient( 'leiho_' . $test . '_test_' . get_current_user_id() );
+		}
+		$unseen = (int) $failures['unseen'];
+		if ( $admin ) {
+			Leiho_Mail::mark_seen();
+		}
+		$max = 1;
+		foreach ( $stats['days'] as $day ) {
+			$max = max( $max, $day['sent'] + $day['failed'] );
+		}
+		$base  = array( 'tab' => 'mail' );
+		$user  = wp_get_current_user();
+		$tiles = array(
+			array( __( 'Sent, 7 days', 'leiho' ), $stats['sent_7'] ),
+			array( __( 'Failed, 7 days', 'leiho' ), $stats['failed_7'] ),
+			array( __( 'Sent, 30 days', 'leiho' ), $stats['sent_30'] ),
+			array( __( 'Failed, 30 days', 'leiho' ), $stats['failed_30'] ),
+		);
+		?>
+		<?php if ( is_array( $result ) ) : ?>
+			<div class="leiho-notice leiho-notice--<?php echo $result['ok'] ? 'ok' : 'error'; ?>" role="<?php echo $result['ok'] ? 'status' : 'alert'; ?>">
+				<span class="leiho-dot leiho-dot--<?php echo $result['ok'] ? 'ok' : 'error'; ?>"></span>
+				<strong><?php echo esc_html( $result['message'] ); ?></strong>
+			</div>
+		<?php endif; ?>
+
+		<?php if ( $others || '' !== $override ) : ?>
+			<div class="leiho-notice leiho-notice--warn" role="status">
+				<span class="leiho-dot leiho-dot--warn"></span>
+				<div>
+					<?php if ( $others ) : ?>
+						<?php /* translators: %s: plugin names. */ ?>
+						<strong><?php echo esc_html( sprintf( __( 'Another e-mail plugin is active: %s.', 'leiho' ), implode( ', ', $others ) ) ); ?></strong>
+					<?php else : ?>
+						<strong><?php esc_html_e( 'Another plugin replaces the WordPress e-mail function.', 'leiho' ); ?></strong>
+					<?php endif; ?>
+					<p><?php esc_html_e( 'Two plugins sending e-mail can override each other. Use only one: turn the other off, or leave Leiho’s SMTP off. The log may also miss e-mails the other plugin sends itself.', 'leiho' ); ?></p>
+				</div>
+			</div>
+		<?php endif; ?>
+
+		<div class="leiho-card leiho-mailsum">
+			<div class="leiho-mailsum__status">
+				<?php if ( $unseen ) : ?>
+					<span class="leiho-dot leiho-dot--error" aria-hidden="true"></span>
+					<div>
+						<?php /* translators: %d: number of e-mails. */ ?>
+						<strong><?php echo esc_html( sprintf( _n( '%d e-mail could not be sent since your last visit.', '%d e-mails could not be sent since your last visit.', $unseen, 'leiho' ), $unseen ) ); ?></strong>
+						<?php if ( '' !== $failures['last_error'] ) : ?>
+							<code class="leiho-mailsum__error"><?php echo esc_html( $failures['last_error'] ); ?></code>
+						<?php endif; ?>
+						<p class="leiho-muted"><?php esc_html_e( 'Form messages are kept in WordPress: nothing is lost.', 'leiho' ); ?></p>
+					</div>
+				<?php elseif ( $stats['failed_7'] ) : ?>
+					<span class="leiho-dot leiho-dot--warn" aria-hidden="true"></span>
+					<?php /* translators: %d: number of e-mails. */ ?>
+					<span><?php echo esc_html( sprintf( _n( '%d failure in the last 7 days, already seen.', '%d failures in the last 7 days, already seen.', $stats['failed_7'], 'leiho' ), $stats['failed_7'] ) ); ?></span>
+				<?php else : ?>
+					<span class="leiho-dot leiho-dot--ok" aria-hidden="true"></span>
+					<span><?php esc_html_e( 'No failures in the last 7 days.', 'leiho' ); ?></span>
+				<?php endif; ?>
+				<?php if ( $admin ) : ?>
+					<a class="leiho-mailsum__link" href="#leiho-mail-settings"><?php Leiho_Icons::render( 'settings', 14 ); ?><?php esc_html_e( 'Settings', 'leiho' ); ?></a>
+				<?php endif; ?>
+			</div>
+
+			<dl class="leiho-mailsum__stats">
+				<?php foreach ( $tiles as $tile ) : ?>
+					<div>
+						<dt><?php echo esc_html( $tile[0] ); ?></dt>
+						<dd><?php echo esc_html( number_format_i18n( $tile[1] ) ); ?></dd>
+					</div>
+				<?php endforeach; ?>
+			</dl>
+
+			<div class="leiho-mailchart">
+				<div class="leiho-mailchart__head">
+					<span><?php esc_html_e( 'Last 14 days', 'leiho' ); ?></span>
+					<span class="leiho-mailchart__legend">
+						<span><i class="leiho-mailchart__sent"></i><?php echo esc_html( _x( 'Sent', 'e-mails, plural', 'leiho' ) ); ?></span>
+						<span><i class="leiho-mailchart__failed"></i><?php echo esc_html( _x( 'Failed', 'e-mails, plural', 'leiho' ) ); ?></span>
+					</span>
+				</div>
+				<div class="leiho-mailchart__bars" role="img" aria-label="<?php esc_attr_e( 'E-mails sent and failed per day', 'leiho' ); ?>">
+					<?php $i = 0; ?>
+					<?php foreach ( $stats['days'] as $date => $day ) : ?>
+						<?php
+						$label = sprintf(
+							/* translators: 1: date, 2: sent, 3: failed. */
+							__( '%1$s: %2$d sent, %3$d failed', 'leiho' ),
+							mysql2date( get_option( 'date_format' ), $date ),
+							$day['sent'],
+							$day['failed']
+						);
+						?>
+						<div class="leiho-mailchart__day" title="<?php echo esc_attr( $label ); ?>">
+							<span class="leiho-mailchart__bar">
+								<?php if ( $day['failed'] ) : ?>
+									<span class="leiho-mailchart__failed" style="height:<?php echo esc_attr( (string) round( 100 * $day['failed'] / $max, 1 ) ); ?>%"></span>
+								<?php endif; ?>
+								<?php if ( $day['sent'] ) : ?>
+									<span class="leiho-mailchart__sent" style="height:<?php echo esc_attr( (string) round( 100 * $day['sent'] / $max, 1 ) ); ?>%"></span>
+								<?php endif; ?>
+							</span>
+							<span class="leiho-mailchart__date"><?php echo 0 === $i % 2 || 13 === $i ? esc_html( mysql2date( 'j', $date ) ) : ''; ?></span>
+						</div>
+						<?php $i++; ?>
+					<?php endforeach; ?>
+				</div>
+			</div>
+		</div>
+
+		<div class="leiho-mailog-head">
+			<h2 class="leiho-heading"><?php esc_html_e( 'E-mail log', 'leiho' ); ?></h2>
+			<div class="leiho-mailog-tools">
+				<nav class="leiho-segmented leiho-segmented--links" aria-label="<?php esc_attr_e( 'Filter the log', 'leiho' ); ?>">
+					<?php foreach ( array( '' => __( 'All', 'leiho' ), 'failed' => _x( 'Failed', 'e-mails, plural', 'leiho' ), 'sent' => _x( 'Sent', 'e-mails, plural', 'leiho' ) ) as $key => $name ) : ?>
+						<a href="<?php echo esc_url( Leiho_App::url( 'forms', '' === $key ? $base : array_merge( $base, array( 'status' => $key ) ) ) ); ?>" aria-selected="<?php echo $key === $filter ? 'true' : 'false'; ?>"><?php echo esc_html( $name ); ?></a>
+					<?php endforeach; ?>
+				</nav>
+				<form method="get" action="<?php echo esc_url( admin_url( 'admin.php' ) ); ?>" class="leiho-mailog-per">
+					<input type="hidden" name="page" value="<?php echo esc_attr( Leiho_App::SLUG ); ?>">
+					<input type="hidden" name="view" value="forms">
+					<input type="hidden" name="tab" value="mail">
+					<?php if ( '' !== $filter ) : ?>
+						<input type="hidden" name="status" value="<?php echo esc_attr( $filter ); ?>">
+					<?php endif; ?>
+					<label for="leiho_mail_per"><?php esc_html_e( 'Show', 'leiho' ); ?></label>
+					<select id="leiho_mail_per" name="per" onchange="this.form.submit()">
+						<?php foreach ( Leiho_Mail::PER_PAGE as $option ) : ?>
+							<option value="<?php echo esc_attr( (string) $option ); ?>" <?php selected( $per, $option ); ?>><?php echo esc_html( number_format_i18n( $option ) ); ?></option>
+						<?php endforeach; ?>
+					</select>
+					<noscript><button type="submit" class="leiho-btn leiho-btn--quiet leiho-btn--small"><?php esc_html_e( 'OK', 'leiho' ); ?></button></noscript>
+				</form>
+			</div>
+		</div>
+		<div class="leiho-card leiho-card--flush">
+			<?php if ( ! $s['log'] ) : ?>
+				<div class="leiho-empty"><p><?php esc_html_e( 'The log is off (settings below).', 'leiho' ); ?></p></div>
+			<?php elseif ( ! $log ) : ?>
+				<div class="leiho-empty">
+					<?php Leiho_Icons::render( 'mail', 32 ); ?>
+					<h3><?php esc_html_e( 'No e-mails logged', 'leiho' ); ?></h3>
+					<p><?php esc_html_e( 'Every e-mail WordPress sends (forms, password resets, notifications) is listed here with its result.', 'leiho' ); ?></p>
+				</div>
+			<?php else : ?>
+				<table class="leiho-table leiho-mailog">
+					<thead>
+						<tr>
+							<th scope="col"><?php esc_html_e( 'Date', 'leiho' ); ?></th>
+							<th scope="col"><?php esc_html_e( 'To', 'leiho' ); ?></th>
+							<th scope="col"><?php esc_html_e( 'Subject', 'leiho' ); ?></th>
+							<th scope="col"><?php esc_html_e( 'Result', 'leiho' ); ?></th>
+						</tr>
+					</thead>
+					<tbody>
+						<?php foreach ( $log as $row ) : ?>
+							<tr>
+								<td><?php echo esc_html( get_date_from_gmt( $row['created_at'], get_option( 'date_format' ) . ' ' . get_option( 'time_format' ) ) ); ?></td>
+								<td class="leiho-mailog__to"><?php echo esc_html( $row['to_addr'] ); ?></td>
+								<td><?php echo esc_html( $row['subject'] ); ?></td>
+								<td>
+									<?php if ( 'sent' === $row['status'] ) : ?>
+										<span class="leiho-muted"><?php esc_html_e( 'Sent', 'leiho' ); ?></span>
+									<?php else : ?>
+										<span class="leiho-pill leiho-pill--error"><?php esc_html_e( 'Failed', 'leiho' ); ?></span>
+										<?php if ( '' !== $row['error'] ) : ?>
+											<div class="leiho-table__message"><?php echo esc_html( $row['error'] ); ?></div>
+										<?php endif; ?>
+									<?php endif; ?>
+								</td>
+							</tr>
+						<?php endforeach; ?>
+					</tbody>
+				</table>
+			<?php endif; ?>
+		</div>
+		<div class="leiho-mailog-foot">
+			<span>
+				<?php if ( $paged > 1 ) : ?>
+					<a class="leiho-btn leiho-btn--quiet leiho-btn--small" href="<?php echo esc_url( Leiho_App::url( 'forms', array_filter( array_merge( $base, array( 'status' => $filter, 'paged' => $paged - 1 ) ) ) ) ); ?>"><?php esc_html_e( 'Newer', 'leiho' ); ?></a>
+				<?php endif; ?>
+				<?php if ( $more ) : ?>
+					<a class="leiho-btn leiho-btn--quiet leiho-btn--small" href="<?php echo esc_url( Leiho_App::url( 'forms', array_filter( array_merge( $base, array( 'status' => $filter, 'paged' => $paged + 1 ) ) ) ) ); ?>"><?php esc_html_e( 'Older', 'leiho' ); ?></a>
+				<?php endif; ?>
+			</span>
+			<?php if ( $log && $admin ) : ?>
+				<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" onsubmit="return confirm(<?php echo esc_attr( wp_json_encode( __( 'Empty the whole e-mail log?', 'leiho' ) ) ); ?>);">
+					<input type="hidden" name="action" value="leiho_mail_clear_log">
+					<?php wp_nonce_field( 'leiho_mail_clear_log' ); ?>
+					<button type="submit" class="leiho-btn leiho-btn--quiet leiho-btn--small"><?php esc_html_e( 'Empty the log', 'leiho' ); ?></button>
+				</form>
+			<?php endif; ?>
+		</div>
+
+		<?php if ( ! $admin ) : ?>
+			<?php return; ?>
+		<?php endif; ?>
+
+		<h2 class="leiho-heading leiho-mail-settings-title" id="leiho-mail-settings"><?php Leiho_Icons::render( 'settings', 16 ); ?><?php esc_html_e( 'E-mail sending settings', 'leiho' ); ?></h2>
+		<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>">
+			<input type="hidden" name="action" value="leiho_save_mail">
+			<?php wp_nonce_field( 'leiho_save_mail' ); ?>
+
+			<details class="leiho-acc" <?php echo $s['smtp'] && '' !== $s['host'] ? '' : 'open'; ?>>
+				<summary>
+					<span class="leiho-acc__title"><strong><?php esc_html_e( 'SMTP server', 'leiho' ); ?></strong></span>
+					<span class="leiho-acc__meta"><span class="leiho-acc__chip<?php echo Leiho_Mail::active() ? ' is-on' : ''; ?>"><?php echo esc_html( Leiho_Mail::active() ? $s['host'] : __( 'Off: the web server sends', 'leiho' ) ); ?></span></span>
+				</summary>
+				<div class="leiho-acc__body">
+					<p class="leiho-help"><?php esc_html_e( 'Without it, WordPress sends e-mail through the web server, and many end up in spam or never arrive. Use the SMTP access of your mailbox or of a sending service (Brevo, Mailgun, Amazon SES, Postmark…).', 'leiho' ); ?></p>
+					<div class="leiho-row">
+						<span class="leiho-row__label"><?php esc_html_e( 'Sending', 'leiho' ); ?></span>
+						<div class="leiho-checks">
+							<label class="leiho-inline-check"><input type="checkbox" name="leiho_mail[smtp]" value="1" <?php checked( $s['smtp'] ); ?>> <?php esc_html_e( 'Send all WordPress e-mail through this SMTP server', 'leiho' ); ?></label>
+						</div>
+					</div>
+					<div class="leiho-row">
+						<label for="leiho_mail_host"><?php esc_html_e( 'Server', 'leiho' ); ?></label>
+						<div class="leiho-inline-field">
+							<input dir="ltr" type="text" id="leiho_mail_host" name="leiho_mail[host]" value="<?php echo esc_attr( $s['host'] ); ?>" placeholder="smtp.example.com" spellcheck="false" autocomplete="off">
+							<input dir="ltr" type="number" name="leiho_mail[port]" value="<?php echo esc_attr( (string) $s['port'] ); ?>" min="1" max="65535" class="leiho-input--narrow" aria-label="<?php esc_attr_e( 'Port', 'leiho' ); ?>">
+						</div>
+					</div>
+					<div class="leiho-row">
+						<label for="leiho_mail_encryption"><?php esc_html_e( 'Encryption', 'leiho' ); ?></label>
+						<div>
+							<select id="leiho_mail_encryption" name="leiho_mail[encryption]">
+								<option value="tls" <?php selected( $s['encryption'], 'tls' ); ?>><?php esc_html_e( 'STARTTLS (port 587)', 'leiho' ); ?></option>
+								<option value="ssl" <?php selected( $s['encryption'], 'ssl' ); ?>><?php esc_html_e( 'SSL/TLS (port 465)', 'leiho' ); ?></option>
+								<option value="none" <?php selected( $s['encryption'], 'none' ); ?>><?php esc_html_e( 'None', 'leiho' ); ?></option>
+							</select>
+						</div>
+					</div>
+					<div class="leiho-row">
+						<span class="leiho-row__label"><?php esc_html_e( 'Login', 'leiho' ); ?></span>
+						<div class="leiho-checks">
+							<label class="leiho-inline-check"><input type="checkbox" name="leiho_mail[auth]" value="1" <?php checked( $s['auth'] ); ?>> <?php esc_html_e( 'The server asks for a username and password', 'leiho' ); ?></label>
+						</div>
+					</div>
+					<div class="leiho-row">
+						<label for="leiho_mail_username"><?php esc_html_e( 'Username', 'leiho' ); ?></label>
+						<div><input dir="ltr" type="text" id="leiho_mail_username" name="leiho_mail[username]" value="<?php echo esc_attr( $s['username'] ); ?>" autocomplete="off" spellcheck="false"></div>
+					</div>
+					<?php if ( defined( 'LEIHO_SMTP_PASSWORD' ) ) : ?>
+						<div class="leiho-row">
+							<span class="leiho-row__label"><?php esc_html_e( 'Password', 'leiho' ); ?></span>
+							<span class="leiho-help"><?php esc_html_e( 'Set in wp-config.php (LEIHO_SMTP_PASSWORD).', 'leiho' ); ?></span>
+						</div>
+					<?php else : ?>
+						<?php self::secret_row( Leiho_Mail::SECRET, __( 'Password', 'leiho' ), __( 'Stored encrypted. You can also define LEIHO_SMTP_PASSWORD in wp-config.php instead.', 'leiho' ) ); ?>
+					<?php endif; ?>
+				</div>
+			</details>
+
+			<details class="leiho-acc">
+				<summary>
+					<span class="leiho-acc__title"><strong><?php esc_html_e( 'Sender', 'leiho' ); ?></strong></span>
+					<span class="leiho-acc__meta"><span class="leiho-acc__chip"><?php echo esc_html( '' !== $s['from_email'] ? $s['from_email'] : __( 'WordPress default', 'leiho' ) ); ?></span></span>
+				</summary>
+				<div class="leiho-acc__body">
+					<p class="leiho-help"><?php esc_html_e( 'Use an address of your own domain, allowed to send through the server above (SPF, DKIM): otherwise e-mails land in spam.', 'leiho' ); ?></p>
+					<div class="leiho-row">
+						<label for="leiho_mail_from_email"><?php esc_html_e( 'From address', 'leiho' ); ?></label>
+						<div><input dir="ltr" type="email" id="leiho_mail_from_email" name="leiho_mail[from_email]" value="<?php echo esc_attr( $s['from_email'] ); ?>" placeholder="contact@example.com"></div>
+					</div>
+					<div class="leiho-row">
+						<label for="leiho_mail_from_name"><?php esc_html_e( 'From name', 'leiho' ); ?></label>
+						<div><input type="text" id="leiho_mail_from_name" name="leiho_mail[from_name]" value="<?php echo esc_attr( $s['from_name'] ); ?>" placeholder="<?php echo esc_attr( wp_specialchars_decode( get_bloginfo( 'name' ), ENT_QUOTES ) ); ?>"></div>
+					</div>
+					<div class="leiho-row">
+						<span class="leiho-row__label"></span>
+						<div class="leiho-checks">
+							<label class="leiho-inline-check"><input type="checkbox" name="leiho_mail[force_from]" value="1" <?php checked( $s['force_from'] ); ?>> <?php esc_html_e( 'Use this sender for every e-mail, even those of other plugins', 'leiho' ); ?></label>
+							<span class="leiho-help"><?php esc_html_e( 'Unchecked, only the default WordPress sender (wordpress@…) is replaced.', 'leiho' ); ?></span>
+						</div>
+					</div>
+				</div>
+			</details>
+
+			<details class="leiho-acc">
+				<summary>
+					<span class="leiho-acc__title"><strong><?php esc_html_e( 'E-mail log', 'leiho' ); ?></strong></span>
+					<span class="leiho-acc__meta"><span class="leiho-acc__chip"><?php echo esc_html( $s['log'] ? Leiho_Mail::retention_label( $s['log_days'] ) : __( 'Off', 'leiho' ) ); ?></span></span>
+				</summary>
+				<div class="leiho-acc__body">
+					<div class="leiho-row">
+						<span class="leiho-row__label"><?php esc_html_e( 'Log', 'leiho' ); ?></span>
+						<div class="leiho-checks">
+							<label class="leiho-inline-check"><input type="checkbox" name="leiho_mail[log]" value="1" <?php checked( $s['log'] ); ?>> <?php esc_html_e( 'Log each e-mail: date, recipient, subject, result', 'leiho' ); ?></label>
+							<span class="leiho-help"><?php esc_html_e( 'The content of e-mails is never logged.', 'leiho' ); ?></span>
+						</div>
+					</div>
+					<div class="leiho-row">
+						<label for="leiho_mail_log_days"><?php esc_html_e( 'Keep the log', 'leiho' ); ?></label>
+						<div>
+							<select id="leiho_mail_log_days" name="leiho_mail[log_days]">
+								<?php foreach ( Leiho_Mail::LOG_DAYS as $days ) : ?>
+									<option value="<?php echo esc_attr( (string) $days ); ?>" <?php selected( (int) $s['log_days'], $days ); ?>><?php echo esc_html( Leiho_Mail::retention_label( $days ) ); ?></option>
+								<?php endforeach; ?>
+							</select>
+							<span class="leiho-help"><?php esc_html_e( 'Older lines are deleted on their own. Messages received from your forms are never deleted: you decide when.', 'leiho' ); ?></span>
+						</div>
+					</div>
+				</div>
+			</details>
+
+			<details class="leiho-acc">
+				<summary>
+					<span class="leiho-acc__title"><strong><?php esc_html_e( 'Alert when an e-mail fails', 'leiho' ); ?></strong></span>
+					<span class="leiho-acc__meta">
+						<?php
+						$alerts = array_filter( array( $s['alert_slack'] ? 'Slack' : '', $s['alert_telegram'] ? 'Telegram' : '' ) );
+						echo '<span class="leiho-acc__chip' . ( $alerts ? ' is-on' : '' ) . '">' . esc_html( $alerts ? implode( ', ', $alerts ) : __( 'Off', 'leiho' ) ) . '</span>';
+						?>
+					</span>
+				</summary>
+				<div class="leiho-acc__body">
+					<p class="leiho-help"><?php esc_html_e( 'If the SMTP server is down, an alert by e-mail would fail too. These alerts go through Slack or Telegram: at most one an hour, grouping the failures in between. They hold no visitor data, only the error and a link to this page.', 'leiho' ); ?></p>
+					<div class="leiho-row">
+						<span class="leiho-row__label">Slack</span>
+						<div class="leiho-checks">
+							<label class="leiho-inline-check"><input type="checkbox" name="leiho_mail[alert_slack]" value="1" <?php checked( $s['alert_slack'] ); ?>> <?php esc_html_e( 'Post an alert in a Slack channel', 'leiho' ); ?></label>
+						</div>
+					</div>
+					<?php self::secret_row( 'slack_webhook', __( 'Slack webhook URL', 'leiho' ), __( 'Slack → Apps → Incoming Webhooks → Add to a channel. Starts with https://hooks.slack.com/', 'leiho' ) ); ?>
+					<div class="leiho-row">
+						<span class="leiho-row__label">Telegram</span>
+						<div class="leiho-checks">
+							<label class="leiho-inline-check"><input type="checkbox" name="leiho_mail[alert_telegram]" value="1" <?php checked( $s['alert_telegram'] ); ?>> <?php esc_html_e( 'Send an alert in Telegram', 'leiho' ); ?></label>
+						</div>
+					</div>
+					<?php self::secret_row( 'telegram_token', __( 'Bot token', 'leiho' ), __( 'Create a bot with @BotFather and paste the token it gives you.', 'leiho' ) ); ?>
+					<div class="leiho-row">
+						<label for="leiho_mail_telegram_chat"><?php esc_html_e( 'Chat ID', 'leiho' ); ?></label>
+						<div>
+							<input dir="ltr" type="text" id="leiho_mail_telegram_chat" name="leiho_mail[telegram_chat]" value="<?php echo esc_attr( $s['telegram_chat'] ); ?>" placeholder="-1001234567890" spellcheck="false">
+							<span class="leiho-help"><?php esc_html_e( 'The conversation or group that receives the alerts (a number, or @channel for a public channel). Send a message to your bot first.', 'leiho' ); ?></span>
+						</div>
+					</div>
+				</div>
+			</details>
+
+			<div class="leiho-savebar">
+				<span></span>
+				<div class="leiho-actions" style="margin:0">
+					<button type="submit" class="leiho-btn"><?php esc_html_e( 'Save', 'leiho' ); ?></button>
+				</div>
+			</div>
+		</form>
+
+		<div class="leiho-card leiho-mailtests">
+			<h3 class="leiho-subheading"><?php esc_html_e( 'Tests', 'leiho' ); ?></h3>
+			<p class="leiho-help"><?php esc_html_e( 'Save your settings first. Each test uses what is saved.', 'leiho' ); ?></p>
+			<form class="leiho-mailtests__row" method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>">
+				<input type="hidden" name="action" value="leiho_mail_test">
+				<?php wp_nonce_field( 'leiho_mail_test' ); ?>
+				<label for="leiho_test_to"><?php esc_html_e( 'Test e-mail', 'leiho' ); ?></label>
+				<input dir="ltr" type="email" id="leiho_test_to" name="leiho_test_to" value="<?php echo esc_attr( $user->user_email ); ?>" required>
+				<button type="submit" class="leiho-btn leiho-btn--quiet"><?php esc_html_e( 'Send', 'leiho' ); ?></button>
+			</form>
+			<form class="leiho-mailtests__row" method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>">
+				<input type="hidden" name="action" value="leiho_mail_alert_test">
+				<?php wp_nonce_field( 'leiho_mail_alert_test' ); ?>
+				<span><?php esc_html_e( 'Test alert', 'leiho' ); ?></span>
+				<button type="submit" class="leiho-btn leiho-btn--quiet"><?php esc_html_e( 'Send a test alert to Slack and Telegram', 'leiho' ); ?></button>
+			</form>
 		</div>
 		<?php
 	}

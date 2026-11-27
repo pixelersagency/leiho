@@ -2,6 +2,21 @@
 
 All notable changes to Leiho (called Okno until 1.0.0-beta.11) are documented here. The project follows [Semantic Versioning](https://semver.org/). The plugin and the bridge package share one version number.
 
+## [Unreleased]
+
+## [1.0.2] — 2026-11-27
+
+### Added
+
+- **Forms.** Your front end's forms post to `POST /wp-json/leiho/v1/forms/{id}`. A new **Forms** screen sets, for each form, the required fields, the e-mail to your team and an optional confirmation to the visitor. Spam protection: browsers on allowed sites only, honeypot, minimum time, limits per IP, per form and per address, size limits, probable spam (too many links, WordPress's disallowed words) kept apart without e-mail, optional Cloudflare Turnstile, e-mails always in plain text.
+- **Messages received.** Every form message is kept in WordPress, with whether its notification left. Covered by WordPress's personal data export and erasure tools.
+- **E-mail sending.** SMTP for all WordPress e-mail (password encrypted, or `LEIHO_SMTP_PASSWORD`), sender name and address, a log of each e-mail with its result, counts and a 14-day chart, and a test e-mail. Failures show in wp-admin and can alert a Slack channel or a Telegram chat, at most once an hour, with no visitor data. Choose how many log lines to show and how long the log is kept (3 months by default, or until you clear it). Form messages are never deleted on their own.
+- **Roles for forms.** Each profile can be allowed to see received messages, delete them, set up forms, and read the e-mail log.
+
+### Changed
+
+- **Scheduled posts go live on the site right away.** When WordPress publishes a scheduled entry, Leiho now deploys in that same cron run instead of waiting for the next one, which on a headless site could be hours away. The README explains how to give WordPress a real cron (DISABLE_WP_CRON and a call to wp-cron.php every few minutes).
+
 ## [1.0.1] — 2026-11-27
 
 ### Added
@@ -404,6 +419,7 @@ First public release.
 - Managed regions (`data-okno-managed`) explain where to edit content Okno doesn't own.
 - Explicit sections (`data-okno-section`, `data-okno-layout`) take precedence over auto-detected ones.
 
+[1.0.2]: https://github.com/pixelersagency/leiho/releases/tag/v1.0.2
 [1.0.1]: https://github.com/pixelersagency/leiho/releases/tag/v1.0.1
 [1.0.0]: https://github.com/pixelersagency/leiho/releases/tag/v1.0.0
 [1.0.0-rc.10]: https://github.com/pixelersagency/leiho/releases/tag/v1.0.0-rc.10

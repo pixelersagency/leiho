@@ -27,6 +27,13 @@ class Leiho_Deploy_Manager {
 	/** Publication automatique déjà replanifiée dans cette requête. */
 	private static $auto_queued = false;
 
+	/**
+	 * Un contenu programmé vient de passer en ligne pendant ce cron.
+	 *
+	 * @var bool
+	 */
+	private static $scheduled_live = false;
+
 	/** Au-delà, un deploy sans statut connu est considéré comme perdu. */
 	const STALE_AFTER = 1800;
 
@@ -251,11 +258,32 @@ class Leiho_Deploy_Manager {
 			'shutdown',
 			static function () use ( $auto ) {
 				Leiho_Deploy_Manager::mark_pending();
-				if ( $auto ) {
+				if ( $auto && self::$scheduled_live ) {
+					// Contenu programmé mis en ligne par le cron : personne
+					// n'édite, inutile d'attendre le délai de calme. On publie
+					// dans ce même passage du cron, sans en attendre un second
+					// (sur un front statique, le cron ne tourne que quand
+					// quelqu'un charge WordPress).
+					Leiho_Deploy_Manager::run_auto();
+				} elseif ( $auto ) {
 					Leiho_Deploy_Manager::reschedule_auto( 0 );
 				}
 			}
 		);
+	}
+
+	/**
+	 * Repère un contenu programmé que le cron met en ligne (future → publish).
+	 *
+	 * @param string  $new_status Nouveau statut.
+	 * @param string  $old_status Ancien statut.
+	 * @param WP_Post $post       Contenu.
+	 * @return void
+	 */
+	public static function note_scheduled( $new_status, $old_status, $post ) {
+		if ( 'publish' === $new_status && 'future' === $old_status && $post && wp_doing_cron() ) {
+			self::$scheduled_live = true;
+		}
 	}
 
 	/**

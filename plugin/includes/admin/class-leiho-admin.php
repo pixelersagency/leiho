@@ -23,6 +23,12 @@ class Leiho_Admin {
 		add_action( 'admin_post_leiho_save_security', array( $this, 'handle_save_security' ) );
 		add_action( 'admin_post_leiho_save_ai', array( $this, 'handle_save_ai' ) );
 		add_action( 'admin_post_leiho_save_roles', array( $this, 'handle_save_roles' ) );
+		add_action( 'admin_post_leiho_save_forms', array( $this, 'handle_save_forms' ) );
+		add_action( 'admin_post_leiho_delete_entry', array( $this, 'handle_delete_entry' ) );
+		add_action( 'admin_post_leiho_save_mail', array( $this, 'handle_save_mail' ) );
+		add_action( 'admin_post_leiho_mail_test', array( $this, 'handle_mail_test' ) );
+		add_action( 'admin_post_leiho_mail_alert_test', array( $this, 'handle_mail_alert_test' ) );
+		add_action( 'admin_post_leiho_mail_clear_log', array( $this, 'handle_mail_clear_log' ) );
 		add_action( 'admin_bar_menu', array( $this, 'admin_bar' ), 80 );
 		add_filter( 'plugin_action_links_' . plugin_basename( LEIHO_FILE ), array( $this, 'action_links' ) );
 	}
@@ -172,7 +178,7 @@ class Leiho_Admin {
 			return;
 		}
 
-		if ( in_array( $view, array( 'home', 'start', 'settings', 'deploys', 'ai', 'roles', 'security' ), true ) ) {
+		if ( in_array( $view, array( 'home', 'start', 'settings', 'deploys', 'ai', 'roles', 'security', 'forms' ), true ) ) {
 			$this->enqueue_dashboard();
 			$this->enqueue_shell( $view );
 			if ( 'ai' === $view ) {
@@ -655,6 +661,167 @@ class Leiho_Admin {
 		$input = isset( $_POST['leiho_roles'] ) && is_array( $_POST['leiho_roles'] ) ? wp_unslash( $_POST['leiho_roles'] ) : array(); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Nettoyé par Leiho_Roles::sanitize().
 		update_option( Leiho_Roles::OPTION, Leiho_Roles::sanitize( $input ), false );
 		wp_safe_redirect( Leiho_App::url( 'roles', array( 'leiho_saved' => '1' ) ) );
+		exit;
+	}
+
+	/**
+	 * Écran Formulaires : formulaires, e-mails, sites autorisés.
+	 *
+	 * @return void
+	 */
+	public function handle_save_forms() {
+		if ( ! Leiho_Roles::can( 'manage_forms' ) ) {
+			wp_die( esc_html__( 'Access denied.', 'leiho' ) );
+		}
+		check_admin_referer( 'leiho_save_forms' );
+		$input = isset( $_POST['leiho_forms'] ) && is_array( $_POST['leiho_forms'] ) ? wp_unslash( $_POST['leiho_forms'] ) : array(); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Nettoyé par Leiho_Forms::sanitize().
+		$clean = Leiho_Forms::sanitize( $input );
+		if ( ! current_user_can( 'manage_options' ) ) {
+			// Protection anti-spam et sites autorisés : administrateurs seulement.
+			$before              = Leiho_Forms::config();
+			$clean['protection'] = $before['protection'];
+			$clean['origins']    = $before['origins'];
+			update_option( Leiho_Forms::OPTION, $clean, false );
+			wp_safe_redirect( Leiho_App::url( 'forms', array( 'tab' => 'setup', 'leiho_saved' => '1' ) ) );
+			exit;
+		}
+		update_option( Leiho_Forms::OPTION, $clean, false );
+		$secrets = isset( $_POST['leiho_secret'] ) && is_array( $_POST['leiho_secret'] ) ? wp_unslash( $_POST['leiho_secret'] ) : array(); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+		$name    = Leiho_Forms::SECRET_TURNSTILE;
+		if ( isset( $secrets[ $name ] ) && preg_match( '/^[A-Za-z0-9_-]{10,200}$/', trim( (string) $secrets[ $name ] ) ) ) {
+			Leiho_Secrets::set( $name, trim( (string) $secrets[ $name ] ) );
+		}
+		if ( ! empty( $_POST[ 'leiho_clear_' . $name ] ) ) {
+			Leiho_Secrets::set( $name, '' );
+		}
+		wp_safe_redirect( Leiho_App::url( 'forms', array( 'tab' => 'setup', 'leiho_saved' => '1' ) ) );
+		exit;
+	}
+
+	/**
+	 * Supprime un message reçu.
+	 *
+	 * @return void
+	 */
+	public function handle_delete_entry() {
+		if ( ! Leiho_Roles::can_view( 'forms' ) || ! Leiho_Roles::can( 'delete_messages' ) ) {
+			wp_die( esc_html__( 'Access denied.', 'leiho' ) );
+		}
+		$id = isset( $_POST['entry'] ) ? absint( $_POST['entry'] ) : 0;
+		check_admin_referer( 'leiho_delete_entry_' . $id );
+		if ( $id && Leiho_Forms::POST_TYPE === get_post_type( $id ) ) {
+			wp_delete_post( $id, true );
+		}
+		wp_safe_redirect( Leiho_App::url( 'forms', array( 'leiho_deleted' => '1' ) ) );
+		exit;
+	}
+
+	/**
+	 * Onglet Envoi des e-mails : SMTP, expéditeur, journal, alertes.
+	 *
+	 * @return void
+	 */
+	public function handle_save_mail() {
+		if ( ! current_user_can( 'manage_options' ) ) {
+			wp_die( esc_html__( 'Access denied.', 'leiho' ) );
+		}
+		check_admin_referer( 'leiho_save_mail' );
+		$input = isset( $_POST['leiho_mail'] ) && is_array( $_POST['leiho_mail'] ) ? wp_unslash( $_POST['leiho_mail'] ) : array(); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Nettoyé par Leiho_Mail::sanitize().
+		update_option( Leiho_Mail::OPTION, Leiho_Mail::sanitize( $input ), false );
+		Leiho_Mail::prune();
+
+		// Secrets : champ vide = inchangé, valeur = remplacement.
+		$secrets = isset( $_POST['leiho_secret'] ) && is_array( $_POST['leiho_secret'] ) ? wp_unslash( $_POST['leiho_secret'] ) : array(); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+		foreach ( array( Leiho_Mail::SECRET, 'slack_webhook', 'telegram_token' ) as $name ) {
+			if ( isset( $secrets[ $name ] ) && '' !== trim( (string) $secrets[ $name ] ) ) {
+				$value = trim( (string) $secrets[ $name ] );
+				if ( 'slack_webhook' !== $name || 0 === strpos( $value, 'https://' ) ) {
+					Leiho_Secrets::set( $name, $value );
+				}
+			}
+			if ( ! empty( $_POST[ 'leiho_clear_' . $name ] ) ) {
+				Leiho_Secrets::set( $name, '' );
+			}
+		}
+		wp_safe_redirect( Leiho_App::url( 'forms', array( 'tab' => 'mail', 'leiho_saved' => '1' ) ) );
+		exit;
+	}
+
+	/**
+	 * Résultat d'un test, gardé pour l'affichage après redirection.
+	 *
+	 * @param string $kind   mail | alert.
+	 * @param array  $result ok, message.
+	 * @return void
+	 */
+	private static function store_test_result( $kind, array $result ) {
+		set_transient( 'leiho_' . $kind . '_test_' . get_current_user_id(), $result, 300 );
+	}
+
+	/**
+	 * E-mail de test.
+	 *
+	 * @return void
+	 */
+	public function handle_mail_test() {
+		if ( ! current_user_can( 'manage_options' ) ) {
+			wp_die( esc_html__( 'Access denied.', 'leiho' ) );
+		}
+		check_admin_referer( 'leiho_mail_test' );
+		$to     = isset( $_POST['leiho_test_to'] ) ? sanitize_email( wp_unslash( $_POST['leiho_test_to'] ) ) : '';
+		$result = Leiho_Mail::send_test( $to );
+		self::store_test_result(
+			'mail',
+			array(
+				'ok'      => true === $result,
+				/* translators: %s: e-mail address. */
+				'message' => true === $result ? sprintf( __( 'Test e-mail sent to %s. Check the inbox (and the spam folder).', 'leiho' ), $to ) : (string) $result,
+			)
+		);
+		wp_safe_redirect( Leiho_App::url( 'forms', array( 'tab' => 'mail', 'leiho_test' => 'mail' ) ) );
+		exit;
+	}
+
+	/**
+	 * Alerte de test (Slack, Telegram).
+	 *
+	 * @return void
+	 */
+	public function handle_mail_alert_test() {
+		if ( ! current_user_can( 'manage_options' ) ) {
+			wp_die( esc_html__( 'Access denied.', 'leiho' ) );
+		}
+		check_admin_referer( 'leiho_mail_alert_test' );
+		/* translators: %s: site name. */
+		$results = Leiho_Mail::send_alert( sprintf( __( '%s: test alert from Leiho. E-mail failures will be reported here.', 'leiho' ), wp_specialchars_decode( get_bloginfo( 'name' ), ENT_QUOTES ) ) );
+		$lines   = array();
+		foreach ( $results as $channel => $result ) {
+			$name    = 'slack' === $channel ? 'Slack' : 'Telegram';
+			$lines[] = true === $result ? sprintf( /* translators: %s: Slack or Telegram. */ __( '%s: alert sent.', 'leiho' ), $name ) : $name . ' : ' . $result;
+		}
+		self::store_test_result(
+			'alert',
+			array(
+				'ok'      => $results && ! in_array( false, array_map( static function ( $r ) { return true === $r; }, $results ), true ),
+				'message' => $lines ? implode( ' ', $lines ) : __( 'No alert is set up: turn on Slack or Telegram and fill in its fields, then save.', 'leiho' ),
+			)
+		);
+		wp_safe_redirect( Leiho_App::url( 'forms', array( 'tab' => 'mail', 'leiho_test' => 'alert' ) ) );
+		exit;
+	}
+
+	/**
+	 * Vide le journal des envois.
+	 *
+	 * @return void
+	 */
+	public function handle_mail_clear_log() {
+		if ( ! current_user_can( 'manage_options' ) ) {
+			wp_die( esc_html__( 'Access denied.', 'leiho' ) );
+		}
+		check_admin_referer( 'leiho_mail_clear_log' );
+		Leiho_Mail::clear();
+		wp_safe_redirect( Leiho_App::url( 'forms', array( 'tab' => 'mail' ) ) );
 		exit;
 	}
 

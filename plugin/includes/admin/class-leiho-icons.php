@@ -48,6 +48,7 @@ class Leiho_Icons {
 		'shield'   => array( 'M12 3l7 3v6c0 4.5-3 7.7-7 9-4-1.3-7-4.5-7-9V6z', 'M9 12l2 2 4-4' ),
 		'user'     => array( 'M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8z', 'M4 21a8 8 0 0 1 16 0' ),
 		'logout'   => array( 'M15 4h4v16h-4', 'M10 8l-4 4 4 4', 'M6 12h11' ),
+		'mail'     => array( 'M3 5h18v14H3z', 'M3 6l9 7 9-7' ),
 		'upload'   => array( 'M12 16V4', 'M7 9l5-5 5 5', 'M4 16v4h16v-4' ),
 	);
 

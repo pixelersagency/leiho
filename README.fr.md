@@ -489,6 +489,7 @@ contenu.byPath( '/services/audit' );
 - Types : `npx leiho types --url https://cms.exemple.fr` écrit `src/leiho.d.ts`, généré depuis les groupes de champs ACF.
 - Accès public par défaut (contenu publié seulement), ou restreint par jeton (`LEIHO_TOKEN`).
 - Publication automatique après chaque modification, en option.
+- Articles programmés : quand WordPress met en ligne un contenu programmé, Leiho publie le site dans le même passage du cron. Mais WP-Cron ne tourne que si quelqu'un charge WordPress, ce qui arrive rarement en headless. Ajoutez `define( 'DISABLE_WP_CRON', true );` dans `wp-config.php` et appelez `https://cms.exemple.fr/wp-cron.php?doing_wp_cron` toutes les 5 minutes depuis le cron de votre hébergeur (ou `wp cron event run --due-now` avec WP-CLI).
 - À la première installation, WordPress est durci pour le headless : pas d'indexation du CMS, pages publiques redirigées vers le front, XML-RPC coupé, liste des utilisateurs fermée aux visiteurs.
 
 Détails dans le [README anglais](README.md#content-api).
@@ -531,6 +532,20 @@ Rien n'est jamais supprimé côté ACF : ni métas, ni groupe de champs, ni type
 API REST (administrateurs) : `GET /leiho/v1/collections/import-acf` (types et état), `GET …/import-acf/preview?post_type=ville`, `POST …/import-acf/run` (`{ "post_type": "ville" }`, un lot par appel jusqu'à `status: done`, reprise possible), `GET …/import-acf/status?post_type=ville`, `POST …/import-acf/rollback` (`{ "post_type": "ville", "confirm": "ville" }`). WP-CLI : `wp leiho acf-import list|preview|run|rollback`.
 
 Format et API : [plugin/docs/collections-spec.md](plugin/docs/collections-spec.md) (en anglais).
+
+## Formulaires et e-mails
+
+Le formulaire de contact de votre front (ou de devis, de réservation, de newsletter…) envoie ses champs à WordPress, et Leiho s'occupe du reste. Tout se règle dans l'écran **Formulaires**, en trois onglets.
+
+**Formulaires.** Créez un formulaire avec un identifiant, par exemple `contact`, et votre site envoie ses champs à `POST /wp-json/leiho/v1/forms/contact` (FormData ou JSON, sans jeton). Pour chaque formulaire : champs obligatoires, champs qui contiennent l'e-mail et le nom du visiteur, copie gardée dans WordPress, e-mail à votre équipe (destinataires, objet, texte, le visiteur en Reply-To) et confirmation au visiteur en option. Variables : `{fields}` (tous les champs remplis), `{name}`, `{email}`… (un champ), `{form}`, `{site}` et `{date}`. Champ piège `_hp` (doit rester vide) et `_elapsed` (millisecondes depuis l'affichage) contre les robots.
+
+Réponses : 200 `{ ok: true, message }`, 400 `leiho_form_invalid` avec `data.fields` (`required` ou `email` par champ), 403 origine refusée, 404 formulaire inconnu, 429 trop de messages (5 en 10 minutes par IP), 500 rien d'envoyé ni de gardé. Protection : seuls les navigateurs sur le site, son aperçu et les adresses ajoutées peuvent envoyer ; 5 messages par 10 minutes par IP et 30 par heure par formulaire ; 50 000 caractères par message ; plus de 5 liens ou un mot de Réglages → Discussion → Clés de commentaires non autorisées : gardé à part comme spam probable, sans e-mail ; [Cloudflare Turnstile](https://developers.cloudflare.com/turnstile/) en option (400 `leiho_form_captcha` sans vérification valide) ; e-mails toujours en texte brut ; une confirmation par heure et par adresse, 20 par heure et par formulaire.
+
+**Messages reçus.** Chaque message, avec son formulaire, ses champs et l'état de la notification. Rien n'est perdu si un e-mail finit en spam ou ne part pas.
+
+**Envoi des e-mails.** Tous les e-mails de WordPress passent par un serveur SMTP : hôte, port, chiffrement, identifiant, mot de passe (chiffré, ou `LEIHO_SMTP_PASSWORD` dans wp-config.php), expéditeur. Un journal garde la date, le destinataire, l'objet et le résultat de chaque e-mail (jamais son contenu), avec des chiffres et un graphique sur 14 jours ; vous choisissez combien de lignes afficher (10 à 100) et combien de temps garder le journal (1, 3, 6 ou 12 mois, ou jusqu'à ce que vous le vidiez ; 3 mois par défaut), et un bouton envoie un e-mail de test. Quand un e-mail ne part pas, wp-admin l'affiche et Leiho peut prévenir un canal Slack ou une conversation Telegram : une alerte par heure au plus, sans données de visiteur, avec l'erreur et un lien.
+
+**Qui voit quoi.** Dans Rôles, chaque profil peut voir les messages reçus, les supprimer, régler les formulaires et leurs e-mails, et lire le journal des e-mails. Le serveur SMTP, les alertes d'échec et la protection anti-spam restent aux administrateurs.
 
 ## Moteurs de recherche et assistants IA
 

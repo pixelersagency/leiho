@@ -5961,3 +5961,799 @@ mark.leiho-ai-flag {
 	unicode-bidi: isolate;
 	text-align: left;
 }
+
+/* ── Formulaires : onglets en liens, messages reçus ────────────────── */
+.leiho-app .leiho-segmented--links {
+	margin: 0 0 24px;
+}
+
+.leiho-app .leiho-segmented--links a {
+	padding: 5px 11px;
+	border-radius: 6px;
+	color: var(--leiho-muted);
+	font-size: var(--leiho-text-base, 14px);
+	font-weight: 550;
+	text-decoration: none;
+}
+
+.leiho-app .leiho-segmented--links a[aria-selected="true"] {
+	background: var(--leiho-active, var(--leiho-bg));
+	color: var(--leiho-ink);
+}
+
+.leiho-app .leiho-segmented--links a:focus-visible {
+	outline: 2px solid var(--leiho-accent-ink);
+	outline-offset: 1px;
+}
+
+.leiho-app .leiho-subheading {
+	margin: 28px 0 4px;
+	font-size: var(--leiho-text-base, 14px);
+	font-weight: 600;
+	color: var(--leiho-ink);
+}
+
+.leiho-app .leiho-entry summary {
+	cursor: pointer;
+}
+
+.leiho-app .leiho-entry dl {
+	margin: 10px 0 0;
+	display: grid;
+	grid-template-columns: max-content 1fr;
+	gap: 6px 16px;
+}
+
+.leiho-app .leiho-entry dt {
+	color: var(--leiho-faint);
+}
+
+.leiho-app .leiho-entry dd {
+	margin: 0;
+	overflow-wrap: anywhere;
+}
+
+.leiho-app .leiho-entries td:last-child {
+	text-align: right;
+	white-space: nowrap;
+}
+
+/* ── Formulaires : envoi des e-mails ───────────────────────────────── */
+.leiho-app .leiho-mailsum,
+.leiho-app .leiho-admin--app .leiho-card.leiho-mailsum {
+	padding: 0;
+	overflow: hidden;
+}
+
+.leiho-app .leiho-mailsum__status {
+	display: flex;
+	align-items: flex-start;
+	gap: 10px;
+	padding: 14px 18px;
+	border-bottom: 1px solid var(--leiho-line);
+	color: var(--leiho-body);
+	font-size: var(--leiho-text-base, 14px);
+}
+
+.leiho-app .leiho-mailsum__status .leiho-dot {
+	flex: none;
+	margin-top: 6px;
+}
+
+.leiho-app .leiho-mailsum__status strong {
+	font-weight: 550;
+	color: var(--leiho-ink);
+}
+
+.leiho-app .leiho-mailsum__status p {
+	margin: 6px 0 0;
+	font-size: var(--leiho-text-sm, 13px);
+}
+
+.leiho-app .leiho-mailsum__error {
+	display: block;
+	margin-top: 6px;
+	padding: 0;
+	background: none;
+	font-family: var(--leiho-mono);
+	font-size: var(--leiho-text-xs, 12px);
+	color: var(--leiho-muted);
+	overflow-wrap: anywhere;
+}
+
+.leiho-app .leiho-mailsum__stats {
+	display: grid;
+	grid-template-columns: repeat( 4, 1fr );
+	margin: 0;
+	border-bottom: 1px solid var(--leiho-line);
+}
+
+.leiho-app .leiho-mailsum__stats > div {
+	padding: 14px 18px;
+	border-left: 1px solid var(--leiho-line);
+}
+
+.leiho-app .leiho-mailsum__stats > div:first-child {
+	border-left: 0;
+}
+
+.leiho-app .leiho-mailsum__stats dt {
+	color: var(--leiho-faint);
+	font-size: var(--leiho-text-xs, 12px);
+}
+
+.leiho-app .leiho-mailsum__stats dd {
+	margin: 4px 0 0;
+	color: var(--leiho-ink);
+	font-size: var(--leiho-text-2xl, 20px);
+	font-weight: 550;
+	font-variant-numeric: tabular-nums;
+}
+
+@media (max-width: 640px) {
+	.leiho-app .leiho-mailsum__stats {
+		grid-template-columns: repeat( 2, 1fr );
+	}
+	.leiho-app .leiho-mailsum__stats > div:nth-child(3) {
+		border-left: 0;
+	}
+	.leiho-app .leiho-mailsum__stats > div:nth-child(n+3) {
+		border-top: 1px solid var(--leiho-line);
+	}
+}
+
+.leiho-app .leiho-mailchart {
+	padding: 14px 18px 12px;
+}
+
+.leiho-app .leiho-mailchart__head {
+	display: flex;
+	flex-wrap: wrap;
+	justify-content: space-between;
+	gap: 8px;
+	margin-bottom: 12px;
+	color: var(--leiho-faint);
+	font-size: var(--leiho-text-xs, 12px);
+}
+
+.leiho-app .leiho-mailchart__bars {
+	display: grid;
+	grid-template-columns: repeat( 14, 1fr );
+	gap: 4px;
+	height: 72px;
+}
+
+.leiho-app .leiho-mailchart__day {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 6px;
+	min-width: 0;
+}
+
+.leiho-app .leiho-mailchart__bar {
+	flex: 1;
+	width: 10px;
+	display: flex;
+	flex-direction: column-reverse;
+	gap: 2px;
+	border-bottom: 1px solid var(--leiho-line-strong);
+}
+
+.leiho-app .leiho-mailchart__sent,
+.leiho-app .leiho-mailchart__failed {
+	display: block;
+	width: 100%;
+	border-radius: 2px 2px 0 0;
+}
+
+.leiho-app .leiho-mailchart__sent {
+	background: var(--leiho-faint);
+	opacity: 0.55;
+}
+
+.leiho-app .leiho-mailchart__failed {
+	background: var(--leiho-error);
+}
+
+.leiho-app .leiho-mailchart__date {
+	height: 12px;
+	font-size: var(--leiho-text-2xs, 11px);
+	line-height: 12px;
+	color: var(--leiho-faint);
+	font-variant-numeric: tabular-nums;
+}
+
+.leiho-app .leiho-mailchart__legend {
+	display: inline-flex;
+	gap: 14px;
+}
+
+.leiho-app .leiho-mailchart__legend > span {
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+}
+
+.leiho-app .leiho-mailchart__legend i {
+	width: 8px;
+	height: 8px;
+	border-radius: 2px;
+}
+
+.leiho-app .leiho-mailog-head {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	justify-content: space-between;
+	gap: 12px;
+	margin-top: 40px;
+}
+
+.leiho-app .leiho-mailog-head .leiho-segmented--links {
+	margin: 0;
+}
+
+.leiho-app .leiho-mailog-foot {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	gap: 8px;
+	margin-top: 12px;
+}
+
+.leiho-app .leiho-mailog td:first-child {
+	white-space: nowrap;
+	color: var(--leiho-muted);
+}
+
+.leiho-app .leiho-mailog__to {
+	overflow-wrap: break-word;
+	word-break: normal;
+}
+
+.leiho-app .leiho-admin--app .leiho-table {
+	width: 100%;
+	border-collapse: collapse;
+}
+
+.leiho-app .leiho-admin--app .leiho-table th,
+.leiho-app .leiho-admin--app .leiho-table td {
+	padding: 10px 14px;
+	border-bottom: 1px solid var(--leiho-line);
+	text-align: start;
+	vertical-align: top;
+}
+
+.leiho-app .leiho-admin--app .leiho-table tr:last-child td {
+	border-bottom: 0;
+}
+
+.leiho-app .leiho-entry {
+	background: transparent;
+	border: 0;
+	padding: 0;
+}
+
+.leiho-app .leiho-entries td:first-child {
+	white-space: nowrap;
+	color: var(--leiho-muted);
+}
+
+.leiho-app .leiho-admin--app .leiho-mailog .leiho-table__message {
+	margin-top: 4px;
+	font-size: var(--leiho-text-xs, 12px);
+	color: var(--leiho-muted);
+}
+
+/* ── Formulaires : navigation, boîte de réception, accordéons ───────── */
+.leiho-app .leiho-forms__nav {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	margin-bottom: 24px;
+}
+
+.leiho-app .leiho-forms__nav .leiho-segmented--links {
+	margin: 0;
+}
+
+.leiho-app .leiho-segmented--links a {
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+}
+
+.leiho-app .leiho-forms__count {
+	min-width: 18px;
+	padding: 0 6px;
+	border-radius: 9px;
+	background: var(--leiho-input);
+	color: var(--leiho-muted);
+	font-size: var(--leiho-text-2xs, 11px);
+	line-height: 18px;
+	text-align: center;
+	font-variant-numeric: tabular-nums;
+}
+
+.leiho-app .leiho-forms textarea,
+.leiho-app .leiho-forms input[type="email"] {
+	width: 100%;
+	padding: 9px 12px;
+	border: 1px solid var(--leiho-line-strong);
+	border-radius: 8px;
+	background: var(--leiho-bg);
+	color: var(--leiho-ink);
+	font: inherit;
+	font-size: 14px;
+	line-height: 1.5;
+	box-shadow: none;
+}
+
+.leiho-app .leiho-forms input[type="email"] {
+	max-width: 480px;
+	min-height: 38px;
+	padding: 0 12px;
+}
+
+.leiho-app .leiho-forms textarea:focus,
+.leiho-app .leiho-forms input[type="email"]:focus {
+	border-color: var(--leiho-accent-ink);
+	box-shadow: 0 0 0 3px var(--leiho-accent-soft);
+	outline: none;
+}
+
+.leiho-app .leiho-forms .leiho-textarea--mail {
+	min-height: 150px;
+	resize: vertical;
+}
+
+.leiho-app .leiho-forms .leiho-input--narrow {
+	width: 96px;
+	max-width: 96px;
+}
+
+.leiho-app .leiho-forms .leiho-input--medium {
+	max-width: 240px;
+}
+
+/* Ligne empilée : libellé au-dessus, champ sur toute la largeur. */
+.leiho-app .leiho-admin--app .leiho-row--stack {
+	grid-template-columns: 1fr;
+	gap: 6px;
+}
+
+.leiho-app .leiho-admin--app .leiho-row--stack > label {
+	padding-top: 0;
+}
+
+.leiho-app .leiho-admin--app .leiho-row--stack input[type="text"] {
+	max-width: none;
+}
+
+/* Boîte de réception. */
+.leiho-app .leiho-inbox {
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+
+.leiho-app .leiho-inbox > li + li {
+	border-top: 1px solid var(--leiho-line);
+}
+
+.leiho-app .leiho-inbox__item > summary {
+	display: grid;
+	grid-template-columns: minmax( 0, 1fr ) auto;
+	grid-template-areas: "from meta" "preview meta";
+	gap: 2px 16px;
+	padding: 14px 18px;
+	cursor: pointer;
+	list-style: none;
+}
+
+.leiho-app .leiho-inbox__item > summary::-webkit-details-marker {
+	display: none;
+}
+
+.leiho-app .leiho-inbox__item > summary:hover {
+	background: var(--leiho-hover);
+}
+
+.leiho-app .leiho-inbox__item > summary:focus-visible {
+	outline: 2px solid var(--leiho-accent-ink);
+	outline-offset: -2px;
+}
+
+.leiho-app .leiho-inbox__from {
+	grid-area: from;
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	min-width: 0;
+	color: var(--leiho-ink);
+}
+
+.leiho-app .leiho-inbox__from strong {
+	font-weight: 550;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+.leiho-app .leiho-inbox__preview {
+	grid-area: preview;
+	overflow: hidden;
+	color: var(--leiho-muted);
+	font-size: var(--leiho-text-sm, 13px);
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+.leiho-app .leiho-inbox__meta {
+	grid-area: meta;
+	display: flex;
+	flex-direction: column;
+	align-items: flex-end;
+	gap: 2px;
+	color: var(--leiho-faint);
+	font-size: var(--leiho-text-xs, 12px);
+	white-space: nowrap;
+}
+
+.leiho-app .leiho-inbox__item[open] > summary {
+	background: var(--leiho-hover);
+}
+
+.leiho-app .leiho-inbox__item[open] .leiho-inbox__preview {
+	visibility: hidden;
+}
+
+.leiho-app .leiho-inbox__body {
+	padding: 4px 18px 16px;
+}
+
+.leiho-app .leiho-inbox__body dl {
+	display: grid;
+	grid-template-columns: max-content 1fr;
+	gap: 8px 20px;
+	margin: 8px 0 0;
+}
+
+.leiho-app .leiho-inbox__body dt {
+	color: var(--leiho-faint);
+	font-size: var(--leiho-text-sm, 13px);
+}
+
+.leiho-app .leiho-inbox__body dd {
+	margin: 0;
+	color: var(--leiho-body);
+	overflow-wrap: break-word;
+}
+
+.leiho-app .leiho-inbox__actions {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	justify-content: space-between;
+	gap: 8px;
+	margin-top: 16px;
+	padding-top: 12px;
+	border-top: 1px solid var(--leiho-line);
+	font-size: var(--leiho-text-sm, 13px);
+}
+
+.leiho-app .leiho-inbox__buttons {
+	display: inline-flex;
+	gap: 6px;
+}
+
+.leiho-app .leiho-inbox__buttons form {
+	margin: 0;
+}
+
+/* Accordéons (un formulaire, un groupe de réglages). */
+.leiho-app .leiho-acc {
+	border: 1px solid var(--leiho-line);
+	border-radius: var(--leiho-radius);
+	background: var(--leiho-bg);
+}
+
+.leiho-app .leiho-acc + .leiho-acc {
+	margin-top: 10px;
+}
+
+.leiho-app .leiho-acc > summary {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	justify-content: space-between;
+	gap: 8px 16px;
+	padding: 14px 18px;
+	cursor: pointer;
+	list-style: none;
+}
+
+.leiho-app .leiho-acc > summary::-webkit-details-marker {
+	display: none;
+}
+
+.leiho-app .leiho-acc > summary:hover {
+	background: var(--leiho-hover);
+}
+
+.leiho-app .leiho-acc > summary:focus-visible {
+	outline: 2px solid var(--leiho-accent-ink);
+	outline-offset: -2px;
+}
+
+.leiho-app .leiho-acc[open] > summary {
+	border-bottom: 1px solid var(--leiho-line);
+}
+
+.leiho-app .leiho-acc__title {
+	display: inline-flex;
+	align-items: center;
+	gap: 10px;
+	color: var(--leiho-ink);
+}
+
+.leiho-app .leiho-acc__title::before {
+	content: "";
+	width: 6px;
+	height: 6px;
+	border-right: 1.5px solid var(--leiho-faint);
+	border-bottom: 1.5px solid var(--leiho-faint);
+	transform: rotate( -45deg );
+	transition: transform 0.15s ease;
+}
+
+.leiho-app .leiho-acc[open] > summary .leiho-acc__title::before {
+	transform: rotate( 45deg );
+}
+
+.leiho-app .leiho-acc__title svg {
+	color: var(--leiho-faint);
+}
+
+.leiho-app .leiho-acc__title strong {
+	font-weight: 550;
+}
+
+.leiho-app .leiho-acc__title code {
+	padding: 1px 6px;
+	border-radius: 4px;
+	background: var(--leiho-input);
+	color: var(--leiho-muted);
+	font-family: var(--leiho-mono);
+	font-size: var(--leiho-text-xs, 12px);
+}
+
+.leiho-app .leiho-acc--new > summary .leiho-acc__title strong {
+	color: var(--leiho-muted);
+	font-weight: 500;
+}
+
+.leiho-app .leiho-acc__meta {
+	display: inline-flex;
+	flex-wrap: wrap;
+	gap: 6px;
+}
+
+.leiho-app .leiho-acc__chip {
+	padding: 2px 8px;
+	border-radius: 999px;
+	border: 1px solid var(--leiho-line);
+	color: var(--leiho-faint);
+	font-size: var(--leiho-text-xs, 12px);
+	white-space: nowrap;
+}
+
+.leiho-app .leiho-acc__chip.is-on {
+	color: var(--leiho-body);
+}
+
+.leiho-app .leiho-acc__chip.is-on::before {
+	content: "";
+	display: inline-block;
+	width: 6px;
+	height: 6px;
+	margin-right: 6px;
+	border-radius: 50%;
+	background: var(--leiho-ok);
+	vertical-align: 1px;
+}
+
+.leiho-app .leiho-acc__body {
+	padding: 8px 24px 20px;
+}
+
+.leiho-app .leiho-acc__body > .leiho-help:first-child {
+	margin: 8px 0 4px;
+}
+
+.leiho-app .leiho-acc__route {
+	margin: 12px 0 4px;
+}
+
+.leiho-app .leiho-acc__route .leiho-code {
+	margin-top: 6px;
+}
+
+.leiho-app .leiho-acc .leiho-subheading {
+	margin: 24px 0 0;
+	padding-bottom: 6px;
+	border-bottom: 1px solid var(--leiho-line);
+	color: var(--leiho-faint);
+	font-size: var(--leiho-text-xs, 12px);
+	font-weight: 600;
+	letter-spacing: 0.04em;
+	text-transform: uppercase;
+}
+
+.leiho-app .leiho-acc .leiho-subheading + .leiho-row {
+	border-top: 0;
+}
+
+.leiho-app .leiho-acc__more {
+	margin: 4px 0;
+	border-top: 1px solid var(--leiho-line);
+}
+
+.leiho-app .leiho-acc__more > summary {
+	padding: 12px 0;
+	color: var(--leiho-muted);
+	font-size: var(--leiho-text-sm, 13px);
+	cursor: pointer;
+}
+
+.leiho-app .leiho-acc__danger {
+	margin-top: 20px;
+	padding-top: 16px;
+	border-top: 1px solid var(--leiho-line);
+}
+
+/* Formulaires : réglages repliés en accordéons, la page reste courte.
+   Le bouton suit directement les sections, sans barre encadrée. */
+.leiho-app .leiho-admin--app .leiho-forms .leiho-savebar {
+	position: static;
+	justify-content: flex-end;
+	margin-top: 16px;
+	padding: 0;
+	border: 0;
+	background: none;
+	backdrop-filter: none;
+}
+
+.leiho-app .leiho-admin--app .leiho-forms .leiho-savebar > span:empty {
+	display: none;
+}
+
+/* Envoi des e-mails. */
+.leiho-app .leiho-mailsum__link {
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+	margin-left: auto;
+	color: var(--leiho-muted);
+	font-size: var(--leiho-text-sm, 13px);
+	text-decoration: none;
+	white-space: nowrap;
+}
+
+.leiho-app .leiho-mailsum__link:hover {
+	color: var(--leiho-ink);
+}
+
+.leiho-app .leiho-mailog-tools {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 12px;
+}
+
+.leiho-app .leiho-mailog-per {
+	display: inline-flex;
+	align-items: center;
+	gap: 8px;
+	margin: 0;
+	color: var(--leiho-muted);
+	font-size: var(--leiho-text-sm, 13px);
+}
+
+.leiho-app .leiho-admin--app .leiho-mailog-per select {
+	width: auto;
+	min-height: 32px;
+	padding: 0 28px 0 10px;
+}
+
+.leiho-app .leiho-mail-settings-title {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	margin: 48px 0 14px;
+	scroll-margin-top: 24px;
+}
+
+.leiho-app .leiho-mail-settings-title svg {
+	color: var(--leiho-faint);
+}
+
+.leiho-app .leiho-mailtests {
+	margin-top: 24px;
+	padding: 18px 24px;
+}
+
+.leiho-app .leiho-mailtests .leiho-subheading {
+	margin: 0;
+}
+
+.leiho-app .leiho-mailtests__row {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 10px;
+	margin: 12px 0 0;
+}
+
+.leiho-app .leiho-mailtests__row > label,
+.leiho-app .leiho-mailtests__row > span {
+	min-width: 120px;
+	color: var(--leiho-muted);
+	font-size: var(--leiho-text-sm, 13px);
+}
+
+.leiho-app .leiho-mailtests__row input[type="email"] {
+	flex: 1;
+	max-width: 320px;
+}
+
+/* Formulaires : statuts sobres. Pas de pastille colorée pleine, un petit point
+   adouci et un texte neutre ; la couleur reste un indice, pas une alarme. */
+.leiho-app .leiho-forms {
+	--leiho-forms-error: color-mix(in srgb, var(--leiho-error) 60%, var(--leiho-faint));
+	--leiho-forms-warn: color-mix(in srgb, var(--leiho-warn) 45%, var(--leiho-faint));
+}
+
+.leiho-app .leiho-forms .leiho-pill--error,
+.leiho-app .leiho-forms .leiho-pill--warn {
+	gap: 6px;
+	height: auto;
+	padding: 0;
+	background: none;
+	color: var(--leiho-muted);
+	font-weight: 500;
+}
+
+.leiho-app .leiho-forms .leiho-pill--error::before,
+.leiho-app .leiho-forms .leiho-pill--warn::before {
+	content: "";
+	flex: none;
+	width: 6px;
+	height: 6px;
+	border-radius: 50%;
+	background: var(--leiho-forms-error);
+}
+
+.leiho-app .leiho-forms .leiho-pill--warn::before {
+	background: var(--leiho-forms-warn);
+}
+
+.leiho-app .leiho-forms .leiho-mailsum__status .leiho-dot--error {
+	background: var(--leiho-forms-error);
+	box-shadow: none;
+}
+
+.leiho-app .leiho-forms .leiho-mailsum__status .leiho-dot--warn {
+	background: var(--leiho-forms-warn);
+	box-shadow: none;
+}
+
+.leiho-app .leiho-forms .leiho-mailchart__failed {
+	background: var(--leiho-forms-error);
+	opacity: 0.8;
+}
+
+.leiho-app .leiho-forms .leiho-mailog-head {
+	margin-bottom: 16px;
+}

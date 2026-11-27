@@ -109,6 +109,15 @@ class Leiho_App {
 				'icon'  => 'users',
 				'nav'   => true,
 			),
+			// Formulaires du site : messages reçus, e-mails de notification et
+			// de confirmation, envoi des e-mails. Chaque onglet suit sa
+			// permission de l'écran Rôles.
+			'forms'       => array(
+				'label' => __( 'Forms', 'leiho' ),
+				'cap'   => 'edit_posts', // Puis l'écran Rôles (Leiho_Roles::VIEWS).
+				'icon'  => 'mail',
+				'nav'   => true,
+			),
 			'settings'    => array(
 				'label' => __( 'Settings', 'leiho' ),
 				'cap'   => 'manage_options',

@@ -526,6 +526,14 @@ Tokens are encrypted in the database with a key derived from your WordPress salt
 
 Publishing can also be automatic: tick **Publish on its own after each change** and Leiho deploys once the edits stop (60 s by default), changes made in wp-admin included. Nothing to set up on the server: the editor shows a discreet countdown and publishes when it runs out, or right away if the client closes the tab; any open wp-admin tab publishes through the Heartbeat once the delay has passed; WP-Cron is the fallback when nobody is logged in. Whatever fires first, one batch of changes gives one deployment, and a build already running or the minimum delay between deployments only postpones it.
 
+**Scheduled posts and a real cron.** When WordPress puts a scheduled entry online, Leiho publishes the site in the same cron run (with automatic publishing on). But WP-Cron only runs when someone loads WordPress, and on a headless site that is almost nobody: the post would go live whenever the next person logs in. Give WordPress a real cron instead. Add `define( 'DISABLE_WP_CRON', true );` to `wp-config.php` and call `wp-cron.php` every 5 minutes from your host's cron (cPanel, Plesk or a server crontab):
+
+```bash
+*/5 * * * * curl -s https://cms.example.com/wp-cron.php?doing_wp_cron > /dev/null
+```
+
+Or `wp cron event run --due-now` if you have WP-CLI. A free uptime monitor pinging that URL works too.
+
 ## Content API
 
 Leiho also serves your content to the front end, so WordPress is the only source of truth and the front-end repository holds code, not content.
@@ -644,6 +652,37 @@ Nothing is ever deleted from ACF: no postmeta, no field group, no post type. Val
 | `POST /wp-json/leiho/v1/collections/import-acf/rollback` | `{ "post_type": "ville", "confirm": "ville" }`: back to ACF. |
 
 With WP-CLI: `wp leiho acf-import list`, `wp leiho acf-import preview ville`, `wp leiho acf-import run ville`, `wp leiho acf-import rollback ville --yes`.
+
+## Forms and e-mail
+
+Your front end's contact form (or quote, booking, newsletter…) posts to WordPress, and Leiho handles the rest. Everything lives in the **Forms** screen, in three tabs.
+
+**Forms.** Create a form with an identifier, say `contact`, and your site posts its fields to `POST /wp-json/leiho/v1/forms/contact` (FormData or JSON, no token). For each form you set the required fields, the fields that hold the visitor's e-mail and name, whether to keep a copy in WordPress, the e-mail to your team (recipients, subject, body, the visitor as Reply-To) and an optional confirmation to the visitor. Templates use `{fields}` (every field filled in), `{name}`, `{email}`… (one field), `{form}`, `{site}` and `{date}`.
+
+```js
+const data = new FormData(form);           // name, email, message…
+data.append('_hp', '');                    // honeypot: a hidden field that must stay empty
+data.append('_elapsed', Date.now() - t0);  // ms since the form appeared
+const res = await fetch('https://cms.example.com/wp-json/leiho/v1/forms/contact', { method: 'POST', body: data });
+// 200 { ok: true, message }
+// 400 { code: 'leiho_form_invalid', data: { fields: { email: 'email', message: 'required' } } }
+// 403 origin refused, 404 unknown form, 429 too many messages, 500 nothing sent nor kept
+```
+
+Spam and abuse:
+- only browsers on your site, its preview and the addresses you add may post (`Origin` header; localhost too when `WP_ENVIRONMENT_TYPE` is `local` or `development`). Uncheck *Browsers only* if your front end posts from its server;
+- a filled honeypot or a form sent in under 2.5 seconds gets a fake success and nothing is kept;
+- 5 messages per 10 minutes per IP and form, 30 per hour per form whatever the IP, 50,000 characters per message (413 beyond);
+- more than 5 links, or a word from Settings → Discussion → Disallowed Comment Keys: kept apart as probable spam, no e-mail;
+- optional [Cloudflare Turnstile](https://developers.cloudflare.com/turnstile/): paste the site key and secret key, add the widget to your form (it adds `cf-turnstile-response`), and every message needs a valid check (400 `leiho_form_captcha` otherwise; refused too if Cloudflare can't be reached);
+- e-mails always go out as plain text, so a visitor's text can't be read as HTML; visitor fields are kept as plain text and escaped everywhere they're shown;
+- one confirmation per hour per address and 20 per hour per form, with copied fields cut short so nobody can make your site mail text to a stranger. The `leiho_form_accept` filter lets another anti-spam plugin refuse a message, and `leiho_form_received` fires for each one.
+
+**Messages received.** Every message, with its form, its fields and whether the notification left. Nothing is lost when an e-mail ends up in spam or fails. Tools → Export / Erase Personal Data covers them.
+
+**E-mail sending.** Send all WordPress e-mail (forms, password resets, other plugins) through an SMTP server: host, port, encryption, login, password (stored encrypted, or `LEIHO_SMTP_PASSWORD` in wp-config.php), sender name and address. A log keeps the date, recipient, subject and result of each e-mail (never its content), with counts and a 14-day chart; you choose how many lines to show (10 to 100) and how long the log is kept (1, 3, 6 or 12 months, or until you clear it; 3 months by default), and a test button checks the setup. When an e-mail fails, wp-admin shows a warning and Leiho can alert a Slack channel or a Telegram chat: at most once an hour, failures grouped, no visitor data, just the error and a link. Leiho warns you if another SMTP plugin is active.
+
+**Who sees what.** In Roles, each profile can see received messages, delete them, set up forms and their e-mails, and read the e-mail log. The SMTP server, failure alerts and spam protection stay with administrators.
 
 ## Search engines and AI assistants
 

@@ -4,7 +4,7 @@ Tags: headless, acf, jetengine, visual editor, nextjs
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.0.1
+Stable tag: 1.0.2
 License: GPL-2.0-or-later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -52,6 +52,13 @@ Parts of the Leiho app's layout and styles (three-pane Collections view, list ro
 The login page uses the Geist font (https://github.com/vercel/geist-font), Copyright 2024 The Geist Project Authors, SIL Open Font License 1.1. The license ships in licenses/geist-OFL.txt.
 
 == Changelog ==
+
+= 1.0.2 =
+* Forms: your front end's forms post to Leiho's REST API. Choose the required fields, the e-mail to your team and an optional confirmation to the visitor. Spam protection built in, Cloudflare Turnstile optional.
+* Messages received are kept in WordPress, with a simple inbox to read, answer and delete them.
+* E-mail sending: SMTP for all WordPress e-mail, a log with counts and a chart, a test e-mail, and failure alerts in wp-admin, Slack or Telegram.
+* Roles: choose who sees form messages, who deletes them, who sets up forms and who reads the e-mail log.
+* Scheduled posts go live on the site in the same cron run.
 
 = 1.0.1 =
 * Reorder related items: drag a chip in a relationship field (mouse or finger), or press Alt + arrow keys. The order is saved as is.

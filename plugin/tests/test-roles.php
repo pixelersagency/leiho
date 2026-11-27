@@ -65,7 +65,7 @@ assert_true( 'permission inconnue refusée', ! Leiho_Roles::can( 'delete_everyth
 
 /* --- Formulaire → option --- */
 $saved = Leiho_Roles::sanitize( array(
-	'editor' => array( 'views' => array( 'editor', 'collections', 'media', 'deploys', 'settings' ), 'publish_site' => '1', 'use_ai' => '1', 'all_types' => '1', 'simple' => '1' ),
+	'editor' => array( 'views' => array( 'editor', 'collections', 'media', 'deploys', 'forms', 'settings' ), 'publish_site' => '1', 'use_ai' => '1', 'delete_messages' => '1', 'view_mail_log' => '1', 'all_types' => '1', 'simple' => '1' ),
 	'author' => array( 'views' => array( 'collections' ), 'types' => array( 'article', 'Bad Type!' ) ),
 	'administrator' => array( 'views' => array() ),
 ) );
@@ -76,6 +76,11 @@ assert_true( 'personnalisé', 'custom' === $saved['author']['profile'] );
 assert_true( 'types nettoyés', array( 'article', 'badtype' ) === $saved['author']['types'], $saved['author']['types'] );
 assert_true( 'simplifié décoché', false === $saved['author']['simple'] );
 
+assert_true( 'formulaires : réglages refusés par défaut', false === $saved['editor']['manage_forms'] );
+$legacy = Leiho_Roles::normalize( array( 'views' => array( 'editor', 'collections', 'media', 'deploys' ), 'publish_site' => true, 'use_ai' => true, 'types' => '*', 'simple' => true, 'profile' => 'manager' ) );
+assert_true( 'réglage 1.0.1 sur un profil : suit le profil (messages compris)', 'manager' === $legacy['profile'] && in_array( 'forms', $legacy['views'], true ) && $legacy['delete_messages'], $legacy );
+$custom = Leiho_Roles::normalize( array( 'views' => array( 'media' ), 'profile' => 'custom' ) );
+assert_true( 'réglage 1.0.1 personnalisé : gardé tel quel, sans formulaires', 'custom' === $custom['profile'] && array( 'media' ) === $custom['views'] && ! $custom['manage_forms'] );
 $GLOBALS['options']['leiho_roles'] = $saved;
 assert_true( 'auteur : article ouvert', Leiho_Roles::can_type( 'article', $author ) );
 assert_true( 'auteur : page fermée', ! Leiho_Roles::can_type( 'page', $author ) );

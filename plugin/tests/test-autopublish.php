@@ -46,6 +46,7 @@ function add_action( $hook, $cb = null ) { if ( 'shutdown' === $hook ) { $GLOBAL
 function wp_next_scheduled( $h ) { return isset( $GLOBALS['cron'][ $h ] ) ? $GLOBALS['cron'][ $h ] : false; }
 function wp_schedule_single_event( $t, $h ) { $GLOBALS['cron'][ $h ] = $t; }
 function wp_clear_scheduled_hook( $h ) { unset( $GLOBALS['cron'][ $h ] ); }
+function wp_doing_cron() { return ! empty( $GLOBALS['doing_cron'] ); }
 function apply_filters( $tag, $value, ...$args ) {
 	if ( 'leiho_deploy_driver' === $tag && 'fake' === $args[0] ) {
 		return $GLOBALS['driver'];
@@ -305,6 +306,37 @@ $GLOBALS['settings']['deploy_driver'] = 'fake';
 reset_state();
 queue_and_shutdown();
 check( 'avec auto : noté et planifié', $M::pending_since() > 0 && false !== wp_next_scheduled( $M::AUTO_HOOK ) );
+
+// Contenu programmé mis en ligne par le cron : publié dans ce même passage,
+// sans attendre le délai de calme ni un second cron.
+function set_scheduled_live( $value ) {
+	$flag = new ReflectionProperty( 'Leiho_Deploy_Manager', 'scheduled_live' );
+	$flag->setAccessible( true );
+	$flag->setValue( null, $value );
+}
+reset_state();
+$post = (object) array( 'ID' => 7 );
+$M::note_scheduled( 'publish', 'future', $post );
+check( 'hors cron : pas traité comme programmé', ! ( new ReflectionProperty( $M, 'scheduled_live' ) )->getValue() );
+$GLOBALS['doing_cron'] = true;
+$M::note_scheduled( 'publish', 'draft', $post );
+check( 'brouillon publié dans le cron : pas programmé', ! ( new ReflectionProperty( $M, 'scheduled_live' ) )->getValue() );
+$M::note_scheduled( 'publish', 'future', $post );
+queue_and_shutdown();
+check( 'programmé : publié dans le même cron', 1 === $GLOBALS['driver']->calls && 0 === $M::pending_since() );
+check( 'programmé : pas de second cron à attendre', false === wp_next_scheduled( $M::AUTO_HOOK ) );
+$GLOBALS['doing_cron'] = false;
+set_scheduled_live( false );
+
+reset_state();
+$GLOBALS['settings']['auto_deploy'] = false;
+$GLOBALS['doing_cron']              = true;
+$M::note_scheduled( 'publish', 'future', $post );
+queue_and_shutdown();
+check( 'programmé sans auto : noté, rien publié', $M::pending_since() > 0 && 0 === $GLOBALS['driver']->calls );
+$GLOBALS['doing_cron']              = false;
+$GLOBALS['settings']['auto_deploy'] = true;
+set_scheduled_live( false );
 
 echo empty( $GLOBALS['failed'] ) ? "\nTout est vert.\n" : "\nÉCHECS.\n";
 exit( empty( $GLOBALS['failed'] ) ? 0 : 1 );

@@ -20,10 +20,15 @@ class Leiho_Roles {
 	const OPTION = 'leiho_roles';
 
 	/** Vues de l'application réglables par rôle (l'accueil reste ouvert). */
-	const VIEWS = array( 'editor', 'collections', 'media', 'deploys' );
+	const VIEWS = array( 'editor', 'collections', 'media', 'deploys', 'forms' );
 
-	/** Actions réglables par rôle. */
-	const ACTIONS = array( 'publish_site', 'use_ai' );
+	/**
+	 * Actions réglables par rôle. Formulaires : supprimer les messages
+	 * reçus, régler les formulaires et leurs e-mails, voir le journal des
+	 * e-mails. Le serveur SMTP, les alertes et la protection anti-spam
+	 * restent aux administrateurs (mots de passe, jetons).
+	 */
+	const ACTIONS = array( 'publish_site', 'use_ai', 'delete_messages', 'manage_forms', 'view_mail_log' );
 
 	/**
 	 * Profils prêts à l'emploi : un point de départ, que les cases à cocher
@@ -35,28 +40,37 @@ class Leiho_Roles {
 		return array(
 			'manager' => array(
 				'label'        => __( 'Content manager', 'leiho' ),
-				'help'         => __( 'All content, media and publishing, including putting the site online. No settings.', 'leiho' ),
-				'views'        => self::VIEWS,
-				'publish_site' => true,
-				'use_ai'       => true,
+				'help'         => __( 'All content, media and publishing, including putting the site online, plus form messages and the e-mail log. No settings.', 'leiho' ),
+				'views'           => self::VIEWS,
+				'publish_site'    => true,
+				'use_ai'          => true,
+				'delete_messages' => true,
+				'manage_forms'    => false,
+				'view_mail_log'   => true,
 				'types'        => '*',
 				'simple'       => true,
 			),
 			'writer'  => array(
 				'label'        => __( 'Writer', 'leiho' ),
 				'help'         => __( 'Writes and edits content. Doesn’t put the site online.', 'leiho' ),
-				'views'        => array( 'editor', 'collections', 'media' ),
-				'publish_site' => false,
-				'use_ai'       => true,
+				'views'           => array( 'editor', 'collections', 'media' ),
+				'publish_site'    => false,
+				'use_ai'          => true,
+				'delete_messages' => false,
+				'manage_forms'    => false,
+				'view_mail_log'   => false,
 				'types'        => '*',
 				'simple'       => true,
 			),
 			'none'    => array(
 				'label'        => __( 'No access', 'leiho' ),
 				'help'         => __( 'Only the home screen of Leiho.', 'leiho' ),
-				'views'        => array(),
-				'publish_site' => false,
-				'use_ai'       => false,
+				'views'           => array(),
+				'publish_site'    => false,
+				'use_ai'          => false,
+				'delete_messages' => false,
+				'manage_forms'    => false,
+				'view_mail_log'   => false,
 				'types'        => array(),
 				'simple'       => true,
 			),
@@ -128,6 +142,11 @@ class Leiho_Roles {
 	 * @return array
 	 */
 	public static function normalize( $raw ) {
+		// Réglage d'avant les formulaires (1.0.1) resté sur un profil : il
+		// suit le profil, qui comprend maintenant les formulaires.
+		if ( ! array_key_exists( 'manage_forms', $raw ) && isset( $raw['profile'] ) && array_key_exists( (string) $raw['profile'], self::profiles() ) ) {
+			return self::from_profile( (string) $raw['profile'] );
+		}
 		$views = isset( $raw['views'] ) ? array_values( array_intersect( self::VIEWS, array_map( 'strval', (array) $raw['views'] ) ) ) : array();
 		$types = isset( $raw['types'] ) ? $raw['types'] : '*';
 		if ( '*' !== $types ) {
@@ -137,6 +156,9 @@ class Leiho_Roles {
 			'views'        => $views,
 			'publish_site' => ! empty( $raw['publish_site'] ),
 			'use_ai'       => ! empty( $raw['use_ai'] ),
+			'delete_messages' => ! empty( $raw['delete_messages'] ),
+			'manage_forms'    => ! empty( $raw['manage_forms'] ),
+			'view_mail_log'   => ! empty( $raw['view_mail_log'] ),
 			'types'        => $types,
 			'simple'       => ! empty( $raw['simple'] ),
 		);

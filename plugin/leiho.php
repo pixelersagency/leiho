@@ -3,7 +3,7 @@
  * Plugin Name:       Leiho
  * Plugin URI:        https://github.com/pixelersagency/leiho
  * Description:       Visual editor and content API for headless front ends (Astro, Next.js, …), right inside wp-admin. Define your content types in Leiho, or keep your existing ACF or JetEngine fields.
- * Version:           1.0.1
+ * Version:           1.0.2
  * Requires at least: 6.0
  * Requires PHP:      7.4
  * Author:            Pixelers
@@ -25,7 +25,7 @@ if ( defined( 'LEIHO_VERSION' ) ) {
 	return;
 }
 
-define( 'LEIHO_VERSION', '1.0.1' );
+define( 'LEIHO_VERSION', '1.0.2' );
 define( 'LEIHO_FILE', __FILE__ );
 define( 'LEIHO_DIR', plugin_dir_path( __FILE__ ) );
 define( 'LEIHO_URL', plugin_dir_url( __FILE__ ) );
@@ -61,6 +61,8 @@ require_once LEIHO_DIR . 'includes/class-leiho-rest.php';
 require_once LEIHO_DIR . 'includes/class-leiho-content.php';
 require_once LEIHO_DIR . 'includes/class-leiho-seo.php';
 require_once LEIHO_DIR . 'includes/class-leiho-llms.php';
+require_once LEIHO_DIR . 'includes/class-leiho-forms.php';
+require_once LEIHO_DIR . 'includes/class-leiho-mail.php';
 require_once LEIHO_DIR . 'includes/class-leiho-cache.php';
 require_once LEIHO_DIR . 'includes/class-leiho-types.php';
 require_once LEIHO_DIR . 'includes/class-leiho-headless.php';
@@ -138,8 +140,11 @@ final class Leiho_Plugin {
 		add_action( Leiho_Deploy_Manager::CRON_HOOK, array( 'Leiho_Deploy_Manager', 'cleanup_stale' ) );
 		add_action( Leiho_Deploy_Manager::AUTO_HOOK, array( 'Leiho_Deploy_Manager', 'run_auto' ) );
 		add_action( 'leiho_content_changed', array( 'Leiho_Deploy_Manager', 'queue_auto' ) );
+		add_action( 'transition_post_status', array( 'Leiho_Deploy_Manager', 'note_scheduled' ), 10, 3 );
 		add_filter( 'heartbeat_received', array( 'Leiho_Deploy_Manager', 'heartbeat' ) );
 		Leiho_Content::init();
+		Leiho_Forms::init();
+		Leiho_Mail::init();
 		Leiho_Cache::init();
 		Leiho_Collections::init();
 		Leiho_ACF_Import::init();
