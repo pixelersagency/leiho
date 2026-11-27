@@ -314,13 +314,18 @@ function set_scheduled_live( $value ) {
 	$flag->setAccessible( true );
 	$flag->setValue( null, $value );
 }
+function get_scheduled_live() {
+	$flag = new ReflectionProperty( 'Leiho_Deploy_Manager', 'scheduled_live' );
+	$flag->setAccessible( true ); // Obligatoire avant PHP 8.1.
+	return $flag->getValue();
+}
 reset_state();
 $post = (object) array( 'ID' => 7 );
 $M::note_scheduled( 'publish', 'future', $post );
-check( 'hors cron : pas traité comme programmé', ! ( new ReflectionProperty( $M, 'scheduled_live' ) )->getValue() );
+check( 'hors cron : pas traité comme programmé', ! get_scheduled_live() );
 $GLOBALS['doing_cron'] = true;
 $M::note_scheduled( 'publish', 'draft', $post );
-check( 'brouillon publié dans le cron : pas programmé', ! ( new ReflectionProperty( $M, 'scheduled_live' ) )->getValue() );
+check( 'brouillon publié dans le cron : pas programmé', ! get_scheduled_live() );
 $M::note_scheduled( 'publish', 'future', $post );
 queue_and_shutdown();
 check( 'programmé : publié dans le même cron', 1 === $GLOBALS['driver']->calls && 0 === $M::pending_since() );
