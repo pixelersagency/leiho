@@ -28,6 +28,8 @@ $GLOBALS['group_fields'] = array(
 		field( 'formule', 'radio', array( 'choices' => array( 'a' => 'A', 'b' => 'B' ) ) ),
 		field( 'tags', 'select', array( 'multiple' => 1, 'choices' => array( 'x' => 'X', 'y' => 'Y' ) ) ),
 		field( 'libre', 'checkbox', array( 'allow_custom' => 1, 'choices' => array( 'p' => 'P' ) ) ),
+		field( 'fiches', 'post_object', array( 'multiple' => 1, 'post_type' => array( 'page' ) ) ),
+		field( 'parent', 'post_object', array( 'post_type' => array( 'page' ) ) ),
 		field( 'onglet', 'tab' ),
 		field( 'note', 'message' ),
 	),
@@ -44,6 +46,8 @@ $GLOBALS['store'] = array(
 	'field_reglages' => array( 'field_adresse' => 'Paris', 'field_lien' => array( 'url' => 'https://a.fr', 'title' => 'A', 'target' => '' ) ),
 	'field_jours'    => array( 'lun' ),
 	'field_formule'  => 'a',
+	'field_fiches'   => array( '21', '22', '23' ),
+	'field_parent'   => '21',
 );
 
 $adapter = new Leiho_ACF_Adapter();
@@ -77,6 +81,10 @@ assert_true( 'choix enregistrés', 3 === count( $r['saved'] ) && empty( $r['erro
 assert_true( 'cases à cocher écrites en liste', array( 'mar', 'mer' ) === $GLOBALS['store']['field_jours'], $GLOBALS['store']['field_jours'] );
 assert_true( 'radio écrit', 'b' === $GLOBALS['store']['field_formule'] );
 assert_true( 'select multiple écrit', array( 'y' ) === $GLOBALS['store']['field_tags'] );
+assert_true( 'objet de publication multiple → relation', 'relationship' === $by['fiches']['type'] && array( 21, 22, 23 ) === $by['fiches']['value'], $by['fiches'] );
+assert_true( 'objet de publication simple inchangé', 'post_object' === $by['parent']['type'] && 21 === $by['parent']['value'], $by['parent'] );
+$r = $adapter->save_values( 1, array( 'fiches' => array( 23, 21, 22 ) ) );
+assert_true( 'objet multiple : toutes les valeurs gardées, dans le nouvel ordre', empty( $r['errors'] ) && array( 23, 21, 22 ) === array_map( 'intval', $GLOBALS['store']['field_fiches'] ), array( $r, $GLOBALS['store']['field_fiches'] ) );
 $r = $adapter->save_values( 1, array( 'jours' => array( 'dim' ) ) );
 assert_true( 'choix inconnu refusé', 'invalid_choice' === $r['errors']['jours'] && array( 'mar', 'mer' ) === $GLOBALS['store']['field_jours'], $r );
 $r = $adapter->save_values( 1, array( 'libre' => array( 'p', 'Sur mesure <b>' ) ) );

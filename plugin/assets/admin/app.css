@@ -4396,6 +4396,24 @@ body.leiho-app-body #wpbody-content {
 	font-weight: 500;
 }
 
+.leiho-chips.is-sortable .leiho-chips__chip {
+	cursor: grab;
+	touch-action: none;
+	user-select: none;
+	-webkit-user-select: none;
+}
+
+.leiho-chips.is-sortable .leiho-chips__chip:focus-visible {
+	outline: 2px solid var(--leiho-accent-ink);
+	outline-offset: 1px;
+}
+
+.leiho-chips__chip.is-dragging {
+	cursor: grabbing;
+	opacity: 0.6;
+	box-shadow: 0 2px 8px rgba( 0, 0, 0, 0.18 );
+}
+
 .leiho-chips__chip.is-new {
 	background: var(--leiho-accent-soft);
 	color: var(--leiho-accent-ink);

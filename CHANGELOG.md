@@ -2,6 +2,16 @@
 
 All notable changes to Leiho (called Okno until 1.0.0-beta.11) are documented here. The project follows [Semantic Versioning](https://semver.org/). The plugin and the bridge package share one version number.
 
+## [1.0.1] — 2026-11-27
+
+### Added
+
+- **Reorder related items.** In a relationship field (ACF, ACF PRO, SCF, JetEngine posts, Leiho Collections references), drag a chip to change the order, with the mouse or a finger, or focus it and press Alt + arrow keys. The new position is announced to screen readers, and the order is saved as is, so the front end shows the items in that order.
+
+### Fixed
+
+- **ACF Post Object fields with multiple values** kept only the first post when saved from Leiho. They are now edited like a relationship: all values are kept, and they can be reordered.
+
 ## [1.0.0] — 2026-11-25
 
 First stable release.
@@ -394,6 +404,7 @@ First public release.
 - Managed regions (`data-okno-managed`) explain where to edit content Okno doesn't own.
 - Explicit sections (`data-okno-section`, `data-okno-layout`) take precedence over auto-detected ones.
 
+[1.0.1]: https://github.com/pixelersagency/leiho/releases/tag/v1.0.1
 [1.0.0]: https://github.com/pixelersagency/leiho/releases/tag/v1.0.0
 [1.0.0-rc.10]: https://github.com/pixelersagency/leiho/releases/tag/v1.0.0-rc.10
 [1.0.0-rc.9]: https://github.com/pixelersagency/leiho/releases/tag/v1.0.0-rc.9

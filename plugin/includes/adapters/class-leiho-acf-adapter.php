@@ -180,7 +180,8 @@ class Leiho_ACF_Adapter extends Leiho_Field_Adapter {
 
 	/**
 	 * Champs à choix d'ACF vus comme le select de Leiho : cases à cocher →
-	 * select multiple, boutons radio et groupe de boutons → select. ACF les
+	 * select multiple, boutons radio et groupe de boutons → select, objet de
+	 * publication multiple → relation. ACF les
 	 * stocke de la même façon (une liste, ou une valeur), update_field()
 	 * reçoit donc la bonne valeur ; seul l'affichage dans Leiho change.
 	 *
@@ -198,6 +199,12 @@ class Leiho_ACF_Adapter extends Leiho_Field_Adapter {
 			} elseif ( in_array( $field['type'], array( 'radio', 'button_group' ), true ) ) {
 				$fields[ $i ]['type']     = 'select';
 				$fields[ $i ]['multiple'] = 0;
+			} elseif ( 'post_object' === $field['type'] && ! empty( $field['multiple'] ) ) {
+				// Objet de publication à plusieurs valeurs : ACF stocke une liste
+				// ordonnée d'ids, comme une relation. Vu comme un objet simple, il
+				// ne gardait que le premier id à l'enregistrement.
+				$fields[ $i ]['type'] = 'relationship';
+				$fields[ $i ]['max']  = 0;
 			}
 			if ( ! empty( $field['sub_fields'] ) && is_array( $field['sub_fields'] ) ) {
 				$fields[ $i ]['sub_fields'] = self::normalize_fields( $field['sub_fields'] );

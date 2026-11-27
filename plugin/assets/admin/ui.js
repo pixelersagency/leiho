@@ -702,6 +702,8 @@
 	 * @param {string}   o.id         Id du champ de saisie (pour le <label for>).
 	 * @param {string}   o.placeholder
 	 * @param {string}   o.label      Nom accessible de la liste.
+	 * @param {boolean}  o.sortable   Pastilles réordonnables : glisser (souris
+	 *                                et tactile) ou Alt + flèches au clavier.
 	 */
 	function chips( o ) {
 		var options = ( o.options || [] ).map( function ( opt ) {
@@ -730,6 +732,15 @@
 		input.placeholder = o.placeholder || __( 'Search…', 'leiho' );
 		box.appendChild( list );
 		box.appendChild( input );
+		var live = null;
+		if ( o.sortable ) {
+			box.classList.add( 'is-sortable' );
+			live = document.createElement( 'span' );
+			live.className = 'leiho-sr';
+			live.setAttribute( 'aria-live', 'polite' );
+			live.setAttribute( 'aria-atomic', 'true' );
+			box.appendChild( live );
+		}
 
 		var pop = new Popover( {
 			anchor: box,
@@ -801,9 +812,89 @@
 			}
 		}
 
+		// Déplace la pastille `from` à la position `to`, puis remet le focus
+		// dessus (clavier) et annonce la nouvelle place.
+		function moveChip( from, to, focus ) {
+			if ( to < 0 || to >= selected.length || from === to ) {
+				return;
+			}
+			var item = selected.splice( from, 1 )[ 0 ];
+			selected.splice( to, 0, item );
+			renderChips();
+			emit();
+			if ( focus && list.children[ to ] ) {
+				list.children[ to ].focus();
+			}
+			if ( live ) {
+				/* translators: 1: item name, 2: new position, 3: number of items. */
+				live.textContent = sprintf( __( '%1$s moved to position %2$d of %3$d', 'leiho' ), item.label, to + 1, selected.length );
+			}
+		}
+
+		// Glisser à la souris ou au doigt (Pointer Events) : la pastille suit
+		// l'ordre en direct dans le DOM, l'ordre est validé au relâchement.
+		function makeDraggable( chip ) {
+			chip.addEventListener( 'pointerdown', function ( e ) {
+				if ( ( 'mouse' === e.pointerType && 0 !== e.button ) || e.target.closest( '.leiho-chips__remove' ) ) {
+					return;
+				}
+				var startX = e.clientX, startY = e.clientY, dragging = false;
+				var from = [].indexOf.call( list.children, chip );
+
+				function onMove( ev ) {
+					if ( ! dragging ) {
+						if ( Math.abs( ev.clientX - startX ) + Math.abs( ev.clientY - startY ) < 4 ) {
+							return;
+						}
+						dragging = true;
+						chip.classList.add( 'is-dragging' );
+						pop.close( 'drag' );
+					}
+					ev.preventDefault();
+					var chipsEls = [].slice.call( list.children );
+					for ( var i = 0; i < chipsEls.length; i++ ) {
+						var other = chipsEls[ i ];
+						if ( other === chip ) {
+							continue;
+						}
+						var r = other.getBoundingClientRect();
+						if ( ev.clientY >= r.top && ev.clientY <= r.bottom && ev.clientX >= r.left && ev.clientX <= r.right ) {
+							var after = ev.clientX > r.left + r.width / 2;
+							list.insertBefore( chip, after ? other.nextSibling : other );
+							break;
+						}
+					}
+				}
+
+				function onUp() {
+					document.removeEventListener( 'pointermove', onMove );
+					document.removeEventListener( 'pointerup', onUp );
+					document.removeEventListener( 'pointercancel', onUp );
+					if ( ! dragging ) {
+						return;
+					}
+					chip.classList.remove( 'is-dragging' );
+					var to = [].indexOf.call( list.children, chip );
+					if ( to === from ) {
+						renderChips();
+						return;
+					}
+					// Remet le DOM d'origine puis applique le déplacement au modèle.
+					renderChips();
+					moveChip( from, to, false );
+				}
+
+				// Écoute sur le document plutôt qu'une capture du pointeur :
+				// déplacer la pastille dans le DOM ferait perdre la capture.
+				document.addEventListener( 'pointermove', onMove );
+				document.addEventListener( 'pointerup', onUp );
+				document.addEventListener( 'pointercancel', onUp );
+			} );
+		}
+
 		function renderChips() {
 			list.innerHTML = '';
-			selected.forEach( function ( s ) {
+			selected.forEach( function ( s, index ) {
 				var chip = document.createElement( 'span' );
 				chip.className = 'leiho-chips__chip' + ( s.isNew ? ' is-new' : '' );
 				chip.setAttribute( 'role', 'listitem' );
@@ -812,6 +903,26 @@
 				chip.appendChild( text );
 				if ( s.isNew ) {
 					chip.title = __( 'New: created when you save', 'leiho' );
+				}
+				if ( o.sortable ) {
+					chip.tabIndex = 0;
+					chip.title = ( chip.title ? chip.title + '\n' : '' ) + __( 'Drag to reorder, or use Alt + arrow keys.', 'leiho' );
+					/* translators: 1: item name, 2: position, 3: number of items. */
+					chip.setAttribute( 'aria-label', sprintf( __( '%1$s, position %2$d of %3$d. Alt + arrow keys to move.', 'leiho' ), s.label, index + 1, selected.length ) );
+					chip.addEventListener( 'keydown', function ( e ) {
+						if ( ! e.altKey || e.ctrlKey || e.metaKey ) {
+							return;
+						}
+						var back = 'ArrowLeft' === e.key || 'ArrowUp' === e.key;
+						var fwd = 'ArrowRight' === e.key || 'ArrowDown' === e.key;
+						if ( ! back && ! fwd ) {
+							return;
+						}
+						e.preventDefault();
+						var at = [].indexOf.call( list.children, chip );
+						moveChip( at, back ? at - 1 : at + 1, true );
+					} );
+					makeDraggable( chip );
 				}
 				var x = document.createElement( 'button' );
 				x.type = 'button';

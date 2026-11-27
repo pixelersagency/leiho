@@ -4169,6 +4169,9 @@
 					id: id || uid( 'multi' ),
 					label: ctx.def.label,
 					create: !! ctx.def.create,
+					// L'ordre compte pour une relation (ACF le stocke tel quel) ;
+					// pas pour des termes ni des choix multiples.
+					sortable: 'relationship' === ctx.def.type,
 					placeholder: ctx.def.create ? __( 'Search or add…', 'leiho' ) : __( 'Search…', 'leiho' ),
 					options: keys.map( function ( key ) {
 						return { value: isChoice ? key : Number( key ), label: opts[ key ] };
